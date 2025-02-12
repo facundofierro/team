@@ -1,4 +1,4 @@
-import { ToolTypeDefinition } from '@/tools'
+import { ToolTypeDefinition } from '../tools'
 import { z } from 'zod'
 
 const YANDEX_API_KEY = process.env.YANDEX_API_KEY

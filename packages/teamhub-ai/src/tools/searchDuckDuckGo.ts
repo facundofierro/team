@@ -1,4 +1,4 @@
-import { ToolTypeDefinition } from '@/tools'
+import { ToolTypeDefinition } from '../tools'
 import { z } from 'zod'
 
 export type SearchDuckDuckGoParameters = {
