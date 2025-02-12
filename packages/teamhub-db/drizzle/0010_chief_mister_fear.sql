@@ -1,0 +1,1 @@
+ALTER TABLE "agency"."tool_type" ADD COLUMN "managed_price_description" text;

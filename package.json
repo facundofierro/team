@@ -1,0 +1,34 @@
+{
+  "name": "kadiel",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "clean": "turbo run clean",
+    "build": "turbo run build",
+    "build:teamhub": "turbo run build --filter=teamhub...",
+    "test": "turbo run test",
+    "prune:site": "turbo prune --scope=site --docker",
+    "dev": "turbo run dev",
+    "dev:teamhub": "turbo run dev --filter=teamhub...",
+    "start": "turbo run start",
+    "start:teamhub": "turbo run start --filter=teamhub...",
+    "types": "turbo run types",
+    "prettier-fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "@million/lint": "^1.0.11",
+    "husky": "^8.0.3",
+    "prettier": "^2.8.4",
+    "turbo": "^1.13.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "turbo run lint"
+    }
+  },
+  "packageManager": "pnpm@7.5.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1738546887407,
+      "tag": "0000_friendly_vindicator",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1738766526576,
+      "tag": "0001_opposite_ikaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1738766578194,
+      "tag": "0002_motionless_wasp",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1738769274926,
+      "tag": "0003_wooden_slayback",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1739033012322,
+      "tag": "0004_cheerful_captain_cross",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1739038784413,
+      "tag": "0005_goofy_lady_mastermind",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1739235162891,
+      "tag": "0006_late_luminals",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1739275787090,
+      "tag": "0007_vengeful_saracen",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1739287170455,
+      "tag": "0008_needy_mesmero",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1739288498575,
+      "tag": "0009_futuristic_gauntlet",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1739288845317,
+      "tag": "0010_chief_mister_fear",
+      "breakpoints": true
+    }
+  ]
+}
