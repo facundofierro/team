@@ -9,13 +9,19 @@ import { Skeleton } from '../ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { UsersCard } from './settingsDetails/UsersCard'
 import { ToolsCard } from './settingsDetails/ToolsCard'
+import { MemoryWithTypes } from '@teamhub/db'
 
 type SettingsDetailsProps = {
   settings?: OrganizationSettings
+  sharedMemories?: MemoryWithTypes[]
   onSave?: (settings: OrganizationSettings) => Promise<void>
 }
 
-export function SettingsDetails({ settings, onSave }: SettingsDetailsProps) {
+export function SettingsDetails({
+  settings,
+  sharedMemories,
+  onSave,
+}: SettingsDetailsProps) {
   const [hasChanges, setHasChanges] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<
     Partial<OrganizationSettings>
@@ -106,8 +112,8 @@ export function SettingsDetails({ settings, onSave }: SettingsDetailsProps) {
 
             <TabsContent value="sharedMemory" className="h-[calc(100%-3rem)]">
               <SharedMemoryCard
-                onChange={(sharedMemories) => handleChange({ sharedMemories })}
-                sharedMemories={settings.sharedMemories}
+                onChange={(sharedMemories) => {}}
+                sharedMemories={sharedMemories ?? []}
               />
             </TabsContent>
 

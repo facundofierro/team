@@ -15,7 +15,6 @@ import { cached, genRandomId, get, invalidate, keys, set } from '../utils'
 import {
   agents,
   messages,
-  memory,
   tools,
   cron,
   organization as organizationTable,
@@ -28,8 +27,6 @@ import type {
   NewAgent,
   Message,
   NewMessage,
-  Memory,
-  NewMemory,
   Tool,
   NewTool,
   Cron,
@@ -42,6 +39,13 @@ import type {
   User,
   ToolWithTypes,
 } from '../types'
+import { drizzle as drizzleNeon } from 'drizzle-orm/neon-http'
+import { migrate as migrateNeon } from 'drizzle-orm/neon-http/migrator'
+import { neon } from '@neondatabase/serverless'
+import * as embeddingsSchema from '../connections/embeddings/schema'
+import * as memorySchema from '../connections/memory/schema'
+import { createClient } from '@vercel/postgres'
+import { createVercelDatabase } from './utils/vercel'
 
 // Organization functions
 export async function createOrganization(
@@ -51,7 +55,22 @@ export async function createOrganization(
     .insert(organizationTable)
     .values(data)
     .returning()
-  return organization
+
+  const dbPrefix = `team${organization.databaseName}`
+
+  try {
+    // Create databases with schemas
+    await Promise.all([
+      createVercelDatabase(dbPrefix),
+      createVercelDatabase(`${dbPrefix}_emb`, 'embeddings'),
+      createVercelDatabase(`${dbPrefix}_mem`, 'memory'),
+    ])
+
+    return organization
+  } catch (error) {
+    console.error('Error creating organization databases:', error)
+    throw error
+  }
 }
 
 export async function getOrganizations(
@@ -81,13 +100,6 @@ export async function getOrganizationSettings(
     .select()
     .from(toolTypes)
     .orderBy(asc(toolTypes.type))
-  const sharedMemories = await db
-    .select()
-    .from(memory)
-    .where(
-      and(eq(memory.organizationId, organizationId), isNull(memory.agentId))
-    )
-    .orderBy(asc(memory.createdAt))
   const organizationUsers = await db
     .select()
     .from(users)
@@ -104,7 +116,6 @@ export async function getOrganizationSettings(
     })) as ToolWithTypes[],
     toolTypes: allToolTypes as ToolType[],
     users: organizationUsers as User[],
-    sharedMemories: sharedMemories as Memory[],
   }
 }
 
@@ -224,36 +235,6 @@ export async function getAgentMessages(agentId: string): Promise<Message[]> {
     .where(
       or(eq(messages.fromAgentId, agentId), eq(messages.toAgentId, agentId))
     )
-}
-
-// Memory functions
-export async function createMemory(data: NewMemory): Promise<Memory> {
-  const [result] = await db.insert(memory).values(data).returning()
-  return result
-}
-
-export async function getAgentMemories(
-  agentId: string,
-  agentCloneId?: string,
-  type?: string,
-  categories?: string[]
-): Promise<Memory[]> {
-  const conditions = [eq(memory.agentId, agentId)]
-
-  if (agentCloneId) {
-    conditions.push(eq(memory.agentCloneId, agentCloneId))
-  }
-  if (type) {
-    conditions.push(eq(memory.type, type))
-  }
-  if (categories) {
-    conditions.push(inArray(memory.category, categories))
-  }
-
-  return await db
-    .select()
-    .from(memory)
-    .where(and(...conditions))
 }
 
 // Tool functions

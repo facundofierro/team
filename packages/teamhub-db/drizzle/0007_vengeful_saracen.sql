@@ -1,1 +1,0 @@
-ALTER TABLE "agency"."tool" ADD COLUMN "metadata" jsonb DEFAULT '{}'::jsonb;

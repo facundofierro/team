@@ -1,5 +1,5 @@
 import { Message as VercelMessage } from 'ai'
-import { Memory } from '@teamhub/db'
+import { MemoryWithTypes, Memory } from '@teamhub/db'
 import { generateDeepseekStream } from './deepseek/generateStreamText'
 import { generateOpenAIStream } from './openai/generateStreamText'
 
@@ -9,7 +9,7 @@ export async function generateStreamText(params: {
   text: string
   agentId: string
   systemPrompt?: string
-  memories: Memory[]
+  memories: MemoryWithTypes[]
   provider?: AIProvider
 }) {
   const { provider = 'deepseek', systemPrompt = '', memories, text } = params

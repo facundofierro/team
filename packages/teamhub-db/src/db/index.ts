@@ -1,22 +1,34 @@
-import { sql } from '@vercel/postgres'
-import { drizzle } from 'drizzle-orm/vercel-postgres'
+//import { sql } from '@vercel/postgres'
+//import { drizzle } from 'drizzle-orm/vercel-postgres'
 import * as schema from './schema'
-
-const db = drizzle(sql, { schema })
-
-// Export the raw db instance for auth adapter
-export { db }
-
 import * as agencyFunctions from './functions/agency'
-import * as insightsFunctions from './functions/insights'
-import * as embeddingsFunctions from './functions/embeddings'
-
 import * as t from './types'
+
+import { drizzle } from 'drizzle-orm/neon-http'
+import { neon } from '@neondatabase/serverless'
+import { config } from 'dotenv'
+
+config({ path: '.env' }) // or .env.local
+
+const sql = neon<boolean, boolean>(process.env.DATABASE_URL!)
+export const db = drizzle(sql, { schema })
 
 // Export the enhanced db with functions as default
 export default {
   t,
   ...agencyFunctions,
-  ...insightsFunctions,
-  ...embeddingsFunctions,
 }
+
+export { dbInsights } from './connections/insights/db'
+export { dbEmbeddings } from './connections/embeddings/db'
+export { dbMemories } from './connections/memory/db'
+
+export { authAdapter } from './authAdapter'
+
+export * from './schema'
+export * from './functions/agency'
+export * from './types'
+export * from './constants'
+
+export * from './connections/memory/types'
+export * from './connections/embeddings/types'

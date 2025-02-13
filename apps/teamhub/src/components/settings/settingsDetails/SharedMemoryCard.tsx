@@ -1,11 +1,11 @@
 'use client'
 
-import type { MessageType, Memory } from '@teamhub/db'
+import type { MessageType, Memory, MemoryWithTypes } from '@teamhub/db'
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card'
 
 type SharedMemoryCardProps = {
-  onChange: (sharedMemories: Memory[]) => void
-  sharedMemories: Memory[]
+  onChange: (sharedMemories: MemoryWithTypes[]) => void
+  sharedMemories: MemoryWithTypes[]
 }
 
 export function SharedMemoryCard({
