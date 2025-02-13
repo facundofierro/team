@@ -1,1 +1,0 @@
-ALTER TABLE "agency"."tool_type" ADD COLUMN "description" text;
