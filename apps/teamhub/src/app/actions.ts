@@ -20,6 +20,10 @@ export async function createOrganization(
   const newOrg = await db.createOrganization({
     id: crypto.randomUUID(),
     name: name.trim(),
+    databaseName: name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_'),
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: session.user.id,

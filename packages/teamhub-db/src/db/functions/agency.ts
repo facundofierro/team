@@ -59,15 +59,11 @@ export async function createOrganization(
   const dbPrefix = `team${organization.databaseName}`
 
   try {
-    // Create databases with migrations where needed
+    // Create databases with schemas
     await Promise.all([
       createVercelDatabase(dbPrefix),
-      createVercelDatabase(`${dbPrefix}_emb`, {
-        migrationsFolder: 'drizzle/embeddings',
-      }),
-      createVercelDatabase(`${dbPrefix}_mem`, {
-        migrationsFolder: 'drizzle/memory',
-      }),
+      createVercelDatabase(`${dbPrefix}_emb`, 'embeddings'),
+      createVercelDatabase(`${dbPrefix}_mem`, 'memory'),
     ])
 
     return organization

@@ -6,9 +6,9 @@ import { getFunctions } from './functions'
 
 config({ path: '.env' }) // or .env.local
 
-export const embeddings = (databaseName: string) => {
+export const dbEmbeddings = (databaseName: string) => {
   const sql: NeonQueryFunction<boolean, boolean> = neon(
-    process.env[`TEAMKADIEL_${databaseName}_EMB_URL`]!
+    process.env[`TEAM${databaseName}_EMB_URL`]!
   )
 
   const db = drizzle(sql, { schema })

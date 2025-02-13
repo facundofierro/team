@@ -1,4 +1,3 @@
-import { db } from './db'
 import { eq, sql } from 'drizzle-orm'
 import type { NeonHttpDatabase } from 'drizzle-orm/neon-http'
 

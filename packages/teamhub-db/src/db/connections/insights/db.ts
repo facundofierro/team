@@ -5,15 +5,9 @@ import { getFunctions } from './functions'
 
 config({ path: '.env' })
 
-const sql: NeonQueryFunction<boolean, boolean> = neon(
-  process.env.TEAMKADIEL_URL!
-)
-
-export const db = drizzle(sql)
-
-export const insights = (databaseName: string) => {
+export const dbInsights = (databaseName: string) => {
   const sql: NeonQueryFunction<boolean, boolean> = neon(
-    process.env[`TEAMKADIEL_${databaseName}_URL`]!
+    process.env[`TEAM${databaseName}_URL`]!
   )
 
   const db = drizzle(sql)

@@ -1,4 +1,4 @@
-import { eq, and, sql } from 'drizzle-orm'
+import { eq, and, sql, inArray } from 'drizzle-orm'
 import type { NeonHttpDatabase } from 'drizzle-orm/neon-http'
 import { memory } from './schema'
 import type { Memory, NewMemory, MemoryWithTypes } from './types'
@@ -30,24 +30,29 @@ export const getFunctions = (database: NeonHttpDatabase<typeof schema>) => {
     deleteMemory: async (id: string): Promise<void> => {
       await database.delete(memory).where(eq(memory.id, id))
     },
-    getMemoryByAgentId: async (agentId: string): Promise<MemoryWithTypes[]> => {
-      const results = await database
-        .select()
-        .from(memory)
-        .where(eq(memory.agentId, agentId))
-      return results.map((result) => ({
-        ...result,
-        structuredData:
-          result.structuredData as MemoryWithTypes['structuredData'],
-      }))
-    },
-    getMemoryByAgentCloneId: async (
-      agentCloneId: string
+    getAgentMemories: async (
+      agentId: string,
+      agentCloneId?: string,
+      type?: string,
+      categories?: string[]
     ): Promise<MemoryWithTypes[]> => {
+      const conditions = [eq(memory.agentId, agentId)]
+
+      if (agentCloneId) {
+        conditions.push(eq(memory.agentCloneId, agentCloneId))
+      }
+      if (type) {
+        conditions.push(eq(memory.type, type))
+      }
+      if (categories?.length) {
+        conditions.push(inArray(memory.category, categories))
+      }
+
       const results = await database
         .select()
         .from(memory)
-        .where(eq(memory.agentCloneId, agentCloneId))
+        .where(and(...conditions))
+
       return results.map((result) => ({
         ...result,
         structuredData:
