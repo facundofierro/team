@@ -8,3 +8,7 @@ export * from './db/schema'
 export * from './db/functions/agency'
 export * from './db/types'
 export * from './db/constants'
+
+export { insights } from './db/index'
+export { embeddings } from './db/index'
+export { memories } from './db/index'

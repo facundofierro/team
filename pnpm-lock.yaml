@@ -199,6 +199,9 @@ importers:
       '@auth/core':
         specifier: ^0.37.4
         version: 0.37.4
+      '@neondatabase/serverless':
+        specifier: ^0.10.4
+        version: 0.10.4
       '@vercel/kv':
         specifier: ^1.0.1
         version: 1.0.1
@@ -210,7 +213,7 @@ importers:
         version: 1.7.9
       drizzle-orm:
         specifier: ^0.29.5
-        version: 0.29.5(@vercel/postgres@0.8.0)(postgres@3.4.5)(react@18.3.1)
+        version: 0.29.5(@neondatabase/serverless@0.10.4)(@vercel/postgres@0.8.0)(postgres@3.4.5)(react@18.3.1)
       next-auth:
         specifier: ^4.24.11
         version: 4.24.11(@auth/core@0.37.4)(next@15.1.7)(react-dom@18.3.1)(react@18.3.1)
@@ -1920,6 +1923,12 @@ packages:
       '@napi-rs/nice-win32-x64-msvc': 1.0.1
     dev: true
     optional: true
+
+  /@neondatabase/serverless@0.10.4:
+    resolution: {integrity: sha512-2nZuh3VUO9voBauuh+IGYRhGU/MskWHt1IuZvHcJw6GLjDgtqj/KViKo7SIrLdGLdot7vFbiRRw+BgEy3wT9HA==}
+    dependencies:
+      '@types/pg': 8.11.6
+    dev: false
 
   /@neondatabase/serverless@0.7.2:
     resolution: {integrity: sha512-wU3WA2uTyNO7wjPs3Mg0G01jztAxUxzd9/mskMmtPwPTjf7JKWi9AW5/puOGXLxmZ9PVgRFeBVRVYq5nBPhsCg==}
@@ -3704,6 +3713,14 @@ packages:
       pg-types: 4.0.2
     dev: false
 
+  /@types/pg@8.11.6:
+    resolution: {integrity: sha512-/2WmmBXHLsfRqzfHW7BNZ8SbYzE8OSk7i3WjFYvfgRHj7S1xj+16Je5fUKv3lVdVzk/zn9TXOqf+avFCFIE0yQ==}
+    dependencies:
+      '@types/node': 20.14.0
+      pg-protocol: 1.7.0
+      pg-types: 4.0.2
+    dev: false
+
   /@types/pg@8.6.1:
     resolution: {integrity: sha512-1Kc4oAGzAl7uqUStZCDvaLFqZrW9qWSjXOmBfdgyBP5La7Us6Mg4GBvRlSoaZMhQF/zSj1C8CtKMBkoiT8eL8w==}
     dependencies:
@@ -4609,7 +4626,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.29.5(@vercel/postgres@0.8.0)(postgres@3.4.5)(react@18.3.1):
+  /drizzle-orm@0.29.5(@neondatabase/serverless@0.10.4)(@vercel/postgres@0.8.0)(postgres@3.4.5)(react@18.3.1):
     resolution: {integrity: sha512-jS3+uyzTz4P0Y2CICx8FmRQ1eplURPaIMWDn/yq6k4ShRFj9V7vlJk67lSf2kyYPzQ60GkkNGXcJcwrxZ6QCRw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -4680,6 +4697,7 @@ packages:
       sqlite3:
         optional: true
     dependencies:
+      '@neondatabase/serverless': 0.10.4
       '@vercel/postgres': 0.8.0
       postgres: 3.4.5
       react: 18.3.1

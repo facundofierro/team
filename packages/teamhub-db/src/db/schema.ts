@@ -1,30 +1,16 @@
-import { relations, sql } from 'drizzle-orm'
+import { relations } from 'drizzle-orm'
 import {
-  pgTable,
   text,
   boolean,
   timestamp,
   jsonb,
   integer,
-  index,
   pgSchema,
-  customType,
 } from 'drizzle-orm/pg-core'
 
 // Define schemas
 const agency = pgSchema('agency')
-const insights = pgSchema('insights')
 const auth = pgSchema('auth')
-
-// Define custom vector type
-const vector = customType<{ data: number[] }>({
-  dataType() {
-    return 'vector'
-  },
-  toDriver(value: number[]): string {
-    return `[${value.join(',')}]`
-  },
-})
 
 // Add this function at the top
 const generateId = () => Math.random().toString(36).substring(2, 9)
@@ -33,6 +19,8 @@ export const organization = agency.table('organization', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   userId: text('user_id').references(() => users.id),
+  databaseName: text('database_name').notNull(),
+  databaseUrl: text('database_url'), // optional for external connections
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })
@@ -89,35 +77,6 @@ export const messageType = agency.table('message_type', {
   createdAt: timestamp('created_at').defaultNow(),
 })
 
-// Memory table (chat/interaction history)
-export const memory = agency.table(
-  'memory',
-  {
-    id: text('id').primaryKey(),
-    organizationId: text('organization_id').references(() => organization.id),
-    agentId: text('agent_id').references(() => agents.id),
-    agentCloneId: text('agent_clone_id').references(() => agents.id),
-    messageId: text('message_id').references(() => messages.id),
-    type: text('type').notNull(), // 'text', 'structured_data', 'binary'
-    category: text('category').notNull(),
-    content: text('content'),
-    structuredData: jsonb('structured_data'),
-    binaryData: text('binary_data'), // URL or reference to binary storage
-    createdAt: timestamp('created_at').defaultNow(),
-    expiresAt: timestamp('expires_at'),
-  },
-  (memory) => ({
-    agentTypeIdx: index('memory_agent_type_idx').on(
-      memory.agentId,
-      memory.type
-    ),
-    agentCategoryIdx: index('memory_agent_category_idx').on(
-      memory.agentId,
-      memory.category
-    ),
-  })
-)
-
 // Tool table
 export const toolTypes = agency.table('tool_type', {
   id: text('id').primaryKey(),
@@ -162,27 +121,6 @@ export const cron = agency.table('cron', {
   createdAt: timestamp('created_at').defaultNow(),
 })
 
-// Embeddings table
-export const embedding = agency.table(
-  'embedding',
-  {
-    id: text('id').primaryKey(),
-    organizationId: text('organization_id').references(() => organization.id),
-    type: text('type').notNull(),
-    referenceId: text('reference_id').notNull(),
-    vector: vector('vector').notNull(),
-    version: text('version').notNull(),
-    model: text('model').notNull(),
-    dimension: integer('dimension').notNull(),
-    isDeleted: boolean('is_deleted').default(false),
-    metadata: jsonb('metadata').default({}),
-    createdAt: timestamp('created_at').defaultNow(),
-  },
-  (table) => ({
-    vectorIdx: index('vector_idx').on(table.vector),
-  })
-)
-
 // Relations
 export const agent_relations = relations(agents, ({ one, many }) => ({
   parent: one(agents, {
@@ -190,81 +128,6 @@ export const agent_relations = relations(agents, ({ one, many }) => ({
     references: [agents.id],
   }),
 }))
-
-export const message_relations = relations(messages, ({ one, many }) => ({
-  fromAgent: one(agents, {
-    fields: [messages.fromAgentId],
-    references: [agents.id],
-  }),
-  toAgent: one(agents, {
-    fields: [messages.toAgentId],
-    references: [agents.id],
-  }),
-  memories: many(memory),
-}))
-
-// Insight tables
-export const documents = insights.table('document', {
-  id: text('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organization.id),
-  type: text('type').notNull(), // 'company_info', 'product', 'marketing_plan', etc.
-  title: text('title').notNull(),
-  content: text('content').notNull(),
-  metadata: jsonb('metadata').default({}),
-  version: text('version').notNull(),
-  isActive: boolean('is_active').default(true),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-})
-
-export const prospects = insights.table('prospect', {
-  id: text('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organization.id),
-  agentId: text('agent_id').references(() => agents.id),
-  name: text('name').notNull(),
-  company: text('company'),
-  status: text('status').notNull(),
-  score: integer('score'),
-  metadata: jsonb('metadata').default({}),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-})
-
-export const prospectEvents = insights.table('prospect_event', {
-  id: text('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organization.id),
-  prospectId: text('prospect_id').references(() => prospects.id),
-  type: text('type').notNull(),
-  description: text('description'),
-  metadata: jsonb('metadata').default({}),
-  createdAt: timestamp('created_at').defaultNow(),
-})
-
-export const contact = insights.table(
-  'contact',
-  {
-    id: text('id').primaryKey(),
-    organizationId: text('organization_id').references(() => organization.id),
-    prospectId: text('prospect_id').references(() => prospects.id),
-    type: text('type').notNull().default('email'),
-    value: text('value').notNull(),
-  },
-  (table) => ({
-    prospectTypeIdx: index('prospect_type_idx').on(table.type, table.value),
-    prospectValueIdx: index('prospect_value_idx').on(table.value),
-  })
-)
-
-export const markets = insights.table('market', {
-  id: text('id').primaryKey(),
-  organizationId: text('organization_id').references(() => organization.id),
-  name: text('name').notNull(),
-  description: text('description'),
-  segment: text('segment').notNull(),
-  metadata: jsonb('metadata').default({}),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-})
 
 // Auth tables
 export const users = auth.table('users', {

@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@auth/core": "^0.37.4",
+    "@neondatabase/serverless": "^0.10.4",
     "@vercel/kv": "^1.0.1",
     "@vercel/postgres": "^0.8.0",
     "axios": "^1.7.2",

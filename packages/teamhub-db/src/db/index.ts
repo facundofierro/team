@@ -8,8 +8,6 @@ const db = drizzle(sql, { schema })
 export { db }
 
 import * as agencyFunctions from './functions/agency'
-import * as insightsFunctions from './functions/insights'
-import * as embeddingsFunctions from './functions/embeddings'
 
 import * as t from './types'
 
@@ -17,6 +15,8 @@ import * as t from './types'
 export default {
   t,
   ...agencyFunctions,
-  ...insightsFunctions,
-  ...embeddingsFunctions,
 }
+
+export { insights } from './connections/insights/db'
+export { embeddings } from './connections/embeddings/db'
+export { memories } from './connections/memory/db'

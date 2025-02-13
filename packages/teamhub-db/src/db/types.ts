@@ -2,15 +2,8 @@ import {
   agents,
   messages,
   messageType,
-  memory,
   tools,
   cron,
-  embedding,
-  documents,
-  prospects,
-  prospectEvents,
-  markets,
-  contact,
   users,
   accounts,
   sessions,
@@ -26,35 +19,14 @@ export type NewAgent = typeof agents.$inferInsert
 export type Message = typeof messages.$inferSelect
 export type NewMessage = typeof messages.$inferInsert
 
-export type Memory = typeof memory.$inferSelect
-export type NewMemory = typeof memory.$inferInsert
-
 export type Tool = typeof tools.$inferSelect
 export type NewTool = typeof tools.$inferInsert
 
 export type Cron = typeof cron.$inferSelect
 export type NewCron = typeof cron.$inferInsert
 
-export type Embedding = typeof embedding.$inferSelect
-export type NewEmbedding = typeof embedding.$inferInsert
-
-export type Document = typeof documents.$inferSelect
-export type NewDocument = typeof documents.$inferInsert
-
-export type Prospect = typeof prospects.$inferSelect
-export type NewProspect = typeof prospects.$inferInsert
-
-export type ProspectEvent = typeof prospectEvents.$inferSelect
-export type NewProspectEvent = typeof prospectEvents.$inferInsert
-
-export type Market = typeof markets.$inferSelect
-export type NewMarket = typeof markets.$inferInsert
-
 export type MessageType = typeof messageType.$inferSelect
 export type NewMessageType = typeof messageType.$inferInsert
-
-export type Contact = typeof contact.$inferSelect
-export type NewContact = typeof contact.$inferInsert
 
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -143,19 +115,7 @@ export interface MessageWithTypes extends Message {
   metadata: MessageMetadata
 }
 
-export interface MemoryWithTypes extends Memory {
-  structuredData: MemoryStructuredData
-}
-
 export interface DocumentWithTypes extends Document {
-  metadata: MetadataProperty
-}
-
-export interface ProspectWithTypes extends Prospect {
-  metadata: MetadataProperty
-}
-
-export interface MarketWithTypes extends Market {
   metadata: MetadataProperty
 }
 
@@ -180,9 +140,6 @@ export type ContactType =
   | 'youtube'
   | 'website'
   | 'other'
-export interface ContactWithTypes extends Contact {
-  type: ContactType
-}
 
 export type ToolTypeWithTypes = ToolType & {
   configurationParams: Record<
@@ -200,5 +157,4 @@ export type OrganizationSettings = {
   tools: ToolWithTypes[]
   toolTypes: ToolType[]
   users: User[]
-  sharedMemories: Memory[]
 }
