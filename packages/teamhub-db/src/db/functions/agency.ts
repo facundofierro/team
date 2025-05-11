@@ -51,12 +51,7 @@ import { createVercelDatabase } from './utils/vercel'
 export async function createOrganization(
   data: NewOrganization
 ): Promise<Organization> {
-  const [organization] = await db
-    .insert(organizationTable)
-    .values(data)
-    .returning()
-
-  const dbPrefix = `team${organization.databaseName}`
+  const dbPrefix = `team-${data.databaseName}`
 
   try {
     // Create databases with schemas
@@ -65,6 +60,11 @@ export async function createOrganization(
       createVercelDatabase(`${dbPrefix}_emb`, 'embeddings'),
       createVercelDatabase(`${dbPrefix}_mem`, 'memory'),
     ])
+
+    const [organization] = await db
+      .insert(organizationTable)
+      .values(data)
+      .returning()
 
     return organization
   } catch (error) {

@@ -1,8 +1,23 @@
+import { Vercel } from '@vercel/sdk'
+import { createApiClient } from '@neondatabase/api-client'
 import { drizzle } from 'drizzle-orm/neon-http'
 import { neon } from '@neondatabase/serverless'
 import { sql } from 'drizzle-orm'
 import * as memorySchema from '../../connections/memory/schema'
 import * as embeddingsSchema from '../../connections/embeddings/schema'
+
+const neonClient = createApiClient({
+  apiKey: process.env.NEON_API_KEY!,
+})
+
+type NeonRegion = 'fra1' | 'ord1' | 'syd1' | 'hkg1' | 'scl1' | 'dfw1'
+
+const vercel = new Vercel({
+  bearerToken: process.env.VERCEL_API_TOKEN,
+})
+
+const PROJECT_ID =
+  process.env.VERCEL_PROJECT_ID || 'prj_O0Vb4Pdc2ZrYkp40j7k0kD2MITbD'
 
 const getSchema = (type: string) => {
   switch (type) {
@@ -15,45 +30,79 @@ const getSchema = (type: string) => {
   }
 }
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function addEnvVars(envVars: Record<string, string>) {
+  if (!PROJECT_ID) throw new Error('VERCEL_PROJECT_ID is not set')
+
+  await vercel.env.createMany(
+    PROJECT_ID,
+    Object.entries(envVars).map(([key, value]) => ({
+      key,
+      value,
+      type: 'encrypted',
+      target: ['production', 'preview', 'development'],
+    }))
+  )
+}
+
+async function waitForDatabase(
+  storeId: string,
+  maxAttempts = 10
+): Promise<void> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const response = await fetch(
+      `https://api.vercel.com/v9/stores/${storeId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.VERCEL_API_TOKEN}`,
+        },
+      }
+    )
+    const data = await response.json()
+
+    if (data.status === 'ready') {
+      return
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+  }
+
+  throw new Error('Database creation timeout')
+}
+
 export async function createVercelDatabase(name: string, migration?: string) {
   try {
-    // Create database using Vercel API
-    const response = await fetch('https://api.vercel.com/v9/stores', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.VERCEL_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name,
-        storeId: `postgres-${name}`,
-        configuration: {
-          type: 'postgres',
-        },
-      }),
+    // Create database using Neon API
+    const { database } = await neonClient.createDatabase({
+      projectId: process.env.NEON_PROJECT_ID!,
+      name: name,
     })
 
-    if (!response.ok) {
-      throw new Error(`Failed to create database: ${await response.text()}`)
-    }
+    // Get connection string
+    const { connection_uri } = await neonClient.getDatabaseConnectionUri({
+      projectId: process.env.NEON_PROJECT_ID!,
+      databaseName: database.name,
+    })
 
-    const { databaseUrl } = await response.json()
-
-    // Run migrations if provided
-    // if (migration?.migrationsFolder && databaseUrl) {
-    //   await runMigrations(databaseUrl, migration.migrationsFolder)
-    //   console.log(`Migrations completed for database: ${name}`)
-    // }
-
-    if (migration && databaseUrl) {
+    if (migration && connection_uri) {
       const schema = getSchema(migration)
-      const db = drizzle(neon(databaseUrl))
-      await db.execute(sql`
-        ${schema}
-      `)
+      const db = drizzle(neon(connection_uri))
+      await db.execute(sql`${schema}`)
     }
 
-    return { name, databaseUrl }
+    // Add env var using Vercel SDK
+    await vercel.env.add({
+      key: `TEAM_${name.toUpperCase()}_URL`,
+      value: connection_uri,
+      type: 'encrypted',
+      target: ['production', 'preview', 'development'],
+    })
+
+    return {
+      name,
+      connectionString: connection_uri,
+    }
   } catch (error) {
     console.error(`Error creating database ${name}:`, error)
     throw error

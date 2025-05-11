@@ -1,0 +1,39 @@
+name: Deploy to Self-Hosted Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Next.js app
+        run: pnpm build
+        working-directory: apps/teamhub
+
+      - name: Install production dependencies
+        run: pnpm install --prod
+
+      - name: Restart app with pm2
+        run: |
+          cd apps/teamhub
+          pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
