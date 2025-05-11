@@ -3,11 +3,11 @@ import { neon, NeonQueryFunction } from '@neondatabase/serverless'
 import { config } from 'dotenv'
 import { getFunctions } from './functions'
 
-config({ path: '.env' })
+// config({ path: '.env' })
 
 export const dbInsights = (databaseName: string) => {
   const sql: NeonQueryFunction<boolean, boolean> = neon(
-    process.env[`TEAM${databaseName}_URL`]!
+    process.env[`TEAM_${databaseName.toUpperCase()}_URL`]!
   )
 
   const db = drizzle(sql)

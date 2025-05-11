@@ -4,11 +4,11 @@ import { config } from 'dotenv'
 import * as schema from './schema'
 import { getFunctions } from './functions'
 
-config({ path: '.env' }) // or .env.local
+// config({ path: '.env' }) // or .env.local
 
 export const dbEmbeddings = (databaseName: string) => {
   const sql: NeonQueryFunction<boolean, boolean> = neon(
-    process.env[`TEAM${databaseName}_EMB_URL`]!
+    process.env[`TEAM_${databaseName.toUpperCase()}_EMB_URL`]!
   )
 
   const db = drizzle(sql, { schema })

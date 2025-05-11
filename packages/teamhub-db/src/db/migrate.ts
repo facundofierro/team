@@ -1,5 +1,5 @@
 import { resolve } from 'path'
-config({ path: resolve(__dirname, '../.env') })
+// config({ path: resolve(__dirname, '../.env') })
 
 import { sql } from 'drizzle-orm'
 import { migrate } from 'drizzle-orm/neon-http/migrator'
@@ -11,7 +11,7 @@ import { drizzle } from 'drizzle-orm/neon-http'
 import { neon } from '@neondatabase/serverless'
 import { config } from 'dotenv'
 
-config({ path: './.env' }) // or .env.local
+// config({ path: './.env' }) // or .env.local
 
 async function main() {
   try {
