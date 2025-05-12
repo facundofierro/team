@@ -5,14 +5,17 @@ RUN npm install -g pnpm pm2
 
 WORKDIR /app
 
-# Copy only the necessary files for install first (for better caching)
-COPY package.json pnpm-lock.yaml ./
+# Copy lockfile, workspace config, and app package.json for install caching
+COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+COPY apps/teamhub/package.json ./
 
-# Install dependencies
+# Install dependencies (will use workspaces)
 RUN pnpm install --prod
 
-# Copy the rest of your app
-COPY . .
+# Copy the rest of your app and packages
+COPY apps/teamhub ./
+COPY packages ./packages
 
 # Build your Next.js app
 RUN pnpm build
