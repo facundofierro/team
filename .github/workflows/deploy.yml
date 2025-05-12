@@ -6,34 +6,34 @@ on:
       - main
 
 jobs:
-  deploy:
-    runs-on: self-hosted
-
+  build-and-push:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          node-version: 22
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
         with:
-          version: 8
+          context: apps/teamhub
+          file: apps/teamhub/Dockerfile
+          push: true
+          tags: your-dockerhub-username/teamhub:latest
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build Next.js app
-        run: pnpm build
-        working-directory: apps/teamhub
-
-      - name: Install production dependencies
-        run: pnpm install --prod
-
-      - name: Restart app with pm2
+  deploy:
+    runs-on: self-hosted
+    needs: build-and-push
+    steps:
+      - name: Pull and deploy Docker image
         run: |
-          cd apps/teamhub
-          pm2 reload ecosystem.config.js || pm2 start ecosystem.config.js
+          docker pull your-dockerhub-username/teamhub:latest
+          docker stack deploy -c /path/to/docker-stack.yml teamhub

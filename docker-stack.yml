@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  teamhub:
+    image: your-dockerhub-username/teamhub:latest
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      # Add other env vars here, or use secrets/configs

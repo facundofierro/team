@@ -45,7 +45,7 @@ import { neon } from '@neondatabase/serverless'
 import * as embeddingsSchema from '../connections/embeddings/schema'
 import * as memorySchema from '../connections/memory/schema'
 import { createClient } from '@vercel/postgres'
-import { createVercelDatabase } from './utils/vercel'
+import { createDatabase } from './utils/database'
 
 // Organization functions
 export async function createOrganization(
@@ -56,9 +56,9 @@ export async function createOrganization(
   try {
     // Create databases with schemas
     await Promise.all([
-      createVercelDatabase(dbPrefix),
-      createVercelDatabase(`${dbPrefix}_emb`, 'embeddings'),
-      createVercelDatabase(`${dbPrefix}_mem`, 'memory'),
+      createDatabase(dbPrefix),
+      createDatabase(`${dbPrefix}_emb`, 'embeddings'),
+      createDatabase(`${dbPrefix}_mem`, 'memory'),
     ])
 
     const [organization] = await db
