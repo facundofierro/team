@@ -12,9 +12,6 @@ COPY pnpm-workspace.yaml ./
 # Copy the entire repository, preserving structure
 COPY . .
 
-# Set working directory to the app
-WORKDIR /app/apps/teamhub
-
 # Install dependencies (will use workspaces)
 RUN pnpm install
 
