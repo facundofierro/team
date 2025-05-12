@@ -11,11 +11,13 @@ COPY pnpm-workspace.yaml ./
 COPY apps/teamhub/package.json ./
 COPY packages ./packages
 COPY apps/teamhub ./
+COPY apps/teamhub/tsconfig.json ./
 
 # Install dependencies (will use workspaces)
 RUN pnpm install --prod
 
 # Build your Next.js app
+RUN ls -l tsconfig.json
 RUN pnpm build
 
 EXPOSE 3000
