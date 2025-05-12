@@ -16,10 +16,10 @@ COPY . .
 WORKDIR /app/apps/teamhub
 
 # Install dependencies (will use workspaces)
-RUN pnpm install --prod
+RUN pnpm install
 
 # Build your Next.js app
-RUN pnpm build
+RUN pnpm build:teamhub:prod
 
 EXPOSE 3000
 

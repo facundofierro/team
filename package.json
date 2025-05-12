@@ -6,6 +6,7 @@
     "clean": "turbo run clean",
     "build": "turbo run build",
     "build:teamhub": "turbo run build --filter=teamhub...",
+    "build:teamhub:prod": "NODE_ENV=production turbo run build --filter=teamhub...",
     "test": "turbo run test",
     "prune:site": "turbo prune --scope=site --docker",
     "dev": "turbo run dev",
