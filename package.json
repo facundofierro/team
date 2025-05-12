@@ -27,7 +27,7 @@
       "pre-commit": "turbo run lint"
     }
   },
-  "packageManager": "pnpm@7.5.0",
+  "packageManager": "pnpm@10.10.0",
   "workspaces": [
     "apps/*",
     "packages/*"
