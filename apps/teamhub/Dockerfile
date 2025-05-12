@@ -15,7 +15,10 @@ COPY . .
 # Install dependencies (will use workspaces)
 RUN pnpm install
 
-# Build your Next.js app
+# Set working directory to the root to run the build script
+WORKDIR /app
+
+# Build your Next.js app using the root script
 RUN pnpm build:teamhub:prod
 
 EXPOSE 3000
