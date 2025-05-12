@@ -9,13 +9,11 @@ WORKDIR /app
 COPY pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
 COPY apps/teamhub/package.json ./
+COPY packages ./packages
+COPY apps/teamhub ./
 
 # Install dependencies (will use workspaces)
 RUN pnpm install --prod
-
-# Copy the rest of your app and packages
-COPY apps/teamhub ./
-COPY packages ./packages
 
 # Build your Next.js app
 RUN pnpm build
