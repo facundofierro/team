@@ -39,13 +39,7 @@ import type {
   User,
   ToolWithTypes,
 } from '../types'
-import { drizzle as drizzleNeon } from 'drizzle-orm/neon-http'
-import { migrate as migrateNeon } from 'drizzle-orm/neon-http/migrator'
-import { neon } from '@neondatabase/serverless'
-import * as embeddingsSchema from '../connections/embeddings/schema'
-import * as memorySchema from '../connections/memory/schema'
-import { createClient } from '@vercel/postgres'
-import { createDatabase } from './utils/database'
+import { createOrgDatabaseAndSchemas } from './utils/database'
 
 // Organization functions
 export async function createOrganization(
@@ -54,12 +48,7 @@ export async function createOrganization(
   const dbPrefix = `team-${data.databaseName}`
 
   try {
-    // Create databases with schemas
-    await Promise.all([
-      createDatabase(dbPrefix),
-      createDatabase(`${dbPrefix}_emb`, 'embeddings'),
-      createDatabase(`${dbPrefix}_mem`, 'memory'),
-    ])
+    await createOrgDatabaseAndSchemas(data.databaseName)
 
     const [organization] = await db
       .insert(organizationTable)

@@ -7,11 +7,11 @@ import * as t from './types'
 import { drizzle } from 'drizzle-orm/neon-http'
 import { neon } from '@neondatabase/serverless'
 import { config } from 'dotenv'
-import { ensureAgencyAndAuthSchemas } from './functions/utils/database'
+import { ensureMainDatabaseAndSchemas } from './functions/utils/database'
 
 // config({ path: '.env' }) // or .env.local
 
-await ensureAgencyAndAuthSchemas()
+await ensureMainDatabaseAndSchemas()
 
 const sql = neon<boolean, boolean>(process.env.DATABASE_URL!)
 export const db = drizzle(sql, { schema })

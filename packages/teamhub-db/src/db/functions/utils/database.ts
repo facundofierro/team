@@ -20,53 +20,21 @@ const getSchema = (type: DatabaseType) => {
   }
 }
 
-// Helper to build connection string for a given org and db type
-export function getConnectionString(
-  orgId: string,
-  dbType: DatabaseType
-): string {
+// MAIN DB HELPERS (agency/auth)
+export async function ensureMainDatabaseAndSchemas() {
   const host = process.env.PG_HOST
   const user = process.env.PG_USER
   const password = process.env.PG_PASSWORD
-  if (!host || !user || !password) {
+  const dbName = process.env.PG_DATABASE
+  if (!host || !user || !password || !dbName) {
     throw new Error(
-      'Missing PG_HOST, PG_USER, or PG_PASSWORD environment variables'
+      'Missing PG_HOST, PG_USER, PG_PASSWORD, or PG_DATABASE env vars'
     )
   }
-  // Convention: db name is <orgId>_<dbType>_db
-  const dbName = `${orgId.toLowerCase()}_${dbType}_db`
-  return `postgres://${user}:${password}@${host}:5432/${dbName}`
-}
-
-// Get a drizzle-orm db instance for a given org and db type
-export function getDb(orgId: string, dbType: DatabaseType) {
-  const connectionString = getConnectionString(orgId, dbType)
-  const pool = new Pool({ connectionString })
-  const db = drizzle(pool)
-  return db
-}
-
-/**
- * Create a new PostgreSQL database and optionally run a schema migration.
- * @param dbName The name of the database to create.
- * @param schemaType Optional. The schema type to migrate: 'embeddings', 'memory', or 'insights'.
- *                  For 'insights', no migration is run.
- */
-export async function createDatabase(
-  dbName: string,
-  schemaType?: DatabaseType
-) {
-  // Hardcoded admin connection string (connects to 'postgres' db)
-  const host = process.env.PG_HOST
-  const user = process.env.PG_USER
-  const password = process.env.PG_PASSWORD
-  if (!host || !user || !password) {
-    throw new Error(
-      'Missing PG_HOST, PG_USER, or PG_PASSWORD environment variables'
-    )
-  }
+  const mainDbUrl = `postgres://${user}:${password}@${host}:5432/${dbName}`
   const adminUrl = `postgres://${user}:${password}@${host}:5432/postgres`
 
+  // Create main DB if not exists
   const client = new Client({ connectionString: adminUrl })
   try {
     await client.connect()
@@ -83,62 +51,79 @@ export async function createDatabase(
     await client.end()
   }
 
-  // Run schema migration if needed
-  if (schemaType === 'embeddings' || schemaType === 'memory') {
-    // Build connection string for the new db
-    const dbUrl = `postgres://${user}:${password}@${host}:5432/${dbName}`
-    const pool = new Pool({ connectionString: dbUrl })
-    const db = drizzle(pool)
-    const schema = getSchema(schemaType)
-    // Run migration: create tables from schema
-    // This assumes drizzle-orm can sync schema (if not, use a migration tool)
-    // @ts-ignore
-    await db.execute(schema)
+  // Ensure schemas exist
+  const pool = new Pool({ connectionString: mainDbUrl })
+  try {
+    await pool.query('CREATE SCHEMA IF NOT EXISTS agency;')
+    await pool.query('CREATE SCHEMA IF NOT EXISTS auth;')
+  } finally {
     await pool.end()
-    console.log(`Schema for ${schemaType} migrated in ${dbName}.`)
   }
-  // For 'insights', do nothing (tables will be created per org as needed)
 }
 
-async function getOrCreateDb(dbName: string, schemaType?: DatabaseType) {
+export function getMainDb() {
   const host = process.env.PG_HOST
   const user = process.env.PG_USER
   const password = process.env.PG_PASSWORD
-  const dbUrl = `postgres://${user}:${password}@${host}:5432/${dbName}`
+  const dbName = process.env.PG_DATABASE
+  if (!host || !user || !password || !dbName) {
+    throw new Error(
+      'Missing PG_HOST, PG_USER, PG_PASSWORD, or PG_DATABASE env vars'
+    )
+  }
+  const mainDbUrl = `postgres://${user}:${password}@${host}:5432/${dbName}`
+  const pool = new Pool({ connectionString: mainDbUrl })
+  return drizzle(pool, { schema: mainSchema })
+}
 
-  let pool: Pool
+// ORG DB HELPERS (per-organization)
+export async function createOrgDatabaseAndSchemas(orgDbName: string) {
+  const host = process.env.PG_HOST
+  const user = process.env.PG_USER
+  const password = process.env.PG_PASSWORD
+  if (!host || !user || !password) {
+    throw new Error('Missing PG_HOST, PG_USER, or PG_PASSWORD env vars')
+  }
+  const orgDbUrl = `postgres://${user}:${password}@${host}:5432/${orgDbName}`
+  const adminUrl = `postgres://${user}:${password}@${host}:5432/postgres`
+
+  // Create org DB if not exists
+  const client = new Client({ connectionString: adminUrl })
   try {
-    pool = new Pool({ connectionString: dbUrl })
-    // Try a simple query to check connection
-    await pool.query('SELECT 1')
+    await client.connect()
+    await client.query(`CREATE DATABASE "${orgDbName}"`)
+    console.log(`Database ${orgDbName} created successfully.`)
   } catch (err: any) {
-    if (err.code === '3D000') {
-      // database does not exist
-      await createDatabase(dbName, schemaType)
-      pool = new Pool({ connectionString: dbUrl })
-      await pool.query('SELECT 1') // retry
+    if (err.code === '42P04') {
+      // 42P04 is 'duplicate_database'
+      console.log(`Database ${orgDbName} already exists.`)
     } else {
       throw err
     }
+  } finally {
+    await client.end()
   }
-  return drizzle(pool)
+
+  // Ensure org schemas exist
+  const pool = new Pool({ connectionString: orgDbUrl })
+  try {
+    await pool.query('CREATE SCHEMA IF NOT EXISTS insights;')
+    await pool.query('CREATE SCHEMA IF NOT EXISTS memory;')
+    await pool.query('CREATE SCHEMA IF NOT EXISTS embeddings;')
+  } finally {
+    await pool.end()
+  }
 }
 
-export async function ensureAgencyAndAuthSchemas() {
+export function getOrgDb(orgDbName: string) {
   const host = process.env.PG_HOST
   const user = process.env.PG_USER
   const password = process.env.PG_PASSWORD
-  const dbUrl = `postgres://${user}:${password}@${host}:5432/${process.env.PG_DATABASE}`
-  const pool = new Pool({ connectionString: dbUrl })
-  const db = drizzle(pool)
-
-  // Ensure schemas exist
-  await db.execute(sql`CREATE SCHEMA IF NOT EXISTS agency;`)
-  await db.execute(sql`CREATE SCHEMA IF NOT EXISTS auth;`)
-
-  // Sync all tables in both schemas
-  // @ts-ignore
-  await db.execute(mainSchema)
-
-  await pool.end()
+  if (!host || !user || !password) {
+    throw new Error('Missing PG_HOST, PG_USER, or PG_PASSWORD env vars')
+  }
+  const orgDbUrl = `postgres://${user}:${password}@${host}:5432/${orgDbName}`
+  const pool = new Pool({ connectionString: orgDbUrl })
+  // You can pass the appropriate schema here if needed
+  return drizzle(pool)
 }
