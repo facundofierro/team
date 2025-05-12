@@ -1,62 +1,79 @@
 import { resolve } from 'path'
-// config({ path: resolve(__dirname, '../.env') })
-
-import { sql } from 'drizzle-orm'
-import { migrate } from 'drizzle-orm/neon-http/migrator'
-import * as mainSchema from './schema'
-import * as embeddingsSchema from './connections/embeddings/schema'
-import * as memorySchema from './connections/memory/schema'
-
-import { drizzle } from 'drizzle-orm/neon-http'
-import { neon } from '@neondatabase/serverless'
 import { config } from 'dotenv'
+import { migrate } from 'drizzle-orm/node-postgres/migrator'
+import * as mainSchema from './schema'
 
-// config({ path: './.env' }) // or .env.local
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
+
+config({ path: resolve(__dirname, '../../.env') }) // Adjust path if needed
+
+const PG_HOST = process.env.PG_HOST
+const PG_USER = process.env.PG_USER
+const PG_PASSWORD = process.env.PG_PASSWORD
+const MAIN_DB_NAME = 'teamhub'
+
+const MAIN_DB_URL = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:5432/${MAIN_DB_NAME}`
+
+async function createDatabaseIfNotExists(
+  connectionString: string,
+  dbName: string
+) {
+  // Parse the connection string to get db name and connection info
+  const { host, port, user, password } = {
+    host: PG_HOST,
+    port: 5432,
+    user: PG_USER,
+    password: PG_PASSWORD,
+  }
+  // Connect to the default 'postgres' db
+  const adminConnectionString = `postgres://${user}:${password}@${host}:${port}/postgres`
+  const client = new Pool({ connectionString: adminConnectionString })
+  try {
+    // Try connecting to the target db
+    const testPool = new Pool({ connectionString })
+    await testPool.query('SELECT 1')
+    await testPool.end()
+  } catch (err: any) {
+    if (err.code === '3D000') {
+      // Database does not exist, create it
+      console.log(`Database ${dbName} does not exist. Creating...`)
+      await client.query(`CREATE DATABASE "${dbName}"`)
+      console.log(`Database ${dbName} created.`)
+    } else {
+      throw err
+    }
+  } finally {
+    await client.end()
+  }
+}
+
+async function ensureSchemasExist(connectionString: string) {
+  const pool = new Pool({ connectionString })
+  try {
+    await pool.query('CREATE SCHEMA IF NOT EXISTS agency;')
+    await pool.query('CREATE SCHEMA IF NOT EXISTS auth;')
+  } finally {
+    await pool.end()
+  }
+}
+
+async function migrateDb(connectionString: string) {
+  const pool = new Pool({ connectionString })
+  const db = drizzle(pool, { schema: mainSchema })
+  console.log(`Migrating main application database...`)
+  await migrate(db, { migrationsFolder: './drizzle' })
+  await pool.end()
+}
 
 async function main() {
   try {
-    // Migrate main database
-    if (!process.env.DATABASE_URL) {
-      throw new Error('DATABASE_URL is not set')
+    if (!PG_HOST || !PG_USER || !PG_PASSWORD) {
+      throw new Error('PG_HOST, PG_USER, or PG_PASSWORD is not set')
     }
-    const neonSql = neon<boolean, boolean>(process.env.DATABASE_URL)
-    const mainDb = drizzle(neonSql)
-    console.log('Migrating main database...')
-    // await mainDb.execute(sql`
-    //   CREATE SCHEMA IF NOT EXISTS agency;
-    // `)
-    // await mainDb.execute(sql`
-    //   CREATE SCHEMA IF NOT EXISTS auth;
-    // `)
-    await migrate(mainDb, { migrationsFolder: './drizzle' })
-
-    // Get organizations
-    const agencyDb = drizzle(neonSql, { schema: mainSchema })
-    const organizations = await agencyDb.query.organization.findMany({
-      columns: {
-        id: true,
-        databaseName: true,
-      },
-    })
-
-    // Migrate each organization's databases
-    // for (const org of organizations) {
-    //   const embUrl = process.env[`TEAM${org.databaseName}_EMB_URL`]
-    //   const memUrl = process.env[`TEAM${org.databaseName}_MEM_URL`]
-
-    //   if (embUrl) {
-    //     console.log(`Migrating embeddings database for ${org.databaseName}...`)
-    //     const embDb = drizzleNeon(neon(embUrl))
-    //     await migrateNeon(embDb, { migrationsFolder: 'drizzle/embeddings' })
-    //   }
-
-    //   if (memUrl) {
-    //     console.log(`Migrating memory database for ${org.databaseName}...`)
-    //     const memDb = drizzleNeon(neon(memUrl))
-    //     await migrateNeon(memDb, { migrationsFolder: 'drizzle/memory' })
-    //   }
-    // }
-
+    await createDatabaseIfNotExists(MAIN_DB_URL, MAIN_DB_NAME)
+    await ensureSchemasExist(MAIN_DB_URL)
+    await migrateDb(MAIN_DB_URL)
     console.log('All migrations completed!')
   } catch (error) {
     console.error('Error performing migrations:', error)
