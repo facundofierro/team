@@ -24,7 +24,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: apps/teamhub
+          context: .
           file: apps/teamhub/Dockerfile
           push: true
           tags: your-dockerhub-username/teamhub:latest
