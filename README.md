@@ -67,7 +67,7 @@ TeamHub is a modern platform for creating and managing organizations, each with 
   - `NEXTAUTH_URL`: The canonical URL of your deployment (e.g. https://yourdomain.com)
   - `NEXTAUTH_SECRET`: Secret for NextAuth session encryption
   - `SENTRY_DSN`: Sentry Data Source Name for error monitoring
-  - (Any other variables required by your authentication/provider setup)
+  - TODO: (Any other variables required by your authentication/provider setup)
 
 ### Installation
 
