@@ -1,3 +1,4 @@
+console.log('NEXTAUTH_URL at build:', process.env.NEXTAUTH_URL)
 import { withSentryConfig } from '@sentry/nextjs'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
