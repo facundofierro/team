@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.4
 FROM node:22-alpine
 
-# Install pnpm, pm2, and turbo globally
-RUN npm install -g pnpm pm2 turbo
+# Install pnpm and turbo globally (remove pm2)
+RUN npm install -g pnpm turbo
 
 WORKDIR /app
 
@@ -25,4 +25,4 @@ RUN pnpm build:teamhub:prod
 
 EXPOSE 3000
 
-CMD ["pm2-runtime", "apps/teamhub/ecosystem.config.js"]
+CMD ["pnpm", "start"]
