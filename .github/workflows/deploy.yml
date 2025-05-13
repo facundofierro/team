@@ -35,7 +35,7 @@ jobs:
           push: true
           tags: |
             facundofierro/teamhub:latest
-            facundofierro/teamhub:${{ env.TAG }}
+            facundofierro/teamhub:${{ steps.set_tag.outputs.tag }}
 
       - name: Cache pnpm store
         uses: actions/cache@v4
