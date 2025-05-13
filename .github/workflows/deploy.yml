@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.set_tag.outputs.tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,8 +23,9 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set commit SHA as env var
-        run: echo "TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+      - name: Set commit SHA as output
+        id: set_tag
+        run: echo "tag=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -58,10 +61,10 @@ jobs:
 
       - name: Update docker-stack.yml with new image tag
         run: |
-          sed -i 's|facundofierro/teamhub:.*|facundofierro/teamhub:${{ env.TAG }}|' docker-stack.yml
+          sed -i "s|facundofierro/teamhub:.*|facundofierro/teamhub:${{ needs.build-and-push.outputs.tag }}|" docker-stack.yml
 
       - name: Pull and deploy Docker image
         run: |
-          docker pull facundofierro/teamhub:${{ env.TAG }}
+          docker pull facundofierro/teamhub:${{ needs.build-and-push.outputs.tag }}
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
           docker stack deploy -c docker-stack.yml teamhub
