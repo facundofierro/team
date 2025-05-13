@@ -11,7 +11,7 @@ import { ensureMainDatabaseAndSchemas } from './functions/utils/database'
 
 // config({ path: '.env' }) // or .env.local
 
-await ensureMainDatabaseAndSchemas()
+// await ensureMainDatabaseAndSchemas()
 
 const PG_HOST = process.env.PG_HOST
 const PG_USER = process.env.PG_USER
