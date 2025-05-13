@@ -25,4 +25,4 @@ RUN pnpm build:teamhub:prod
 
 EXPOSE 3000
 
-CMD ["pm2-runtime", "ecosystem.config.js"]
+CMD ["pm2-runtime", "apps/teamhub/ecosystem.config.js"]
