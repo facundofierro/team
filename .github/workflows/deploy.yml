@@ -27,7 +27,7 @@ jobs:
           context: .
           file: apps/teamhub/Dockerfile
           push: true
-          tags: your-dockerhub-username/teamhub:latest
+          tags: facundofierro/teamhub:latest
 
   deploy:
     runs-on: self-hosted
@@ -35,5 +35,5 @@ jobs:
     steps:
       - name: Pull and deploy Docker image
         run: |
-          docker pull your-dockerhub-username/teamhub:latest
+          docker pull facundofierro/teamhub:latest
           docker stack deploy -c /path/to/docker-stack.yml teamhub
