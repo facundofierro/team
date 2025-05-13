@@ -1,7 +1,7 @@
 import { eq, sql } from 'drizzle-orm'
-import type { NeonHttpDatabase } from 'drizzle-orm/neon-http'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
-export const getFunctions = (database: NeonHttpDatabase) => {
+export const getFunctions = (database: NodePgDatabase) => {
   return {
     addTable: (tableName: string, columns: string[]) =>
       database.execute(sql`CREATE TABLE ${tableName} (${columns.join(', ')})`),

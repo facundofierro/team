@@ -25,11 +25,9 @@ export async function ensureMainDatabaseAndSchemas() {
   const host = process.env.PG_HOST
   const user = process.env.PG_USER
   const password = process.env.PG_PASSWORD
-  const dbName = process.env.PG_DATABASE
+  const dbName = 'teamhub'
   if (!host || !user || !password || !dbName) {
-    throw new Error(
-      'Missing PG_HOST, PG_USER, PG_PASSWORD, or PG_DATABASE env vars'
-    )
+    throw new Error('Missing PG_HOST, PG_USER, PG_PASSWORD env vars')
   }
   const mainDbUrl = `postgres://${user}:${password}@${host}:5432/${dbName}`
   const adminUrl = `postgres://${user}:${password}@${host}:5432/postgres`
