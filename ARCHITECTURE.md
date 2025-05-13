@@ -8,7 +8,7 @@ TeamHub is a multi-tenant AI agent management platform built with a modular, sca
 
 - **Frontend/Backend:** Next.js (App Router)
 - **UI:** shadcn/ui, Radix UI, Tailwind CSS
-- **Database:** Neon (Postgres, one per organization)
+- **Database:** Postgres (one per organization, running on host Linux Ubuntu server)
 - **ORM:** Drizzle ORM
 - **Authentication:** next-auth
 - **State Management:** Zustand
@@ -17,7 +17,7 @@ TeamHub is a multi-tenant AI agent management platform built with a modular, sca
 
 ## Data Flow & Multi-Tenancy
 
-- Each organization is provisioned a dedicated Postgres database on Neon.
+- Each organization is provisioned a dedicated Postgres database on the host system (Linux Ubuntu server).
 - All agent data, insights, and settings are stored per-organization.
 - API routes and server actions enforce organization isolation and security.
 - Users can switch organizations via the UI; all queries and mutations are scoped to the selected organization.
@@ -32,23 +32,25 @@ TeamHub is a multi-tenant AI agent management platform built with a modular, sca
 
 ### Prerequisites
 
-- Vercel account (for hosting Next.js app)
-- Neon account (for Postgres databases)
+- Self-hosted server (with Docker and Docker Swarm configured)
+- Postgres database(s) running on the host Linux Ubuntu server
 - Required environment variables (see README)
 
 ### Steps
 
-1. **Provision Neon Project:**
-   - Create a Neon project and note your API key and project ID.
+1. **Provision Postgres Database(s):**
+   - Set up Postgres on your Linux Ubuntu server.
    - The app will automatically provision a new database for each organization.
-2. **Configure Vercel Project:**
-   - Deploy the Next.js app to Vercel.
-   - Set environment variables in Vercel dashboard (`NEON_API_KEY`, `NEON_PROJECT_ID`, etc.).
-3. **Connect Domains (Optional):**
-   - Add custom domains in Vercel for production.
+2. **Build and Push Docker Image:**
+   - Use the provided Dockerfile to build the app image.
+   - Push the image to your Docker registry (e.g., Docker Hub). This is automated via GitHub Actions in `.github/workflows/deploy.yml`.
+3. **Deploy with Docker Swarm:**
+   - Use the `docker-stack.yml` file to deploy the stack to your self-hosted server.
+   - Example: `docker stack deploy -c docker-stack.yml teamhub`
+   - Ensure required environment variables (such as `PG_PASSWORD`) are set, either in the stack file or as secrets.
 4. **Monitor & Scale:**
-   - Use Sentry for error monitoring.
-   - Neon and Vercel both support autoscaling for production workloads.
+   - Use Sentry for error monitoring (configured in `next.config.mjs`).
+   - Docker Swarm supports scaling for production workloads.
 
 ## Extensibility
 
