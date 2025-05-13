@@ -29,6 +29,14 @@ jobs:
           push: true
           tags: facundofierro/teamhub:latest
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
   deploy:
     runs-on: self-hosted
     needs: build-and-push
