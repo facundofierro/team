@@ -47,4 +47,5 @@ jobs:
       - name: Pull and deploy Docker image
         run: |
           docker pull facundofierro/teamhub:latest
-          docker stack deploy -c /path/to/docker-stack.yml teamhub
+          export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
+          docker stack deploy -c docker-stack.yml teamhub

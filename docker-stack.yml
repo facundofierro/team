@@ -15,4 +15,5 @@ services:
       - '3000:3000'
     environment:
       - NODE_ENV=production
+      - PG_PASSWORD=${PG_PASSWORD}
       # Add other env vars here, or use secrets/configs
