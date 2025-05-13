@@ -1,27 +1,28 @@
+# syntax=docker/dockerfile:1.4
 FROM node:22-alpine
 
-# Install pnpm and pm2 globally
-RUN npm install -g pnpm pm2
+# Install pnpm, pm2, and turbo globally
+RUN npm install -g pnpm pm2 turbo
 
 WORKDIR /app
 
-# Copy lockfile and workspace config for install caching
+# Copy only lockfiles and all package.json files for install caching
 COPY pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY apps/teamhub/package.json ./apps/teamhub/
+COPY packages/teamhub-db/package.json ./packages/teamhub-db/
+COPY packages/teamhub-ai/package.json ./packages/teamhub-ai/
 
-# Copy the entire repository, preserving structure
+# Install dependencies with pnpm, using BuildKit cache for pnpm store
+RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store pnpm install
+
+# Copy the rest of the code
 COPY . .
 
-# Install dependencies (will use workspaces)
-RUN pnpm install
-
-# Set working directory to the root to run the build script
-WORKDIR /app
-
-# Build your Next.js app using the root script
+# Build your Next.js app using the root script (turbo cache enabled by default)
 RUN pnpm build:teamhub:prod
 
 EXPOSE 3000
 
-# Start with PM2 in cluster mode (uses all available CPU cores)
 CMD ["pm2-runtime", "ecosystem.config.js"]
