@@ -21,13 +21,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set commit SHA as env var
+        run: echo "TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: apps/teamhub/Dockerfile
           push: true
-          tags: facundofierro/teamhub:latest
+          tags: |
+            facundofierro/teamhub:latest
+            facundofierro/teamhub:${{ env.TAG }}
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -51,8 +56,12 @@ jobs:
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
+      - name: Update docker-stack.yml with new image tag
+        run: |
+          sed -i 's|facundofierro/teamhub:.*|facundofierro/teamhub:${{ env.TAG }}|' docker-stack.yml
+
       - name: Pull and deploy Docker image
         run: |
-          docker pull facundofierro/teamhub:latest
+          docker pull facundofierro/teamhub:${{ env.TAG }}
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
           docker stack deploy -c docker-stack.yml teamhub
