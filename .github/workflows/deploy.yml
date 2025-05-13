@@ -41,6 +41,13 @@ jobs:
     runs-on: self-hosted
     needs: build-and-push
     steps:
+      - name: Checkout only docker-stack.yml
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docker-stack.yml
+          sparse-checkout-cone-mode: false
+
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
