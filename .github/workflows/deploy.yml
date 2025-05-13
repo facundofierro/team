@@ -33,6 +33,9 @@ jobs:
     runs-on: self-hosted
     needs: build-and-push
     steps:
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
       - name: Pull and deploy Docker image
         run: |
           docker pull facundofierro/teamhub:latest
