@@ -1,84 +1,96 @@
-# TeamHub - AI Agent Management Platform
+# TeamHub – Multi-Organization AI Agent Platform
 
 ## Overview
 
-TeamHub is a powerful platform for creating and managing AI agents, designed to support multiple organizations with isolated data environments. The platform enables seamless integration of various AI models and tools, facilitating sophisticated agent-to-agent communication and workflow automation.
+TeamHub is a modern platform for creating and managing organizations, each with its own set of AI agents. Designed for multi-tenant environments, TeamHub enables organizations to securely manage their own agents, data, and workflows, all within a beautiful, accessible UI built with [shadcn/ui](https://ui.shadcn.com/) components.
 
-## Key Features
+## Features
 
-- **Multi-tenant Architecture**: Each organization gets its own dedicated database for:
+- **Multi-Organization Support**
 
-  - Insights storage
-  - RAG (Retrieval-Augmented Generation) capabilities
-  - Secure data isolation
+  - Create and switch between organizations
+  - Each organization has isolated data, settings, and agents
+  - Secure, dedicated database per organization
 
-- **Flexible AI Model Integration**:
+- **AI Agent Management**
 
-  - Support for multiple AI models
-  - Extensible architecture for adding new AI providers
-  - Model selection flexibility for different agents
+  - Create, view, and configure AI agents for each organization
+  - Agents have customizable roles, memory, tools, and policies
+  - Agent-to-agent communication and workflow automation
 
-- **Advanced Agent Capabilities**:
+- **Insights & Analytics**
 
-  - Inter-agent communication
-  - Workflow automation
-  - Tool integration framework
-  - Custom tool development support
+  - View organization-specific insights, logs, and analytics
+  - Data grid and table views for easy exploration
 
-- **Database Management**:
-  - Automated database provisioning
-  - Secure credential management
-  - Integration with Neon and Vercel
+- **Organization Settings**
+
+  - Manage organization-wide settings, tool integrations, and users
+  - Configure available tools and permissions for agents
+
+- **Modern UI/UX**
+
+  - Built with shadcn/ui components for a consistent, accessible experience
+  - Responsive design with sidebar navigation and dialogs
+
+- **Extensible Architecture**
+  - Add new AI models and tools easily
+  - Modular codebase for rapid feature development
 
 ## Technical Stack
 
-- **Backend Infrastructure**:
+- **Frontend & Backend:** Next.js (App Router)
+- **UI Components:** shadcn/ui, Radix UI
+- **Database:** Neon (Postgres)
+- **ORM:** Drizzle ORM
+- **Authentication:** next-auth
+- **State Management:** Zustand
+- **Deployment:** Vercel
+- **Other:** Tailwind CSS, Sentry, React Query
 
-  - Next.js
-  - Vercel for deployment
-  - Neon for database management
-  - Drizzle ORM for database operations
+---
 
-- **Security**:
-  - Isolated database instances per organization
-  - Encrypted environment variables
-  - Secure API token management
+👉 For detailed architecture and deployment information, see [ARCHITECTURE.md](ARCHITECTURE.md)
+
+---
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js
-- Vercel account
-- Neon account
+- Postgres database (Neon or your own Postgres server)
 - Required environment variables:
-  - `VERCEL_API_TOKEN`
-  - `NEON_API_KEY`
-  - `NEON_PROJECT_ID`
-  - `VERCEL_PROJECT_ID`
+  - `PG_HOST`: Hostname of your Postgres server
+  - `PG_USER`: Username for your Postgres server
+  - `PG_PASSWORD`: Password for your Postgres server
+  - `NEXTAUTH_URL`: The canonical URL of your deployment (e.g. https://yourdomain.com)
+  - `NEXTAUTH_SECRET`: Secret for NextAuth session encryption
+  - `SENTRY_DSN`: Sentry Data Source Name for error monitoring
+  - (Any other variables required by your authentication/provider setup)
 
 ### Installation
 
-1. Clone the repository
+1. **Clone the repository**
 
-```bash
-git clone [repository-url]
-cd teamhub
-```
+   ```bash
+   git clone [repository-url]
+   cd teamhub
+   ```
 
-2. Install dependencies
+2. **Install dependencies**
 
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-3. Set up environment variables
+3. **Set up environment variables**
 
-```bash
-cp .env.example .env.local
-```
+   ```bash
+   cp .env.example .env.local
+   ```
 
-4. Configure your environment variables with your Vercel and Neon credentials
+4. **Configure your environment variables** with your Postgres, NextAuth, and Sentry credentials
 
 ### Development
 
@@ -86,15 +98,14 @@ cp .env.example .env.local
 npm run dev
 ```
 
-## Architecture
+## User Flow
 
-The platform is built with a modular architecture that allows for:
-
-- Dynamic agent creation and management
-- Isolated database instances per organization
-- Extensible tool integration
-- Flexible AI model integration
-- Secure inter-agent communication
+1. **Sign in and create an organization**
+2. **Switch between organizations** using the sidebar
+3. **Create and manage AI agents** within each organization
+4. **Configure agent roles, memory, tools, and policies**
+5. **View insights and analytics** for your organization
+6. **Manage organization settings, users, and integrations**
 
 ## Contributing
 
@@ -102,7 +113,7 @@ We welcome contributions! Please see our contributing guidelines for more detail
 
 ## License
 
-[License Type] - See LICENSE file for details
+[License Type] – See LICENSE file for details
 
 ## Support
 

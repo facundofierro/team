@@ -1,10 +1,10 @@
 import { eq, and, sql } from 'drizzle-orm'
-import type { NeonHttpDatabase } from 'drizzle-orm/neon-http'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { embedding } from './schema'
 import type { Embedding, NewEmbedding, EmbeddingWithTypes } from './types'
 import * as schema from './schema'
 
-export const getFunctions = (database: NeonHttpDatabase<typeof schema>) => {
+export const getFunctions = (database: NodePgDatabase<typeof schema>) => {
   return {
     createEmbedding: async (
       data: NewEmbedding

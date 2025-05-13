@@ -1,10 +1,10 @@
 import { eq, and, sql, inArray } from 'drizzle-orm'
-import type { NeonHttpDatabase } from 'drizzle-orm/neon-http'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { memory } from './schema'
 import type { Memory, NewMemory, MemoryWithTypes } from './types'
 import * as schema from './schema'
 
-export const getFunctions = (database: NeonHttpDatabase<typeof schema>) => {
+export const getFunctions = (database: NodePgDatabase<typeof schema>) => {
   return {
     createMemory: async (data: NewMemory): Promise<MemoryWithTypes> => {
       const [result] = await database.insert(memory).values(data).returning()
