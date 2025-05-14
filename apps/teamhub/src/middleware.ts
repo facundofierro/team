@@ -1,14 +1,18 @@
-import { auth } from '@/auth'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth
+export function middleware(req: NextRequest) {
+  // Check for the session cookie (adjust the cookie name if needed)
+  const session = req.cookies.get('next-auth.session-token')
   const isAuthPage = req.nextUrl.pathname.startsWith('/api/auth')
 
-  if (!isLoggedIn && !isAuthPage) {
+  if (!session && !isAuthPage) {
     const signInUrl = new URL('/api/auth/signin', req.nextUrl.origin)
-    return Response.redirect(signInUrl)
+    return NextResponse.redirect(signInUrl)
   }
-})
+
+  return NextResponse.next()
+}
 
 // Optionally configure which paths to protect
 export const config = {
