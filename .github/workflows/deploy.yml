@@ -71,4 +71,4 @@ jobs:
 
       - name: Start Pinggy tunnel
         run: |
-          docker run --net=host -it pinggy/pinggy -p 443 -R0:teamhub:3000 -L4300:localhost:4300 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
+          docker run --net=host -it pinggy/pinggy -p 443 -R0:192.168.88.135:3000 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
