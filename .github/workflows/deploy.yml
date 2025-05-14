@@ -68,3 +68,7 @@ jobs:
           docker pull facundofierro/teamhub:${{ needs.build-and-push.outputs.tag }}
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
           docker stack deploy -c docker-stack.yml teamhub
+
+      - name: Start Pinggy tunnel
+        run: |
+          docker run --net=host -it pinggy/pinggy -p 443 -R0:teamhub:3000 -L4300:localhost:4300 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
