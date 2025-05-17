@@ -69,6 +69,14 @@ jobs:
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
           docker stack deploy -c docker-stack.yml teamhub
 
-      - name: Start Pinggy tunnel
+      - name: Prune stopped containers
+        run: docker container prune -f
+
+      - name: Ensure Pinggy tunnel is running
         run: |
-          docker run --net=host pinggy/pinggy -p 443 -R0:192.168.88.135:3000 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
+          if ! docker ps --filter "name=pinggy-tunnel" --filter "status=running" | grep pinggy-tunnel; then
+            docker rm -f pinggy-tunnel || true
+            docker run --net=host --name pinggy-tunnel -d pinggy/pinggy -p 443 -R0:192.168.88.135:3000 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
+          else
+            echo "Pinggy tunnel is already running."
+          fi
