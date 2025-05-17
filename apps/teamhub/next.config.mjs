@@ -1,4 +1,5 @@
 console.log('NEXTAUTH_URL at build:', process.env.NEXTAUTH_URL)
+console.log('ALLOWED_EMAILS at build:', process.env.ALLOWED_EMAILS)
 import { withSentryConfig } from '@sentry/nextjs'
 /** @type {import('next').NextConfig} */
 const nextConfig = {

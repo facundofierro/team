@@ -35,7 +35,18 @@ export const { handlers, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user }) {
-      return allowedEmails.includes(user.email ?? '')
+      const email = user.email ?? ''
+      const isAllowed = allowedEmails.includes(email)
+      if (!isAllowed) {
+        console.warn(
+          `SignIn denied for email: ${email}. Allowed emails: [${allowedEmails.join(
+            ', '
+          )}]`
+        )
+      } else {
+        console.log(`SignIn allowed for email: ${email}`)
+      }
+      return isAllowed
     },
     async session({ session, token }) {
       if (session.user) {
