@@ -4,6 +4,8 @@ import type { NextRequest } from 'next/server'
 export function middleware(req: NextRequest) {
   // Check for the session cookie (adjust the cookie name if needed)
   const session = req.cookies.get('next-auth.session-token')
+  console.log('Middleware cookies:', req.cookies)
+  console.log('Middleware session token:', session)
   const isAuthPage = req.nextUrl.pathname.startsWith('/api/auth')
 
   if (!session && !isAuthPage) {
