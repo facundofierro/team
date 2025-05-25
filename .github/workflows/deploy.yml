@@ -68,8 +68,11 @@ jobs:
       - name: Ensure Pinggy tunnels are running
         run: |
           # Main app tunnel (port 443 -> 3000)
-          if ! docker ps --filter "name=pinggy-tunnel" --filter "status=running" | grep pinggy-tunnel; then
-            docker rm -f pinggy-tunnel || true
+          if ! docker ps --filter "name=pinggy-tunnel" --filter "status=running" --format "{{.Names}}" | grep -q "^pinggy-tunnel$"; then
+            echo "Main tunnel not running, setting it up..."
+            # Stop and remove any existing container (running or stopped)
+            docker stop pinggy-tunnel 2>/dev/null || true
+            docker rm pinggy-tunnel 2>/dev/null || true
             docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy -p 443 -R0:192.168.88.135:3000 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
             echo "Waiting for main tunnel to be ready..."
             sleep 10
@@ -78,14 +81,21 @@ jobs:
           fi
 
           # Registry tunnel (port 5000 -> 5000) - for external access from GitHub
-          if ! docker ps --filter "name=pinggy-registry-tunnel" --filter "status=running" | grep pinggy-registry-tunnel; then
-            docker rm -f pinggy-registry-tunnel || true
+          if ! docker ps --filter "name=pinggy-registry-tunnel" --filter "status=running" --format "{{.Names}}" | grep -q "^pinggy-registry-tunnel$"; then
+            echo "Registry tunnel not running, setting it up..."
+            # Stop and remove any existing container (running or stopped)
+            docker stop pinggy-registry-tunnel 2>/dev/null || true
+            docker rm pinggy-registry-tunnel 2>/dev/null || true
             docker run --net=host --name=pinggy-registry-tunnel -d pinggy/pinggy -p 5000 -R0:192.168.88.135:5000 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
             echo "Waiting for registry tunnel to be ready..."
             sleep 15
           else
             echo "Registry Pinggy tunnel is already running."
           fi
+
+          # Clean up any orphaned pinggy containers (containers without proper names)
+          echo "Cleaning up orphaned pinggy containers..."
+          docker ps -a --filter "ancestor=pinggy/pinggy" --format "{{.Names}}" | grep -v -E "^(pinggy-tunnel|pinggy-registry-tunnel)$" | xargs -r docker rm -f
 
   build-and-push:
     runs-on: ubuntu-latest
