@@ -47,7 +47,7 @@ jobs:
             echo "Registry service exists. Checking if it's healthy..."
             # Wait for registry to be accessible
             for i in {1..10}; do
-              if curl -f --connect-timeout 5 --max-time 10 -u admin:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
+              if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
                 echo "Registry is accessible"
                 break
               fi
@@ -56,7 +56,7 @@ jobs:
             done
 
             # Final check
-            if ! curl -f --connect-timeout 5 --max-time 10 -u admin:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
+            if ! curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
               echo "Registry is not accessible. Redeploying stack..."
               export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
               docker stack deploy -c docker-stack.yml teamhub
@@ -141,7 +141,7 @@ jobs:
       - name: Login to external registry via Pinggy
         run: |
           echo "Logging in to registry at https://$REGISTRY_DOMAIN"
-          echo "k8mX9pL2nQ7vR4wE" | docker login https://$REGISTRY_DOMAIN -u admin --password-stdin
+          echo "k8mX9pL2nQ7vR4wE" | docker login https://$REGISTRY_DOMAIN -u docker --password-stdin
 
       - name: Load and push image to external registry
         run: |
@@ -191,7 +191,7 @@ jobs:
       - name: Login to local registry
         run: |
           echo "Logging in to local registry at localhost:5000"
-          echo "k8mX9pL2nQ7vR4wE" | docker login localhost:5000 -u admin --password-stdin
+          echo "k8mX9pL2nQ7vR4wE" | docker login localhost:5000 -u docker --password-stdin
 
       - name: Tag and push to local registry
         run: |
