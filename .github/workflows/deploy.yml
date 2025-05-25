@@ -46,17 +46,17 @@ jobs:
           else
             echo "Registry service exists. Checking if it's healthy..."
             # Wait for registry to be accessible
-            for i in {1..30}; do
-              if curl -f http://localhost:5000/v2/ >/dev/null 2>&1; then
+            for i in {1..10}; do
+              if curl -f -u admin:k8mX9pL2nQ7vR4wE http://localhost:5000/v2/ >/dev/null 2>&1; then
                 echo "Registry is accessible"
                 break
               fi
-              echo "Waiting for registry to be ready... (attempt $i/30)"
-              sleep 10
+              echo "Waiting for registry to be ready... (attempt $i/10)"
+              sleep 5
             done
 
             # Final check
-            if ! curl -f http://localhost:5000/v2/ >/dev/null 2>&1; then
+            if ! curl -f -u admin:k8mX9pL2nQ7vR4wE http://localhost:5000/v2/ >/dev/null 2>&1; then
               echo "Registry is not accessible. Redeploying stack..."
               export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
               docker stack deploy -c docker-stack.yml teamhub
