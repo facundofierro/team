@@ -11,7 +11,7 @@ mkdir -p /tmp/registry-auth
 # Generate htpasswd file for registry authentication
 # Using a random password for better security
 echo "Creating registry authentication..."
-docker run --rm --entrypoint htpasswd httpd:2 -Bbn admin k8mX9pL2nQ7vR4wE > /tmp/registry-auth/htpasswd
+docker run --rm --entrypoint htpasswd httpd:2 -Bbn docker k8mX9pL2nQ7vR4wE > /tmp/registry-auth/htpasswd
 
 # Create the registry auth volume and copy the htpasswd file
 echo "Setting up registry authentication volume..."
@@ -26,7 +26,7 @@ echo "Registry setup complete!"
 echo ""
 echo "Registry will be available at: localhost:5000"
 echo "Default credentials:"
-echo "  Username: admin"
+echo "  Username: docker"
 echo "  Password: k8mX9pL2nQ7vR4wE"
 echo ""
 echo "To change credentials, edit this script and re-run it."
