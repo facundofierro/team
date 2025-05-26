@@ -73,6 +73,8 @@ jobs:
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
             # Single tunnel with domain-based forwarding using wildcard
+            # Based on Pinggy docs: only one default forwarding (-R0:) allowed
+            # Use domain forwarding for additional ports
             docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:3000 \
@@ -86,6 +88,11 @@ jobs:
             # Show tunnel information
             echo "Tunnel logs:"
             docker logs pinggy-tunnel 2>/dev/null | tail -20 || echo "No logs available yet"
+
+            echo "Waiting additional time for all ports to be mapped..."
+            sleep 10
+            echo "Final tunnel status:"
+            docker logs pinggy-tunnel 2>/dev/null | tail -30 || echo "No logs available yet"
           else
             echo "Wildcard Pinggy tunnel is already running."
           fi
@@ -101,6 +108,7 @@ jobs:
       tag: ${{ needs.prepare-tag.outputs.tag }}
     env:
       # Registry accessible from GitHub via wildcard subdomain
+      # With Pinggy Pro wildcard, port 5000 should be accessible via registry subdomain
       REGISTRY_DOMAIN: 'registry.r1.teamxagents.com'
     steps:
       - name: Checkout code
