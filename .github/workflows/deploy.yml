@@ -140,6 +140,44 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Test DNS and connectivity before login
+        run: |
+          echo "Testing DNS resolution for $REGISTRY_DOMAIN..."
+
+          # Test DNS resolution
+          if nslookup $REGISTRY_DOMAIN; then
+            echo "✅ DNS resolution successful"
+          else
+            echo "❌ DNS resolution failed"
+            exit 1
+          fi
+
+          # Test basic connectivity
+          echo "Testing basic connectivity to $REGISTRY_DOMAIN..."
+          if curl -I --connect-timeout 10 --max-time 30 https://$REGISTRY_DOMAIN 2>/dev/null; then
+            echo "✅ HTTPS connection successful"
+          else
+            echo "⚠️ HTTPS connection failed, trying HTTP..."
+            if curl -I --connect-timeout 10 --max-time 30 http://$REGISTRY_DOMAIN 2>/dev/null; then
+              echo "✅ HTTP connection successful"
+            else
+              echo "❌ Both HTTP and HTTPS connections failed"
+            fi
+          fi
+
+          # Test registry endpoint specifically
+          echo "Testing registry endpoint /v2/..."
+          if curl -I --connect-timeout 10 --max-time 30 https://$REGISTRY_DOMAIN/v2/ 2>/dev/null; then
+            echo "✅ Registry endpoint accessible via HTTPS"
+          else
+            echo "⚠️ Registry endpoint not accessible via HTTPS, trying HTTP..."
+            if curl -I --connect-timeout 10 --max-time 30 http://$REGISTRY_DOMAIN/v2/ 2>/dev/null; then
+              echo "✅ Registry endpoint accessible via HTTP"
+            else
+              echo "❌ Registry endpoint not accessible"
+            fi
+          fi
+
       - name: Login to external registry via Pinggy
         run: |
           echo "Logging in to registry at https://$REGISTRY_DOMAIN"
