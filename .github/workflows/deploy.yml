@@ -36,6 +36,64 @@ jobs:
             ./setup-registry.sh
           fi
 
+          # Create nginx config as a Docker config
+          cat > nginx.conf << 'EOF'
+          events {
+              worker_connections 1024;
+          }
+
+          http {
+              upstream teamhub {
+                  server teamhub:3000;
+              }
+
+              upstream registry {
+                  server registry:5000;
+              }
+
+              upstream remotion {
+                  server host.docker.internal:6000;
+              }
+
+              server {
+                  listen 80;
+                  server_name _;
+
+                  # Main application
+                  location / {
+                      proxy_pass http://teamhub;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+                  }
+
+                  # Docker registry
+                  location /v2/ {
+                      proxy_pass http://registry;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+
+                      # Docker registry specific headers
+                      proxy_set_header X-Forwarded-Host $host;
+                      proxy_buffering off;
+                      client_max_body_size 0;
+                  }
+
+                  # Remotion service
+                  location /remotion/ {
+                      proxy_pass http://remotion/;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+                  }
+              }
+          }
+          EOF
+
           # Create a temporary stack file with only infrastructure services
           cat > docker-stack-infra.yml << 'EOF'
           version: '3.8'
@@ -47,8 +105,9 @@ jobs:
               ports:
                 - '80:80'
                 - '443:443'
-              volumes:
-                - ./nginx.conf:/etc/nginx/nginx.conf:ro
+              configs:
+                - source: nginx_config
+                  target: /etc/nginx/nginx.conf
               networks:
                 - registry_network
 
@@ -71,6 +130,10 @@ jobs:
                 - registry_auth:/auth
               networks:
                 - registry_network
+
+          configs:
+            nginx_config:
+              file: ./nginx.conf
 
           volumes:
             registry_data:
