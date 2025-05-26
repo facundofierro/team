@@ -10,7 +10,6 @@ import { config } from 'dotenv'
 import { ensureMainDatabaseAndSchemas } from './functions/utils/database'
 
 // config({ path: '.env' }) // or .env.local
-
 // await ensureMainDatabaseAndSchemas()
 
 const PG_HOST = process.env.PG_HOST
