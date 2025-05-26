@@ -60,35 +60,39 @@ jobs:
               echo "Registry is not accessible. Redeploying stack..."
               export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
               docker stack deploy -c docker-stack.yml teamhub
-              echo "Waiting for registry to be ready after redeploy..."
+                            echo "Waiting for registry to be ready after redeploy..."
               sleep 30
             fi
           fi
 
-      - name: Ensure Pinggy tunnels are running
+      - name: Ensure Pinggy tunnel is running
         run: |
-          # Single tunnel with multiple port forwarding
+          # Single tunnel with wildcard domain forwarding
           if ! docker ps --filter "name=pinggy-tunnel" --filter "status=running" --format "{{.Names}}" | grep -q "^pinggy-tunnel$"; then
-            echo "Multi-port tunnel not running, setting it up..."
-            # Stop and remove any existing containers
-            docker stop pinggy-tunnel pinggy-registry-tunnel 2>/dev/null || true
-            docker rm pinggy-tunnel pinggy-registry-tunnel 2>/dev/null || true
-            # Single tunnel for both services using port-based forwarding
+            echo "Wildcard tunnel not running, setting it up..."
+            docker stop pinggy-tunnel 2>/dev/null || true
+            docker rm pinggy-tunnel 2>/dev/null || true
+            # Single tunnel with domain-based forwarding using wildcard
             docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:3000 \
-              -R5000:127.0.0.1:5000 \
+              -Rregistry.r1.teamxagents.com:0:127.0.0.1:5000 \
+              -Rremotionr1.teamxagents.com:0:127.0.0.1:6000 \
               -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
               FpyP2PGUXy0@pro.pinggy.io
-            echo "Waiting for multi-port tunnel to be ready..."
+            echo "Waiting for wildcard tunnel to be ready..."
             sleep 15
+
+            # Show tunnel information
+            echo "Tunnel logs:"
+            docker logs pinggy-tunnel 2>/dev/null | tail -20 || echo "No logs available yet"
           else
-            echo "Multi-port Pinggy tunnel is already running."
+            echo "Wildcard Pinggy tunnel is already running."
           fi
 
           # Clean up any orphaned pinggy containers (containers without proper names)
           echo "Cleaning up orphaned pinggy containers..."
-          docker ps -a --filter "ancestor=pinggy/pinggy" --format "{{.Names}}" | grep -v -E "^(pinggy-tunnel|pinggy-registry-tunnel)$" | xargs -r docker rm -f
+          docker ps -a --filter "ancestor=pinggy/pinggy" --format "{{.Names}}" | grep -v -E "^pinggy-tunnel$" | xargs -r docker rm -f
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -96,8 +100,8 @@ jobs:
     outputs:
       tag: ${{ needs.prepare-tag.outputs.tag }}
     env:
-      # Registry accessible from GitHub via Pinggy domain on port 5000
-      REGISTRY_DOMAIN: 'ukjhwjyazp.a.pinggy.link:5000'
+      # Registry accessible from GitHub via wildcard subdomain
+      REGISTRY_DOMAIN: 'registry.r1.teamxagents.com'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
