@@ -133,7 +133,7 @@ jobs:
           # Deploy infrastructure services only
           echo "Deploying infrastructure services (nginx + registry)..."
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
-          docker stack deploy -c docker-stack-infra.yml teamhub-infra
+          docker stack deploy -c docker-stack-infra.yml teamhub
 
           echo "Waiting for infrastructure services to be ready..."
           sleep 30
@@ -152,7 +152,7 @@ jobs:
           if ! curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
             echo "❌ Registry is still not accessible after 2.5 minutes"
             docker service ls
-            docker service logs teamhub-infra_registry --tail 20
+            docker service logs teamhub_registry --tail 20
             exit 1
           fi
 
