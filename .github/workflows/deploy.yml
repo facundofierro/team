@@ -86,7 +86,7 @@ jobs:
             # Stop and remove any existing container (running or stopped)
             docker stop pinggy-registry-tunnel 2>/dev/null || true
             docker rm pinggy-registry-tunnel 2>/dev/null || true
-            docker run --net=host --name=pinggy-registry-tunnel -d pinggy/pinggy -p 5000 -R0:192.168.88.135:5000 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
+            docker run --net=host --name=pinggy-registry-tunnel -d pinggy/pinggy -p 5000 -R0:127.0.0.1:5000 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 FpyP2PGUXy0@pro.pinggy.io
             echo "Waiting for registry tunnel to be ready..."
             sleep 15
           else
