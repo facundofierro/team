@@ -1,5 +1,21 @@
 version: '3.8'
 services:
+  # Add nginx reverse proxy service
+  nginx:
+    image: nginx:alpine
+    deploy:
+      replicas: 1
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - registry_network
+    depends_on:
+      - teamhub
+      - registry
+
   # Private Docker Registry
   registry:
     image: registry:2
@@ -8,11 +24,9 @@ services:
       placement:
         constraints:
           - node.role == manager
-    ports:
-      - target: 5000
-        published: 5000
-        protocol: tcp
-        mode: host
+    # Remove external port exposure - only internal access
+    expose:
+      - '5000'
     environment:
       - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
       - REGISTRY_AUTH=htpasswd
@@ -35,8 +49,9 @@ services:
       rollback_config:
         parallelism: 1
         delay: 10s
-    ports:
-      - '3000:3000'
+    # Remove external port exposure - only internal access
+    expose:
+      - '3000'
     environment:
       - NODE_ENV=production
       - PG_PASSWORD=${PG_PASSWORD}
