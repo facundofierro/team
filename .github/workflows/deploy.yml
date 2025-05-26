@@ -97,7 +97,7 @@ jobs:
       tag: ${{ needs.prepare-tag.outputs.tag }}
     env:
       # Registry accessible from GitHub via Pinggy domain on port 5000
-      REGISTRY_DOMAIN: 'yourdomain.a.pinggy.link:5000'
+      REGISTRY_DOMAIN: 'ukjhwjyazp.a.pinggy.link:5000'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
