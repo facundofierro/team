@@ -44,9 +44,9 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Use nohup with interactive Docker to keep tunnel running in background
-            # This approach maintains interactive mode while allowing background operation
-            nohup docker run --net=host --rm --name=pinggy-tunnel -it pinggy/pinggy \
+            # Use nohup with interactive Docker (no TTY) to keep tunnel running in background
+            # GitHub Actions doesn't provide TTY, so use -i only (not -it)
+            nohup docker run --net=host --rm --name=pinggy-tunnel -i pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no \
@@ -204,9 +204,9 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Use nohup with interactive Docker to keep tunnel running in background
-            # This approach maintains interactive mode while allowing background operation
-            nohup docker run --net=host --rm --name=pinggy-tunnel -it pinggy/pinggy \
+            # Use nohup with interactive Docker (no TTY) to keep tunnel running in background
+            # GitHub Actions doesn't provide TTY, so use -i only (not -it)
+            nohup docker run --net=host --rm --name=pinggy-tunnel -i pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no \
