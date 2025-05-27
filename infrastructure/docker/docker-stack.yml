@@ -29,11 +29,9 @@ services:
     # Remove external port exposure - only internal access
     expose:
       - '5000'
-    environment:
-      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
-      - REGISTRY_AUTH=htpasswd
-      - REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm
-      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
+    configs:
+      - source: registry_config
+        target: /etc/docker/registry/config.yml
     volumes:
       - registry_data:/var/lib/registry
       - registry_auth:/auth
@@ -104,6 +102,8 @@ configs:
   nginx_config:
     external: true
     name: teamhub_nginx_config_v4
+  registry_config:
+    file: ./infrastructure/configs/registry-config.yml
 
 volumes:
   registry_data:
