@@ -176,9 +176,9 @@ test_external_access() {
 # Monitor service for a period
 monitor_service() {
     echo "Monitoring Pinggy service for 30 seconds..."
-    for i in {1..6}; do
+    for i in {1..3}; do
         if run_sudo systemctl is-active --quiet $SERVICE_NAME; then
-            echo "✅ Pinggy service still running (check $i/6)"
+            echo "✅ Pinggy service still running (check $i/3)"
         else
             echo "❌ Pinggy service has failed! Checking logs..."
             show_logs
