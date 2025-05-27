@@ -49,6 +49,7 @@ jobs:
 
               server {
                   listen 80;
+                  listen [::]:80;
                   server_name _;
 
                   # Default response for root path during infrastructure phase
@@ -379,6 +380,7 @@ jobs:
 
               server {
                   listen 80;
+                  listen [::]:80;
                   server_name _;
 
                   # Main application
