@@ -91,15 +91,18 @@ deploy_infrastructure() {
         return 0
     fi
 
-    # If force redeploy is enabled, remove existing config to force update
+    # If force redeploy is enabled, we'll create a new config with a timestamp
     if [ "$FORCE_REDEPLOY" = "true" ]; then
-        echo "🔄 Force redeploy enabled - removing existing config to force update"
-        docker config rm teamhub_nginx_infra_config 2>/dev/null || true
+        echo "🔄 Force redeploy enabled - will create new config with timestamp"
         CONFIG_EXISTS=false
     fi
 
+    # Create a timestamp for unique config name
+    TIMESTAMP=$(date +%s)
+    CONFIG_NAME="nginx_infra_config_${TIMESTAMP}"
+
     # Create a temporary stack file with only infrastructure services
-    cat > docker-stack-infra.yml << 'EOF'
+    cat > docker-stack-infra.yml << EOF
 version: '3.8'
 services:
   nginx:
@@ -110,7 +113,7 @@ services:
       - '80:80'
       - '443:443'
     configs:
-      - source: nginx_infra_config
+      - source: ${CONFIG_NAME}
         target: /etc/nginx/nginx.conf
     volumes:
       - /opt/nginx-certs:/etc/nginx/ssl:ro
@@ -138,7 +141,7 @@ services:
       - registry_network
 
 configs:
-  nginx_infra_config:
+  ${CONFIG_NAME}:
     file: ./infrastructure/configs/nginx-infra.conf
 
 volumes:
@@ -150,10 +153,9 @@ networks:
     driver: overlay
 EOF
 
-    # Only remove conflicting configs if they exist and we need to recreate them
+    # Create new infrastructure config with timestamp
     if [ "$CONFIG_EXISTS" = false ]; then
-        echo "Creating new infrastructure config..."
-        docker config rm teamhub_nginx_infra_config 2>/dev/null || true
+        echo "Creating new infrastructure config: ${CONFIG_NAME}"
     fi
 
     # Deploy infrastructure services (this will update existing services or create new ones)
