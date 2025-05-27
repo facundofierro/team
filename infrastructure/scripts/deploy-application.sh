@@ -18,6 +18,8 @@ check_transition_state() {
 # Deploy full application stack
 deploy_full_stack() {
     local IMAGE_TAG="$1"
+    local REGISTRY_FALLBACK="$2"
+    local DOCKERHUB_IMAGE="$3"
     local USING_INFRA_CONFIG=false
 
     if check_transition_state; then
@@ -26,9 +28,12 @@ deploy_full_stack() {
 
     echo "Deploying full application stack (including teamhub)..."
 
-    # Update docker-stack.yml with new image tag if provided
-    if [ -n "$IMAGE_TAG" ]; then
-        echo "Updating docker-stack.yml with image tag: $IMAGE_TAG"
+    # Determine which image to use based on registry fallback
+    if [ "$REGISTRY_FALLBACK" = "dockerhub" ] && [ -n "$DOCKERHUB_IMAGE" ]; then
+        echo "Using DockerHub image: $DOCKERHUB_IMAGE"
+        sed -i "s|localhost:5000/teamhub:.*|$DOCKERHUB_IMAGE|" infrastructure/docker/docker-stack.yml
+    elif [ -n "$IMAGE_TAG" ]; then
+        echo "Using private registry image with tag: $IMAGE_TAG"
         sed -i "s|localhost:5000/teamhub:.*|localhost:5000/teamhub:$IMAGE_TAG|" infrastructure/docker/docker-stack.yml
     fi
 
@@ -119,9 +124,20 @@ cleanup() {
 # Main deployment function
 main() {
     local IMAGE_TAG="$1"
+    local REGISTRY_FALLBACK=""
+    local DOCKERHUB_IMAGE=""
+
+    # Check for registry fallback info
+    if [ -f /tmp/registry-fallback.env ]; then
+        source /tmp/registry-fallback.env
+        echo "Registry fallback detected: $REGISTRY_FALLBACK"
+        if [ "$REGISTRY_FALLBACK" = "dockerhub" ]; then
+            echo "Using DockerHub image: $DOCKERHUB_IMAGE"
+        fi
+    fi
 
     # Deploy the full stack
-    deploy_full_stack "$IMAGE_TAG"
+    deploy_full_stack "$IMAGE_TAG" "$REGISTRY_FALLBACK" "$DOCKERHUB_IMAGE"
 
     # Wait for services to be ready
     wait_for_services

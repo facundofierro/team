@@ -29,6 +29,9 @@ services:
     # Remove external port exposure - only internal access
     expose:
       - '5000'
+    environment:
+      # Fix for tunnel connections - specify the external host
+      - REGISTRY_HTTP_HOST=https://r1.teamxagents.com
     configs:
       - source: registry_config
         target: /etc/docker/registry/config.yml
