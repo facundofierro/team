@@ -135,7 +135,7 @@ StartLimitIntervalSec=0             # No limit on restart attempts
 [Service]
 Type=simple                         # Simple service type
 User=runner                         # Run as runner user
-ExecStart=/usr/local/bin/pinggy ... # Command to run
+ExecStart=/usr/bin/ssh ... # SSH command for TLS tunnel
 Restart=always                      # Always restart on failure
 RestartSec=10                       # Wait 10 seconds before restart
 StandardOutput=journal              # Log to systemd journal
@@ -197,8 +197,8 @@ sudo journalctl -u pinggy -n 50
 # Check if Pinggy CLI is installed
 which pinggy
 
-# Test Pinggy CLI manually
-/usr/local/bin/pinggy --token FpyP2PGUXy0 -l 80 --notui
+# Test Pinggy CLI manually (TLS tunnel)
+ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no tls@a.pinggy.io FpyP2PGUXy0
 ```
 
 ### Service Keeps Restarting
@@ -234,8 +234,8 @@ ping google.com
 # Check service user
 sudo systemctl show pinggy | grep User
 
-# Check file permissions
-ls -la /usr/local/bin/pinggy
+# Check SSH availability
+which ssh
 
 # Check service file permissions
 ls -la /etc/systemd/system/pinggy.service
