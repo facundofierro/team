@@ -1,0 +1,39 @@
+[Unit]
+Description=Pinggy Tunnel Service
+Documentation=https://pinggy.io/docs
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=runner
+Group=runner
+ExecStart=/usr/local/bin/pinggy --token FpyP2PGUXy0 -l 80 --notui
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pinggy
+
+# Environment
+Environment=HOME=/home/runner
+WorkingDirectory=/home/runner
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=512M
+
+# Restart policy
+StartLimitBurst=5
+StartLimitIntervalSec=300
+
+[Install]
+WantedBy=multi-user.target
