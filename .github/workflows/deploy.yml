@@ -484,6 +484,8 @@ jobs:
             sed -i 's/name: teamhub_nginx_config_v4//' docker-stack.yml
 
             # Deploy the full stack (nginx.conf is already checked out)
+            export NEXTCLOUD_ADMIN_PASSWORD="${{ secrets.NEXTCLOUD_ADMIN_PASSWORD }}"
+            export NEXTCLOUD_DB_PASSWORD="${{ secrets.NEXTCLOUD_DB_PASSWORD }}"
             docker stack deploy -c docker-stack.yml teamhub
 
             # Clean up the temporary infrastructure config after successful deployment
@@ -494,6 +496,8 @@ jobs:
           else
             # Subsequent deployments: just update the stack
             echo "🔄 Updating existing full stack deployment"
+            export NEXTCLOUD_ADMIN_PASSWORD="${{ secrets.NEXTCLOUD_ADMIN_PASSWORD }}"
+            export NEXTCLOUD_DB_PASSWORD="${{ secrets.NEXTCLOUD_DB_PASSWORD }}"
             docker stack deploy -c docker-stack.yml teamhub
           fi
 
