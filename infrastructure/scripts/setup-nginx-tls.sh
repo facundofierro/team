@@ -22,17 +22,21 @@ run_sudo() {
 
 run_sudo mkdir -p "$CERT_DIR"
 
-# Generate self-signed certificate for future use
-echo "Generating self-signed certificate for future HTTPS support..."
+# Generate self-signed certificate for HTTPS support
+echo "Generating self-signed certificate for HTTPS support..."
 run_sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout "$CERT_DIR/registry.key" \
-    -out "$CERT_DIR/registry.crt" \
+    -keyout "$CERT_DIR/nginx.key" \
+    -out "$CERT_DIR/nginx.crt" \
     -subj "/C=US/ST=Local/L=Local/O=TeamXAgents/OU=Registry/CN=$SERVER_IP" \
     -addext "subjectAltName=IP:$SERVER_IP,IP:127.0.0.1,DNS:localhost,DNS:r1.teamxagents.com"
 
 # Set proper permissions
-run_sudo chmod 644 "$CERT_DIR/registry.crt"
-run_sudo chmod 600 "$CERT_DIR/registry.key"
+run_sudo chmod 644 "$CERT_DIR/nginx.crt"
+run_sudo chmod 600 "$CERT_DIR/nginx.key"
+
+# Also create registry.crt and registry.key for backward compatibility
+run_sudo cp "$CERT_DIR/nginx.crt" "$CERT_DIR/registry.crt"
+run_sudo cp "$CERT_DIR/nginx.key" "$CERT_DIR/registry.key"
 
 echo "✅ Certificate generated and ready for future use"
 
