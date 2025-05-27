@@ -44,9 +44,9 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Use nohup with interactive Docker (no TTY) to keep tunnel running in background
-            # GitHub Actions doesn't provide TTY, so use -i only (not -it)
-            nohup docker run --net=host --rm --name=pinggy-tunnel -i pinggy/pinggy \
+            # Start tunnel in background using setsid to detach from session
+            # This creates a new session that survives the GitHub Actions step
+            setsid docker run --net=host --rm --name=pinggy-tunnel -i pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no \
@@ -54,7 +54,7 @@ jobs:
               -o ServerAliveCountMax=3 \
               -o ExitOnForwardFailure=yes \
               -o TCPKeepAlive=yes \
-              FpyP2PGUXy0+force@pro.pinggy.io > /tmp/pinggy.log 2>&1 &
+              FpyP2PGUXy0+force@pro.pinggy.io > /tmp/pinggy.log 2>&1 < /dev/null &
             echo "Waiting for enhanced tunnel to be ready..."
             sleep 20
 
@@ -204,9 +204,9 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Use nohup with interactive Docker (no TTY) to keep tunnel running in background
-            # GitHub Actions doesn't provide TTY, so use -i only (not -it)
-            nohup docker run --net=host --rm --name=pinggy-tunnel -i pinggy/pinggy \
+            # Start tunnel in background using setsid to detach from session
+            # This creates a new session that survives the GitHub Actions step
+            setsid docker run --net=host --rm --name=pinggy-tunnel -i pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no \
@@ -214,7 +214,7 @@ jobs:
               -o ServerAliveCountMax=3 \
               -o ExitOnForwardFailure=yes \
               -o TCPKeepAlive=yes \
-              FpyP2PGUXy0+force@pro.pinggy.io > /tmp/pinggy.log 2>&1 &
+              FpyP2PGUXy0+force@pro.pinggy.io > /tmp/pinggy.log 2>&1 < /dev/null &
             echo "Waiting for enhanced tunnel to be ready..."
             sleep 20
 
