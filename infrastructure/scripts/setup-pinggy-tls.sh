@@ -4,8 +4,17 @@ set -e
 
 echo "=== Setting up Pinggy TLS Tunnel for Docker Registry ==="
 
+# Check if there's already a working Pinggy tunnel
+echo "Checking for existing Pinggy tunnels..."
+if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/ >/dev/null 2>&1; then
+    echo "✅ Existing Pinggy tunnel is already working for registry access"
+    echo "🔒 Skipping TLS tunnel setup - using existing tunnel"
+    exit 0
+fi
+
 # Stop any existing tunnels
 pkill -f "a.pinggy.io" 2>/dev/null || true
+pkill -f "pro.pinggy.io" 2>/dev/null || true
 
 # Wait a moment for cleanup
 sleep 2
@@ -16,7 +25,8 @@ echo "This tunnel will NOT inspect traffic - better for Docker registry"
 # Start TLS tunnel - this will forward TLS traffic directly without inspection
 # Your nginx will handle the SSL termination locally
 # Using Pinggy Pro with custom domain r1.teamxagents.com and token FpyP2PGUXy0
-nohup ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 FpyP2PGUXy0@pro.pinggy.io > /tmp/pinggy-tls.log 2>&1 &
+echo "Attempting to start TLS tunnel with force option to override existing tunnel..."
+nohup ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 FpyP2PGUXy0@pro.pinggy.io force > /tmp/pinggy-tls.log 2>&1 &
 
 PINGGY_PID=$!
 echo "Pinggy TLS tunnel started with PID: $PINGGY_PID"
