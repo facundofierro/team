@@ -16,6 +16,7 @@ services:
     depends_on:
       - teamhub
       - registry
+      - nextcloud
 
   # Private Docker Registry
   registry:
@@ -62,6 +63,43 @@ services:
     depends_on:
       - registry
 
+  nextcloud:
+    image: nextcloud:latest
+    deploy:
+      replicas: 1
+    expose:
+      - '80'
+    environment:
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD:-admin123}
+      - NEXTCLOUD_TRUSTED_DOMAINS=r1.teamxagents.com localhost
+      - OVERWRITEPROTOCOL=https
+      - OVERWRITEHOST=r1.teamxagents.com
+      - OVERWRITEWEBROOT=/nextcloud
+      - POSTGRES_HOST=nextcloud_db
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=${NEXTCLOUD_DB_PASSWORD:-nextcloud123}
+    volumes:
+      - nextcloud_data:/var/www/html
+    networks:
+      - registry_network
+    depends_on:
+      - nextcloud_db
+
+  nextcloud_db:
+    image: postgres:15
+    deploy:
+      replicas: 1
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=${NEXTCLOUD_DB_PASSWORD:-nextcloud123}
+    volumes:
+      - nextcloud_db_data:/var/lib/postgresql/data
+    networks:
+      - registry_network
+
 configs:
   nginx_config:
     external: true
@@ -70,6 +108,8 @@ configs:
 volumes:
   registry_data:
   registry_auth:
+  nextcloud_data:
+  nextcloud_db_data:
 
 networks:
   registry_network:
