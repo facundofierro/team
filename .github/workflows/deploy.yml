@@ -44,9 +44,9 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Enhanced tunnel configuration for better stability
-            # Using force option to ensure clean startup and improved keep-alive settings
-            docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
+            # Enhanced tunnel configuration with TUI disabled for CI/CD
+            # Use interactive mode but disable TTY to prevent full-screen interface
+            docker run --net=host --name=pinggy-tunnel -i -d pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no \
@@ -54,6 +54,8 @@ jobs:
               -o ServerAliveCountMax=3 \
               -o ExitOnForwardFailure=yes \
               -o TCPKeepAlive=yes \
+              -o LogLevel=INFO \
+              -T \
               FpyP2PGUXy0+force@pro.pinggy.io
             echo "Waiting for enhanced tunnel to be ready..."
             sleep 20
@@ -204,9 +206,9 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Enhanced tunnel configuration for better stability
-            # Using force option to ensure clean startup and improved keep-alive settings
-            docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
+            # Enhanced tunnel configuration with TUI disabled for CI/CD
+            # Use interactive mode but disable TTY to prevent full-screen interface
+            docker run --net=host --name=pinggy-tunnel -i -d pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no \
@@ -214,6 +216,8 @@ jobs:
               -o ServerAliveCountMax=3 \
               -o ExitOnForwardFailure=yes \
               -o TCPKeepAlive=yes \
+              -o LogLevel=INFO \
+              -T \
               FpyP2PGUXy0+force@pro.pinggy.io
             echo "Waiting for enhanced tunnel to be ready..."
             sleep 20
