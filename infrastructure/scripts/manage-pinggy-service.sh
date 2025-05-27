@@ -14,7 +14,11 @@ install_pinggy_cli() {
         echo "Installing Pinggy CLI..."
         curl -sSL -o /tmp/pinggy https://s3.ap-south-1.amazonaws.com/public.pinggy.binaries/cli/v0.2.2/linux/amd64/pinggy
         chmod +x /tmp/pinggy
-        sudo mv /tmp/pinggy /usr/local/bin/
+        if [ -n "$SUDO_PASSWORD" ]; then
+            echo "$SUDO_PASSWORD" | sudo -S mv /tmp/pinggy /usr/local/bin/
+        else
+            sudo mv /tmp/pinggy /usr/local/bin/
+        fi
         echo "✅ Pinggy CLI installed"
     else
         echo "✅ Pinggy CLI already installed"
@@ -29,13 +33,25 @@ install_service() {
     install_pinggy_cli
 
     # Copy service file
-    sudo cp "$SERVICE_FILE" /etc/systemd/system/
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S cp "$SERVICE_FILE" /etc/systemd/system/
+    else
+        sudo cp "$SERVICE_FILE" /etc/systemd/system/
+    fi
 
     # Reload systemd
-    sudo systemctl daemon-reload
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl daemon-reload
+    else
+        sudo systemctl daemon-reload
+    fi
 
     # Enable service to start on boot
-    sudo systemctl enable $SERVICE_NAME
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl enable $SERVICE_NAME
+    else
+        sudo systemctl enable $SERVICE_NAME
+    fi
 
     echo "✅ Pinggy service installed and enabled"
 }
@@ -48,12 +64,22 @@ start_service() {
     pkill -f "pinggy.*FpyP2PGUXy0" 2>/dev/null || true
     sleep 2
 
-    sudo systemctl start $SERVICE_NAME
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl start $SERVICE_NAME
+    else
+        sudo systemctl start $SERVICE_NAME
+    fi
 
     # Wait a moment for service to start
     sleep 5
 
-    if sudo systemctl is-active --quiet $SERVICE_NAME; then
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl is-active --quiet $SERVICE_NAME
+    else
+        sudo systemctl is-active --quiet $SERVICE_NAME
+    fi
+
+    if [ $? -eq 0 ]; then
         echo "✅ Pinggy service started successfully"
         show_status
     else
@@ -66,19 +92,33 @@ start_service() {
 # Stop the service
 stop_service() {
     echo "Stopping Pinggy service..."
-    sudo systemctl stop $SERVICE_NAME
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl stop $SERVICE_NAME
+    else
+        sudo systemctl stop $SERVICE_NAME
+    fi
     echo "✅ Pinggy service stopped"
 }
 
 # Restart the service
 restart_service() {
     echo "Restarting Pinggy service..."
-    sudo systemctl restart $SERVICE_NAME
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl restart $SERVICE_NAME
+    else
+        sudo systemctl restart $SERVICE_NAME
+    fi
 
     # Wait a moment for service to restart
     sleep 5
 
-    if sudo systemctl is-active --quiet $SERVICE_NAME; then
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl is-active --quiet $SERVICE_NAME
+    else
+        sudo systemctl is-active --quiet $SERVICE_NAME
+    fi
+
+    if [ $? -eq 0 ]; then
         echo "✅ Pinggy service restarted successfully"
         show_status
     else
@@ -91,24 +131,42 @@ restart_service() {
 # Show service status
 show_status() {
     echo "Pinggy service status:"
-    sudo systemctl status $SERVICE_NAME --no-pager -l
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl status $SERVICE_NAME --no-pager -l
+    else
+        sudo systemctl status $SERVICE_NAME --no-pager -l
+    fi
 }
 
 # Show service logs
 show_logs() {
     echo "Recent Pinggy service logs:"
-    sudo journalctl -u $SERVICE_NAME --no-pager -l -n 20
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S journalctl -u $SERVICE_NAME --no-pager -l -n 20
+    else
+        sudo journalctl -u $SERVICE_NAME --no-pager -l -n 20
+    fi
 }
 
 # Follow service logs
 follow_logs() {
     echo "Following Pinggy service logs (Ctrl+C to stop):"
-    sudo journalctl -u $SERVICE_NAME -f
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S journalctl -u $SERVICE_NAME -f
+    else
+        sudo journalctl -u $SERVICE_NAME -f
+    fi
 }
 
 # Check if service is running
 check_service() {
-    if sudo systemctl is-active --quiet $SERVICE_NAME; then
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl is-active --quiet $SERVICE_NAME
+    else
+        sudo systemctl is-active --quiet $SERVICE_NAME
+    fi
+
+    if [ $? -eq 0 ]; then
         echo "✅ Pinggy service is running"
         return 0
     else
@@ -141,7 +199,13 @@ test_external_access() {
 monitor_service() {
     echo "Monitoring Pinggy service for 30 seconds..."
     for i in {1..6}; do
-        if sudo systemctl is-active --quiet $SERVICE_NAME; then
+        if [ -n "$SUDO_PASSWORD" ]; then
+            echo "$SUDO_PASSWORD" | sudo -S systemctl is-active --quiet $SERVICE_NAME
+        else
+            sudo systemctl is-active --quiet $SERVICE_NAME
+        fi
+
+        if [ $? -eq 0 ]; then
             echo "✅ Pinggy service still running (check $i/6)"
         else
             echo "❌ Pinggy service has failed! Checking logs..."
@@ -155,7 +219,13 @@ monitor_service() {
 
 # Export service status for GitHub Actions
 export_service_status() {
-    if sudo systemctl is-active --quiet $SERVICE_NAME; then
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S systemctl is-active --quiet $SERVICE_NAME
+    else
+        sudo systemctl is-active --quiet $SERVICE_NAME
+    fi
+
+    if [ $? -eq 0 ]; then
         # Test if tunnel is working
         if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/ >/dev/null 2>&1; then
             echo "tunnel_ready=true" >> $GITHUB_OUTPUT
