@@ -64,7 +64,8 @@ services:
 
 configs:
   nginx_config:
-    file: ./nginx.conf
+    external: true
+    name: teamhub_nginx_config_v4
 
 volumes:
   registry_data:
