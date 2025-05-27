@@ -49,16 +49,16 @@ jobs:
         run: |
           # Stop any conflicting services first
           echo "Stopping conflicting services..."
-          sudo snap stop nextcloud 2>/dev/null || true
-          sudo snap disable nextcloud 2>/dev/null || true
+          snap stop nextcloud 2>/dev/null || true
+          snap disable nextcloud 2>/dev/null || true
 
           # Kill any existing pinggy processes
-          sudo pkill -f pinggy 2>/dev/null || true
+          pkill -f pinggy 2>/dev/null || true
           sleep 2
 
           # Create systemd service file for Pinggy
           echo "Creating Pinggy systemd service..."
-          sudo tee /etc/systemd/system/pinggy-tunnel.service > /dev/null <<EOF
+          cat > /tmp/pinggy-tunnel.service <<EOF
           [Unit]
           Description=Pinggy Tunnel Service for TeamHub Registry
           After=network.target docker.service
@@ -79,24 +79,27 @@ jobs:
           WantedBy=multi-user.target
           EOF
 
+          # Copy service file to systemd directory
+          cp /tmp/pinggy-tunnel.service /etc/systemd/system/
+
           # Reload systemd and enable the service
-          sudo systemctl daemon-reload
-          sudo systemctl enable pinggy-tunnel
+          systemctl daemon-reload
+          systemctl enable pinggy-tunnel
 
           # Start the service
           echo "Starting Pinggy tunnel service..."
-          sudo systemctl start pinggy-tunnel
+          systemctl start pinggy-tunnel
 
           # Wait for service to start
           sleep 10
 
           # Check service status
           echo "Pinggy service status:"
-          sudo systemctl status pinggy-tunnel --no-pager
+          systemctl status pinggy-tunnel --no-pager
 
           # Show recent logs
           echo "Recent Pinggy logs:"
-          sudo journalctl -u pinggy-tunnel --no-pager -n 20
+          journalctl -u pinggy-tunnel --no-pager -n 20
 
       - name: Deploy infrastructure services (nginx + registry)
         run: |
@@ -123,7 +126,7 @@ jobs:
 
             # Ensure port 80 is available for Docker nginx
             echo "Ensuring port 80 is available..."
-            sudo netstat -tlnp | grep :80 || echo "Port 80 is free"
+            netstat -tlnp | grep :80 || echo "Port 80 is free"
 
             # Check if registry volumes exist
             if ! docker volume ls --filter name=registry_data --format "{{.Name}}" | grep -q registry_data; then
@@ -228,31 +231,31 @@ jobs:
       - name: Ensure Pinggy tunnel service is running
         run: |
           # Check if Pinggy service is running
-          if sudo systemctl is-active --quiet pinggy-tunnel; then
+          if systemctl is-active --quiet pinggy-tunnel; then
             echo "✅ Pinggy tunnel service is already running"
           else
             echo "🔄 Starting Pinggy tunnel service..."
-            sudo systemctl start pinggy-tunnel
+            systemctl start pinggy-tunnel
             sleep 10
           fi
 
           # Show service status and recent logs
           echo "Pinggy service status:"
-          sudo systemctl status pinggy-tunnel --no-pager
+          systemctl status pinggy-tunnel --no-pager
 
           echo "Recent Pinggy logs:"
-          sudo journalctl -u pinggy-tunnel --no-pager -n 10
+          journalctl -u pinggy-tunnel --no-pager -n 10
 
       - name: Monitor tunnel stability
         run: |
           echo "Monitoring tunnel stability for 30 seconds..."
           for i in {1..6}; do
-            if sudo systemctl is-active --quiet pinggy-tunnel; then
+            if systemctl is-active --quiet pinggy-tunnel; then
               echo "✅ Tunnel service still running (check $i/6)"
             else
               echo "❌ Tunnel service has failed! Checking logs..."
-              sudo systemctl status pinggy-tunnel --no-pager
-              sudo journalctl -u pinggy-tunnel --no-pager -n 20
+              systemctl status pinggy-tunnel --no-pager
+              journalctl -u pinggy-tunnel --no-pager -n 20
               exit 1
             fi
             sleep 5
@@ -270,8 +273,8 @@ jobs:
             echo "✅ Registry accessible via HTTPS through tunnel"
           else
             echo "⚠️ Registry not accessible via HTTPS, checking tunnel status..."
-            sudo systemctl status pinggy-tunnel --no-pager
-            sudo journalctl -u pinggy-tunnel --no-pager -n 10
+            systemctl status pinggy-tunnel --no-pager
+            journalctl -u pinggy-tunnel --no-pager -n 10
             echo "Checking local registry status..."
             curl -f -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ || echo "Local registry also not accessible"
           fi
@@ -280,9 +283,9 @@ jobs:
         id: tunnel_status
         run: |
           # Check service status first
-          if ! sudo systemctl is-active --quiet pinggy-tunnel; then
+          if ! systemctl is-active --quiet pinggy-tunnel; then
             echo "❌ Pinggy service is not running"
-            sudo systemctl status pinggy-tunnel --no-pager
+            systemctl status pinggy-tunnel --no-pager
             echo "tunnel_ready=false" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -295,9 +298,9 @@ jobs:
             echo "tunnel_ready=false" >> $GITHUB_OUTPUT
             echo "❌ Tunnel is not ready - build-and-push may fail"
             echo "Service status:"
-            sudo systemctl status pinggy-tunnel --no-pager
+            systemctl status pinggy-tunnel --no-pager
             echo "Recent logs:"
-            sudo journalctl -u pinggy-tunnel --no-pager -n 10
+            journalctl -u pinggy-tunnel --no-pager -n 10
           fi
 
   build-and-push:
