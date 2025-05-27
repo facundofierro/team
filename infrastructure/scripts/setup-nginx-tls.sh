@@ -154,22 +154,29 @@ EOF
 
 echo "✅ Enhanced nginx configuration created"
 
+# Get the script directory and repository root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+echo "Script directory: $SCRIPT_DIR"
+echo "Repository root: $REPO_ROOT"
+
 # Copy the nginx configuration to the configs directory
 echo "Installing nginx TLS configuration..."
-cp /tmp/nginx-tls.conf infrastructure/configs/nginx-tls.conf
+cp /tmp/nginx-tls.conf "$REPO_ROOT/infrastructure/configs/nginx-tls.conf"
 
 # Update the docker-compose to use TLS configuration and mount certificates
 echo "Updating docker-compose configuration..."
 
 # Create a backup of the current docker-compose
-cp infrastructure/docker-compose.yml infrastructure/docker-compose.yml.backup.$(date +%Y%m%d_%H%M%S)
+cp "$REPO_ROOT/infrastructure/docker-compose.yml" "$REPO_ROOT/infrastructure/docker-compose.yml.backup.$(date +%Y%m%d_%H%M%S)"
 
 # Update the nginx service in docker-compose.yml to use TLS config and mount certificates
 sed -i.bak \
     -e 's|./configs/nginx.conf:/etc/nginx/nginx.conf:ro|./configs/nginx-tls.conf:/etc/nginx/nginx.conf:ro|' \
     -e '/- "80:80"/a\      - "443:443"' \
     -e '/nginx.conf:ro/a\      - '"$CERT_DIR"':/etc/nginx/certs:ro' \
-    infrastructure/docker-compose.yml
+    "$REPO_ROOT/infrastructure/docker-compose.yml"
 
 echo "✅ Docker compose configuration updated"
 echo "Certificate files created in: $CERT_DIR"
@@ -177,7 +184,7 @@ echo "Enhanced nginx config installed: infrastructure/configs/nginx-tls.conf"
 
 # Restart nginx container to apply TLS configuration
 echo "Restarting nginx container with TLS configuration..."
-cd infrastructure
+cd "$REPO_ROOT/infrastructure"
 docker-compose up -d nginx
 
 echo "✅ Nginx restarted with TLS support"
