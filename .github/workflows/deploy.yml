@@ -44,9 +44,9 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Enhanced tunnel configuration with TUI disabled for CI/CD
-            # Use interactive mode but disable TTY to prevent full-screen interface
-            docker run --net=host --name=pinggy-tunnel -i -d pinggy/pinggy \
+            # Use nohup with interactive Docker to keep tunnel running in background
+            # This approach maintains interactive mode while allowing background operation
+            nohup docker run --net=host --rm --name=pinggy-tunnel -it pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no \
@@ -54,20 +54,18 @@ jobs:
               -o ServerAliveCountMax=3 \
               -o ExitOnForwardFailure=yes \
               -o TCPKeepAlive=yes \
-              -o LogLevel=INFO \
-              -T \
-              FpyP2PGUXy0+force@pro.pinggy.io
+              FpyP2PGUXy0+force@pro.pinggy.io > /tmp/pinggy.log 2>&1 &
             echo "Waiting for enhanced tunnel to be ready..."
             sleep 20
 
             # Show tunnel information
             echo "Tunnel logs:"
-            docker logs pinggy-tunnel 2>/dev/null | tail -20 || echo "No logs available yet"
+            tail -20 /tmp/pinggy.log 2>/dev/null || echo "No logs available yet"
 
             echo "Waiting additional time for all ports to be mapped..."
             sleep 15
             echo "Final tunnel status:"
-            docker logs pinggy-tunnel 2>/dev/null | tail -30 || echo "No logs available yet"
+            tail -30 /tmp/pinggy.log 2>/dev/null || echo "No logs available yet"
           else
             echo "Wildcard Pinggy tunnel is already running."
           fi
@@ -206,9 +204,9 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Enhanced tunnel configuration with TUI disabled for CI/CD
-            # Use interactive mode but disable TTY to prevent full-screen interface
-            docker run --net=host --name=pinggy-tunnel -i -d pinggy/pinggy \
+            # Use nohup with interactive Docker to keep tunnel running in background
+            # This approach maintains interactive mode while allowing background operation
+            nohup docker run --net=host --rm --name=pinggy-tunnel -it pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no \
@@ -216,20 +214,18 @@ jobs:
               -o ServerAliveCountMax=3 \
               -o ExitOnForwardFailure=yes \
               -o TCPKeepAlive=yes \
-              -o LogLevel=INFO \
-              -T \
-              FpyP2PGUXy0+force@pro.pinggy.io
+              FpyP2PGUXy0+force@pro.pinggy.io > /tmp/pinggy.log 2>&1 &
             echo "Waiting for enhanced tunnel to be ready..."
             sleep 20
 
             # Show tunnel information
             echo "Tunnel logs:"
-            docker logs pinggy-tunnel 2>/dev/null | tail -20 || echo "No logs available yet"
+            tail -20 /tmp/pinggy.log 2>/dev/null || echo "No logs available yet"
 
             echo "Waiting additional time for all ports to be mapped..."
             sleep 15
             echo "Final tunnel status:"
-            docker logs pinggy-tunnel 2>/dev/null | tail -30 || echo "No logs available yet"
+            tail -30 /tmp/pinggy.log 2>/dev/null || echo "No logs available yet"
           else
             echo "Wildcard Pinggy tunnel is already running."
           fi
@@ -246,7 +242,7 @@ jobs:
               echo "✅ Tunnel still running (check $i/6)"
             else
               echo "❌ Tunnel has exited! Checking logs..."
-              docker logs pinggy-tunnel --tail 20
+              tail -20 /tmp/pinggy.log 2>/dev/null || echo "No logs available"
               exit 1
             fi
             sleep 5
