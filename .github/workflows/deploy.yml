@@ -27,6 +27,8 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Setup Pinggy systemd service
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: |
           chmod +x infrastructure/scripts/setup-pinggy.sh
           chmod +x infrastructure/scripts/manage-pinggy-service.sh
@@ -39,16 +41,24 @@ jobs:
           infrastructure/scripts/deploy-infrastructure.sh
 
       - name: Ensure Pinggy service is running
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: infrastructure/scripts/setup-pinggy.sh restart
 
       - name: Monitor service stability
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: infrastructure/scripts/setup-pinggy.sh monitor
 
       - name: Test external registry access
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: infrastructure/scripts/setup-pinggy.sh test
 
       - name: Export service readiness status
         id: tunnel_status
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: infrastructure/scripts/setup-pinggy.sh status
 
   build-and-push:
@@ -184,6 +194,8 @@ jobs:
           done
 
       - name: Deploy full application stack
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: |
           chmod +x infrastructure/scripts/deploy-application.sh
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
