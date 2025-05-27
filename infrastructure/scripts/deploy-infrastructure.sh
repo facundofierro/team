@@ -44,7 +44,7 @@ setup_registry() {
 
 # Deploy infrastructure services (nginx + registry)
 deploy_infrastructure() {
-    echo "🚀 Deploying infrastructure services (nginx + registry) for first time..."
+    echo "🚀 Deploying infrastructure services (nginx + registry)..."
 
     # Ensure port 80 is available for Docker nginx
     echo "Ensuring port 80 is available..."
@@ -52,6 +52,39 @@ deploy_infrastructure() {
 
     # Setup registry if needed
     setup_registry
+
+    # Check if infrastructure services already exist
+    local NGINX_EXISTS=false
+    local REGISTRY_EXISTS=false
+    local NETWORK_EXISTS=false
+    local CONFIG_EXISTS=false
+
+    if docker service ls --filter name=teamhub_nginx --format "{{.Name}}" | grep -q teamhub_nginx; then
+        echo "✅ Nginx service already exists"
+        NGINX_EXISTS=true
+    fi
+
+    if docker service ls --filter name=teamhub_registry --format "{{.Name}}" | grep -q teamhub_registry; then
+        echo "✅ Registry service already exists"
+        REGISTRY_EXISTS=true
+    fi
+
+    if docker network ls --filter name=teamhub_registry_network --format "{{.Name}}" | grep -q teamhub_registry_network; then
+        echo "✅ Registry network already exists"
+        NETWORK_EXISTS=true
+    fi
+
+    if docker config ls --filter name=teamhub_nginx_infra_config --format "{{.Name}}" | grep -q teamhub_nginx_infra_config; then
+        echo "✅ Infrastructure nginx config already exists"
+        CONFIG_EXISTS=true
+    fi
+
+    # If all infrastructure components exist, skip deployment
+    if [ "$NGINX_EXISTS" = true ] && [ "$REGISTRY_EXISTS" = true ] && [ "$NETWORK_EXISTS" = true ] && [ "$CONFIG_EXISTS" = true ]; then
+        echo "✅ All infrastructure services already exist and running, skipping deployment"
+        wait_for_registry
+        return 0
+    fi
 
     # Create a temporary stack file with only infrastructure services
     cat > docker-stack-infra.yml << 'EOF'
@@ -103,16 +136,14 @@ networks:
     driver: overlay
 EOF
 
-    # Remove existing stack to avoid config conflicts
-    docker stack rm teamhub 2>/dev/null || true
-    echo "Waiting for stack removal to complete..."
-    sleep 30
+    # Only remove conflicting configs if they exist and we need to recreate them
+    if [ "$CONFIG_EXISTS" = false ]; then
+        echo "Creating new infrastructure config..."
+        docker config rm teamhub_nginx_infra_config 2>/dev/null || true
+    fi
 
-    # Clean up old configs
-    docker config rm teamhub_nginx_infra_config 2>/dev/null || true
-
-    # Deploy infrastructure services only
-    echo "Deploying infrastructure services (nginx + registry)..."
+    # Deploy infrastructure services (this will update existing services or create new ones)
+    echo "Deploying/updating infrastructure services (nginx + registry)..."
     export PG_PASSWORD="${PG_PASSWORD}"
     docker stack deploy -c docker-stack-infra.yml teamhub
 

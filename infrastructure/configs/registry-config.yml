@@ -1,0 +1,38 @@
+version: 0.1
+log:
+  fields:
+    service: registry
+storage:
+  filesystem:
+    rootdirectory: /var/lib/registry
+  maintenance:
+    uploadpurging:
+      enabled: true
+      age: 168h
+      interval: 24h
+      dryrun: false
+http:
+  addr: :5000
+  headers:
+    X-Content-Type-Options: [nosniff]
+  http2:
+    disabled: true
+  # Optimize for tunnel connections
+  net: tcp
+  # Reduce timeouts for better error handling
+  timeout:
+    read: 30s
+    write: 30s
+    idle: 60s
+  # Limit request size to handle MTU issues
+  maxrequestsize: 1048576 # 1MB chunks
+auth:
+  htpasswd:
+    realm: Registry Realm
+    path: /auth/htpasswd
+# Health check endpoint
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3
