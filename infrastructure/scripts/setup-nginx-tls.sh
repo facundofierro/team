@@ -10,15 +10,29 @@ echo "Detected server IP: $SERVER_IP"
 
 # Create certificates directory
 CERT_DIR="/opt/nginx-certs"
-mkdir -p "$CERT_DIR"
+
+# Helper function to run sudo commands with password if available
+run_sudo() {
+    if [ -n "$SUDO_PASSWORD" ]; then
+        echo "$SUDO_PASSWORD" | sudo -S "$@"
+    else
+        sudo "$@"
+    fi
+}
+
+run_sudo mkdir -p "$CERT_DIR"
 
 # Generate self-signed certificate for local use
 echo "Generating self-signed certificate..."
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+run_sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout "$CERT_DIR/registry.key" \
     -out "$CERT_DIR/registry.crt" \
     -subj "/C=US/ST=Local/L=Local/O=TeamXAgents/OU=Registry/CN=$SERVER_IP" \
     -addext "subjectAltName=IP:$SERVER_IP,IP:127.0.0.1,DNS:localhost,DNS:r1.teamxagents.com"
+
+# Set proper permissions
+run_sudo chmod 644 "$CERT_DIR/registry.crt"
+run_sudo chmod 600 "$CERT_DIR/registry.key"
 
 echo "✅ Certificate generated"
 
@@ -140,39 +154,50 @@ EOF
 
 echo "✅ Enhanced nginx configuration created"
 
-# Update the docker-compose to mount certificates
+# Copy the nginx configuration to the configs directory
+echo "Installing nginx TLS configuration..."
+cp /tmp/nginx-tls.conf infrastructure/configs/nginx-tls.conf
+
+# Update the docker-compose to use TLS configuration and mount certificates
 echo "Updating docker-compose configuration..."
 
 # Create a backup of the current docker-compose
 cp infrastructure/docker-compose.yml infrastructure/docker-compose.yml.backup.$(date +%Y%m%d_%H%M%S)
 
-# Update nginx service in docker-compose to include certificate volume
-cat > /tmp/nginx-service-update.yml << EOF
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./configs/nginx-tls.conf:/etc/nginx/nginx.conf:ro
-      - $CERT_DIR:/etc/nginx/certs:ro
-    depends_on:
-      - teamhub
-      - registry
-    networks:
-      - team-network
-EOF
+# Update the nginx service in docker-compose.yml to use TLS config and mount certificates
+sed -i.bak \
+    -e 's|./configs/nginx.conf:/etc/nginx/nginx.conf:ro|./configs/nginx-tls.conf:/etc/nginx/nginx.conf:ro|' \
+    -e '/- "80:80"/a\      - "443:443"' \
+    -e '/nginx.conf:ro/a\      - '"$CERT_DIR"':/etc/nginx/certs:ro' \
+    infrastructure/docker-compose.yml
 
-echo "✅ Docker compose configuration prepared"
+echo "✅ Docker compose configuration updated"
 echo "Certificate files created in: $CERT_DIR"
-echo "Enhanced nginx config created: /tmp/nginx-tls.conf"
+echo "Enhanced nginx config installed: infrastructure/configs/nginx-tls.conf"
 
+# Restart nginx container to apply TLS configuration
+echo "Restarting nginx container with TLS configuration..."
+cd infrastructure
+docker-compose up -d nginx
+
+echo "✅ Nginx restarted with TLS support"
 echo ""
-echo "To apply this configuration:"
-echo "1. Copy the new nginx config: cp /tmp/nginx-tls.conf infrastructure/configs/nginx-tls.conf"
-echo "2. Update your docker-compose.yml to use the new config and mount certificates"
-echo "3. Restart the nginx container"
-echo ""
-echo "The registry will be available at:"
+echo "The registry is now available at:"
 echo "  - HTTPS: https://$SERVER_IP/v2/"
 echo "  - HTTPS: https://r1.teamxagents.com/v2/ (via Pinggy tunnel)"
+echo ""
+echo "Testing HTTPS registry access..."
+sleep 5
+
+# Test HTTPS access
+if curl -f --connect-timeout 10 --max-time 30 -k -u docker:k8mX9pL2nQ7vR4wE https://$SERVER_IP/v2/ >/dev/null 2>&1; then
+    echo "✅ Registry accessible via HTTPS locally"
+else
+    echo "⚠️ Registry not accessible via HTTPS locally - check nginx logs"
+fi
+
+if curl -f --connect-timeout 10 --max-time 30 -k -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/ >/dev/null 2>&1; then
+    echo "✅ Registry accessible via HTTPS through Pinggy tunnel"
+else
+    echo "⚠️ Registry not accessible via HTTPS through tunnel - may need time to propagate"
+fi
