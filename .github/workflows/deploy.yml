@@ -28,6 +28,15 @@ jobs:
             nginx-infra.conf
           sparse-checkout-cone-mode: false
 
+      - name: Setup SSH key for stable Pinggy tunnel
+        run: |
+          # Generate SSH key for passwordless authentication and better stability
+          if [ ! -f ~/.ssh/pinggy_key ]; then
+            echo "Generating SSH key for stable tunnel connections..."
+            ssh-keygen -t rsa -b 2048 -f ~/.ssh/pinggy_key -N ""
+            chmod 600 ~/.ssh/pinggy_key
+          fi
+
       - name: Ensure Pinggy tunnel is running BEFORE infrastructure
         run: |
           # Single tunnel with wildcard domain forwarding
@@ -35,22 +44,26 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Single tunnel through nginx reverse proxy
-            # All services accessible through port 80 with path-based routing
+            # Enhanced tunnel configuration for better stability
+            # Using force option to ensure clean startup and improved keep-alive settings
             docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
-              -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
-              FpyP2PGUXy0@pro.pinggy.io
-            echo "Waiting for wildcard tunnel to be ready..."
-            sleep 15
+              -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=30 \
+              -o ServerAliveCountMax=3 \
+              -o ExitOnForwardFailure=yes \
+              -o TCPKeepAlive=yes \
+              FpyP2PGUXy0+force@pro.pinggy.io
+            echo "Waiting for enhanced tunnel to be ready..."
+            sleep 20
 
             # Show tunnel information
             echo "Tunnel logs:"
             docker logs pinggy-tunnel 2>/dev/null | tail -20 || echo "No logs available yet"
 
             echo "Waiting additional time for all ports to be mapped..."
-            sleep 10
+            sleep 15
             echo "Final tunnel status:"
             docker logs pinggy-tunnel 2>/dev/null | tail -30 || echo "No logs available yet"
           else
@@ -191,22 +204,26 @@ jobs:
             echo "Wildcard tunnel not running, setting it up..."
             docker stop pinggy-tunnel 2>/dev/null || true
             docker rm pinggy-tunnel 2>/dev/null || true
-            # Single tunnel through nginx reverse proxy
-            # All services accessible through port 80 with path-based routing
+            # Enhanced tunnel configuration for better stability
+            # Using force option to ensure clean startup and improved keep-alive settings
             docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
               -p 443 \
               -R0:127.0.0.1:80 \
-              -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
-              FpyP2PGUXy0@pro.pinggy.io
-            echo "Waiting for wildcard tunnel to be ready..."
-            sleep 15
+              -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=30 \
+              -o ServerAliveCountMax=3 \
+              -o ExitOnForwardFailure=yes \
+              -o TCPKeepAlive=yes \
+              FpyP2PGUXy0+force@pro.pinggy.io
+            echo "Waiting for enhanced tunnel to be ready..."
+            sleep 20
 
             # Show tunnel information
             echo "Tunnel logs:"
             docker logs pinggy-tunnel 2>/dev/null | tail -20 || echo "No logs available yet"
 
             echo "Waiting additional time for all ports to be mapped..."
-            sleep 10
+            sleep 15
             echo "Final tunnel status:"
             docker logs pinggy-tunnel 2>/dev/null | tail -30 || echo "No logs available yet"
           else
@@ -216,6 +233,20 @@ jobs:
           # Clean up any orphaned pinggy containers (containers without proper names)
           echo "Cleaning up orphaned pinggy containers..."
           docker ps -a --filter "ancestor=pinggy/pinggy" --format "{{.Names}}" | grep -v -E "^pinggy-tunnel$" | xargs -r docker rm -f
+
+      - name: Monitor tunnel stability
+        run: |
+          echo "Monitoring tunnel stability for 30 seconds..."
+          for i in {1..6}; do
+            if docker ps --filter "name=pinggy-tunnel" --filter "status=running" --format "{{.Names}}" | grep -q "^pinggy-tunnel$"; then
+              echo "✅ Tunnel still running (check $i/6)"
+            else
+              echo "❌ Tunnel has exited! Checking logs..."
+              docker logs pinggy-tunnel --tail 20
+              exit 1
+            fi
+            sleep 5
+          done
 
       - name: Test external registry access after tunnel setup
         run: |
