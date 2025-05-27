@@ -61,6 +61,14 @@ jobs:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: infrastructure/scripts/setup-pinggy.sh status
 
+      - name: Optimize tunnel for Docker registry
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO }}
+        run: |
+          echo "Setting up optimized Pinggy tunnel configuration..."
+          chmod +x infrastructure/scripts/setup-pinggy-tls.sh
+          infrastructure/scripts/setup-pinggy-tls.sh || echo "Warning: TLS tunnel optimization failed, continuing with existing tunnel"
+
   build-and-push:
     runs-on: ubuntu-latest
     needs: [prepare-tag, setup-registry]
@@ -113,6 +121,26 @@ jobs:
         run: |
           chmod +x infrastructure-only/infrastructure/scripts/test-connectivity.sh
           infrastructure-only/infrastructure/scripts/test-connectivity.sh
+
+      - name: Test registry connectivity with small image
+        run: |
+          echo "Testing Docker registry connectivity with small Alpine image..."
+          chmod +x test-small-push.sh
+          # Create the test script content since it may not be in sparse checkout
+          cat > test-registry.sh << 'EOF'
+          #!/bin/bash
+          echo "Testing Docker registry connectivity with small image..."
+          docker pull alpine:latest
+          docker tag alpine:latest r1.teamxagents.com/test-alpine:latest
+          if docker push r1.teamxagents.com/test-alpine:latest; then
+              echo "✅ Small image push successful - tunnel is working!"
+          else
+              echo "❌ Small image push failed - tunnel connectivity issue"
+          fi
+          docker rmi r1.teamxagents.com/test-alpine:latest 2>/dev/null || true
+          EOF
+          chmod +x test-registry.sh
+          ./test-registry.sh || echo "Warning: Small image test failed, will try main deployment anyway"
 
       - name: Login to external registry
         run: |
@@ -213,12 +241,6 @@ jobs:
               fi
             fi
           done
-
-      - name: Test registry connectivity with small image
-        run: |
-          echo "Testing Docker registry connectivity with small image..."
-          chmod +x test-small-push.sh
-          ./test-small-push.sh || echo "Warning: Small image test failed, proceeding with main deployment"
 
       - name: Deploy full application stack
         env:
