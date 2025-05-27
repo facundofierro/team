@@ -6,7 +6,7 @@ This directory contains modular scripts that handle different aspects of the dep
 
 ### 🔧 `setup-pinggy.sh`
 
-Handles Pinggy tunnel setup and management.
+Handles Pinggy tunnel setup and management using systemd service.
 
 **Usage:**
 
@@ -16,13 +16,57 @@ Handles Pinggy tunnel setup and management.
 
 **Commands:**
 
-- `install` - Install Pinggy CLI only
-- `setup` - Full setup (install + create wrapper + start tunnel)
-- `check` - Check if tunnel is running
-- `restart` - Restart tunnel if needed
-- `monitor` - Monitor tunnel stability for 30 seconds
+- `install` - Install Pinggy CLI and systemd service
+- `setup` - Full setup (install + start systemd service)
+- `check` - Check if service is running
+- `restart` - Restart service if needed
+- `monitor` - Monitor service stability for 30 seconds
 - `test` - Test external access through tunnel
 - `status` - Export tunnel status for GitHub Actions
+
+**Note:** This script now uses the systemd service for better reliability and management.
+
+### 🛠️ `manage-pinggy-service.sh`
+
+Direct systemd service management for Pinggy tunnel.
+
+**Usage:**
+
+```bash
+./manage-pinggy-service.sh {install|start|stop|restart|status|check|logs|follow|test|monitor|export-status|uninstall}
+```
+
+**Commands:**
+
+- `install` - Install and enable Pinggy systemd service
+- `start` - Start the Pinggy service
+- `stop` - Stop the Pinggy service
+- `restart` - Restart the Pinggy service
+- `status` - Show detailed service status
+- `check` - Quick check if service is running
+- `logs` - Show recent service logs
+- `follow` - Follow service logs in real-time
+- `test` - Test external access through tunnel
+- `monitor` - Monitor service stability for 30 seconds
+- `export-status` - Export tunnel status for GitHub Actions
+- `uninstall` - Remove the systemd service
+
+### 🧪 `test-pinggy-service.sh`
+
+Test script to verify Pinggy systemd service setup.
+
+**Usage:**
+
+```bash
+./test-pinggy-service.sh
+```
+
+**Features:**
+
+- Validates all required files and permissions
+- Checks system dependencies
+- Tests network connectivity
+- Provides setup recommendations
 
 ### 🏗️ `deploy-infrastructure.sh`
 
