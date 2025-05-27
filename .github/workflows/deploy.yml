@@ -214,6 +214,12 @@ jobs:
             fi
           done
 
+      - name: Test registry connectivity with small image
+        run: |
+          echo "Testing Docker registry connectivity with small image..."
+          chmod +x test-small-push.sh
+          ./test-small-push.sh || echo "Warning: Small image test failed, proceeding with main deployment"
+
       - name: Deploy full application stack
         env:
           SUDO_PASSWORD: ${{ secrets.SUDO }}

@@ -127,6 +127,13 @@ main() {
     local REGISTRY_FALLBACK=""
     local DOCKERHUB_IMAGE=""
 
+    # Setup optimized tunnel for registry if needed
+    if [ -f infrastructure/scripts/setup-pinggy-tls.sh ]; then
+        echo "Setting up optimized Pinggy TLS tunnel for Docker registry..."
+        chmod +x infrastructure/scripts/setup-pinggy-tls.sh
+        infrastructure/scripts/setup-pinggy-tls.sh || echo "Warning: TLS tunnel setup failed, continuing with existing tunnel"
+    fi
+
     # Check for registry fallback info
     if [ -f /tmp/registry-fallback.env ]; then
         source /tmp/registry-fallback.env
