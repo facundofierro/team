@@ -10,7 +10,7 @@ StartLimitIntervalSec=300
 Type=simple
 User=__USER__
 Group=__GROUP__
-ExecStart=/usr/local/bin/pinggy --token FpyP2PGUXy0 -l 80 --notui
+ExecStart=/usr/bin/ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 tls@a.pinggy.io FpyP2PGUXy0
 Restart=always
 RestartSec=10
 StandardOutput=journal

@@ -17,16 +17,14 @@ run_sudo() {
     fi
 }
 
-# Install Pinggy CLI if not present
-install_pinggy_cli() {
-    if ! command -v pinggy &> /dev/null; then
-        echo "Installing Pinggy CLI..."
-        curl -sSL -o /tmp/pinggy https://s3.ap-south-1.amazonaws.com/public.pinggy.binaries/cli/v0.2.2/linux/amd64/pinggy
-        chmod +x /tmp/pinggy
-        run_sudo mv /tmp/pinggy /usr/local/bin/
-        echo "✅ Pinggy CLI installed"
+# Check SSH availability for TLS tunnel
+check_ssh_available() {
+    if ! command -v ssh &> /dev/null; then
+        echo "❌ SSH is not available - required for TLS tunnel"
+        echo "Please install openssh-client package"
+        exit 1
     else
-        echo "✅ Pinggy CLI already installed"
+        echo "✅ SSH is available for TLS tunnel"
     fi
 }
 
@@ -34,8 +32,8 @@ install_pinggy_cli() {
 install_service() {
     echo "Installing Pinggy systemd service..."
 
-    # Install Pinggy CLI first
-    install_pinggy_cli
+    # Check SSH availability for TLS tunnel
+    check_ssh_available
 
             # Get current user and group
     CURRENT_USER=$(whoami)
@@ -83,7 +81,7 @@ start_service() {
     echo "Starting Pinggy service..."
 
     # Stop any existing manual processes first
-    pkill -f "pinggy.*FpyP2PGUXy0" 2>/dev/null || true
+    pkill -f "tls@a.pinggy.io.*FpyP2PGUXy0" 2>/dev/null || true
     sleep 2
 
     run_sudo systemctl start $SERVICE_NAME

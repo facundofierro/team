@@ -4,7 +4,7 @@ set -e
 
 echo "=== Setting up Pinggy TLS Tunnel for Docker Registry ==="
 
-# Stop any existing HTTP tunnel
+# Stop any existing tunnels
 pkill -f "a.pinggy.io" 2>/dev/null || true
 
 # Wait a moment for cleanup
@@ -15,7 +15,7 @@ echo "This tunnel will NOT inspect traffic - better for Docker registry"
 
 # Start TLS tunnel - this will forward TLS traffic directly without inspection
 # Your nginx will handle the SSL termination locally
-nohup ssh -p 443 -R0:localhost:80 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 tls@a.pinggy.io > /tmp/pinggy-tls.log 2>&1 &
+nohup ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 tls@a.pinggy.io FpyP2PGUXy0 > /tmp/pinggy-tls.log 2>&1 &
 
 PINGGY_PID=$!
 echo "Pinggy TLS tunnel started with PID: $PINGGY_PID"
