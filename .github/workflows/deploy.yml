@@ -200,18 +200,15 @@ jobs:
       - name: Ensure Pinggy tunnel is running
         run: |
           # Check if tunnel process is already running
-          if ! pgrep -f "ssh.*FpyP2PGUXy0" > /dev/null; then
+          if ! pgrep -f "pinggy.*FpyP2PGUXy0" > /dev/null; then
             echo "Pinggy tunnel not running, setting it up..."
 
-            # Kill any existing SSH tunnel processes
-            pkill -f "ssh.*FpyP2PGUXy0" 2>/dev/null || true
+            # Kill any existing pinggy processes
+            pkill -f "pinggy.*FpyP2PGUXy0" 2>/dev/null || true
             sleep 2
 
-            # Start tunnel using SSH in background with nohup (more reliable than CLI)
-            nohup ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no \
-              -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
-              -o ExitOnForwardFailure=yes -o TCPKeepAlive=yes \
-              FpyP2PGUXy0+force@a.pinggy.io \
+            # Start tunnel using CLI with --notui for background processes
+            nohup pinggy --token FpyP2PGUXy0 -l 80 --notui \
               > /tmp/pinggy.log 2>&1 &
 
             echo "Waiting for tunnel to establish connection..."
@@ -233,7 +230,7 @@ jobs:
         run: |
           echo "Monitoring tunnel stability for 30 seconds..."
           for i in {1..6}; do
-            if pgrep -f "ssh.*FpyP2PGUXy0" > /dev/null; then
+            if pgrep -f "pinggy.*FpyP2PGUXy0" > /dev/null; then
               echo "✅ Tunnel still running (check $i/6)"
             else
               echo "❌ Tunnel has exited! Checking logs..."
