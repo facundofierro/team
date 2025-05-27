@@ -122,6 +122,12 @@ jobs:
           chmod +x infrastructure-only/infrastructure/scripts/test-connectivity.sh
           infrastructure-only/infrastructure/scripts/test-connectivity.sh
 
+      - name: Login to external registry
+        run: |
+          PROTOCOL="${REGISTRY_PROTOCOL:-https}"
+          echo "Logging in to registry at $PROTOCOL://$REGISTRY_DOMAIN"
+          echo "k8mX9pL2nQ7vR4wE" | docker login $PROTOCOL://$REGISTRY_DOMAIN -u docker --password-stdin
+
       - name: Test registry connectivity with small image
         run: |
           echo "Testing Docker registry connectivity with small Alpine image..."
@@ -141,12 +147,6 @@ jobs:
           EOF
           chmod +x test-registry.sh
           ./test-registry.sh || echo "Warning: Small image test failed, will try main deployment anyway"
-
-      - name: Login to external registry
-        run: |
-          PROTOCOL="${REGISTRY_PROTOCOL:-https}"
-          echo "Logging in to registry at $PROTOCOL://$REGISTRY_DOMAIN"
-          echo "k8mX9pL2nQ7vR4wE" | docker login $PROTOCOL://$REGISTRY_DOMAIN -u docker --password-stdin
 
       - name: Login to DockerHub (fallback)
         if: env.DOCKERHUB_USERNAME != ''

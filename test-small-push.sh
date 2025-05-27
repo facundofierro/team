@@ -2,6 +2,10 @@
 
 echo "Testing Docker registry connectivity with small image..."
 
+# Login to the registry first
+echo "Logging in to Docker registry..."
+echo "k8mX9pL2nQ7vR4wE" | docker login r1.teamxagents.com -u docker --password-stdin
+
 # Pull a small test image (alpine is ~5MB)
 echo "Pulling alpine test image..."
 docker pull alpine:latest
