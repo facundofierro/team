@@ -45,34 +45,58 @@ jobs:
             chmod 600 ~/.ssh/pinggy_key
           fi
 
-      - name: Ensure Pinggy tunnel is running BEFORE infrastructure
+      - name: Setup Pinggy tunnel as systemd service
         run: |
-          # Check if tunnel process is already running
-          if ! pgrep -f "pinggy.*FpyP2PGUXy0" > /dev/null; then
-            echo "Pinggy tunnel not running, setting it up..."
+          # Stop any conflicting services first
+          echo "Stopping conflicting services..."
+          sudo snap stop nextcloud 2>/dev/null || true
+          sudo snap disable nextcloud 2>/dev/null || true
 
-            # Kill any existing pinggy processes
-            pkill -f "pinggy.*FpyP2PGUXy0" 2>/dev/null || true
-            sleep 2
+          # Kill any existing pinggy processes
+          sudo pkill -f pinggy 2>/dev/null || true
+          sleep 2
 
-            # Start tunnel using CLI with --notui for background processes
-            nohup pinggy --token FpyP2PGUXy0 -l 80 --notui \
-              > /tmp/pinggy.log 2>&1 &
+          # Create systemd service file for Pinggy
+          echo "Creating Pinggy systemd service..."
+          sudo tee /etc/systemd/system/pinggy-tunnel.service > /dev/null <<EOF
+          [Unit]
+          Description=Pinggy Tunnel Service for TeamHub Registry
+          After=network.target docker.service
+          Wants=network.target
+          Requires=docker.service
 
-            echo "Waiting for tunnel to establish connection..."
-            sleep 20
+          [Service]
+          Type=simple
+          User=root
+          ExecStart=/usr/local/bin/pinggy --token FpyP2PGUXy0 -l 80 --notui
+          Restart=always
+          RestartSec=10
+          StandardOutput=journal
+          StandardError=journal
+          KillMode=process
 
-            # Show tunnel information
-            echo "Tunnel logs:"
-            tail -20 /tmp/pinggy.log 2>/dev/null || echo "No logs available yet"
+          [Install]
+          WantedBy=multi-user.target
+          EOF
 
-            echo "Waiting additional time for tunnel to stabilize..."
-            sleep 15
-            echo "Final tunnel status:"
-            tail -30 /tmp/pinggy.log 2>/dev/null || echo "No logs available yet"
-          else
-            echo "Pinggy tunnel is already running."
-          fi
+          # Reload systemd and enable the service
+          sudo systemctl daemon-reload
+          sudo systemctl enable pinggy-tunnel
+
+          # Start the service
+          echo "Starting Pinggy tunnel service..."
+          sudo systemctl start pinggy-tunnel
+
+          # Wait for service to start
+          sleep 10
+
+          # Check service status
+          echo "Pinggy service status:"
+          sudo systemctl status pinggy-tunnel --no-pager
+
+          # Show recent logs
+          echo "Recent Pinggy logs:"
+          sudo journalctl -u pinggy-tunnel --no-pager -n 20
 
       - name: Deploy infrastructure services (nginx + registry)
         run: |
@@ -96,6 +120,10 @@ jobs:
           # Only deploy infrastructure if teamhub image doesn't exist and full stack isn't deployed
           if [ "$TEAMHUB_EXISTS" = false ] && [ "$FULL_STACK_EXISTS" = false ]; then
             echo "🚀 Deploying infrastructure services (nginx + registry) for first time..."
+
+            # Ensure port 80 is available for Docker nginx
+            echo "Ensuring port 80 is available..."
+            sudo netstat -tlnp | grep :80 || echo "Port 80 is free"
 
             # Check if registry volumes exist
             if ! docker volume ls --filter name=registry_data --format "{{.Name}}" | grep -q registry_data; then
@@ -197,44 +225,34 @@ jobs:
             echo "✅ Infrastructure already exists, skipping infrastructure deployment"
           fi
 
-      - name: Ensure Pinggy tunnel is running
+      - name: Ensure Pinggy tunnel service is running
         run: |
-          # Check if tunnel process is already running
-          if ! pgrep -f "pinggy.*FpyP2PGUXy0" > /dev/null; then
-            echo "Pinggy tunnel not running, setting it up..."
-
-            # Kill any existing pinggy processes
-            pkill -f "pinggy.*FpyP2PGUXy0" 2>/dev/null || true
-            sleep 2
-
-            # Start tunnel using CLI with --notui for background processes
-            nohup pinggy --token FpyP2PGUXy0 -l 80 --notui \
-              > /tmp/pinggy.log 2>&1 &
-
-            echo "Waiting for tunnel to establish connection..."
-            sleep 20
-
-            # Show tunnel information
-            echo "Tunnel logs:"
-            tail -20 /tmp/pinggy.log 2>/dev/null || echo "No logs available yet"
-
-            echo "Waiting additional time for tunnel to stabilize..."
-            sleep 15
-            echo "Final tunnel status:"
-            tail -30 /tmp/pinggy.log 2>/dev/null || echo "No logs available yet"
+          # Check if Pinggy service is running
+          if sudo systemctl is-active --quiet pinggy-tunnel; then
+            echo "✅ Pinggy tunnel service is already running"
           else
-            echo "Pinggy tunnel is already running."
+            echo "🔄 Starting Pinggy tunnel service..."
+            sudo systemctl start pinggy-tunnel
+            sleep 10
           fi
+
+          # Show service status and recent logs
+          echo "Pinggy service status:"
+          sudo systemctl status pinggy-tunnel --no-pager
+
+          echo "Recent Pinggy logs:"
+          sudo journalctl -u pinggy-tunnel --no-pager -n 10
 
       - name: Monitor tunnel stability
         run: |
           echo "Monitoring tunnel stability for 30 seconds..."
           for i in {1..6}; do
-            if pgrep -f "pinggy.*FpyP2PGUXy0" > /dev/null; then
-              echo "✅ Tunnel still running (check $i/6)"
+            if sudo systemctl is-active --quiet pinggy-tunnel; then
+              echo "✅ Tunnel service still running (check $i/6)"
             else
-              echo "❌ Tunnel has exited! Checking logs..."
-              tail -20 /tmp/pinggy.log 2>/dev/null || echo "No logs available"
+              echo "❌ Tunnel service has failed! Checking logs..."
+              sudo systemctl status pinggy-tunnel --no-pager
+              sudo journalctl -u pinggy-tunnel --no-pager -n 20
               exit 1
             fi
             sleep 5
@@ -252,7 +270,8 @@ jobs:
             echo "✅ Registry accessible via HTTPS through tunnel"
           else
             echo "⚠️ Registry not accessible via HTTPS, checking tunnel status..."
-            docker logs pinggy-tunnel --tail 10
+            sudo systemctl status pinggy-tunnel --no-pager
+            sudo journalctl -u pinggy-tunnel --no-pager -n 10
             echo "Checking local registry status..."
             curl -f -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ || echo "Local registry also not accessible"
           fi
@@ -260,6 +279,14 @@ jobs:
       - name: Export tunnel readiness status
         id: tunnel_status
         run: |
+          # Check service status first
+          if ! sudo systemctl is-active --quiet pinggy-tunnel; then
+            echo "❌ Pinggy service is not running"
+            sudo systemctl status pinggy-tunnel --no-pager
+            echo "tunnel_ready=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           # Test if tunnel is working and export status
           if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/ >/dev/null 2>&1; then
             echo "tunnel_ready=true" >> $GITHUB_OUTPUT
@@ -267,6 +294,10 @@ jobs:
           else
             echo "tunnel_ready=false" >> $GITHUB_OUTPUT
             echo "❌ Tunnel is not ready - build-and-push may fail"
+            echo "Service status:"
+            sudo systemctl status pinggy-tunnel --no-pager
+            echo "Recent logs:"
+            sudo journalctl -u pinggy-tunnel --no-pager -n 10
           fi
 
   build-and-push:
