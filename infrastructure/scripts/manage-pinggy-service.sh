@@ -73,6 +73,13 @@ install_service() {
 
 # Start the service
 start_service() {
+    # Check if service is already running
+    if run_sudo systemctl is-active --quiet $SERVICE_NAME; then
+        echo "✅ Pinggy service is already running"
+        show_status
+        return 0
+    fi
+
     echo "Starting Pinggy service..."
 
     # Stop any existing manual processes first
