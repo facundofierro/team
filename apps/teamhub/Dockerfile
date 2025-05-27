@@ -50,8 +50,9 @@ COPY --from=builder /app/apps/teamhub/public ./apps/teamhub/public
 COPY --from=builder /app/packages ./packages
 
 # Copy any other necessary files
-COPY --from=builder /app/apps/teamhub/next.config.js ./apps/teamhub/
+COPY --from=builder /app/apps/teamhub/next.config.mjs ./apps/teamhub/
 COPY --from=builder /app/apps/teamhub/package.json ./apps/teamhub/
+COPY --from=builder /app/apps/teamhub/middleware.ts ./apps/teamhub/
 
 EXPOSE 3000
 
