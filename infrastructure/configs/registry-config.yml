@@ -19,13 +19,15 @@ http:
     disabled: true
   # Optimize for tunnel connections
   net: tcp
-  # Reduce timeouts for better error handling
+  # Increase timeouts for tunnel connections
   timeout:
-    read: 30s
-    write: 30s
-    idle: 60s
-  # Limit request size to handle MTU issues
-  maxrequestsize: 1048576 # 1MB chunks
+    read: 300s
+    write: 300s
+    idle: 300s
+  # Increase request size for better throughput
+  maxrequestsize: 104857600 # 100MB chunks
+  # Add host configuration for external access
+  host: https://r1.teamxagents.com
 auth:
   htpasswd:
     realm: Registry Realm
