@@ -138,10 +138,10 @@ jobs:
           echo "Waiting for infrastructure services to be ready..."
           sleep 30
 
-          # Wait for registry to be accessible
+          # Wait for registry to be accessible through nginx
           for i in {1..15}; do
-            if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
-              echo "✅ Registry is accessible"
+            if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
+              echo "✅ Registry is accessible through nginx"
               break
             fi
             echo "Waiting for registry to be ready... (attempt $i/15)"
@@ -149,10 +149,14 @@ jobs:
           done
 
           # Final check
-          if ! curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
+          if ! curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
             echo "❌ Registry is still not accessible after 2.5 minutes"
+            echo "Checking service status:"
             docker service ls
+            echo "Registry logs:"
             docker service logs teamhub_registry --tail 20
+            echo "Nginx logs:"
+            docker service logs teamhub_nginx --tail 20
             exit 1
           fi
 
