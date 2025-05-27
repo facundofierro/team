@@ -129,9 +129,9 @@ jobs:
           chmod +x infrastructure-only/infrastructure/scripts/test-connectivity.sh
           infrastructure-only/infrastructure/scripts/test-connectivity.sh
 
-      - name: Configure Docker for self-signed certificates
+      - name: Configure Docker for insecure HTTP registry
         run: |
-          # Create Docker daemon config to accept insecure HTTPS registries
+          # Create Docker daemon config to accept insecure HTTP registries
           sudo mkdir -p /etc/docker
           echo '{
             "insecure-registries": ["r1.teamxagents.com"],
@@ -142,7 +142,7 @@ jobs:
 
       - name: Login to external registry
         run: |
-          PROTOCOL="https"
+          PROTOCOL="http"
           echo "Logging in to registry at $PROTOCOL://$REGISTRY_DOMAIN"
           echo "k8mX9pL2nQ7vR4wE" | docker login $PROTOCOL://$REGISTRY_DOMAIN -u docker --password-stdin
 

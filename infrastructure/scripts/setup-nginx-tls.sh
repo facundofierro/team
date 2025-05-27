@@ -2,7 +2,7 @@
 
 set -e
 
-echo "=== Setting up Nginx with TLS for Docker Registry ==="
+echo "=== Preparing TLS Certificates for Future Use ==="
 
 # Get the server's local IP
 SERVER_IP=$(hostname -I | awk '{print $1}')
@@ -22,8 +22,8 @@ run_sudo() {
 
 run_sudo mkdir -p "$CERT_DIR"
 
-# Generate self-signed certificate for local use
-echo "Generating self-signed certificate..."
+# Generate self-signed certificate for future use
+echo "Generating self-signed certificate for future HTTPS support..."
 run_sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout "$CERT_DIR/registry.key" \
     -out "$CERT_DIR/registry.crt" \
@@ -34,9 +34,10 @@ run_sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 run_sudo chmod 644 "$CERT_DIR/registry.crt"
 run_sudo chmod 600 "$CERT_DIR/registry.key"
 
-echo "✅ Certificate generated"
+echo "✅ Certificate generated and ready for future use"
 
-# Create enhanced nginx configuration with TLS
+# Create enhanced nginx configuration with TLS (for future use)
+echo "Creating TLS-enabled nginx configuration template..."
 cat > /tmp/nginx-tls.conf << 'EOF'
 events {
     worker_connections 1024;
@@ -152,7 +153,7 @@ http {
 }
 EOF
 
-echo "✅ Enhanced nginx configuration created"
+echo "✅ TLS nginx configuration template created"
 
 # Get the script directory and repository root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -161,50 +162,17 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 echo "Script directory: $SCRIPT_DIR"
 echo "Repository root: $REPO_ROOT"
 
-# Copy the nginx configuration to the configs directory
-echo "Installing nginx TLS configuration..."
+# Copy the nginx configuration to the configs directory for future use
+echo "Saving TLS configuration template..."
 cp /tmp/nginx-tls.conf "$REPO_ROOT/infrastructure/configs/nginx-tls.conf"
 
-# Update the docker-compose to use TLS configuration and mount certificates
-echo "Updating docker-compose configuration..."
-
-# Create a backup of the current docker-compose
-cp "$REPO_ROOT/infrastructure/docker-compose.yml" "$REPO_ROOT/infrastructure/docker-compose.yml.backup.$(date +%Y%m%d_%H%M%S)"
-
-# Update the nginx service in docker-compose.yml to use TLS config and mount certificates
-sed -i.bak \
-    -e 's|./configs/nginx.conf:/etc/nginx/nginx.conf:ro|./configs/nginx-tls.conf:/etc/nginx/nginx.conf:ro|' \
-    -e '/- "80:80"/a\      - "443:443"' \
-    -e '/nginx.conf:ro/a\      - '"$CERT_DIR"':/etc/nginx/certs:ro' \
-    "$REPO_ROOT/infrastructure/docker-compose.yml"
-
-echo "✅ Docker compose configuration updated"
-echo "Certificate files created in: $CERT_DIR"
-echo "Enhanced nginx config installed: infrastructure/configs/nginx-tls.conf"
-
-# Restart nginx container to apply TLS configuration
-echo "Restarting nginx container with TLS configuration..."
-cd "$REPO_ROOT/infrastructure"
-docker-compose up -d nginx
-
-echo "✅ Nginx restarted with TLS support"
+echo "✅ TLS setup completed"
 echo ""
-echo "The registry is now available at:"
-echo "  - HTTPS: https://$SERVER_IP/v2/"
-echo "  - HTTPS: https://r1.teamxagents.com/v2/ (via Pinggy tunnel)"
+echo "Summary:"
+echo "- TLS certificates generated at: $CERT_DIR"
+echo "- TLS nginx config template saved at: infrastructure/configs/nginx-tls.conf"
+echo "- Current deployment will use HTTP (insecure registry mode)"
+echo "- TLS configuration is ready for future use when needed"
 echo ""
-echo "Testing HTTPS registry access..."
-sleep 5
-
-# Test HTTPS access
-if curl -f --connect-timeout 10 --max-time 30 -k -u docker:k8mX9pL2nQ7vR4wE https://$SERVER_IP/v2/ >/dev/null 2>&1; then
-    echo "✅ Registry accessible via HTTPS locally"
-else
-    echo "⚠️ Registry not accessible via HTTPS locally - check nginx logs"
-fi
-
-if curl -f --connect-timeout 10 --max-time 30 -k -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/ >/dev/null 2>&1; then
-    echo "✅ Registry accessible via HTTPS through Pinggy tunnel"
-else
-    echo "⚠️ Registry not accessible via HTTPS through tunnel - may need time to propagate"
-fi
+echo "The registry will be accessible via HTTP through the Pinggy tunnel"
+echo "Docker clients will need to be configured with insecure-registries setting"
