@@ -34,12 +34,12 @@ jobs:
           chmod +x infrastructure/scripts/manage-pinggy-service.sh
           infrastructure/scripts/setup-pinggy.sh setup
 
-      - name: Configure Docker for insecure registry
+      - name: Setup nginx with TLS for registry
         env:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: |
-          chmod +x infrastructure/scripts/configure-docker-insecure.sh
-          infrastructure/scripts/configure-docker-insecure.sh
+          chmod +x infrastructure/scripts/setup-nginx-tls.sh
+          infrastructure/scripts/setup-nginx-tls.sh
 
       - name: Deploy infrastructure services
         run: |
@@ -129,9 +129,20 @@ jobs:
           chmod +x infrastructure-only/infrastructure/scripts/test-connectivity.sh
           infrastructure-only/infrastructure/scripts/test-connectivity.sh
 
+      - name: Configure Docker for self-signed certificates
+        run: |
+          # Create Docker daemon config to accept insecure HTTPS registries
+          sudo mkdir -p /etc/docker
+          echo '{
+            "insecure-registries": ["r1.teamxagents.com"],
+            "registry-mirrors": []
+          }' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+          sleep 10
+
       - name: Login to external registry
         run: |
-          PROTOCOL="${REGISTRY_PROTOCOL:-https}"
+          PROTOCOL="https"
           echo "Logging in to registry at $PROTOCOL://$REGISTRY_DOMAIN"
           echo "k8mX9pL2nQ7vR4wE" | docker login $PROTOCOL://$REGISTRY_DOMAIN -u docker --password-stdin
 
