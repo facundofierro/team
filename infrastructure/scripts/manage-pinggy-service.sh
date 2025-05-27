@@ -37,8 +37,30 @@ install_service() {
     # Install Pinggy CLI first
     install_pinggy_cli
 
-    # Copy service file
-    run_sudo cp "$SERVICE_FILE" /etc/systemd/system/
+            # Get current user and group
+    CURRENT_USER=$(whoami)
+    CURRENT_GROUP=$(id -gn $CURRENT_USER)
+
+    echo "Configuring service for user: $CURRENT_USER"
+    echo "Primary group: $CURRENT_GROUP"
+
+    # Create Pinggy working directory
+    run_sudo mkdir -p /opt/pinggy
+    run_sudo chown $CURRENT_USER:$CURRENT_GROUP /opt/pinggy
+    run_sudo chmod 755 /opt/pinggy
+    echo "✅ Created working directory: /opt/pinggy"
+
+    # Create temporary service file with user-specific values
+    TEMP_SERVICE_FILE="/tmp/pinggy.service"
+    sed -e "s|__USER__|$CURRENT_USER|g" \
+        -e "s|__GROUP__|$CURRENT_GROUP|g" \
+        "$SERVICE_FILE" > "$TEMP_SERVICE_FILE"
+
+    # Copy customized service file
+    run_sudo cp "$TEMP_SERVICE_FILE" /etc/systemd/system/pinggy.service
+
+    # Clean up temporary file
+    rm -f "$TEMP_SERVICE_FILE"
 
     # Reload systemd
     run_sudo systemctl daemon-reload
@@ -194,6 +216,9 @@ uninstall_service() {
 
     # Remove service file
     run_sudo rm -f /etc/systemd/system/$SERVICE_NAME.service
+
+    # Remove working directory
+    run_sudo rm -rf /opt/pinggy
 
     # Reload systemd
     run_sudo systemctl daemon-reload
