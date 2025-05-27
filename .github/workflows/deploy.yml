@@ -34,6 +34,13 @@ jobs:
           chmod +x infrastructure/scripts/manage-pinggy-service.sh
           infrastructure/scripts/setup-pinggy.sh setup
 
+      - name: Configure Docker for insecure registry
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO }}
+        run: |
+          chmod +x infrastructure/scripts/configure-docker-insecure.sh
+          infrastructure/scripts/configure-docker-insecure.sh
+
       - name: Deploy infrastructure services
         run: |
           chmod +x infrastructure/scripts/deploy-infrastructure.sh
