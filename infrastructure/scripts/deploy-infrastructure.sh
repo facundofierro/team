@@ -7,8 +7,12 @@ echo "=== Deploying Infrastructure Services ==="
 # Check if teamhub image already exists in registry
 check_teamhub_image() {
     echo "Checking if teamhub image exists in registry..."
-    if curl -f -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/teamhub/tags/list 2>/dev/null | grep -q "latest"; then
-        echo "✅ Teamhub image already exists in registry"
+    # Try HTTPS first, then fallback to HTTP
+    if curl -f -k -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/teamhub/tags/list 2>/dev/null | grep -q "latest"; then
+        echo "✅ Teamhub image already exists in registry (HTTPS)"
+        return 0
+    elif curl -f -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/teamhub/tags/list 2>/dev/null | grep -q "latest"; then
+        echo "✅ Teamhub image already exists in registry (HTTP)"
         return 0
     else
         echo "ℹ️ Teamhub image not found in registry - first deployment"
@@ -45,6 +49,7 @@ setup_registry() {
 # Deploy infrastructure services (nginx + registry)
 deploy_infrastructure() {
     echo "🚀 Deploying infrastructure services (nginx + registry)..."
+    local FORCE_REDEPLOY="${1:-false}"
 
     # Ensure port 80 is available for Docker nginx
     echo "Ensuring port 80 is available..."
@@ -79,11 +84,18 @@ deploy_infrastructure() {
         CONFIG_EXISTS=true
     fi
 
-    # If all infrastructure components exist, skip deployment
-    if [ "$NGINX_EXISTS" = true ] && [ "$REGISTRY_EXISTS" = true ] && [ "$NETWORK_EXISTS" = true ] && [ "$CONFIG_EXISTS" = true ]; then
+    # If all infrastructure components exist and force redeploy is not enabled, skip deployment
+    if [ "$FORCE_REDEPLOY" != "true" ] && [ "$NGINX_EXISTS" = true ] && [ "$REGISTRY_EXISTS" = true ] && [ "$NETWORK_EXISTS" = true ] && [ "$CONFIG_EXISTS" = true ]; then
         echo "✅ All infrastructure services already exist and running, skipping deployment"
         wait_for_registry
         return 0
+    fi
+
+    # If force redeploy is enabled, remove existing config to force update
+    if [ "$FORCE_REDEPLOY" = "true" ]; then
+        echo "🔄 Force redeploy enabled - removing existing config to force update"
+        docker config rm teamhub_nginx_infra_config 2>/dev/null || true
+        CONFIG_EXISTS=false
     fi
 
     # Create a temporary stack file with only infrastructure services
@@ -100,6 +112,8 @@ services:
     configs:
       - source: nginx_infra_config
         target: /etc/nginx/nginx.conf
+    volumes:
+      - /opt/nginx-certs:/etc/nginx/ssl:ro
     networks:
       - registry_network
 
@@ -159,16 +173,26 @@ wait_for_registry() {
     echo "Waiting for registry to be accessible through nginx..."
 
     for i in {1..15}; do
-        if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
-            echo "✅ Registry is accessible through nginx"
+        # Try HTTPS first (preferred), then HTTP as fallback
+        if curl -f -k --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/ >/dev/null 2>&1; then
+            echo "✅ Registry is accessible through nginx (HTTPS)"
+            return 0
+        elif curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
+            echo "✅ Registry is accessible through nginx (HTTP)"
             return 0
         fi
         echo "Waiting for registry to be ready... (attempt $i/15)"
         sleep 10
     done
 
-    # Final check
-    if ! curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
+    # Final check with both protocols
+    if curl -f -k --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/ >/dev/null 2>&1; then
+        echo "✅ Registry is accessible via HTTPS"
+        return 0
+    elif curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
+        echo "✅ Registry is accessible via HTTP"
+        return 0
+    else
         echo "❌ Registry is still not accessible after 2.5 minutes"
         echo "Checking service status:"
         docker service ls
@@ -184,6 +208,9 @@ wait_for_registry() {
 main() {
     local TEAMHUB_EXISTS=false
     local FULL_STACK_EXISTS=false
+    local FORCE_REDEPLOY="${1:-false}"
+
+    echo "Force redeploy flag: $FORCE_REDEPLOY"
 
     # Check current state
     if check_teamhub_image; then
@@ -194,9 +221,14 @@ main() {
         FULL_STACK_EXISTS=true
     fi
 
-    # Only deploy infrastructure if teamhub image doesn't exist and full stack isn't deployed
-    if [ "$TEAMHUB_EXISTS" = false ] && [ "$FULL_STACK_EXISTS" = false ]; then
-        deploy_infrastructure
+    # Deploy infrastructure if:
+    # 1. Force redeploy is enabled, OR
+    # 2. teamhub image doesn't exist and full stack isn't deployed
+    if [ "$FORCE_REDEPLOY" = "true" ]; then
+        echo "🔄 Force redeploy enabled - redeploying infrastructure services"
+        deploy_infrastructure "$FORCE_REDEPLOY"
+    elif [ "$TEAMHUB_EXISTS" = false ] && [ "$FULL_STACK_EXISTS" = false ]; then
+        deploy_infrastructure "$FORCE_REDEPLOY"
     else
         echo "✅ Infrastructure already exists, skipping infrastructure deployment"
     fi

@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      force_redeploy:
+        description: 'Force redeploy infrastructure (ignores existing services)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   prepare-tag:
@@ -45,7 +55,7 @@ jobs:
         run: |
           chmod +x infrastructure/scripts/deploy-infrastructure.sh
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
-          infrastructure/scripts/deploy-infrastructure.sh
+          infrastructure/scripts/deploy-infrastructure.sh "${{ github.event.inputs.force_redeploy || 'false' }}"
 
       - name: Ensure Pinggy service is running
         env:
@@ -129,9 +139,9 @@ jobs:
           chmod +x infrastructure-only/infrastructure/scripts/test-connectivity.sh
           infrastructure-only/infrastructure/scripts/test-connectivity.sh
 
-      - name: Configure Docker for insecure HTTP registry
+      - name: Configure Docker for HTTPS registry with self-signed cert
         run: |
-          # Create Docker daemon config to accept insecure HTTP registries
+          # Create Docker daemon config to accept insecure HTTPS registries (self-signed certs)
           sudo mkdir -p /etc/docker
           echo '{
             "insecure-registries": ["r1.teamxagents.com"],
@@ -142,7 +152,7 @@ jobs:
 
       - name: Login to external registry
         run: |
-          PROTOCOL="http"
+          PROTOCOL="https"
           echo "Logging in to registry at $PROTOCOL://$REGISTRY_DOMAIN"
           echo "k8mX9pL2nQ7vR4wE" | docker login $PROTOCOL://$REGISTRY_DOMAIN -u docker --password-stdin
 
