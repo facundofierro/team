@@ -28,6 +28,39 @@ jobs:
             nginx-infra.conf
           sparse-checkout-cone-mode: false
 
+      - name: Ensure Pinggy tunnel is running BEFORE infrastructure
+        run: |
+          # Single tunnel with wildcard domain forwarding
+          if ! docker ps --filter "name=pinggy-tunnel" --filter "status=running" --format "{{.Names}}" | grep -q "^pinggy-tunnel$"; then
+            echo "Wildcard tunnel not running, setting it up..."
+            docker stop pinggy-tunnel 2>/dev/null || true
+            docker rm pinggy-tunnel 2>/dev/null || true
+            # Single tunnel through nginx reverse proxy
+            # All services accessible through port 80 with path-based routing
+            docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
+              -p 443 \
+              -R0:127.0.0.1:80 \
+              -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
+              FpyP2PGUXy0@pro.pinggy.io
+            echo "Waiting for wildcard tunnel to be ready..."
+            sleep 15
+
+            # Show tunnel information
+            echo "Tunnel logs:"
+            docker logs pinggy-tunnel 2>/dev/null | tail -20 || echo "No logs available yet"
+
+            echo "Waiting additional time for all ports to be mapped..."
+            sleep 10
+            echo "Final tunnel status:"
+            docker logs pinggy-tunnel 2>/dev/null | tail -30 || echo "No logs available yet"
+          else
+            echo "Wildcard Pinggy tunnel is already running."
+          fi
+
+          # Clean up any orphaned pinggy containers (containers without proper names)
+          echo "Cleaning up orphaned pinggy containers..."
+          docker ps -a --filter "ancestor=pinggy/pinggy" --format "{{.Names}}" | grep -v -E "^pinggy-tunnel$" | xargs -r docker rm -f
+
       - name: Deploy infrastructure services (nginx + registry)
         run: |
           # Check if teamhub image already exists in registry
@@ -184,6 +217,35 @@ jobs:
           echo "Cleaning up orphaned pinggy containers..."
           docker ps -a --filter "ancestor=pinggy/pinggy" --format "{{.Names}}" | grep -v -E "^pinggy-tunnel$" | xargs -r docker rm -f
 
+      - name: Test external registry access after tunnel setup
+        run: |
+          echo "Testing external registry access via Pinggy tunnel..."
+
+          # Wait a bit more for tunnel to stabilize
+          sleep 10
+
+          # Test with HTTPS (since Pinggy exposes port 443)
+          if curl -f --connect-timeout 10 --max-time 30 -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/ >/dev/null 2>&1; then
+            echo "✅ Registry accessible via HTTPS through tunnel"
+          else
+            echo "⚠️ Registry not accessible via HTTPS, checking tunnel status..."
+            docker logs pinggy-tunnel --tail 10
+            echo "Checking local registry status..."
+            curl -f -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ || echo "Local registry also not accessible"
+          fi
+
+      - name: Export tunnel readiness status
+        id: tunnel_status
+        run: |
+          # Test if tunnel is working and export status
+          if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/ >/dev/null 2>&1; then
+            echo "tunnel_ready=true" >> $GITHUB_OUTPUT
+            echo "✅ Tunnel is ready for external access"
+          else
+            echo "tunnel_ready=false" >> $GITHUB_OUTPUT
+            echo "❌ Tunnel is not ready - build-and-push may fail"
+          fi
+
   build-and-push:
     runs-on: ubuntu-latest
     needs: [prepare-tag, setup-registry]
@@ -238,27 +300,27 @@ jobs:
             exit 1
           fi
 
-          # Test basic connectivity
+          # Test basic connectivity (HTTPS since Pinggy exposes port 443)
           echo "Testing basic connectivity to $REGISTRY_DOMAIN..."
           if curl -I --connect-timeout 10 --max-time 30 https://$REGISTRY_DOMAIN 2>/dev/null; then
             echo "✅ HTTPS connection successful"
           else
-            echo "⚠️ HTTPS connection failed, trying HTTP..."
+            echo "⚠️ HTTPS connection failed, trying HTTP as fallback..."
             if curl -I --connect-timeout 10 --max-time 30 http://$REGISTRY_DOMAIN 2>/dev/null; then
-              echo "✅ HTTP connection successful"
+              echo "✅ HTTP connection successful (unexpected but working)"
             else
-              echo "❌ Both HTTP and HTTPS connections failed"
+              echo "❌ Both HTTPS and HTTP connections failed"
             fi
           fi
 
-          # Test registry endpoint specifically
+          # Test registry endpoint specifically (HTTPS first)
           echo "Testing registry endpoint /v2/..."
           if curl -I --connect-timeout 10 --max-time 30 https://$REGISTRY_DOMAIN/v2/ 2>/dev/null; then
             echo "✅ Registry endpoint accessible via HTTPS"
           else
             echo "⚠️ Registry endpoint not accessible via HTTPS, trying HTTP..."
             if curl -I --connect-timeout 10 --max-time 30 http://$REGISTRY_DOMAIN/v2/ 2>/dev/null; then
-              echo "✅ Registry endpoint accessible via HTTP"
+              echo "✅ Registry endpoint accessible via HTTP (unexpected but working)"
             else
               echo "❌ Registry endpoint not accessible"
             fi
@@ -266,7 +328,7 @@ jobs:
 
       - name: Login to external registry via Pinggy
         run: |
-          echo "Logging in to registry at https://$REGISTRY_DOMAIN"
+          echo "Logging in to registry at https://$REGISTRY_DOMAIN (Pinggy exposes HTTPS)"
           echo "k8mX9pL2nQ7vR4wE" | docker login https://$REGISTRY_DOMAIN -u docker --password-stdin
 
       - name: Load and push image to external registry
