@@ -24,8 +24,8 @@ http:
     read: 300s
     write: 300s
     idle: 300s
-  # Increase request size for better throughput
-  maxrequestsize: 104857600 # 100MB chunks
+  # Reduce request size for tunnel compatibility
+  maxrequestsize: 10485760 # 10MB chunks
   # Add host configuration for external access
   host: https://r1.teamxagents.com
 auth:
