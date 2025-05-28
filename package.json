@@ -20,7 +20,7 @@
     "@million/lint": "^1.0.11",
     "husky": "^8.0.3",
     "prettier": "^2.8.4",
-    "turbo": "^1.13.3"
+    "turbo": "^2.5.3"
   },
   "husky": {
     "hooks": {
