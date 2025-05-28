@@ -259,7 +259,7 @@ deploy_full_stack() {
 wait_for_services() {
     echo "Waiting for all services to be ready..."
 
-    # Check teamhub service
+    # Check teamhub service first
     for i in {1..15}; do
         if docker service ls --filter name=teamhub_teamhub --format "{{.Replicas}}" | grep -q "1/1"; then
             echo "✅ Teamhub service is ready"
@@ -275,23 +275,7 @@ wait_for_services() {
         fi
     done
 
-    # Check nginx service
-    for i in {1..15}; do
-        if docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
-            echo "✅ Nginx service is ready"
-            break
-        fi
-        if [ $i -eq 15 ]; then
-            echo "❌ Nginx service failed to start after 15 attempts"
-            echo "🔍 Checking nginx service logs:"
-            docker service logs teamhub_nginx --tail 20 || true
-        else
-            echo "Waiting for nginx service... (attempt $i/15)"
-            sleep 10
-        fi
-    done
-
-    # Check remotion service
+    # Check remotion service before nginx (nginx depends on remotion)
     for i in {1..15}; do
         if docker service ls --filter name=teamhub_remotion --format "{{.Replicas}}" | grep -q "1/1"; then
             echo "✅ Remotion service is ready"
@@ -303,6 +287,22 @@ wait_for_services() {
             docker service logs teamhub_remotion --tail 20 || true
         else
             echo "Waiting for remotion service... (attempt $i/15)"
+            sleep 10
+        fi
+    done
+
+    # Check nginx service last (after dependencies are ready)
+    for i in {1..15}; do
+        if docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
+            echo "✅ Nginx service is ready"
+            break
+        fi
+        if [ $i -eq 15 ]; then
+            echo "❌ Nginx service failed to start after 15 attempts"
+            echo "🔍 Checking nginx service logs:"
+            docker service logs teamhub_nginx --tail 20 || true
+        else
+            echo "Waiting for nginx service... (attempt $i/15)"
             sleep 10
         fi
     done
