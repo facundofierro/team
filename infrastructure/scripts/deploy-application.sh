@@ -4,6 +4,106 @@ set -e
 
 echo "=== Deploying Full Application Stack ==="
 
+# Setup infrastructure if needed
+setup_infrastructure() {
+    echo "🔧 Setting up infrastructure services (databases)..."
+
+    # Check if infrastructure services already exist
+    local POSTGRES_EXISTS=false
+    local REDIS_EXISTS=false
+
+    if docker service ls --filter name=teamhub_postgres --format "{{.Name}}" | grep -q teamhub_postgres; then
+        echo "✅ PostgreSQL service already exists"
+        POSTGRES_EXISTS=true
+    fi
+
+    if docker service ls --filter name=teamhub_redis --format "{{.Name}}" | grep -q teamhub_redis; then
+        echo "✅ Redis service already exists"
+        REDIS_EXISTS=true
+    fi
+
+    # If infrastructure exists and force redeploy is not enabled, skip setup
+    if [ "$FORCE_REDEPLOY" != "true" ] && [ "$POSTGRES_EXISTS" = true ] && [ "$REDIS_EXISTS" = true ]; then
+        echo "✅ Infrastructure already exists, skipping setup"
+        return 0
+    fi
+
+    # Create infrastructure services
+    echo "🚀 Creating infrastructure services..."
+
+    # Create temporary infrastructure stack
+    cat > /tmp/docker-stack-infra.yml << EOF
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    environment:
+      - POSTGRES_DB=teamhub
+      - POSTGRES_USER=teamhub
+      - POSTGRES_PASSWORD=\${PG_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+
+  redis:
+    image: redis:7-alpine
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - redis_data:/data
+    networks:
+      - default
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    driver: overlay
+EOF
+
+    # Deploy infrastructure
+    docker stack deploy -c /tmp/docker-stack-infra.yml teamhub
+
+    # Wait for infrastructure to be ready
+    echo "Waiting for infrastructure services..."
+    sleep 20
+
+    # Wait for PostgreSQL
+    for i in {1..10}; do
+        if docker service ls --filter name=teamhub_postgres --format "{{.Replicas}}" | grep -q "1/1"; then
+            echo "✅ PostgreSQL is ready"
+            break
+        fi
+        echo "Waiting for PostgreSQL... (attempt $i/10)"
+        sleep 10
+    done
+
+    # Wait for Redis
+    for i in {1..10}; do
+        if docker service ls --filter name=teamhub_redis --format "{{.Replicas}}" | grep -q "1/1"; then
+            echo "✅ Redis is ready"
+            break
+        fi
+        echo "Waiting for Redis... (attempt $i/10)"
+        sleep 10
+    done
+
+    # Clean up temporary file
+    rm -f /tmp/docker-stack-infra.yml
+    echo "✅ Infrastructure setup completed"
+}
+
 # Check if we're transitioning from infrastructure-only to full stack
 check_transition_state() {
     if docker config ls --filter name=teamhub_nginx_infra_config --format "{{.Name}}" | grep -q teamhub_nginx_infra_config; then
@@ -18,8 +118,6 @@ check_transition_state() {
 # Deploy full application stack
 deploy_full_stack() {
     local IMAGE_TAG="$1"
-    local REGISTRY_FALLBACK="$2"
-    local DOCKERHUB_IMAGE="$3"
     local USING_INFRA_CONFIG=false
 
     if check_transition_state; then
@@ -28,13 +126,14 @@ deploy_full_stack() {
 
     echo "Deploying full application stack (including teamhub)..."
 
-    # Determine which image to use based on registry fallback
-    if [ "$REGISTRY_FALLBACK" = "dockerhub" ] && [ -n "$DOCKERHUB_IMAGE" ]; then
+    # Use DockerHub image
+    if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$IMAGE_TAG" ]; then
+        local DOCKERHUB_IMAGE="$DOCKERHUB_USERNAME/teamhub:$IMAGE_TAG"
         echo "Using DockerHub image: $DOCKERHUB_IMAGE"
         sed -i "s|localhost:5000/teamhub:.*|$DOCKERHUB_IMAGE|" infrastructure/docker/docker-stack.yml
-    elif [ -n "$IMAGE_TAG" ]; then
-        echo "Using private registry image with tag: $IMAGE_TAG"
-        sed -i "s|localhost:5000/teamhub:.*|localhost:5000/teamhub:$IMAGE_TAG|" infrastructure/docker/docker-stack.yml
+    else
+        echo "❌ DockerHub username or image tag not provided"
+        exit 1
     fi
 
     if [ "$USING_INFRA_CONFIG" = true ]; then
@@ -98,20 +197,20 @@ wait_for_services() {
 test_application() {
     echo "Testing application endpoints..."
 
-    # Test registry endpoint (HTTPS - Pinggy now forwards to port 443)
-    if curl -f -k --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/ >/dev/null 2>&1; then
-        echo "✅ Registry endpoint is accessible (HTTPS)"
-    else
-        echo "❌ Registry endpoint is not accessible"
-    fi
-
-    # Test teamhub endpoint (if deployed)
+    # Test teamhub endpoint
     if docker service ls --filter name=teamhub_teamhub --format "{{.Name}}" | grep -q teamhub_teamhub; then
-        if curl -f -k --connect-timeout 5 --max-time 10 https://127.0.0.1:443/ >/dev/null 2>&1; then
-            echo "✅ Teamhub application is accessible (HTTPS)"
+        if curl -f --connect-timeout 5 --max-time 10 http://127.0.0.1:80/ >/dev/null 2>&1; then
+            echo "✅ Teamhub application is accessible"
         else
             echo "⚠️ Teamhub application may still be starting up"
         fi
+    fi
+
+    # Test nginx service
+    if curl -f --connect-timeout 5 --max-time 10 http://127.0.0.1:80/health >/dev/null 2>&1; then
+        echo "✅ Nginx service is accessible"
+    else
+        echo "⚠️ Nginx service may still be starting up"
     fi
 }
 
@@ -124,27 +223,25 @@ cleanup() {
 # Main deployment function
 main() {
     local IMAGE_TAG="$1"
-    local REGISTRY_FALLBACK=""
-    local DOCKERHUB_IMAGE=""
 
-    # Setup optimized tunnel for registry if needed
-    if [ -f infrastructure/scripts/setup-pinggy-tls.sh ]; then
-        echo "Setting up optimized Pinggy TLS tunnel for Docker registry..."
-        chmod +x infrastructure/scripts/setup-pinggy-tls.sh
-        infrastructure/scripts/setup-pinggy-tls.sh || echo "Warning: TLS tunnel setup failed, continuing with existing tunnel"
+    if [ -z "$IMAGE_TAG" ]; then
+        echo "❌ Image tag is required"
+        echo "Usage: $0 <image_tag>"
+        exit 1
     fi
 
-    # Check for registry fallback info
-    if [ -f /tmp/registry-fallback.env ]; then
-        source /tmp/registry-fallback.env
-        echo "Registry fallback detected: $REGISTRY_FALLBACK"
-        if [ "$REGISTRY_FALLBACK" = "dockerhub" ]; then
-            echo "Using DockerHub image: $DOCKERHUB_IMAGE"
-        fi
+    if [ -z "$DOCKERHUB_USERNAME" ]; then
+        echo "❌ DOCKERHUB_USERNAME environment variable is required"
+        exit 1
     fi
+
+    echo "🚀 Starting deployment with DockerHub image: $DOCKERHUB_USERNAME/teamhub:$IMAGE_TAG"
+
+    # Setup infrastructure first
+    setup_infrastructure
 
     # Deploy the full stack
-    deploy_full_stack "$IMAGE_TAG" "$REGISTRY_FALLBACK" "$DOCKERHUB_IMAGE"
+    deploy_full_stack "$IMAGE_TAG"
 
     # Wait for services to be ready
     wait_for_services
@@ -156,6 +253,7 @@ main() {
     cleanup
 
     echo "✅ Application deployment completed successfully"
+    echo "🌐 Application should be accessible at http://your-server-ip"
 }
 
 # Execute main function with all arguments

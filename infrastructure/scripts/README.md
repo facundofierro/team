@@ -1,181 +1,115 @@
 # Infrastructure Scripts
 
-This directory contains modular scripts that handle different aspects of the deployment process. These scripts are part of the organized infrastructure directory structure and are used by the GitHub Actions workflow (`.github/workflows/deploy.yml`) for automated deployments.
+## Overview
 
-## Scripts Overview
+This directory contains the deployment script for the TeamHub application using DockerHub as the container registry.
 
-### 🔧 `setup-pinggy.sh`
+## Scripts
 
-Handles Pinggy tunnel setup and management using systemd service.
+### `deploy-application.sh`
 
-**Usage:**
+**Purpose**: Complete application deployment including infrastructure setup and application stack deployment.
 
-```bash
-./setup-pinggy.sh {install|setup|check|restart|monitor|test|status}
-```
-
-**Commands:**
-
-- `install` - Install Pinggy CLI and systemd service
-- `setup` - Full setup (install + start systemd service)
-- `check` - Check if service is running
-- `restart` - Restart service if needed
-- `monitor` - Monitor service stability for 30 seconds
-- `test` - Test external access through tunnel
-- `status` - Export tunnel status for GitHub Actions
-
-**Note:** This script now uses the systemd service for better reliability and management.
-
-### 🛠️ `manage-pinggy-service.sh`
-
-Direct systemd service management for Pinggy tunnel.
-
-**Usage:**
+**Usage**:
 
 ```bash
-./manage-pinggy-service.sh {install|start|stop|restart|status|check|logs|follow|test|monitor|export-status|uninstall}
+./deploy-application.sh <image-tag>
 ```
 
-**Commands:**
+**Environment Variables Required**:
 
-- `install` - Install and enable Pinggy systemd service
-- `start` - Start the Pinggy service
-- `stop` - Stop the Pinggy service
-- `restart` - Restart the Pinggy service
-- `status` - Show detailed service status
-- `check` - Quick check if service is running
-- `logs` - Show recent service logs
-- `follow` - Follow service logs in real-time
-- `test` - Test external access through tunnel
-- `monitor` - Monitor service stability for 30 seconds
-- `export-status` - Export tunnel status for GitHub Actions
-- `uninstall` - Remove the systemd service
-
-### 🧪 `test-pinggy-service.sh`
-
-Test script to verify Pinggy systemd service setup.
-
-**Usage:**
-
-```bash
-./test-pinggy-service.sh
-```
-
-**Features:**
-
-- Validates all required files and permissions
-- Checks system dependencies
-- Tests network connectivity
-- Provides setup recommendations
-
-### 🏗️ `deploy-infrastructure.sh`
-
-Handles infrastructure deployment (nginx + Docker registry).
-
-**Usage:**
-
-```bash
-export PG_PASSWORD="your_password"
-./deploy-infrastructure.sh
-```
-
-**Features:**
-
-- Checks if teamhub image exists in registry
-- Checks if full stack is already deployed
-- Only deploys infrastructure if needed
-- Sets up registry volumes and authentication
-- Waits for services to be ready
-
-### 🚀 `deploy-application.sh`
-
-Handles full application stack deployment.
-
-**Usage:**
-
-```bash
-export PG_PASSWORD="your_password"
-export NEXTCLOUD_ADMIN_PASSWORD="your_password"
-export NEXTCLOUD_DB_PASSWORD="your_password"
-./deploy-application.sh [IMAGE_TAG]
-```
-
-**Features:**
-
-- Detects transition from infrastructure-only to full stack
-- Updates docker-stack.yml with new image tag
-- Handles both first deployment and updates
-- Waits for services to be ready
-- Tests application endpoints
-- Cleans up old containers
-
-### 🔍 `test-connectivity.sh`
-
-Tests connectivity to the Docker registry through Pinggy tunnel.
-
-**Usage:**
-
-```bash
-export REGISTRY_DOMAIN="r1.teamxagents.com"
-./test-connectivity.sh
-```
-
-**Features:**
-
-- Tests DNS resolution
-- Tests basic connectivity (HTTPS/HTTP)
-- Tests registry endpoint specifically
-- Tests registry authentication
-- Determines best protocol and exports to GitHub environment
-
-## Environment Variables
-
-### Required for all scripts:
-
+- `DOCKERHUB_USERNAME` - DockerHub username
 - `PG_PASSWORD` - PostgreSQL password
-
-### Required for application deployment:
-
 - `NEXTCLOUD_ADMIN_PASSWORD` - Nextcloud admin password
 - `NEXTCLOUD_DB_PASSWORD` - Nextcloud database password
+- `FORCE_REDEPLOY` - (optional) Set to "true" to force redeploy infrastructure
 
-### Optional:
+**What it does**:
 
-- `REGISTRY_DOMAIN` - Registry domain (defaults to `r1.teamxagents.com`)
-- `REGISTRY_PROTOCOL` - Protocol to use (set by test-connectivity.sh)
+1. **Infrastructure Setup**: Creates PostgreSQL and Redis services if they don't exist
+2. **Application Deployment**: Deploys the full application stack using DockerHub image
+3. **Health Checks**: Waits for services to be ready and tests endpoints
+4. **Cleanup**: Removes old containers
 
-## GitHub Actions Integration
-
-The scripts are designed to work seamlessly with GitHub Actions:
-
-1. **setup-registry job**: Uses `setup-pinggy.sh` and `deploy-infrastructure.sh`
-2. **build-and-push job**: Uses `test-connectivity.sh`
-3. **deploy job**: Uses `deploy-application.sh`
-
-## Benefits of Modular Structure
-
-1. **Maintainability**: Each script has a single responsibility
-2. **Reusability**: Scripts can be used independently or in other workflows
-3. **Testability**: Individual components can be tested separately
-4. **Readability**: Main workflow file is much cleaner and easier to understand
-5. **Debugging**: Easier to isolate and fix issues in specific components
-
-## Local Development
-
-You can run these scripts locally for testing:
+**Example**:
 
 ```bash
-# Test Pinggy setup
-./infrastructure/scripts/setup-pinggy.sh check
+export DOCKERHUB_USERNAME="myusername"
+export PG_PASSWORD="secure_password"
+export NEXTCLOUD_ADMIN_PASSWORD="admin_password"
+export NEXTCLOUD_DB_PASSWORD="db_password"
 
-# Test infrastructure deployment
-export PG_PASSWORD="test"
-./infrastructure/scripts/deploy-infrastructure.sh
-
-# Test connectivity
-./infrastructure/scripts/test-connectivity.sh
+./deploy-application.sh abc123def456
 ```
 
-## Error Handling
+## Deployment Flow
 
-All scripts use `set -e` to exit on any error and include proper error messages and logging for debugging purposes.
+```
+1. Check/Setup Infrastructure (PostgreSQL, Redis)
+2. Pull DockerHub image: username/teamhub:tag
+3. Deploy Docker Swarm stack
+4. Wait for services to be ready
+5. Perform health checks
+6. Cleanup old containers
+```
+
+## Architecture Benefits
+
+- **Simplified**: Single script handles everything
+- **Reliable**: Uses DockerHub instead of private registry
+- **Fast**: No tunnel setup or complex networking
+- **Maintainable**: Standard Docker workflow
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Image Pull Failed**
+
+   ```bash
+   # Check DockerHub credentials
+   docker login
+   docker pull $DOCKERHUB_USERNAME/teamhub:latest
+   ```
+
+2. **Service Won't Start**
+
+   ```bash
+   # Check service status
+   docker service ls
+   docker service logs teamhub_<service-name>
+   ```
+
+3. **Database Connection Issues**
+   ```bash
+   # Check PostgreSQL
+   docker service logs teamhub_postgres
+   ```
+
+### Manual Commands
+
+```bash
+# Check all services
+docker service ls
+
+# View service logs
+docker service logs teamhub_teamhub --follow
+
+# Remove all services (reset)
+docker stack rm teamhub
+
+# Force redeploy
+export FORCE_REDEPLOY="true"
+./deploy-application.sh <tag>
+```
+
+## Migration Notes
+
+This simplified approach replaces the previous complex setup that included:
+
+- ❌ Pinggy tunnel management
+- ❌ Private Docker registry
+- ❌ Complex nginx TLS configuration
+- ❌ Multi-stage infrastructure deployment
+
+The new approach is much more reliable and follows industry standards for Docker deployments.

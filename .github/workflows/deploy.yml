@@ -25,208 +25,33 @@ jobs:
         id: set_tag
         run: echo "tag=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
-  setup-registry:
-    runs-on: self-hosted
-    needs: prepare-tag
-    steps:
-      - name: Checkout required files
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            infrastructure/
-          sparse-checkout-cone-mode: false
-
-      - name: Setup Pinggy systemd service
-        env:
-          SUDO_PASSWORD: ${{ secrets.SUDO }}
-        run: |
-          chmod +x infrastructure/scripts/setup-pinggy.sh
-          chmod +x infrastructure/scripts/manage-pinggy-service.sh
-
-          # Force reinstall Pinggy service if force_redeploy is true
-          if [ "${{ github.event.inputs.force_redeploy || 'false' }}" = "true" ]; then
-            echo "🔄 Force redeploy enabled - reinstalling Pinggy service"
-            infrastructure/scripts/manage-pinggy-service.sh uninstall || true
-            infrastructure/scripts/manage-pinggy-service.sh install
-            infrastructure/scripts/manage-pinggy-service.sh start
-          else
-            infrastructure/scripts/setup-pinggy.sh setup
-          fi
-
-      - name: Setup nginx with TLS for registry
-        env:
-          SUDO_PASSWORD: ${{ secrets.SUDO }}
-        run: |
-          chmod +x infrastructure/scripts/setup-nginx-tls.sh
-          infrastructure/scripts/setup-nginx-tls.sh
-
-      - name: Deploy infrastructure services
-        run: |
-          chmod +x infrastructure/scripts/deploy-infrastructure.sh
-          export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
-          infrastructure/scripts/deploy-infrastructure.sh "${{ github.event.inputs.force_redeploy || 'false' }}"
-
-      - name: Ensure Pinggy service is running
-        env:
-          SUDO_PASSWORD: ${{ secrets.SUDO }}
-        run: infrastructure/scripts/setup-pinggy.sh restart
-
-      - name: Monitor service stability
-        env:
-          SUDO_PASSWORD: ${{ secrets.SUDO }}
-        run: infrastructure/scripts/setup-pinggy.sh monitor
-
-      - name: Test registry access via Pinggy
-        env:
-          SUDO_PASSWORD: ${{ secrets.SUDO }}
-        run: |
-          echo "Testing registry access via Pinggy tunnel..."
-          sleep 15  # Give tunnel time to stabilize
-          if curl -f --connect-timeout 15 --max-time 45 -u docker:k8mX9pL2nQ7vR4wE https://ukjhwjyazp.a.pinggy.link/v2/ >/dev/null 2>&1; then
-            echo "✅ Registry is accessible via Pinggy tunnel"
-          else
-            echo "⚠️ Registry test failed, but continuing deployment"
-          fi
-
-      - name: Export service readiness status
-        id: tunnel_status
-        env:
-          SUDO_PASSWORD: ${{ secrets.SUDO }}
-        run: |
-          echo "Main Pinggy service status:"
-          infrastructure/scripts/setup-pinggy.sh status
-          echo "tunnel_ready=true" >> $GITHUB_OUTPUT
-
-      - name: Update Pinggy service for registry access
-        env:
-          SUDO_PASSWORD: ${{ secrets.SUDO }}
-        run: |
-          echo "Updating Pinggy service to forward to registry port 5000..."
-          infrastructure/scripts/manage-pinggy-service.sh uninstall || true
-          infrastructure/scripts/manage-pinggy-service.sh install
-          infrastructure/scripts/manage-pinggy-service.sh start
-
   build-and-push:
     runs-on: ubuntu-latest
-    needs: [prepare-tag, setup-registry]
+    needs: prepare-tag
     outputs:
       tag: ${{ needs.prepare-tag.outputs.tag }}
-    env:
-      REGISTRY_DOMAIN: 'ukjhwjyazp.a.pinggy.link'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Checkout scripts
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            infrastructure/scripts/
-          sparse-checkout-cone-mode: false
-          path: infrastructure-only
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/teamhub/Dockerfile
-          push: false
-          tags: |
-            teamhub:latest
-            teamhub:${{ needs.prepare-tag.outputs.tag }}
-          outputs: type=docker,dest=/tmp/teamhub.tar
-
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: teamhub-image
-          path: /tmp/teamhub.tar
-          retention-days: 1
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Test connectivity to registry
-        run: |
-          echo "Testing DNS resolution and connectivity..."
-          nslookup ukjhwjyazp.a.pinggy.link || echo "DNS lookup failed"
-          ping -c 3 ukjhwjyazp.a.pinggy.link || echo "Ping failed"
-
-          chmod +x infrastructure-only/infrastructure/scripts/test-connectivity.sh
-          infrastructure-only/infrastructure/scripts/test-connectivity.sh
-
-      - name: Configure Docker for secure HTTPS registry access
-        run: |
-          # Ensure Docker is properly configured for HTTPS registry access
-          sudo mkdir -p /etc/docker
-          echo '{
-            "registry-mirrors": [],
-            "log-driver": "json-file",
-            "log-opts": {
-              "max-size": "10m",
-              "max-file": "3"
-            },
-            "experimental": false
-          }' | sudo tee /etc/docker/daemon.json
-
-          echo "Docker daemon config created:"
-          cat /etc/docker/daemon.json
-
-          sudo systemctl restart docker
-          sleep 10
-
-          echo "Docker info after restart:"
-          docker info | grep -A 3 "Server Version" || echo "Docker info check"
-
-      - name: Login to external registry
-        run: |
-          # Login to the registry
-          echo "Logging in to registry at $REGISTRY_DOMAIN"
-          echo "k8mX9pL2nQ7vR4wE" | docker login $REGISTRY_DOMAIN -u docker --password-stdin
-
-      - name: Test registry connectivity
-        run: |
-          echo "Testing registry connectivity..."
-
-          # Wait for tunnel to stabilize
-          sleep 15
-
-          # Test registry API
-          curl -f --connect-timeout 10 --max-time 30 -u docker:k8mX9pL2nQ7vR4wE https://$REGISTRY_DOMAIN/v2/ || echo "Registry API test failed"
-
-      - name: Login to DockerHub (fallback)
-        if: env.DOCKERHUB_USERNAME != ''
+      - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Load and push image
-        run: |
-          # Load the built image
-          docker load -i /tmp/teamhub.tar
-
-          # Push to private registry
-          chmod +x infrastructure-only/infrastructure/scripts/push-with-fallback.sh
-          infrastructure-only/infrastructure/scripts/push-with-fallback.sh \
-            teamhub \
-            ${{ needs.prepare-tag.outputs.tag }} \
-            $REGISTRY_DOMAIN
-
-      - name: Upload registry fallback info
-        uses: actions/upload-artifact@v4
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
         with:
-          name: registry-fallback
-          path: /tmp/registry-fallback.env
-          retention-days: 1
+          context: .
+          file: apps/teamhub/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/teamhub:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/teamhub:${{ needs.prepare-tag.outputs.tag }}
 
   deploy:
     runs-on: self-hosted
@@ -239,61 +64,13 @@ jobs:
             infrastructure/
           sparse-checkout-cone-mode: false
 
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v4
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
         with:
-          name: teamhub-image
-          path: /tmp
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Download registry fallback info
-        uses: actions/download-artifact@v4
-        with:
-          name: registry-fallback
-          path: /tmp
-
-      - name: Load Docker image
-        run: docker load -i /tmp/teamhub.tar
-
-      - name: Check registry fallback status
-        id: registry_check
-        run: |
-          if [ -f /tmp/registry-fallback.env ]; then
-            source /tmp/registry-fallback.env
-            echo "registry_fallback=$REGISTRY_FALLBACK" >> $GITHUB_OUTPUT
-            if [ "$REGISTRY_FALLBACK" = "dockerhub" ]; then
-              echo "dockerhub_image=$DOCKERHUB_IMAGE" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "registry_fallback=private" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Login to local registry
-        run: |
-          echo "Logging in to local registry at localhost:5000"
-          echo "k8mX9pL2nQ7vR4wE" | docker login localhost:5000 -u docker --password-stdin
-
-      - name: Tag and push to local registry
-        run: |
-          docker tag teamhub:${{ needs.build-and-push.outputs.tag }} localhost:5000/teamhub:${{ needs.build-and-push.outputs.tag }}
-          docker tag teamhub:latest localhost:5000/teamhub:latest
-
-          # Push with minimal retry logic
-          for i in {1..2}; do
-            echo "Pushing images to registry (attempt $i/2)..."
-            if docker push localhost:5000/teamhub:${{ needs.build-and-push.outputs.tag }} && docker push localhost:5000/teamhub:latest; then
-              echo "Successfully pushed images to registry"
-              break
-            else
-              echo "Push failed, retrying in 10 seconds..."
-              sleep 10
-              if [ $i -eq 2 ]; then
-                echo "Failed to push after 2 attempts"
-                exit 1
-              fi
-            fi
-          done
-
-      - name: Deploy full application stack
+      - name: Deploy application stack
         env:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: |
@@ -301,10 +78,7 @@ jobs:
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
           export NEXTCLOUD_ADMIN_PASSWORD="${{ secrets.NEXTCLOUD_ADMIN_PASSWORD }}"
           export NEXTCLOUD_DB_PASSWORD="${{ secrets.NEXTCLOUD_DB_PASSWORD }}"
-
-          # Copy registry fallback info to the expected location
-          if [ -f /tmp/registry-fallback.env ]; then
-            cp /tmp/registry-fallback.env /tmp/registry-fallback.env
-          fi
+          export DOCKERHUB_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}"
+          export FORCE_REDEPLOY="${{ github.event.inputs.force_redeploy || 'false' }}"
 
           infrastructure/scripts/deploy-application.sh ${{ needs.build-and-push.outputs.tag }}
