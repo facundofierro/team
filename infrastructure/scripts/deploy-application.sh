@@ -201,29 +201,22 @@ deploy_full_stack() {
         local CONTAINER_IMAGE="$CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
         echo "Using Container Registry image: $CONTAINER_IMAGE"
 
-        # Update the docker-stack.yml with the new image
-        sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" infrastructure/docker/docker-stack.yml
+        # Create a temporary docker-stack.yml and update the image
+        cp infrastructure/docker/docker-stack.yml ./docker-stack-temp.yml
+        sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" ./docker-stack-temp.yml
     else
         echo "❌ Container registry or image tag not provided"
         exit 1
     fi
 
-    # Fix nginx configuration to use file-based config
-    echo "🔧 Configuring nginx with file-based configuration"
-
-    # Create a temporary docker-stack.yml in current directory to preserve relative paths
-    cp infrastructure/docker/docker-stack.yml ./docker-stack-temp.yml
-
-    # Fix the nginx config to use the correct file path
-    sed -i 's/external: true//' ./docker-stack-temp.yml
-    sed -i 's/name: teamhub_nginx_config_v4/file: .\/infrastructure\/configs\/nginx.conf/' ./docker-stack-temp.yml
+    echo "🔧 Using file-based nginx configuration"
 
     # Deploy the full stack
     export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
     export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
     export PG_PASSWORD="${PG_PASSWORD}"
 
-    echo "🚀 Deploying application stack with corrected configuration..."
+    echo "🚀 Deploying application stack..."
     docker stack deploy -c ./docker-stack-temp.yml teamhub
 
     # Clean up temporary file
