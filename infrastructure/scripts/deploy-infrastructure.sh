@@ -125,8 +125,8 @@ services:
       placement:
         constraints:
           - node.role == manager
-    expose:
-      - "5000"
+    ports:
+      - "5000:5000"
     environment:
       - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
       - REGISTRY_AUTH=htpasswd
