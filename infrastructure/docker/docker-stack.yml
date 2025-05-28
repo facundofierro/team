@@ -50,6 +50,25 @@ services:
     depends_on:
       - teamhub
       - nextcloud
+      - remotion
+
+  # Remotion rendering service
+  remotion:
+    image: ${REMOTION_IMAGE:-ghcr.io/facundofierro/kadiel-learning/remotion-render:latest}
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+    environment:
+      - NODE_ENV=production
+      # Add any environment variables your remotion service needs
+    networks:
+      - teamhub_network
 
   teamhub:
     image: localhost:5000/teamhub:latest

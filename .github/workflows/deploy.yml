@@ -83,6 +83,7 @@ jobs:
           echo "🔧 Deployment Configuration:"
           echo "  - Container Registry: ghcr.io/${{ github.repository }}"
           echo "  - Image Tag: ${{ needs.build-and-push.outputs.tag }}"
+          echo "  - Remotion Image: ghcr.io/facundofierro/kadiel-learning/remotion-render:latest"
           echo "  - Force Redeploy: ${{ github.event.inputs.force_redeploy || 'false' }}"
           echo "  - Trigger: ${{ github.event_name }}"
 
@@ -96,6 +97,11 @@ jobs:
           export NEXTCLOUD_DB_PASSWORD="${{ secrets.NEXTCLOUD_DB_PASSWORD }}"
           export CONTAINER_REGISTRY="ghcr.io/${{ github.repository }}"
           export FORCE_REDEPLOY="${{ github.event.inputs.force_redeploy || 'false' }}"
+
+          # Pull latest remotion-render image
+          echo "🎬 Pulling latest remotion-render image..."
+          docker pull ghcr.io/facundofierro/kadiel-learning/remotion-render:latest
+          export REMOTION_IMAGE="ghcr.io/facundofierro/kadiel-learning/remotion-render:latest"
 
           infrastructure/scripts/deploy-application.sh ${{ needs.build-and-push.outputs.tag }}
 
