@@ -33,7 +33,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Install pnpm globally (only what we need for production)
-RUN npm install -g pnpm
+RUN npm install -g pnpm turbo
 
 WORKDIR /app
 
