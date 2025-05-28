@@ -57,6 +57,7 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/teamhub/next.config.mjs ./apps/teamhub/
 COPY --from=builder /app/apps/teamhub/package.json ./apps/teamhub/
 COPY --from=builder /app/apps/teamhub/middleware.ts ./apps/teamhub/
+COPY --from=builder /app/turbo.json ./
 
 # Change ownership to nextjs user
 RUN chown -R nextjs:nodejs /app
