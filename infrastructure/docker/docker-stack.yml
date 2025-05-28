@@ -1,5 +1,35 @@
 version: '3.8'
 services:
+  # PostgreSQL database for teamhub
+  postgres:
+    image: postgres:15
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    environment:
+      - POSTGRES_DB=teamhub
+      - POSTGRES_USER=teamhub
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - registry_network
+
+  # Redis cache for teamhub
+  redis:
+    image: redis:7-alpine
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - redis_data:/data
+    networks:
+      - registry_network
+
   # Add nginx reverse proxy service
   nginx:
     image: nginx:alpine
@@ -58,10 +88,14 @@ services:
     environment:
       - NODE_ENV=production
       - PG_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_URL=postgresql://teamhub:${PG_PASSWORD}@postgres:5432/teamhub
+      - REDIS_URL=redis://redis:6379
       # Add other env vars here, or use secrets/configs
     networks:
       - registry_network
     depends_on:
+      - postgres
+      - redis
       - registry
 
   nextcloud:
@@ -103,12 +137,13 @@ services:
 
 configs:
   nginx_config:
-    external: true
-    name: teamhub_nginx_config_v4
+    file: ./infrastructure/configs/nginx.conf
   registry_config:
     file: ./infrastructure/configs/registry-config.yml
 
 volumes:
+  postgres_data:
+  redis_data:
   registry_data:
   registry_auth:
   nextcloud_data:

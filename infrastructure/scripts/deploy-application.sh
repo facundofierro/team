@@ -4,27 +4,72 @@ set -e
 
 echo "=== Deploying Full Application Stack ==="
 
+# Check if infrastructure services are already running and healthy
+check_infrastructure_status() {
+    echo "🔍 Checking infrastructure status..."
+
+    local POSTGRES_RUNNING=false
+    local REDIS_RUNNING=false
+    local POSTGRES_HEALTHY=false
+    local REDIS_HEALTHY=false
+
+    # Check if services exist and are running
+    if docker service ls --filter name=teamhub_postgres --format "{{.Name}}" | grep -q teamhub_postgres; then
+        if docker service ls --filter name=teamhub_postgres --format "{{.Replicas}}" | grep -q "1/1"; then
+            POSTGRES_RUNNING=true
+            echo "✅ PostgreSQL service is running"
+        else
+            echo "⚠️ PostgreSQL service exists but not ready"
+        fi
+    else
+        echo "❌ PostgreSQL service not found"
+    fi
+
+    if docker service ls --filter name=teamhub_redis --format "{{.Name}}" | grep -q teamhub_redis; then
+        if docker service ls --filter name=teamhub_redis --format "{{.Replicas}}" | grep -q "1/1"; then
+            REDIS_RUNNING=true
+            echo "✅ Redis service is running"
+        else
+            echo "⚠️ Redis service exists but not ready"
+        fi
+    else
+        echo "❌ Redis service not found"
+    fi
+
+    # Test health of running services
+    if [ "$POSTGRES_RUNNING" = true ]; then
+        # Test PostgreSQL connectivity through docker service
+        if docker service logs teamhub_postgres 2>/dev/null | tail -20 | grep -q "database system is ready to accept connections"; then
+            POSTGRES_HEALTHY=true
+            echo "✅ PostgreSQL is healthy"
+        else
+            echo "⚠️ PostgreSQL may not be healthy"
+        fi
+    fi
+
+    if [ "$REDIS_RUNNING" = true ]; then
+        # Redis is typically ready if the service is running
+        REDIS_HEALTHY=true
+        echo "✅ Redis is healthy"
+    fi
+
+    # Return status
+    if [ "$POSTGRES_HEALTHY" = true ] && [ "$REDIS_HEALTHY" = true ]; then
+        echo "✅ Infrastructure is healthy and ready"
+        return 0
+    else
+        echo "❌ Infrastructure needs setup"
+        return 1
+    fi
+}
+
 # Setup infrastructure if needed
 setup_infrastructure() {
     echo "🔧 Setting up infrastructure services (databases)..."
 
-    # Check if infrastructure services already exist
-    local POSTGRES_EXISTS=false
-    local REDIS_EXISTS=false
-
-    if docker service ls --filter name=teamhub_postgres --format "{{.Name}}" | grep -q teamhub_postgres; then
-        echo "✅ PostgreSQL service already exists"
-        POSTGRES_EXISTS=true
-    fi
-
-    if docker service ls --filter name=teamhub_redis --format "{{.Name}}" | grep -q teamhub_redis; then
-        echo "✅ Redis service already exists"
-        REDIS_EXISTS=true
-    fi
-
-    # If infrastructure exists and force redeploy is not enabled, skip setup
-    if [ "$FORCE_REDEPLOY" != "true" ] && [ "$POSTGRES_EXISTS" = true ] && [ "$REDIS_EXISTS" = true ]; then
-        echo "✅ Infrastructure already exists, skipping setup"
+    # Check if we should skip infrastructure setup
+    if [ "$FORCE_REDEPLOY" != "true" ] && check_infrastructure_status; then
+        echo "✅ Infrastructure already exists and is healthy, skipping setup"
         return 0
     fi
 
@@ -104,13 +149,43 @@ EOF
     echo "✅ Infrastructure setup completed"
 }
 
-# Check if we're transitioning from infrastructure-only to full stack
-check_transition_state() {
-    if docker config ls --filter name=teamhub_nginx_infra_config --format "{{.Name}}" | grep -q teamhub_nginx_infra_config; then
-        echo "🔄 Transitioning from infrastructure-only to full stack deployment"
+# Check if full stack is already deployed
+check_full_stack_status() {
+    echo "🔍 Checking full application stack status..."
+
+    local TEAMHUB_RUNNING=false
+    local NGINX_RUNNING=false
+
+    # Check if teamhub service exists and is running
+    if docker service ls --filter name=teamhub_teamhub --format "{{.Name}}" | grep -q teamhub_teamhub; then
+        if docker service ls --filter name=teamhub_teamhub --format "{{.Replicas}}" | grep -q "1/1"; then
+            TEAMHUB_RUNNING=true
+            echo "✅ Teamhub service is running"
+        else
+            echo "⚠️ Teamhub service exists but not ready"
+        fi
+    else
+        echo "❌ Teamhub service not found"
+    fi
+
+    # Check if nginx service exists and is running
+    if docker service ls --filter name=teamhub_nginx --format "{{.Name}}" | grep -q teamhub_nginx; then
+        if docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
+            NGINX_RUNNING=true
+            echo "✅ Nginx service is running"
+        else
+            echo "⚠️ Nginx service exists but not ready"
+        fi
+    else
+        echo "❌ Nginx service not found"
+    fi
+
+    # Return status
+    if [ "$TEAMHUB_RUNNING" = true ] && [ "$NGINX_RUNNING" = true ]; then
+        echo "✅ Full application stack is running"
         return 0
     else
-        echo "🔄 Updating existing full stack deployment"
+        echo "❌ Full application stack needs deployment"
         return 1
     fi
 }
@@ -118,51 +193,41 @@ check_transition_state() {
 # Deploy full application stack
 deploy_full_stack() {
     local IMAGE_TAG="$1"
-    local USING_INFRA_CONFIG=false
 
-    if check_transition_state; then
-        USING_INFRA_CONFIG=true
-    fi
-
-    echo "Deploying full application stack (including teamhub)..."
+    echo "🚀 Deploying full application stack..."
 
     # Use GitHub Container Registry image
     if [ -n "$CONTAINER_REGISTRY" ] && [ -n "$IMAGE_TAG" ]; then
         local CONTAINER_IMAGE="$CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
         echo "Using Container Registry image: $CONTAINER_IMAGE"
+
+        # Update the docker-stack.yml with the new image
         sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" infrastructure/docker/docker-stack.yml
     else
         echo "❌ Container registry or image tag not provided"
         exit 1
     fi
 
-    if [ "$USING_INFRA_CONFIG" = true ]; then
-        # First deployment: transition from infrastructure to full stack
-        echo "🚀 First deployment: Transitioning to full stack with nginx.conf"
+    # Fix nginx configuration to use file-based config
+    echo "🔧 Configuring nginx with file-based configuration"
 
-        # Update the docker-stack.yml to use file-based config instead of external
-        sed -i 's/external: true/file: .\/infrastructure\/configs\/nginx.conf/' infrastructure/docker/docker-stack.yml
-        sed -i 's/name: teamhub_nginx_config_v4//' infrastructure/docker/docker-stack.yml
+    # Create a temporary docker-stack.yml with corrected nginx config path
+    cp infrastructure/docker/docker-stack.yml /tmp/docker-stack-fixed.yml
 
-        # Deploy the full stack (nginx.conf is already checked out)
-        export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
-        export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
-        export PG_PASSWORD="${PG_PASSWORD}"
-        docker stack deploy -c infrastructure/docker/docker-stack.yml teamhub
+    # Fix the nginx config to use the correct file path
+    sed -i 's/external: true//' /tmp/docker-stack-fixed.yml
+    sed -i 's/name: teamhub_nginx_config_v4/file: .\/infrastructure\/configs\/nginx.conf/' /tmp/docker-stack-fixed.yml
 
-        # Clean up the temporary infrastructure config after successful deployment
-        echo "🧹 Cleaning up temporary infrastructure config"
-        sleep 30  # Wait for deployment to complete
-        docker config rm teamhub_nginx_infra_config 2>/dev/null || true
+    # Deploy the full stack
+    export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
+    export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
+    export PG_PASSWORD="${PG_PASSWORD}"
 
-    else
-        # Subsequent deployments: just update the stack
-        echo "🔄 Updating existing full stack deployment"
-        export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
-        export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
-        export PG_PASSWORD="${PG_PASSWORD}"
-        docker stack deploy -c infrastructure/docker/docker-stack.yml teamhub
-    fi
+    echo "🚀 Deploying application stack with corrected configuration..."
+    docker stack deploy -c /tmp/docker-stack-fixed.yml teamhub
+
+    # Clean up temporary file
+    rm -f /tmp/docker-stack-fixed.yml
 
     echo "Waiting for teamhub service to be ready..."
     sleep 30
@@ -237,17 +302,24 @@ main() {
 
     echo "🚀 Starting deployment with Container Registry image: $CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
 
-    # Setup infrastructure first
+    # Stage 1: Setup infrastructure first (if needed)
+    echo "=== STAGE 1: Infrastructure Setup ==="
     setup_infrastructure
 
-    # Deploy the full stack
-    deploy_full_stack "$IMAGE_TAG"
+    # Stage 2: Deploy the full stack (if needed or if force redeploy)
+    echo "=== STAGE 2: Application Deployment ==="
+    if [ "$FORCE_REDEPLOY" = "true" ] || ! check_full_stack_status; then
+        deploy_full_stack "$IMAGE_TAG"
 
-    # Wait for services to be ready
-    wait_for_services
+        # Wait for services to be ready
+        wait_for_services
 
-    # Test application endpoints
-    test_application
+        # Test application endpoints
+        test_application
+    else
+        echo "✅ Full application stack already running, skipping deployment"
+        echo "💡 Use FORCE_REDEPLOY=true to force redeployment"
+    fi
 
     # Cleanup
     cleanup

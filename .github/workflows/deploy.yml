@@ -78,6 +78,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Display deployment configuration
+        run: |
+          echo "🔧 Deployment Configuration:"
+          echo "  - Container Registry: ghcr.io/${{ github.repository }}"
+          echo "  - Image Tag: ${{ needs.build-and-push.outputs.tag }}"
+          echo "  - Force Redeploy: ${{ github.event.inputs.force_redeploy || 'false' }}"
+          echo "  - Trigger: ${{ github.event_name }}"
+
       - name: Deploy application stack
         env:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
@@ -90,6 +98,12 @@ jobs:
           export FORCE_REDEPLOY="${{ github.event.inputs.force_redeploy || 'false' }}"
 
           infrastructure/scripts/deploy-application.sh ${{ needs.build-and-push.outputs.tag }}
+
+      - name: Run health check
+        run: |
+          chmod +x infrastructure/scripts/health-check.sh
+          echo "🏥 Running post-deployment health check..."
+          infrastructure/scripts/health-check.sh
 
   cleanup-old-images:
     runs-on: ubuntu-latest

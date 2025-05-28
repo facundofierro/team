@@ -20,7 +20,23 @@ GitHub Actions → GitHub Container Registry → Self-hosted Server (Docker Swar
 6. **Teamhub**: Main application
 7. **Nextcloud**: File storage and collaboration
 
-## Deployment Process
+## Two-Stage Deployment Process
+
+The deployment follows a smart two-stage approach that avoids duplicating services and only deploys what's needed:
+
+### Stage 1: Infrastructure Setup
+
+- **Checks existing infrastructure**: Verifies if PostgreSQL and Redis are already running and healthy
+- **Conditional deployment**: Only deploys infrastructure if services are missing or unhealthy
+- **Force redeploy option**: Can be overridden with `FORCE_REDEPLOY=true` to redeploy everything
+- **Health verification**: Ensures databases are ready before proceeding
+
+### Stage 2: Application Deployment
+
+- **Full stack status check**: Verifies if teamhub and nginx services are already running
+- **Smart updates**: Only deploys application stack if needed or when forced
+- **Configuration management**: Properly handles nginx configuration and service networking
+- **Health monitoring**: Performs post-deployment health checks
 
 ### 1. Build & Push (GitHub Actions)
 
@@ -32,23 +48,25 @@ GitHub Actions → GitHub Container Registry → Self-hosted Server (Docker Swar
 ### 2. Deploy (Self-hosted Server)
 
 - Pulls latest image from GHCR
-- Sets up infrastructure (databases) if needed
-- Deploys full application stack
-- Performs health checks
+- Performs two-stage deployment as described above
+- Runs comprehensive health checks
+- Provides detailed deployment feedback
 
 ## Directory Structure
 
 ```
 infrastructure/
 ├── configs/
-│   └── nginx.conf          # Simplified nginx configuration
+│   ├── nginx.conf               # Nginx reverse proxy configuration
+│   └── registry-config.yml      # Docker registry configuration
 ├── docker/
-│   └── docker-stack.yml    # Docker Swarm stack definition
+│   └── docker-stack.yml         # Docker Swarm stack definition
 └── scripts/
-    ├── deploy-application.sh    # Main deployment script
-    ├── test-pinggy-fix.sh      # Legacy Pinggy script
-    ├── check-pinggy-domain.sh  # Legacy Pinggy script
-    └── README.md               # Scripts documentation
+    ├── deploy-application.sh    # Main two-stage deployment script
+    ├── health-check.sh          # Post-deployment health verification
+    ├── test-pinggy-fix.sh       # Legacy Pinggy script
+    ├── check-pinggy-domain.sh   # Legacy Pinggy script
+    └── README.md                # Scripts documentation
 ```
 
 ## Environment Variables
@@ -70,8 +88,19 @@ Required secrets in GitHub Actions:
 ✅ **Secure**: Uses GitHub tokens with proper scoping
 ✅ **Simple**: No external service dependencies
 ✅ **Fast**: Optimized with Docker layer caching
+✅ **Smart deployment**: Avoids duplicating existing healthy services
+✅ **Health monitoring**: Comprehensive health checks after deployment
 
-## Deployment Commands
+## Deployment Options
+
+### Automatic Deployment (GitHub Actions)
+
+The deployment runs automatically on pushes to main branch. You can also trigger manual deployments:
+
+1. Go to Actions tab in GitHub
+2. Select "Deploy to Self-Hosted Server"
+3. Click "Run workflow"
+4. Choose whether to force redeploy (optional)
 
 ### Manual Deployment
 
@@ -82,16 +111,38 @@ export NEXTCLOUD_ADMIN_PASSWORD="your-nextcloud-password"
 export NEXTCLOUD_DB_PASSWORD="your-nextcloud-db-password"
 export CONTAINER_REGISTRY="ghcr.io/your-org/your-repo"
 
-# Deploy
+# Normal deployment (smart - only deploys what's needed)
 ./infrastructure/scripts/deploy-application.sh <image-tag>
 ```
 
 ### Force Redeploy
 
+Use this when you want to redeploy everything regardless of current state:
+
 ```bash
 export FORCE_REDEPLOY="true"
 ./infrastructure/scripts/deploy-application.sh <image-tag>
 ```
+
+### Health Check
+
+Run health checks independently:
+
+```bash
+./infrastructure/scripts/health-check.sh
+```
+
+## Smart Deployment Logic
+
+The deployment script intelligently handles different scenarios:
+
+| Scenario                          | Infrastructure Action          | Application Action               |
+| --------------------------------- | ------------------------------ | -------------------------------- |
+| Clean environment                 | Deploy infrastructure          | Deploy application               |
+| Infrastructure exists + healthy   | Skip infrastructure            | Deploy application if needed     |
+| Infrastructure exists + unhealthy | Redeploy infrastructure        | Deploy application               |
+| Force redeploy = true             | Always redeploy infrastructure | Always redeploy application      |
+| All services healthy              | Skip infrastructure            | Skip application (unless forced) |
 
 ## Cost Optimization
 
@@ -99,6 +150,7 @@ export FORCE_REDEPLOY="true"
 - **Layer caching**: Reduces build time and transfer costs
 - **Alpine Linux**: Minimal base images for smaller size
 - **Multi-stage builds**: Production images contain only necessary files
+- **Smart deployment**: Avoids unnecessary redeployments
 
 ## Troubleshooting
 
@@ -113,23 +165,45 @@ export FORCE_REDEPLOY="true"
 
    - Check service logs: `docker service logs teamhub_<service-name>`
    - Verify environment variables are set
+   - Run health check: `./infrastructure/scripts/health-check.sh`
 
 3. **Database Connection Issues**
+
    - Ensure PostgreSQL service is running: `docker service ls`
    - Check database logs: `docker service logs teamhub_postgres`
+   - Verify connection string in teamhub service
+
+4. **Nginx Configuration Issues**
+   - Check nginx logs: `docker service logs teamhub_nginx`
+   - Verify nginx.conf syntax
+   - Ensure all upstream services are available
 
 ### Health Checks
 
 ```bash
-# Check all services
+# Comprehensive health check
+./infrastructure/scripts/health-check.sh
+
+# Manual service checks
 docker service ls
-
-# Check specific service
 docker service logs teamhub_teamhub
+docker service logs teamhub_nginx
+docker service logs teamhub_postgres
 
-# Test application
-curl http://localhost/health
+# Test application endpoints
+curl http://localhost/
+curl http://localhost/nextcloud/
 ```
+
+### Debugging Deployment Issues
+
+1. **Check deployment logs** in GitHub Actions
+2. **Review health check output** at the end of deployment
+3. **Use force redeploy** if services are in inconsistent state:
+   ```bash
+   export FORCE_REDEPLOY="true"
+   ./infrastructure/scripts/deploy-application.sh <image-tag>
+   ```
 
 ## Legacy Scripts
 
