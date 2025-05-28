@@ -9,7 +9,7 @@ on:
       force_redeploy:
         description: 'Force redeploy infrastructure (ignores existing services)'
         required: false
-        default: 'true'
+        default: 'false'
         type: choice
         options:
           - 'false'
@@ -42,7 +42,16 @@ jobs:
         run: |
           chmod +x infrastructure/scripts/setup-pinggy.sh
           chmod +x infrastructure/scripts/manage-pinggy-service.sh
-          infrastructure/scripts/setup-pinggy.sh setup
+
+          # Force reinstall Pinggy service if force_redeploy is true
+          if [ "${{ github.event.inputs.force_redeploy || 'false' }}" = "true" ]; then
+            echo "🔄 Force redeploy enabled - reinstalling Pinggy service"
+            infrastructure/scripts/manage-pinggy-service.sh uninstall || true
+            infrastructure/scripts/manage-pinggy-service.sh install
+            infrastructure/scripts/manage-pinggy-service.sh start
+          else
+            infrastructure/scripts/setup-pinggy.sh setup
+          fi
 
       - name: Setup nginx with TLS for registry
         env:
