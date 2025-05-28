@@ -32,8 +32,8 @@ FROM node:22-alpine AS production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Install pnpm globally
-RUN npm install -g pnpm
+# Install pnpm and turbo globally (like in builder stage)
+RUN npm install -g pnpm turbo
 
 WORKDIR /app
 
@@ -45,10 +45,8 @@ COPY apps/teamhub/package.json ./apps/teamhub/
 COPY packages/teamhub-db/package.json ./packages/teamhub-db/
 COPY packages/teamhub-ai/package.json ./packages/teamhub-ai/
 
-# Install production dependencies AND turbo from package.json
+# Install production dependencies only
 RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store pnpm install --prod --frozen-lockfile
-# Install turbo specifically from the version in package.json
-RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store pnpm add -w turbo@^2.5.3
 
 # Copy built application from builder stage
 COPY --from=builder /app/apps/teamhub/.next ./apps/teamhub/.next
