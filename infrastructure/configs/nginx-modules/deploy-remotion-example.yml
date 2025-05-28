@@ -1,0 +1,32 @@
+# Example Docker Compose file for deploying Remotion service
+# Place this in your remotion project repository
+
+version: '3.8'
+services:
+  remotion:
+    image: ghcr.io/facundofierro/kadiel-learning/remotion-render:latest
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+    environment:
+      - NODE_ENV=production
+      # Add any environment variables your remotion service needs
+    networks:
+      - teamhub_network
+    # Uncomment if you need to expose the port directly (for debugging)
+    # ports:
+    #   - "3001:3001"
+
+networks:
+  teamhub_network:
+    external: true
+# To deploy this service:
+# 1. Make sure the teamhub_network exists (deployed from main infrastructure)
+# 2. Run: docker stack deploy -c docker-compose.yml remotion
+# 3. The service will be accessible at http://your-domain/remotion/

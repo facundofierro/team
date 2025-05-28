@@ -2,6 +2,7 @@
 
 set -e
 
+echo "🏥 Running post-deployment health check..."
 echo "=== Health Check for TeamHub Application Stack ==="
 
 # Colors for output
@@ -70,11 +71,25 @@ NEXTCLOUD_DB_STATUS=$?
 # Endpoint checks
 echo ""
 echo "=== Endpoint Health Checks ==="
+check_endpoint "http://localhost:80/health" "Nginx Health Check"
+NGINX_HEALTH_STATUS=$?
+
 check_endpoint "http://localhost:80" "Main Application"
 MAIN_APP_STATUS=$?
 
 check_endpoint "http://localhost:80/nextcloud/" "Nextcloud"
 NEXTCLOUD_ENDPOINT_STATUS=$?
+
+# Optional external services (may not be deployed)
+echo ""
+echo "=== Optional External Services ==="
+echo "Note: These services are deployed separately and may not be available"
+
+if curl -f --connect-timeout 5 --max-time 10 "http://localhost:80/remotion/" >/dev/null 2>&1; then
+    echo -e "${GREEN}✅ Remotion service is accessible${NC}"
+else
+    echo -e "${YELLOW}⚠️  Remotion service is not available (deployed separately)${NC}"
+fi
 
 # Overall status
 echo ""
@@ -90,10 +105,10 @@ HEALTHY_SERVICES=0
 [ $NEXTCLOUD_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $NEXTCLOUD_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 
-echo "Services: $HEALTHY_SERVICES/$TOTAL_SERVICES healthy"
+echo "Core services: $HEALTHY_SERVICES/$TOTAL_SERVICES healthy"
 
 if [ $HEALTHY_SERVICES -eq $TOTAL_SERVICES ]; then
-    echo -e "${GREEN}🎉 All services are healthy!${NC}"
+    echo -e "${GREEN}🎉 All core services are healthy!${NC}"
     exit 0
 elif [ $HEALTHY_SERVICES -gt $((TOTAL_SERVICES / 2)) ]; then
     echo -e "${YELLOW}⚠️  Most services are healthy, but some issues detected${NC}"
