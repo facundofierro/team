@@ -98,17 +98,17 @@ wait_for_services() {
 test_application() {
     echo "Testing application endpoints..."
 
-    # Test registry endpoint
-    if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
-        echo "✅ Registry endpoint is accessible"
+    # Test registry endpoint (HTTPS - Pinggy now forwards to port 443)
+    if curl -f -k --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/ >/dev/null 2>&1; then
+        echo "✅ Registry endpoint is accessible (HTTPS)"
     else
         echo "❌ Registry endpoint is not accessible"
     fi
 
     # Test teamhub endpoint (if deployed)
     if docker service ls --filter name=teamhub_teamhub --format "{{.Name}}" | grep -q teamhub_teamhub; then
-        if curl -f --connect-timeout 5 --max-time 10 http://127.0.0.1:80/ >/dev/null 2>&1; then
-            echo "✅ Teamhub application is accessible"
+        if curl -f -k --connect-timeout 5 --max-time 10 https://127.0.0.1:443/ >/dev/null 2>&1; then
+            echo "✅ Teamhub application is accessible (HTTPS)"
         else
             echo "⚠️ Teamhub application may still be starting up"
         fi

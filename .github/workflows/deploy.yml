@@ -9,7 +9,7 @@ on:
       force_redeploy:
         description: 'Force redeploy infrastructure (ignores existing services)'
         required: false
-        default: 'false'
+        default: 'true'
         type: choice
         options:
           - 'false'
@@ -136,42 +136,103 @@ jobs:
 
       - name: Test connectivity to registry
         run: |
+          echo "Testing DNS resolution and connectivity..."
+          nslookup r1.teamxagents.com || echo "DNS lookup failed"
+          ping -c 3 r1.teamxagents.com || echo "Ping failed"
+
           chmod +x infrastructure-only/infrastructure/scripts/test-connectivity.sh
           infrastructure-only/infrastructure/scripts/test-connectivity.sh
 
-      - name: Configure Docker for HTTPS registry with self-signed cert
+      - name: Configure Docker for registry access
         run: |
-          # Create Docker daemon config to accept insecure HTTPS registries (self-signed certs)
+          # Create Docker daemon config to accept insecure registries
           sudo mkdir -p /etc/docker
           echo '{
             "insecure-registries": ["r1.teamxagents.com"],
             "registry-mirrors": []
           }' | sudo tee /etc/docker/daemon.json
+
+          echo "Docker daemon config created:"
+          cat /etc/docker/daemon.json
+
           sudo systemctl restart docker
-          sleep 10
+          sleep 15
+
+          echo "Docker info after restart:"
+          docker info | grep -A 5 "Insecure Registries" || echo "No insecure registries found"
 
       - name: Login to external registry
         run: |
-          PROTOCOL="https"
-          echo "Logging in to registry at $PROTOCOL://$REGISTRY_DOMAIN"
-          echo "k8mX9pL2nQ7vR4wE" | docker login $PROTOCOL://$REGISTRY_DOMAIN -u docker --password-stdin
+          # Login via HTTPS explicitly (same as local machine)
+          echo "Logging in to registry at https://$REGISTRY_DOMAIN"
+          echo "k8mX9pL2nQ7vR4wE" | docker login https://$REGISTRY_DOMAIN -u docker --password-stdin
 
       - name: Test registry connectivity with small image
         run: |
           echo "Testing Docker registry connectivity with small Alpine image..."
-          chmod +x test-small-push.sh
-          # Create the test script content since it may not be in sparse checkout
+
+          # Wait a bit for tunnel to stabilize
+          echo "Waiting for tunnel to stabilize..."
+          sleep 30
+
+          # Test basic connectivity first - prioritize HTTPS
+          echo "Testing basic connectivity to registry..."
+          echo "Testing HTTPS connection (primary)..."
+          if curl -f --connect-timeout 10 --max-time 30 https://r1.teamxagents.com/v2/; then
+            echo "✅ HTTPS connection successful"
+          else
+            echo "❌ HTTPS test failed"
+            echo "Testing HTTP connection (fallback)..."
+            curl -f --connect-timeout 10 --max-time 30 http://r1.teamxagents.com/v2/ || echo "HTTP test also failed"
+          fi
+
+          # Create the test script content matching your local version exactly
           cat > test-registry.sh << 'EOF'
           #!/bin/bash
           echo "Testing Docker registry connectivity with small image..."
-          docker pull alpine:latest
-          docker tag alpine:latest r1.teamxagents.com/test-alpine:latest
-          if docker push r1.teamxagents.com/test-alpine:latest; then
-              echo "✅ Small image push successful - tunnel is working!"
-          else
-              echo "❌ Small image push failed - tunnel connectivity issue"
+
+          # Login to the registry first via HTTPS (same as local)
+          echo "Logging in to Docker registry via HTTPS..."
+          echo "k8mX9pL2nQ7vR4wE" | docker login https://r1.teamxagents.com -u docker --password-stdin
+
+                    # Pull a small test image (hello-world is ~5KB, different from previous tests)
+          echo "Pulling hello-world test image..."
+          docker pull hello-world:latest
+
+          # Tag for your registry (HTTPS) with timestamp to avoid cache
+          TIMESTAMP=$(date +%s)
+          echo "Tagging for private registry with timestamp: $TIMESTAMP"
+          docker tag hello-world:latest r1.teamxagents.com/test-hello:$TIMESTAMP
+
+          # Try to push the small image with retries
+          echo "Attempting to push small test image..."
+
+          # Add some debugging
+          echo "Testing registry API before push..."
+          curl -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/ || echo "Registry API test failed"
+
+          # Try push with timeout and retries
+          PUSH_SUCCESS=false
+          for i in {1..3}; do
+              echo "Push attempt $i/3..."
+              if timeout 300 docker push r1.teamxagents.com/test-hello:$TIMESTAMP; then
+                  echo "✅ Small image push successful - tunnel is working!"
+                  echo "The issue is likely with large layer sizes in your main image"
+                  PUSH_SUCCESS=true
+                  break
+              else
+                  echo "Push attempt $i failed, waiting 30 seconds before retry..."
+                  sleep 30
+              fi
+          done
+
+          if [ "$PUSH_SUCCESS" = false ]; then
+              echo "❌ Small image push failed after 3 attempts"
+              echo "Check your tunnel connection and DNS resolution"
           fi
-          docker rmi r1.teamxagents.com/test-alpine:latest 2>/dev/null || true
+
+          # Clean up
+          docker rmi r1.teamxagents.com/test-hello:$TIMESTAMP 2>/dev/null || true
           EOF
           chmod +x test-registry.sh
           ./test-registry.sh || echo "Warning: Small image test failed, will try main deployment anyway"
