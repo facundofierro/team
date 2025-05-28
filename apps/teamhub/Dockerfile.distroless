@@ -1,0 +1,61 @@
+# syntax=docker/dockerfile:1.4
+
+# ===============================
+# ULTRA-MINIMAL NEXT.JS DOCKERFILE
+# Uses standalone output + distroless for smallest possible size
+# ===============================
+
+# Build stage
+FROM node:22-alpine AS builder
+
+# Install necessary packages for building
+RUN apk add --no-cache libc6-compat
+
+# Install pnpm globally
+RUN npm install -g pnpm turbo
+
+WORKDIR /app
+
+# Copy package files for dependency resolution
+COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY turbo.json ./
+COPY apps/teamhub/package.json ./apps/teamhub/
+COPY packages/teamhub-db/package.json ./packages/teamhub-db/
+COPY packages/teamhub-ai/package.json ./packages/teamhub-ai/
+
+# Install dependencies with cache mount
+RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store \
+    pnpm install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Build the application (creates standalone output)
+RUN pnpm build:teamhub:prod
+
+# ===============================
+# Production stage - Distroless (smallest possible)
+# ===============================
+FROM gcr.io/distroless/nodejs22-debian12 AS runner
+
+WORKDIR /app
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Copy standalone output (this contains everything needed to run!)
+COPY --from=builder /app/apps/teamhub/.next/standalone ./
+COPY --from=builder /app/apps/teamhub/.next/static ./apps/teamhub/.next/static
+COPY --from=builder /app/apps/teamhub/public ./apps/teamhub/public
+
+# The distroless image runs as non-root by default
+USER 1001:1001
+
+EXPOSE 3000
+
+# Start the standalone server (distroless doesn't have shell, so direct node call)
+CMD ["apps/teamhub/server.js"]
