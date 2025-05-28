@@ -47,10 +47,6 @@ services:
         target: /etc/nginx/conf.d/locations/remotion.conf
     networks:
       - teamhub_network
-    depends_on:
-      - teamhub
-      - nextcloud
-      - remotion
 
   # Remotion rendering service
   remotion:
