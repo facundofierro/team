@@ -155,6 +155,7 @@ check_full_stack_status() {
 
     local TEAMHUB_RUNNING=false
     local NGINX_RUNNING=false
+    local REMOTION_RUNNING=false
 
     # Check if teamhub service exists and is running
     if docker service ls --filter name=teamhub_teamhub --format "{{.Name}}" | grep -q teamhub_teamhub; then
@@ -180,8 +181,20 @@ check_full_stack_status() {
         echo "❌ Nginx service not found"
     fi
 
+    # Check if remotion service exists and is running
+    if docker service ls --filter name=teamhub_remotion --format "{{.Name}}" | grep -q teamhub_remotion; then
+        if docker service ls --filter name=teamhub_remotion --format "{{.Replicas}}" | grep -q "1/1"; then
+            REMOTION_RUNNING=true
+            echo "✅ Remotion service is running"
+        else
+            echo "⚠️ Remotion service exists but not ready"
+        fi
+    else
+        echo "❌ Remotion service not found"
+    fi
+
     # Return status
-    if [ "$TEAMHUB_RUNNING" = true ] && [ "$NGINX_RUNNING" = true ]; then
+    if [ "$TEAMHUB_RUNNING" = true ] && [ "$NGINX_RUNNING" = true ] && [ "$REMOTION_RUNNING" = true ]; then
         echo "✅ Full application stack is running"
         return 0
     else
@@ -204,6 +217,12 @@ deploy_full_stack() {
         # Create a temporary docker-stack.yml and update the image
         cp infrastructure/docker/docker-stack.yml ./docker-stack-temp.yml
         sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" ./docker-stack-temp.yml
+
+        # Update remotion image if REMOTION_IMAGE is provided
+        if [ -n "$REMOTION_IMAGE" ]; then
+            echo "Using Remotion image: $REMOTION_IMAGE"
+            sed -i "s|\${REMOTION_IMAGE:-.*}|$REMOTION_IMAGE|" ./docker-stack-temp.yml
+        fi
     else
         echo "❌ Container registry or image tag not provided"
         exit 1
@@ -224,6 +243,7 @@ deploy_full_stack() {
     export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
     export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
     export PG_PASSWORD="${PG_PASSWORD}"
+    export REMOTION_IMAGE="${REMOTION_IMAGE}"
 
     echo "🚀 Deploying application stack..."
     docker stack deploy -c ./docker-stack-temp.yml teamhub
@@ -270,6 +290,22 @@ wait_for_services() {
             sleep 10
         fi
     done
+
+    # Check remotion service
+    for i in {1..15}; do
+        if docker service ls --filter name=teamhub_remotion --format "{{.Replicas}}" | grep -q "1/1"; then
+            echo "✅ Remotion service is ready"
+            break
+        fi
+        if [ $i -eq 15 ]; then
+            echo "❌ Remotion service failed to start after 15 attempts"
+            echo "🔍 Checking remotion service logs:"
+            docker service logs teamhub_remotion --tail 20 || true
+        else
+            echo "Waiting for remotion service... (attempt $i/15)"
+            sleep 10
+        fi
+    done
 }
 
 # Test application endpoints
@@ -290,6 +326,13 @@ test_application() {
         echo "✅ Nginx service is accessible"
     else
         echo "⚠️ Nginx service may still be starting up"
+    fi
+
+    # Test remotion endpoint
+    if curl -f --connect-timeout 5 --max-time 10 http://127.0.0.1:80/remotion/ >/dev/null 2>&1; then
+        echo "✅ Remotion service is accessible"
+    else
+        echo "⚠️ Remotion service may still be starting up"
     fi
 }
 
