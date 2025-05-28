@@ -61,9 +61,6 @@ TEAMHUB_STATUS=$?
 check_service "teamhub_nginx" "Nginx Reverse Proxy"
 NGINX_STATUS=$?
 
-check_service "teamhub_registry" "Docker Registry"
-REGISTRY_STATUS=$?
-
 check_service "teamhub_nextcloud" "Nextcloud"
 NEXTCLOUD_STATUS=$?
 
@@ -83,14 +80,13 @@ NEXTCLOUD_ENDPOINT_STATUS=$?
 echo ""
 echo "=== Overall Status ==="
 
-TOTAL_SERVICES=7
+TOTAL_SERVICES=6
 HEALTHY_SERVICES=0
 
 [ $POSTGRES_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $REDIS_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $TEAMHUB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $NGINX_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
-[ $REGISTRY_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $NEXTCLOUD_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $NEXTCLOUD_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 

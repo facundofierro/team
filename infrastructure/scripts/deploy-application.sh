@@ -211,6 +211,15 @@ deploy_full_stack() {
 
     echo "🔧 Using file-based nginx configuration"
 
+    # Check for potential configuration conflicts
+    echo "🔍 Checking for configuration conflicts..."
+
+    # Remove any conflicting old configs if they exist
+    if docker config ls --filter name=teamhub_registry_config --format "{{.Name}}" | grep -q teamhub_registry_config; then
+        echo "⚠️  Removing old registry config that conflicts with new deployment..."
+        docker config rm teamhub_registry_config || true
+    fi
+
     # Deploy the full stack
     export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
     export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
@@ -231,23 +240,35 @@ wait_for_services() {
     echo "Waiting for all services to be ready..."
 
     # Check teamhub service
-    for i in {1..10}; do
+    for i in {1..15}; do
         if docker service ls --filter name=teamhub_teamhub --format "{{.Replicas}}" | grep -q "1/1"; then
             echo "✅ Teamhub service is ready"
             break
         fi
-        echo "Waiting for teamhub service... (attempt $i/10)"
-        sleep 10
+        if [ $i -eq 15 ]; then
+            echo "❌ Teamhub service failed to start after 15 attempts"
+            echo "🔍 Checking teamhub service logs:"
+            docker service logs teamhub_teamhub --tail 20 || true
+        else
+            echo "Waiting for teamhub service... (attempt $i/15)"
+            sleep 10
+        fi
     done
 
     # Check nginx service
-    for i in {1..10}; do
+    for i in {1..15}; do
         if docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
             echo "✅ Nginx service is ready"
             break
         fi
-        echo "Waiting for nginx service... (attempt $i/10)"
-        sleep 10
+        if [ $i -eq 15 ]; then
+            echo "❌ Nginx service failed to start after 15 attempts"
+            echo "🔍 Checking nginx service logs:"
+            docker service logs teamhub_nginx --tail 20 || true
+        else
+            echo "Waiting for nginx service... (attempt $i/15)"
+            sleep 10
+        fi
     done
 }
 
