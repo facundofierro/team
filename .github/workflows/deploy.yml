@@ -195,13 +195,14 @@ jobs:
           echo "Logging in to Docker registry via HTTPS..."
           echo "k8mX9pL2nQ7vR4wE" | docker login https://r1.teamxagents.com -u docker --password-stdin
 
-          # Pull a small test image (alpine is ~5MB)
-          echo "Pulling alpine test image..."
-          docker pull alpine:latest
+                    # Pull a small test image (hello-world is ~5KB, different from previous tests)
+          echo "Pulling hello-world test image..."
+          docker pull hello-world:latest
 
-          # Tag for your registry (HTTPS)
-          echo "Tagging for private registry..."
-          docker tag alpine:latest r1.teamxagents.com/test-alpine:latest
+          # Tag for your registry (HTTPS) with timestamp to avoid cache
+          TIMESTAMP=$(date +%s)
+          echo "Tagging for private registry with timestamp: $TIMESTAMP"
+          docker tag hello-world:latest r1.teamxagents.com/test-hello:$TIMESTAMP
 
           # Try to push the small image with retries
           echo "Attempting to push small test image..."
@@ -214,7 +215,7 @@ jobs:
           PUSH_SUCCESS=false
           for i in {1..3}; do
               echo "Push attempt $i/3..."
-              if timeout 300 docker push r1.teamxagents.com/test-alpine:latest; then
+              if timeout 300 docker push r1.teamxagents.com/test-hello:$TIMESTAMP; then
                   echo "✅ Small image push successful - tunnel is working!"
                   echo "The issue is likely with large layer sizes in your main image"
                   PUSH_SUCCESS=true
@@ -231,7 +232,7 @@ jobs:
           fi
 
           # Clean up
-          docker rmi r1.teamxagents.com/test-alpine:latest 2>/dev/null || true
+          docker rmi r1.teamxagents.com/test-hello:$TIMESTAMP 2>/dev/null || true
           EOF
           chmod +x test-registry.sh
           ./test-registry.sh || echo "Warning: Small image test failed, will try main deployment anyway"

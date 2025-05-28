@@ -198,7 +198,7 @@ sudo journalctl -u pinggy -n 50
 which pinggy
 
 # Test Pinggy CLI manually (TLS tunnel)
-ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no tls@a.pinggy.io FpyP2PGUXy0
+ssh -p 443 -R0:localhost:443 -o StrictHostKeyChecking=no tls@a.pinggy.io FpyP2PGUXy0
 ```
 
 ### Service Keeps Restarting
@@ -222,7 +222,7 @@ df -h
 curl -f --connect-timeout 10 -u docker:k8mX9pL2nQ7vR4wE https://r1.teamxagents.com/v2/
 
 # Check local registry
-curl -f -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/
+curl -f -k -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/
 
 # Check network connectivity
 ping google.com

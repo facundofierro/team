@@ -7,12 +7,9 @@ echo "=== Deploying Infrastructure Services ==="
 # Check if teamhub image already exists in registry
 check_teamhub_image() {
     echo "Checking if teamhub image exists in registry..."
-    # Try HTTPS first, then fallback to HTTP
+    # Check HTTPS registry (Pinggy now forwards to port 443)
     if curl -f -k -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/teamhub/tags/list 2>/dev/null | grep -q "latest"; then
         echo "✅ Teamhub image already exists in registry (HTTPS)"
-        return 0
-    elif curl -f -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/teamhub/tags/list 2>/dev/null | grep -q "latest"; then
-        echo "✅ Teamhub image already exists in registry (HTTP)"
         return 0
     else
         echo "ℹ️ Teamhub image not found in registry - first deployment"
@@ -51,9 +48,10 @@ deploy_infrastructure() {
     echo "🚀 Deploying infrastructure services (nginx + registry)..."
     local FORCE_REDEPLOY="${1:-false}"
 
-    # Ensure port 80 is available for Docker nginx
-    echo "Ensuring port 80 is available..."
+    # Ensure ports 80 and 443 are available for Docker nginx
+    echo "Ensuring ports 80 and 443 are available..."
     netstat -tlnp | grep :80 || echo "Port 80 is free"
+    netstat -tlnp | grep :443 || echo "Port 443 is free"
 
     # Setup registry if needed
     setup_registry
@@ -175,24 +173,18 @@ wait_for_registry() {
     echo "Waiting for registry to be accessible through nginx..."
 
     for i in {1..15}; do
-        # Try HTTPS first (preferred), then HTTP as fallback
+        # Check HTTPS registry (Pinggy now forwards to port 443)
         if curl -f -k --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/ >/dev/null 2>&1; then
             echo "✅ Registry is accessible through nginx (HTTPS)"
-            return 0
-        elif curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
-            echo "✅ Registry is accessible through nginx (HTTP)"
             return 0
         fi
         echo "Waiting for registry to be ready... (attempt $i/15)"
         sleep 10
     done
 
-    # Final check with both protocols
+    # Final check
     if curl -f -k --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/ >/dev/null 2>&1; then
         echo "✅ Registry is accessible via HTTPS"
-        return 0
-    elif curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:80/v2/ >/dev/null 2>&1; then
-        echo "✅ Registry is accessible via HTTP"
         return 0
     else
         echo "❌ Registry is still not accessible after 2.5 minutes"

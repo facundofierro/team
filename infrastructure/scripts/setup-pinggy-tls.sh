@@ -19,14 +19,14 @@ pkill -f "pro.pinggy.io" 2>/dev/null || true
 # Wait a moment for cleanup
 sleep 2
 
-echo "Starting TLS tunnel on port 80 (will terminate at your nginx)..."
-echo "This tunnel will NOT inspect traffic - better for Docker registry"
+echo "Starting TLS tunnel on port 443 (direct HTTPS to nginx)..."
+echo "This tunnel forwards HTTPS traffic directly to nginx port 443"
 
-# Start TLS tunnel - this will forward TLS traffic directly without inspection
-# Your nginx will handle the SSL termination locally
+# Start TLS tunnel - this will forward HTTPS traffic directly to nginx port 443
+# Nginx will handle SSL termination and Docker registry proxying
 # Using Pinggy Pro with custom domain r1.teamxagents.com and token FpyP2PGUXy0
 echo "Attempting to start TLS tunnel with force option to override existing tunnel..."
-nohup ssh -p 443 -R0:localhost:80 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 FpyP2PGUXy0@pro.pinggy.io force > /tmp/pinggy-tls.log 2>&1 &
+nohup ssh -p 443 -R0:localhost:443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 FpyP2PGUXy0@pro.pinggy.io force > /tmp/pinggy-tls.log 2>&1 &
 
 PINGGY_PID=$!
 echo "Pinggy TLS tunnel started with PID: $PINGGY_PID"
