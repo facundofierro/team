@@ -126,13 +126,13 @@ deploy_full_stack() {
 
     echo "Deploying full application stack (including teamhub)..."
 
-    # Use DockerHub image
-    if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$IMAGE_TAG" ]; then
-        local DOCKERHUB_IMAGE="$DOCKERHUB_USERNAME/teamhub:$IMAGE_TAG"
-        echo "Using DockerHub image: $DOCKERHUB_IMAGE"
-        sed -i "s|localhost:5000/teamhub:.*|$DOCKERHUB_IMAGE|" infrastructure/docker/docker-stack.yml
+    # Use GitHub Container Registry image
+    if [ -n "$CONTAINER_REGISTRY" ] && [ -n "$IMAGE_TAG" ]; then
+        local CONTAINER_IMAGE="$CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
+        echo "Using Container Registry image: $CONTAINER_IMAGE"
+        sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" infrastructure/docker/docker-stack.yml
     else
-        echo "❌ DockerHub username or image tag not provided"
+        echo "❌ Container registry or image tag not provided"
         exit 1
     fi
 
@@ -230,12 +230,12 @@ main() {
         exit 1
     fi
 
-    if [ -z "$DOCKERHUB_USERNAME" ]; then
-        echo "❌ DOCKERHUB_USERNAME environment variable is required"
+    if [ -z "$CONTAINER_REGISTRY" ]; then
+        echo "❌ CONTAINER_REGISTRY environment variable is required"
         exit 1
     fi
 
-    echo "🚀 Starting deployment with DockerHub image: $DOCKERHUB_USERNAME/teamhub:$IMAGE_TAG"
+    echo "🚀 Starting deployment with Container Registry image: $CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
 
     # Setup infrastructure first
     setup_infrastructure

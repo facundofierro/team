@@ -2,17 +2,17 @@
 
 ## Overview
 
-This infrastructure uses a simplified Docker Swarm deployment with DockerHub as the container registry. The architecture eliminates the complexity of private registries and tunnels for maximum reliability.
+This infrastructure uses a simplified Docker Swarm deployment with GitHub Container Registry (GHCR) for storing Docker images. The architecture eliminates the complexity of private registries and external services for maximum reliability and cost efficiency.
 
 ## Architecture
 
 ```
-GitHub Actions → DockerHub → Self-hosted Server (Docker Swarm)
+GitHub Actions → GitHub Container Registry → Self-hosted Server (Docker Swarm)
 ```
 
 ### Components
 
-1. **DockerHub**: Container registry for storing Docker images
+1. **GitHub Container Registry (GHCR)**: Container registry for storing Docker images
 2. **Docker Swarm**: Container orchestration on self-hosted server
 3. **PostgreSQL**: Primary database
 4. **Redis**: Caching and session storage
@@ -25,40 +25,51 @@ GitHub Actions → DockerHub → Self-hosted Server (Docker Swarm)
 ### 1. Build & Push (GitHub Actions)
 
 - Builds Docker image from source code
-- Pushes to DockerHub with commit SHA tag
-- No complex registry setup required
+- Pushes to GHCR with commit SHA tag and latest tag
+- Uses Docker layer caching for efficiency
+- Automatically cleans up old versions (keeps last 2)
 
 ### 2. Deploy (Self-hosted Server)
 
-- Pulls latest image from DockerHub
+- Pulls latest image from GHCR
 - Sets up infrastructure (databases) if needed
 - Deploys full application stack
 - Performs health checks
 
-## Configuration Files
+## Directory Structure
 
-- `docker/docker-stack.yml` - Main Docker Swarm stack definition
-- `configs/nginx.conf` - Nginx configuration
-- `scripts/deploy-application.sh` - Main deployment script
+```
+infrastructure/
+├── configs/
+│   └── nginx.conf          # Simplified nginx configuration
+├── docker/
+│   └── docker-stack.yml    # Docker Swarm stack definition
+└── scripts/
+    ├── deploy-application.sh    # Main deployment script
+    ├── test-pinggy-fix.sh      # Legacy Pinggy script
+    ├── check-pinggy-domain.sh  # Legacy Pinggy script
+    └── README.md               # Scripts documentation
+```
 
 ## Environment Variables
 
 Required secrets in GitHub Actions:
 
-- `DOCKERHUB_USERNAME` - DockerHub username
-- `DOCKERHUB_TOKEN` - DockerHub access token
 - `PG_PASSWORD` - PostgreSQL password
 - `NEXTCLOUD_ADMIN_PASSWORD` - Nextcloud admin password
 - `NEXTCLOUD_DB_PASSWORD` - Nextcloud database password
 - `SUDO` - Server sudo password
 
+**Note**: `GITHUB_TOKEN` is automatically provided by GitHub Actions for GHCR access.
+
 ## Benefits of This Architecture
 
-✅ **Reliable**: DockerHub provides 99.9% uptime
-✅ **Simple**: Standard Docker workflow without tunnels
-✅ **Fast**: No tunnel bottlenecks or connectivity issues
-✅ **Secure**: DockerHub handles TLS/SSL properly
-✅ **Maintainable**: Industry-standard approach
+✅ **Cost-effective**: Free tier covers most projects (500MB-50GB storage)
+✅ **Integrated**: Native GitHub integration with automatic cleanup
+✅ **Reliable**: GitHub's enterprise-grade infrastructure
+✅ **Secure**: Uses GitHub tokens with proper scoping
+✅ **Simple**: No external service dependencies
+✅ **Fast**: Optimized with Docker layer caching
 
 ## Deployment Commands
 
@@ -66,10 +77,10 @@ Required secrets in GitHub Actions:
 
 ```bash
 # Set environment variables
-export DOCKERHUB_USERNAME="your-username"
 export PG_PASSWORD="your-pg-password"
 export NEXTCLOUD_ADMIN_PASSWORD="your-nextcloud-password"
 export NEXTCLOUD_DB_PASSWORD="your-nextcloud-db-password"
+export CONTAINER_REGISTRY="ghcr.io/your-org/your-repo"
 
 # Deploy
 ./infrastructure/scripts/deploy-application.sh <image-tag>
@@ -82,14 +93,21 @@ export FORCE_REDEPLOY="true"
 ./infrastructure/scripts/deploy-application.sh <image-tag>
 ```
 
+## Cost Optimization
+
+- **Auto-cleanup**: Keeps only last 2 Docker image versions
+- **Layer caching**: Reduces build time and transfer costs
+- **Alpine Linux**: Minimal base images for smaller size
+- **Multi-stage builds**: Production images contain only necessary files
+
 ## Troubleshooting
 
 ### Common Issues
 
-1. **DockerHub Login Failed**
+1. **GHCR Login Failed**
 
-   - Verify `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets
-   - Ensure token has write permissions
+   - Verify GitHub Actions has proper permissions
+   - Check if `GITHUB_TOKEN` has package write permissions
 
 2. **Service Not Starting**
 
@@ -113,13 +131,11 @@ docker service logs teamhub_teamhub
 curl http://localhost/health
 ```
 
-## Migration from Private Registry
+## Legacy Scripts
 
-If migrating from the previous private registry setup:
+The `scripts/` directory contains some legacy Pinggy-related scripts that may be useful for specific deployment scenarios but are not part of the main workflow:
 
-1. Remove any existing Pinggy services
-2. Clean up old registry containers
-3. Update GitHub secrets with DockerHub credentials
-4. Trigger new deployment
+- `test-pinggy-fix.sh` - Pinggy service testing
+- `check-pinggy-domain.sh` - Pinggy domain checking
 
-The new system will automatically handle infrastructure setup and application deployment in a single, reliable process.
+These are maintained for reference but not used in the current GitHub Container Registry workflow.
