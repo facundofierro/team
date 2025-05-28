@@ -9,7 +9,7 @@ on:
       force_redeploy:
         description: 'Force redeploy infrastructure (ignores existing services)'
         required: false
-        default: 'false'
+        default: 'true'
         type: choice
         options:
           - 'false'
