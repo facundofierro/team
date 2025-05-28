@@ -28,6 +28,10 @@ RUN pnpm build:teamhub:prod
 # Production stage
 FROM node:22-alpine AS production
 
+# Create non-root user for security and smaller footprint
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
 # Install pnpm globally (only what we need for production)
 RUN npm install -g pnpm
 
@@ -53,6 +57,10 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/teamhub/next.config.mjs ./apps/teamhub/
 COPY --from=builder /app/apps/teamhub/package.json ./apps/teamhub/
 COPY --from=builder /app/apps/teamhub/middleware.ts ./apps/teamhub/
+
+# Change ownership to nextjs user
+RUN chown -R nextjs:nodejs /app
+USER nextjs
 
 EXPOSE 3000
 

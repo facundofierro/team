@@ -1,177 +1,141 @@
-# Infrastructure
+# Infrastructure Documentation
 
-This directory contains all infrastructure-related files for the TeamHub deployment. The structure is organized to separate concerns and make the project more maintainable.
+## Overview
+
+This infrastructure uses a simplified Docker Swarm deployment with GitHub Container Registry (GHCR) for storing Docker images. The architecture eliminates the complexity of private registries and external services for maximum reliability and cost efficiency.
+
+## Architecture
+
+```
+GitHub Actions → GitHub Container Registry → Self-hosted Server (Docker Swarm)
+```
+
+### Components
+
+1. **GitHub Container Registry (GHCR)**: Container registry for storing Docker images
+2. **Docker Swarm**: Container orchestration on self-hosted server
+3. **PostgreSQL**: Primary database
+4. **Redis**: Caching and session storage
+5. **Nginx**: Reverse proxy and web server
+6. **Teamhub**: Main application
+7. **Nextcloud**: File storage and collaboration
+
+## Deployment Process
+
+### 1. Build & Push (GitHub Actions)
+
+- Builds Docker image from source code
+- Pushes to GHCR with commit SHA tag and latest tag
+- Uses Docker layer caching for efficiency
+- Automatically cleans up old versions (keeps last 2)
+
+### 2. Deploy (Self-hosted Server)
+
+- Pulls latest image from GHCR
+- Sets up infrastructure (databases) if needed
+- Deploys full application stack
+- Performs health checks
 
 ## Directory Structure
 
 ```
 infrastructure/
-├── scripts/           # Deployment and management scripts
-├── configs/           # Configuration files (nginx, etc.)
-├── docker/           # Docker-related files (compose, setup scripts)
-└── README.md         # This file
+├── configs/
+│   └── nginx.conf          # Simplified nginx configuration
+├── docker/
+│   └── docker-stack.yml    # Docker Swarm stack definition
+└── scripts/
+    ├── deploy-application.sh    # Main deployment script
+    ├── test-pinggy-fix.sh      # Legacy Pinggy script
+    ├── check-pinggy-domain.sh  # Legacy Pinggy script
+    └── README.md               # Scripts documentation
 ```
 
-## 📁 Directory Contents
+## Environment Variables
 
-### `/scripts`
+Required secrets in GitHub Actions:
 
-Contains modular deployment and management scripts:
+- `PG_PASSWORD` - PostgreSQL password
+- `NEXTCLOUD_ADMIN_PASSWORD` - Nextcloud admin password
+- `NEXTCLOUD_DB_PASSWORD` - Nextcloud database password
+- `SUDO` - Server sudo password
 
-- **`setup-pinggy.sh`** - Pinggy tunnel management
-- **`deploy-infrastructure.sh`** - Infrastructure deployment (nginx + registry)
-- **`deploy-application.sh`** - Full application stack deployment
-- **`test-connectivity.sh`** - Connectivity testing for CI/CD
-- **`README.md`** - Detailed script documentation
+**Note**: `GITHUB_TOKEN` is automatically provided by GitHub Actions for GHCR access.
 
-### `/configs`
+## Benefits of This Architecture
 
-Contains configuration files:
+✅ **Cost-effective**: Free tier covers most projects (500MB-50GB storage)
+✅ **Integrated**: Native GitHub integration with automatic cleanup
+✅ **Reliable**: GitHub's enterprise-grade infrastructure
+✅ **Secure**: Uses GitHub tokens with proper scoping
+✅ **Simple**: No external service dependencies
+✅ **Fast**: Optimized with Docker layer caching
 
-- **`nginx.conf`** - Full nginx configuration for production
-- **`nginx-infra.conf`** - Infrastructure-only nginx configuration
+## Deployment Commands
 
-### `/docker`
-
-Contains Docker-related files:
-
-- **`docker-stack.yml`** - Docker Swarm stack definition
-- **`setup-registry.sh`** - Docker registry setup script
-
-## 🚀 Quick Start
-
-### Local Development
+### Manual Deployment
 
 ```bash
-# Test Pinggy setup
-./infrastructure/scripts/setup-pinggy.sh check
+# Set environment variables
+export PG_PASSWORD="your-pg-password"
+export NEXTCLOUD_ADMIN_PASSWORD="your-nextcloud-password"
+export NEXTCLOUD_DB_PASSWORD="your-nextcloud-db-password"
+export CONTAINER_REGISTRY="ghcr.io/your-org/your-repo"
 
-# Test infrastructure deployment
-export PG_PASSWORD="your_password"
-./infrastructure/scripts/deploy-infrastructure.sh
-
-# Test connectivity
-./infrastructure/scripts/test-connectivity.sh
+# Deploy
+./infrastructure/scripts/deploy-application.sh <image-tag>
 ```
 
-### Production Deployment
-
-The GitHub Actions workflow automatically uses these scripts:
-
-1. **Setup Phase**: `setup-pinggy.sh` + `deploy-infrastructure.sh`
-2. **Build Phase**: `test-connectivity.sh`
-3. **Deploy Phase**: `deploy-application.sh`
-
-## 🔧 Configuration
-
-### Environment Variables
+### Force Redeploy
 
 ```bash
-# Required for all deployments
-export PG_PASSWORD="your_postgres_password"
-
-# Required for full application deployment
-export NEXTCLOUD_ADMIN_PASSWORD="your_nextcloud_admin_password"
-export NEXTCLOUD_DB_PASSWORD="your_nextcloud_db_password"
-
-# Optional
-export REGISTRY_DOMAIN="r1.teamxagents.com"
+export FORCE_REDEPLOY="true"
+./infrastructure/scripts/deploy-application.sh <image-tag>
 ```
 
-### Script Usage
+## Cost Optimization
 
-Each script supports multiple commands. See individual script help:
+- **Auto-cleanup**: Keeps only last 2 Docker image versions
+- **Layer caching**: Reduces build time and transfer costs
+- **Alpine Linux**: Minimal base images for smaller size
+- **Multi-stage builds**: Production images contain only necessary files
+
+## Troubleshooting
+
+### Common Issues
+
+1. **GHCR Login Failed**
+
+   - Verify GitHub Actions has proper permissions
+   - Check if `GITHUB_TOKEN` has package write permissions
+
+2. **Service Not Starting**
+
+   - Check service logs: `docker service logs teamhub_<service-name>`
+   - Verify environment variables are set
+
+3. **Database Connection Issues**
+   - Ensure PostgreSQL service is running: `docker service ls`
+   - Check database logs: `docker service logs teamhub_postgres`
+
+### Health Checks
 
 ```bash
-./infrastructure/scripts/setup-pinggy.sh --help
-./infrastructure/scripts/deploy-infrastructure.sh --help
-./infrastructure/scripts/deploy-application.sh --help
-```
-
-## 🏗️ Architecture
-
-### Infrastructure Components
-
-1. **Pinggy Tunnel** - Exposes local services to the internet
-2. **Nginx Reverse Proxy** - Routes traffic and handles SSL
-3. **Docker Registry** - Stores application images
-4. **PostgreSQL** - Application database
-5. **Nextcloud** - File sharing and collaboration
-6. **TeamHub Application** - Main application
-
-### Deployment Flow
-
-```
-GitHub Actions → Pinggy Tunnel → Nginx → Docker Services
-```
-
-## 📋 Maintenance
-
-### Monitoring
-
-```bash
-# Check tunnel status
-./infrastructure/scripts/setup-pinggy.sh check
-
-# Monitor services
+# Check all services
 docker service ls
-docker service logs teamhub_nginx
-docker service logs teamhub_registry
+
+# Check specific service
+docker service logs teamhub_teamhub
+
+# Test application
+curl http://localhost/health
 ```
 
-### Troubleshooting
+## Legacy Scripts
 
-```bash
-# Restart tunnel
-./infrastructure/scripts/setup-pinggy.sh restart
+The `scripts/` directory contains some legacy Pinggy-related scripts that may be useful for specific deployment scenarios but are not part of the main workflow:
 
-# Check connectivity
-./infrastructure/scripts/test-connectivity.sh
+- `test-pinggy-fix.sh` - Pinggy service testing
+- `check-pinggy-domain.sh` - Pinggy domain checking
 
-# View logs
-tail -f /tmp/pinggy.log
-docker service logs teamhub_nginx --follow
-```
-
-## 🔄 Updates
-
-### Adding New Services
-
-1. Update `docker/docker-stack.yml`
-2. Modify `configs/nginx.conf` if needed
-3. Update deployment scripts if necessary
-
-### Configuration Changes
-
-1. Modify files in `configs/`
-2. Test locally
-3. Deploy via GitHub Actions
-
-## 🛡️ Security
-
-- All secrets are managed via GitHub Secrets
-- Registry authentication is enforced
-- Nginx handles SSL termination
-- Services communicate via internal Docker networks
-
-## 📚 Documentation
-
-- [Scripts Documentation](scripts/README.md)
-- [Docker Stack Configuration](docker/docker-stack.yml)
-- [Nginx Configuration](configs/)
-
-## 🤝 Contributing
-
-When adding infrastructure changes:
-
-1. Keep scripts modular and focused
-2. Update documentation
-3. Test locally before committing
-4. Follow the established directory structure
-5. Use proper error handling (`set -e`)
-
-## 🔗 Related
-
-- [Main Project README](../README.md)
-- [Application Documentation](../apps/)
-- [GitHub Actions Workflow](../.github/workflows/deploy.yml)
+These are maintained for reference but not used in the current GitHub Container Registry workflow.
