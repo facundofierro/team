@@ -10,7 +10,7 @@ StartLimitIntervalSec=300
 Type=simple
 User=__USER__
 Group=__GROUP__
-ExecStart=/usr/bin/ssh -p 443 -R0:localhost:443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 FpyP2PGUXy0@pro.pinggy.io
+ExecStart=/usr/bin/ssh -p 443 -R0:localhost:5000 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 FpyP2PGUXy0@pro.pinggy.io
 Restart=always
 RestartSec=10
 StandardOutput=journal

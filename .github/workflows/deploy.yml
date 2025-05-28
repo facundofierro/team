@@ -76,15 +76,16 @@ jobs:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: infrastructure/scripts/setup-pinggy.sh monitor
 
-      - name: Test registry tunnel access
+      - name: Test registry access via Pinggy
         env:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: |
-          echo "Testing dedicated registry tunnel..."
-          if curl -f --connect-timeout 10 --max-time 30 -u docker:k8mX9pL2nQ7vR4wE https://ukjhwjyazp.a.pinggy.link/v2/ >/dev/null 2>&1; then
-            echo "✅ Registry tunnel is working"
+          echo "Testing registry access via Pinggy tunnel..."
+          sleep 15  # Give tunnel time to stabilize
+          if curl -f --connect-timeout 15 --max-time 45 -u docker:k8mX9pL2nQ7vR4wE https://ukjhwjyazp.a.pinggy.link/v2/ >/dev/null 2>&1; then
+            echo "✅ Registry is accessible via Pinggy tunnel"
           else
-            echo "⚠️ Registry tunnel test failed, but continuing deployment"
+            echo "⚠️ Registry test failed, but continuing deployment"
           fi
 
       - name: Export service readiness status
@@ -96,13 +97,14 @@ jobs:
           infrastructure/scripts/setup-pinggy.sh status
           echo "tunnel_ready=true" >> $GITHUB_OUTPUT
 
-      - name: Setup dedicated registry tunnel
+      - name: Update Pinggy service for registry access
         env:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: |
-          echo "Setting up dedicated Pinggy tunnel for Docker registry..."
-          chmod +x infrastructure/scripts/setup-pinggy-registry.sh
-          infrastructure/scripts/setup-pinggy-registry.sh
+          echo "Updating Pinggy service to forward to registry port 5000..."
+          infrastructure/scripts/manage-pinggy-service.sh uninstall || true
+          infrastructure/scripts/manage-pinggy-service.sh install
+          infrastructure/scripts/manage-pinggy-service.sh start
 
   build-and-push:
     runs-on: ubuntu-latest

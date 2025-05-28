@@ -98,7 +98,7 @@ services:
         constraints:
           - node.role == manager
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
       - REGISTRY_AUTH=htpasswd
