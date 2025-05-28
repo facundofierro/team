@@ -211,12 +211,12 @@ deploy_full_stack() {
     # Fix nginx configuration to use file-based config
     echo "🔧 Configuring nginx with file-based configuration"
 
-    # Create a temporary docker-stack.yml with corrected nginx config path
-    cp infrastructure/docker/docker-stack.yml /tmp/docker-stack-fixed.yml
+    # Create a temporary docker-stack.yml in current directory to preserve relative paths
+    cp infrastructure/docker/docker-stack.yml ./docker-stack-temp.yml
 
     # Fix the nginx config to use the correct file path
-    sed -i 's/external: true//' /tmp/docker-stack-fixed.yml
-    sed -i 's/name: teamhub_nginx_config_v4/file: .\/infrastructure\/configs\/nginx.conf/' /tmp/docker-stack-fixed.yml
+    sed -i 's/external: true//' ./docker-stack-temp.yml
+    sed -i 's/name: teamhub_nginx_config_v4/file: .\/infrastructure\/configs\/nginx.conf/' ./docker-stack-temp.yml
 
     # Deploy the full stack
     export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
@@ -224,10 +224,10 @@ deploy_full_stack() {
     export PG_PASSWORD="${PG_PASSWORD}"
 
     echo "🚀 Deploying application stack with corrected configuration..."
-    docker stack deploy -c /tmp/docker-stack-fixed.yml teamhub
+    docker stack deploy -c ./docker-stack-temp.yml teamhub
 
     # Clean up temporary file
-    rm -f /tmp/docker-stack-fixed.yml
+    rm -f ./docker-stack-temp.yml
 
     echo "Waiting for teamhub service to be ready..."
     sleep 30
