@@ -41,10 +41,6 @@ services:
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
-      - source: remotion_upstream_config
-        target: /etc/nginx/conf.d/upstreams/remotion.conf
-      - source: remotion_location_config
-        target: /etc/nginx/conf.d/locations/remotion.conf
     networks:
       - teamhub_network
 
@@ -127,10 +123,6 @@ services:
 configs:
   nginx_config:
     file: ./infrastructure/configs/nginx.conf
-  remotion_upstream_config:
-    file: ./infrastructure/configs/nginx-modules/upstreams/remotion.conf
-  remotion_location_config:
-    file: ./infrastructure/configs/nginx-modules/locations/remotion.conf
 
 volumes:
   postgres_data:
