@@ -48,7 +48,7 @@ COPY packages/teamhub-ai/package.json ./packages/teamhub-ai/
 # Install production dependencies AND turbo from package.json
 RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store pnpm install --prod --frozen-lockfile
 # Install turbo specifically from the version in package.json
-RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store pnpm add turbo@^2.5.3
+RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store pnpm add -w turbo@^2.5.3
 
 # Copy built application from builder stage
 COPY --from=builder /app/apps/teamhub/.next ./apps/teamhub/.next
