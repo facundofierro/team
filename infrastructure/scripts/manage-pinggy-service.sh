@@ -35,6 +35,16 @@ install_service() {
     # Check SSH availability for TLS tunnel
     check_ssh_available
 
+    # Check if old service exists and remove it first
+    if systemctl list-unit-files | grep -q pinggy.service; then
+        echo "🔄 Existing Pinggy service found - removing old configuration..."
+        run_sudo systemctl stop $SERVICE_NAME 2>/dev/null || true
+        run_sudo systemctl disable $SERVICE_NAME 2>/dev/null || true
+        run_sudo rm -f /etc/systemd/system/$SERVICE_NAME.service
+        run_sudo systemctl daemon-reload
+        echo "✅ Old service configuration removed"
+    fi
+
             # Get current user and group
     CURRENT_USER=$(whoami)
     CURRENT_GROUP=$(id -gn $CURRENT_USER)
