@@ -46,7 +46,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.CICD }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -55,8 +55,8 @@ jobs:
           file: apps/teamhub/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/teamhub:latest
-            ghcr.io/${{ github.repository }}/teamhub:${{ needs.prepare-tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/teamhub:latest
+            ghcr.io/${{ github.repository_owner }}/teamhub:${{ needs.prepare-tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -81,7 +81,7 @@ jobs:
       - name: Display deployment configuration
         run: |
           echo "🔧 Deployment Configuration:"
-          echo "  - Container Registry: ghcr.io/${{ github.repository }}"
+          echo "  - Container Registry: ghcr.io/${{ github.repository_owner }}"
           echo "  - Image Tag: ${{ needs.build-and-push.outputs.tag }}"
           echo "  - Remotion Image: ghcr.io/facundofierro/kadiel-learning/remotion-render:latest"
           echo "  - Force Redeploy: ${{ github.event.inputs.force_redeploy || 'false' }}"
@@ -95,7 +95,7 @@ jobs:
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
           export NEXTCLOUD_ADMIN_PASSWORD="${{ secrets.NEXTCLOUD_ADMIN_PASSWORD }}"
           export NEXTCLOUD_DB_PASSWORD="${{ secrets.NEXTCLOUD_DB_PASSWORD }}"
-          export CONTAINER_REGISTRY="ghcr.io/${{ github.repository }}"
+          export CONTAINER_REGISTRY="ghcr.io/${{ github.repository_owner }}"
           export FORCE_REDEPLOY="${{ github.event.inputs.force_redeploy || 'false' }}"
           export REMOTION_IMAGE="ghcr.io/facundofierro/kadiel-learning/remotion-render:latest"
 
