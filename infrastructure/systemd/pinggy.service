@@ -10,7 +10,7 @@ StartLimitIntervalSec=300
 Type=simple
 User=__USER__
 Group=__GROUP__
-ExecStart=/usr/bin/ssh -p 443 -R0:localhost:443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 tls@a.pinggy.io FpyP2PGUXy0
+ExecStart=/usr/bin/ssh -p 443 -R0:localhost:443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=3 FpyP2PGUXy0@pro.pinggy.io
 Restart=always
 RestartSec=10
 StandardOutput=journal
@@ -20,6 +20,9 @@ SyslogIdentifier=pinggy
 # Environment
 Environment=HOME=/opt/pinggy
 WorkingDirectory=/opt/pinggy
+
+# Pre-start script to setup SSH directory
+ExecStartPre=/bin/bash -c 'mkdir -p /opt/pinggy/.ssh && chmod 700 /opt/pinggy/.ssh && chown __USER__:__GROUP__ /opt/pinggy/.ssh'
 
 # Security settings
 NoNewPrivileges=true
