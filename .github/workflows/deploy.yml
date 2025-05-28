@@ -48,6 +48,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Login to kadiel-learning registry (for remotion access)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: facundofierro
+          password: ${{ secrets.KADIEL_LEARNING_TOKEN }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -78,6 +85,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Login to kadiel-learning registry (for remotion access)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: facundofierro
+          password: ${{ secrets.KADIEL_LEARNING_TOKEN }}
+
       - name: Display deployment configuration
         run: |
           echo "🔧 Deployment Configuration:"
@@ -97,10 +111,6 @@ jobs:
           export NEXTCLOUD_DB_PASSWORD="${{ secrets.NEXTCLOUD_DB_PASSWORD }}"
           export CONTAINER_REGISTRY="ghcr.io/${{ github.repository }}"
           export FORCE_REDEPLOY="${{ github.event.inputs.force_redeploy || 'false' }}"
-
-          # Pull latest remotion-render image
-          echo "🎬 Pulling latest remotion-render image..."
-          docker pull ghcr.io/facundofierro/kadiel-learning/remotion-render:latest
           export REMOTION_IMAGE="ghcr.io/facundofierro/kadiel-learning/remotion-render:latest"
 
           infrastructure/scripts/deploy-application.sh ${{ needs.build-and-push.outputs.tag }}
