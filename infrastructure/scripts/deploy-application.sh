@@ -201,29 +201,31 @@ deploy_full_stack() {
         local CONTAINER_IMAGE="$CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
         echo "Using Container Registry image: $CONTAINER_IMAGE"
 
-        # Update the docker-stack.yml with the new image
-        sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" infrastructure/docker/docker-stack.yml
+        # Create a temporary docker-stack.yml and update the image
+        cp infrastructure/docker/docker-stack.yml ./docker-stack-temp.yml
+        sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" ./docker-stack-temp.yml
     else
         echo "❌ Container registry or image tag not provided"
         exit 1
     fi
 
-    # Fix nginx configuration to use file-based config
-    echo "🔧 Configuring nginx with file-based configuration"
+    echo "🔧 Using file-based nginx configuration"
 
-    # Create a temporary docker-stack.yml in current directory to preserve relative paths
-    cp infrastructure/docker/docker-stack.yml ./docker-stack-temp.yml
+    # Check for potential configuration conflicts
+    echo "🔍 Checking for configuration conflicts..."
 
-    # Fix the nginx config to use the correct file path
-    sed -i 's/external: true//' ./docker-stack-temp.yml
-    sed -i 's/name: teamhub_nginx_config_v4/file: .\/infrastructure\/configs\/nginx.conf/' ./docker-stack-temp.yml
+    # Remove any conflicting old configs if they exist
+    if docker config ls --filter name=teamhub_registry_config --format "{{.Name}}" | grep -q teamhub_registry_config; then
+        echo "⚠️  Removing old registry config that conflicts with new deployment..."
+        docker config rm teamhub_registry_config || true
+    fi
 
     # Deploy the full stack
     export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
     export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
     export PG_PASSWORD="${PG_PASSWORD}"
 
-    echo "🚀 Deploying application stack with corrected configuration..."
+    echo "🚀 Deploying application stack..."
     docker stack deploy -c ./docker-stack-temp.yml teamhub
 
     # Clean up temporary file
@@ -238,23 +240,35 @@ wait_for_services() {
     echo "Waiting for all services to be ready..."
 
     # Check teamhub service
-    for i in {1..10}; do
+    for i in {1..15}; do
         if docker service ls --filter name=teamhub_teamhub --format "{{.Replicas}}" | grep -q "1/1"; then
             echo "✅ Teamhub service is ready"
             break
         fi
-        echo "Waiting for teamhub service... (attempt $i/10)"
-        sleep 10
+        if [ $i -eq 15 ]; then
+            echo "❌ Teamhub service failed to start after 15 attempts"
+            echo "🔍 Checking teamhub service logs:"
+            docker service logs teamhub_teamhub --tail 20 || true
+        else
+            echo "Waiting for teamhub service... (attempt $i/15)"
+            sleep 10
+        fi
     done
 
     # Check nginx service
-    for i in {1..10}; do
+    for i in {1..15}; do
         if docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
             echo "✅ Nginx service is ready"
             break
         fi
-        echo "Waiting for nginx service... (attempt $i/10)"
-        sleep 10
+        if [ $i -eq 15 ]; then
+            echo "❌ Nginx service failed to start after 15 attempts"
+            echo "🔍 Checking nginx service logs:"
+            docker service logs teamhub_nginx --tail 20 || true
+        else
+            echo "Waiting for nginx service... (attempt $i/15)"
+            sleep 10
+        fi
     done
 }
 
