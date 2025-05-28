@@ -239,6 +239,22 @@ deploy_full_stack() {
         docker config rm teamhub_registry_config || true
     fi
 
+    # Remove old nginx configs when force redeploy is enabled or when they exist (to prevent update conflicts)
+    if [ "$FORCE_REDEPLOY" = "true" ]; then
+        echo "⚠️  Force redeploy enabled - removing all existing nginx configs..."
+        docker config rm teamhub_nginx_config teamhub_remotion_location_config teamhub_remotion_upstream_config 2>/dev/null || true
+        echo "✅ Old nginx configs removed"
+    else
+        # Check if old modular nginx configs exist and remove them (they conflict with the new single config)
+        OLD_CONFIGS=(teamhub_remotion_location_config teamhub_remotion_upstream_config)
+        for config in "${OLD_CONFIGS[@]}"; do
+            if docker config ls --filter name=$config --format "{{.Name}}" | grep -q $config; then
+                echo "⚠️  Removing conflicting old modular config: $config"
+                docker config rm $config || true
+            fi
+        done
+    fi
+
     # Deploy the full stack
     export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
     export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
