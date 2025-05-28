@@ -7,9 +7,9 @@ echo "=== Deploying Infrastructure Services ==="
 # Check if teamhub image already exists in registry
 check_teamhub_image() {
     echo "Checking if teamhub image exists in registry..."
-    # Check HTTPS registry (Pinggy now forwards to port 443)
-    if curl -f -k -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/teamhub/tags/list 2>/dev/null | grep -q "latest"; then
-        echo "✅ Teamhub image already exists in registry (HTTPS)"
+    # Check registry directly on port 5000
+    if curl -f -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/teamhub/tags/list 2>/dev/null | grep -q "latest"; then
+        echo "✅ Teamhub image already exists in registry"
         return 0
     else
         echo "ℹ️ Teamhub image not found in registry - first deployment"
@@ -43,29 +43,21 @@ setup_registry() {
     fi
 }
 
-# Deploy infrastructure services (nginx + registry)
+# Deploy infrastructure services (registry only)
 deploy_infrastructure() {
-    echo "🚀 Deploying infrastructure services (nginx + registry)..."
+    echo "🚀 Deploying infrastructure services (registry only)..."
     local FORCE_REDEPLOY="${1:-false}"
 
-    # Ensure ports 80 and 443 are available for Docker nginx
-    echo "Ensuring ports 80 and 443 are available..."
-    netstat -tlnp | grep :80 || echo "Port 80 is free"
-    netstat -tlnp | grep :443 || echo "Port 443 is free"
+    # Ensure port 5000 is available for Docker registry
+    echo "Ensuring port 5000 is available..."
+    netstat -tlnp | grep :5000 || echo "Port 5000 is free"
 
     # Setup registry if needed
     setup_registry
 
     # Check if infrastructure services already exist
-    local NGINX_EXISTS=false
     local REGISTRY_EXISTS=false
     local NETWORK_EXISTS=false
-    local CONFIG_EXISTS=false
-
-    if docker service ls --filter name=teamhub_nginx --format "{{.Name}}" | grep -q teamhub_nginx; then
-        echo "✅ Nginx service already exists"
-        NGINX_EXISTS=true
-    fi
 
     if docker service ls --filter name=teamhub_registry --format "{{.Name}}" | grep -q teamhub_registry; then
         echo "✅ Registry service already exists"
@@ -77,14 +69,9 @@ deploy_infrastructure() {
         NETWORK_EXISTS=true
     fi
 
-    if docker config ls --filter name=teamhub_nginx_infra_config --format "{{.Name}}" | grep -q teamhub_nginx_infra_config; then
-        echo "✅ Infrastructure nginx config already exists"
-        CONFIG_EXISTS=true
-    fi
-
     # If all infrastructure components exist and force redeploy is not enabled, skip deployment
-    if [ "$FORCE_REDEPLOY" != "true" ] && [ "$NGINX_EXISTS" = true ] && [ "$REGISTRY_EXISTS" = true ] && [ "$NETWORK_EXISTS" = true ] && [ "$CONFIG_EXISTS" = true ]; then
-        echo "✅ All infrastructure services already exist and running, skipping deployment"
+    if [ "$FORCE_REDEPLOY" != "true" ] && [ "$REGISTRY_EXISTS" = true ] && [ "$NETWORK_EXISTS" = true ]; then
+        echo "✅ Registry infrastructure already exists and running, skipping deployment"
         wait_for_registry
         return 0
     fi
@@ -99,25 +86,10 @@ deploy_infrastructure() {
     TIMESTAMP=$(date +%s)
     CONFIG_NAME="nginx_infra_config_${TIMESTAMP}"
 
-    # Create a temporary stack file with only infrastructure services
+    # Create a temporary stack file with only registry service (no nginx needed)
     cat > docker-stack-infra.yml << EOF
 version: '3.8'
 services:
-  nginx:
-    image: nginx:alpine
-    deploy:
-      replicas: 1
-    ports:
-      - '80:80'
-      - '443:443'
-    configs:
-      - source: ${CONFIG_NAME}
-        target: /etc/nginx/nginx.conf
-    volumes:
-      - /opt/nginx-certs:/etc/nginx/ssl:ro
-    networks:
-      - registry_network
-
   registry:
     image: registry:2
     deploy:
@@ -137,10 +109,6 @@ services:
       - registry_auth:/auth
     networks:
       - registry_network
-
-configs:
-  ${CONFIG_NAME}:
-    file: ./infrastructure/configs/nginx-infra.conf
 
 volumes:
   registry_data:
@@ -170,12 +138,12 @@ EOF
 
 # Wait for registry to be accessible
 wait_for_registry() {
-    echo "Waiting for registry to be accessible through nginx..."
+    echo "Waiting for registry to be accessible on port 5000..."
 
     for i in {1..15}; do
-        # Check HTTPS registry (Pinggy now forwards to port 443)
-        if curl -f -k --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/ >/dev/null 2>&1; then
-            echo "✅ Registry is accessible through nginx (HTTPS)"
+        # Check registry directly on port 5000
+        if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
+            echo "✅ Registry is accessible on port 5000"
             return 0
         fi
         echo "Waiting for registry to be ready... (attempt $i/15)"
@@ -183,8 +151,8 @@ wait_for_registry() {
     done
 
     # Final check
-    if curl -f -k --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE https://127.0.0.1:443/v2/ >/dev/null 2>&1; then
-        echo "✅ Registry is accessible via HTTPS"
+    if curl -f --connect-timeout 5 --max-time 10 -u docker:k8mX9pL2nQ7vR4wE http://127.0.0.1:5000/v2/ >/dev/null 2>&1; then
+        echo "✅ Registry is accessible on port 5000"
         return 0
     else
         echo "❌ Registry is still not accessible after 2.5 minutes"
@@ -192,8 +160,6 @@ wait_for_registry() {
         docker service ls
         echo "Registry logs:"
         docker service logs teamhub_registry --tail 20
-        echo "Nginx logs:"
-        docker service logs teamhub_nginx --tail 20
         exit 1
     fi
 }
