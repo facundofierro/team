@@ -46,14 +46,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to kadiel-learning registry (for remotion access)
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: facundofierro
-          password: ${{ secrets.KADIEL_LEARNING_TOKEN }}
+          password: ${{ secrets.CICD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -83,14 +76,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to kadiel-learning registry (for remotion access)
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: facundofierro
-          password: ${{ secrets.KADIEL_LEARNING_TOKEN }}
+          password: ${{ secrets.CICD }}
 
       - name: Display deployment configuration
         run: |
