@@ -37,7 +37,6 @@ services:
       replicas: 1
     ports:
       - '80:80'
-      - '443:443'
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf

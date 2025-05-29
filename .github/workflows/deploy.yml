@@ -87,6 +87,41 @@ jobs:
           echo "  - Force Redeploy: ${{ github.event.inputs.force_redeploy || 'false' }}"
           echo "  - Trigger: ${{ github.event_name }}"
 
+      - name: Setup Pinggy tunnel
+        run: |
+          echo "🌐 Setting up Pinggy tunnel for main application..."
+
+          # Check if main app tunnel is already running
+          if docker ps --filter "name=pinggy-tunnel" --filter "status=running" | grep -q pinggy-tunnel; then
+            echo "✅ Pinggy tunnel is already running"
+            docker logs --tail 5 pinggy-tunnel 2>/dev/null || true
+          else
+            echo "🚀 Starting Pinggy tunnel..."
+
+            # Remove any stopped tunnel container
+            docker rm -f pinggy-tunnel 2>/dev/null || true
+
+            # Start main app tunnel (port 443 -> nginx port 80)
+            docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
+              -p 443 -R0:192.168.88.135:80 \
+              -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
+              FpyP2PGUXy0@pro.pinggy.io
+
+            echo "⏳ Waiting for tunnel to establish connection..."
+            sleep 15
+
+            # Check tunnel status
+            if docker ps --filter "name=pinggy-tunnel" --filter "status=running" | grep -q pinggy-tunnel; then
+              echo "✅ Pinggy tunnel established successfully"
+              echo "🔗 Tunnel logs:"
+              docker logs --tail 10 pinggy-tunnel 2>/dev/null || true
+            else
+              echo "❌ Failed to establish Pinggy tunnel"
+              docker logs pinggy-tunnel 2>/dev/null || true
+              exit 1
+            fi
+          fi
+
       - name: Deploy application stack
         env:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
@@ -100,6 +135,24 @@ jobs:
           export REMOTION_IMAGE="ghcr.io/facundofierro/kadiel-learning/remotion-render:latest"
 
           infrastructure/scripts/deploy-application.sh ${{ needs.build-and-push.outputs.tag }}
+
+      - name: Verify Pinggy tunnel after deployment
+        run: |
+          echo "🔍 Verifying Pinggy tunnel status..."
+
+          if docker ps --filter "name=pinggy-tunnel" --filter "status=running" | grep -q pinggy-tunnel; then
+            echo "✅ Pinggy tunnel is running"
+            echo "🌐 Application should be accessible at: https://ukjhwjyazp.a.pinggy.link"
+            echo "📋 Service URLs:"
+            echo "  - Main App: https://ukjhwjyazp.a.pinggy.link/"
+            echo "  - Remotion: https://ukjhwjyazp.a.pinggy.link/remotion/"
+            echo "  - Nextcloud: https://ukjhwjyazp.a.pinggy.link/nextcloud/"
+            echo "  - Health Check: https://ukjhwjyazp.a.pinggy.link/health"
+          else
+            echo "⚠️  Pinggy tunnel is not running"
+            echo "🔍 Checking tunnel logs:"
+            docker logs pinggy-tunnel 2>/dev/null || echo "No logs available"
+          fi
 
       - name: Run health check
         run: |
