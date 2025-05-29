@@ -111,6 +111,83 @@ When you build with `output: 'standalone'`, Next.js:
 
 ## 🚀 Deployment Integration
 
+### Automatic Size Logging
+
+The deployment script now automatically logs Docker image sizes during deployment!
+
+```bash
+# Enhanced deployment with size analysis
+export CONTAINER_REGISTRY=ghcr.io/your-username
+./infrastructure/scripts/deploy-with-size-analysis.sh v1.0.0
+
+# Or use the original script (now includes size logging)
+./infrastructure/scripts/deploy-application.sh v1.0.0
+```
+
+**What you'll see during deployment:**
+
+```bash
+📊 ===== Docker Image Size Analysis =====
+🔍 Pulling image to get size information...
+✅ Successfully pulled image: ghcr.io/your-username/teamhub:v1.0.0
+
+📋 Image Details:
+  🏷️  Image: ghcr.io/your-username/teamhub:v1.0.0
+  💾 Size: 156MB
+  🆔 ID: abc123def456
+  📅 Created: 2024-01-15 10:30:00
+
+🎯 Optimization Analysis:
+  ✅ Medium-sized container (156MB)
+  💡 Could be further optimized with distroless base
+============================================
+```
+
+**And at the end of deployment:**
+
+```bash
+📊 ===== Deployment Summary =====
+🚀 Successfully deployed application stack!
+
+🔍 Running Services:
+NAME               REPLICAS  IMAGE
+teamhub_teamhub    1/1       ghcr.io/your-username/teamhub:v1.0.0
+teamhub_nginx      1/1       nginx:alpine
+teamhub_remotion   1/1       remotion:latest
+
+📦 Deployed Image Sizes:
+  🎯 TeamHub: 156MB (ghcr.io/your-username/teamhub:v1.0.0)
+    ✅ Good size - could be further optimized with distroless
+  🌐 Nginx: 23MB (nginx:alpine)
+  🎬 Remotion: 245MB (remotion:latest)
+
+💾 Total Image Storage:
+  📏 Estimated total: 2.1GB
+
+🎯 Quick Actions:
+  • View logs: docker service logs teamhub_teamhub
+  • Scale service: docker service scale teamhub_teamhub=N
+  • Optimize images: See docs/container-optimization.md
+
+🌐 Application URL: http://your-server-ip
+============================================
+```
+
+### Verbose Analysis
+
+For detailed layer analysis, enable verbose mode:
+
+```bash
+# Detailed image layer analysis
+VERBOSE_DEPLOY=true ./infrastructure/scripts/deploy-with-size-analysis.sh v1.0.0
+```
+
+This shows:
+
+- Layer-by-layer breakdown
+- Size contribution of each layer
+- Optimization opportunities
+
 ### Update Your CI/CD
 
 Replace your existing Docker build commands:
@@ -128,7 +205,12 @@ Replace your existing Docker build commands:
 
 ### Update Your Deployment Script
 
-The `infrastructure/scripts/deploy-application.sh` automatically works with the optimized images - no changes needed!
+The enhanced `infrastructure/scripts/deploy-application.sh` now includes:
+
+- ✅ **Pre-deployment size analysis** - Shows image details before deployment
+- ✅ **Optimization recommendations** - Suggests improvements based on size
+- ✅ **Post-deployment summary** - Shows all deployed image sizes
+- ✅ **Verbose layer analysis** - Detailed breakdown when `VERBOSE_DEPLOY=true`
 
 ## 🔧 Environment Variables
 
