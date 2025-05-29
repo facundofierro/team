@@ -4,6 +4,76 @@ set -e
 
 echo "=== Deploying Full Application Stack ==="
 
+# Log Docker image size information
+log_image_size_info() {
+    local IMAGE_NAME="$1"
+
+    echo ""
+    echo "📊 ===== Docker Image Size Analysis ====="
+
+    # Try to pull the image to get accurate size info
+    echo "🔍 Pulling image to get size information..."
+    if docker pull "$IMAGE_NAME" >/dev/null 2>&1; then
+        echo "✅ Successfully pulled image: $IMAGE_NAME"
+
+        # Get detailed image information
+        local IMAGE_SIZE=$(docker images "$IMAGE_NAME" --format "{{.Size}}")
+        local IMAGE_ID=$(docker images "$IMAGE_NAME" --format "{{.ID}}")
+        local CREATED_DATE=$(docker images "$IMAGE_NAME" --format "{{.CreatedAt}}")
+
+        echo ""
+        echo "📋 Image Details:"
+        echo "  🏷️  Image: $IMAGE_NAME"
+        echo "  💾 Size: $IMAGE_SIZE"
+        echo "  🆔 ID: $IMAGE_ID"
+        echo "  📅 Created: $CREATED_DATE"
+
+        # Check if this looks like an optimized image based on size
+        local SIZE_NUM=$(echo "$IMAGE_SIZE" | sed 's/[^0-9.]//g' | head -c 10)
+        local SIZE_UNIT=$(echo "$IMAGE_SIZE" | sed 's/[0-9.]//g' | tr -d ' ')
+
+        echo ""
+        echo "🎯 Optimization Analysis:"
+
+        # Rough size analysis (convert to MB for comparison)
+        if [[ "$SIZE_UNIT" == *"GB"* ]]; then
+            local SIZE_MB=$(echo "$SIZE_NUM * 1000" | bc -l 2>/dev/null || echo "1000")
+        elif [[ "$SIZE_UNIT" == *"MB"* ]]; then
+            local SIZE_MB="$SIZE_NUM"
+        else
+            local SIZE_MB="0"
+        fi
+
+        # Provide recommendations based on size
+        if (( $(echo "$SIZE_MB > 500" | bc -l 2>/dev/null || echo "1") )); then
+            echo "  ⚠️  Large container detected ($IMAGE_SIZE)"
+            echo "  💡 Consider using optimized Dockerfile with standalone output"
+            echo "  📖 See: docs/container-optimization.md"
+        elif (( $(echo "$SIZE_MB > 200" | bc -l 2>/dev/null || echo "0") )); then
+            echo "  ✅ Medium-sized container ($IMAGE_SIZE)"
+            echo "  💡 Could be further optimized with distroless base"
+        else
+            echo "  🚀 Optimized container detected ($IMAGE_SIZE)"
+            echo "  ✅ Excellent size optimization!"
+        fi
+
+        # Show layer information if verbose mode is enabled
+        if [ "$VERBOSE_DEPLOY" = "true" ]; then
+            echo ""
+            echo "🔍 Layer Analysis:"
+            docker history "$IMAGE_NAME" --format "table {{.CreatedBy}}\t{{.Size}}" | head -10
+        fi
+
+    else
+        echo "⚠️  Could not pull image for size analysis"
+        echo "🔍 Image: $IMAGE_NAME"
+        echo "💭 Size information will be available after deployment"
+    fi
+
+    echo "============================================"
+    echo ""
+}
+
 # Check if infrastructure services are already running and healthy
 check_infrastructure_status() {
     echo "🔍 Checking infrastructure status..."
@@ -214,6 +284,9 @@ deploy_full_stack() {
         local CONTAINER_IMAGE="$CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
         echo "Using Container Registry image: $CONTAINER_IMAGE"
 
+        # Log image size information
+        log_image_size_info "$CONTAINER_IMAGE"
+
         # Create a temporary docker-stack.yml and update the image
         cp infrastructure/docker/docker-stack.yml ./docker-stack-temp.yml
         sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" ./docker-stack-temp.yml
@@ -239,21 +312,6 @@ deploy_full_stack() {
         docker config rm teamhub_registry_config || true
     fi
 
-    # Remove old nginx configs when force redeploy is enabled or when they exist (to prevent update conflicts)
-    if [ "$FORCE_REDEPLOY" = "true" ]; then
-        echo "⚠️  Force redeploy enabled - removing all existing nginx configs..."
-        docker config rm teamhub_nginx_config teamhub_remotion_location_config teamhub_remotion_upstream_config 2>/dev/null || true
-        echo "✅ Old nginx configs removed"
-    else
-        # Check if old modular nginx configs exist and remove them (they conflict with the new single config)
-        OLD_CONFIGS=(teamhub_remotion_location_config teamhub_remotion_upstream_config)
-        for config in "${OLD_CONFIGS[@]}"; do
-            if docker config ls --filter name=$config --format "{{.Name}}" | grep -q $config; then
-                echo "⚠️  Removing conflicting old modular config: $config"
-                docker config rm $config || true
-            fi
-        done
-    fi
 
     # Deploy the full stack
     export NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD}"
@@ -358,6 +416,72 @@ cleanup() {
     docker container prune -f
 }
 
+# Show deployment summary with image sizes
+show_deployment_summary() {
+    local IMAGE_TAG="$1"
+
+    echo ""
+    echo "📊 ===== Deployment Summary ====="
+    echo ""
+    echo "🚀 Successfully deployed application stack!"
+    echo ""
+
+    # Show running services
+    echo "🔍 Running Services:"
+    docker service ls --filter name=teamhub_ --format "table {{.Name}}\t{{.Replicas}}\t{{.Image}}" | grep -E "(NAME|teamhub_)"
+
+    echo ""
+    echo "📦 Deployed Image Sizes:"
+
+    # Get images used by the services
+    local TEAMHUB_IMAGE=$(docker service inspect teamhub_teamhub --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null || echo "N/A")
+    local NGINX_IMAGE=$(docker service inspect teamhub_nginx --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null || echo "N/A")
+    local REMOTION_IMAGE=$(docker service inspect teamhub_remotion --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null || echo "N/A")
+
+    # Show teamhub image size (main application)
+    if [ "$TEAMHUB_IMAGE" != "N/A" ]; then
+        local TEAMHUB_SIZE=$(docker images "$TEAMHUB_IMAGE" --format "{{.Size}}" 2>/dev/null || echo "Unknown")
+        echo "  🎯 TeamHub: $TEAMHUB_SIZE ($TEAMHUB_IMAGE)"
+
+        # Provide optimization recommendations
+        local SIZE_NUM=$(echo "$TEAMHUB_SIZE" | sed 's/[^0-9.]//g' | head -c 10)
+        local SIZE_UNIT=$(echo "$TEAMHUB_SIZE" | sed 's/[0-9.]//g' | tr -d ' ')
+
+        if [[ "$SIZE_UNIT" == *"GB"* ]]; then
+            echo "    💡 Large image detected - consider using optimized Dockerfile"
+        elif [[ "$SIZE_UNIT" == *"MB"* ]] && (( $(echo "$SIZE_NUM > 200" | bc -l 2>/dev/null || echo "0") )); then
+            echo "    ✅ Good size - could be further optimized with distroless"
+        else
+            echo "    🚀 Excellent optimization!"
+        fi
+    fi
+
+    # Show other images
+    if [ "$NGINX_IMAGE" != "N/A" ]; then
+        local NGINX_SIZE=$(docker images "$NGINX_IMAGE" --format "{{.Size}}" 2>/dev/null || echo "Unknown")
+        echo "  🌐 Nginx: $NGINX_SIZE ($NGINX_IMAGE)"
+    fi
+
+    if [ "$REMOTION_IMAGE" != "N/A" ]; then
+        local REMOTION_SIZE=$(docker images "$REMOTION_IMAGE" --format "{{.Size}}" 2>/dev/null || echo "Unknown")
+        echo "  🎬 Remotion: $REMOTION_SIZE ($REMOTION_IMAGE)"
+    fi
+
+    echo ""
+    echo "💾 Total Image Storage:"
+    local TOTAL_SIZE=$(docker images --filter "reference=*teamhub*" --format "{{.Size}}" | head -3 | paste -sd+ - | bc 2>/dev/null || echo "Calculating...")
+    echo "  📏 Estimated total: $(docker system df --format "{{.Size}}" | head -1 || echo "Run 'docker system df' for details")"
+
+    echo ""
+    echo "🎯 Quick Actions:"
+    echo "  • View logs: docker service logs teamhub_teamhub"
+    echo "  • Scale service: docker service scale teamhub_teamhub=N"
+    echo "  • Optimize images: See docs/container-optimization.md"
+    echo ""
+    echo "🌐 Application URL: http://your-server-ip"
+    echo "============================================"
+}
+
 # Main deployment function
 main() {
     local IMAGE_TAG="$1"
@@ -374,6 +498,12 @@ main() {
     fi
 
     echo "🚀 Starting deployment with Container Registry image: $CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
+
+    # Enable verbose logging if requested
+    if [ "$VERBOSE_DEPLOY" = "true" ]; then
+        echo "🔍 Verbose logging enabled"
+        echo "📊 Additional image analysis will be shown"
+    fi
 
     # Stage 1: Setup infrastructure first (if needed)
     echo "=== STAGE 1: Infrastructure Setup ==="
@@ -396,6 +526,9 @@ main() {
 
     # Cleanup
     cleanup
+
+    # Show deployment summary
+    show_deployment_summary "$IMAGE_TAG"
 
     echo "✅ Application deployment completed successfully"
     echo "🌐 Application should be accessible at http://your-server-ip"
