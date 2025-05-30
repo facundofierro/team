@@ -2,8 +2,12 @@
 
 set -e
 
+# Health Check Script Version
+HEALTH_CHECK_VERSION="v2.1.0-remotion-integrated"
 echo "🏥 Running post-deployment health check..."
 echo "=== Health Check for TeamHub Application Stack ==="
+echo "📋 Health Check Version: $HEALTH_CHECK_VERSION"
+echo ""
 
 # Colors for output
 RED='\033[0;31m'
