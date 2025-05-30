@@ -54,6 +54,81 @@ TeamHub is a modern platform for creating and managing organizations, each with 
 
 ---
 
+## Available Routes
+
+The application is deployed at **r1.teamxagents.com** using nginx with pinggy. Below are the available routes:
+
+### Frontend Routes
+
+| Route        | Description                                                        | Authentication Required |
+| ------------ | ------------------------------------------------------------------ | ----------------------- |
+| `/`          | Home page (redirects to dashboard after login)                     | ✅                      |
+| `/agents`    | Agent management interface - create, view, and configure AI agents | ✅                      |
+| `/dashboard` | Main dashboard view                                                | ✅                      |
+| `/insights`  | Data insights and analytics with table views                       | ✅                      |
+| `/settings`  | Organization and application settings                              | ✅                      |
+
+### API Routes
+
+| Route                     | Method   | Description                          | Authentication Required |
+| ------------------------- | -------- | ------------------------------------ | ----------------------- |
+| `/api/auth/signin`        | GET      | Sign in page                         | ❌                      |
+| `/api/auth/signout`       | POST     | Sign out endpoint                    | ❌                      |
+| `/api/auth/[...nextauth]` | GET/POST | NextAuth.js authentication endpoints | ❌                      |
+| `/api/chat`               | POST     | Send messages to AI agents           | ✅                      |
+
+### Additional Services (via Nginx Proxy)
+
+| Route         | Service   | Description                                          | Authentication Required |
+| ------------- | --------- | ---------------------------------------------------- | ----------------------- |
+| `/nextcloud/` | Nextcloud | File storage, collaboration, and document management | ✅ (Nextcloud login)    |
+| `/remotion/`  | Remotion  | Video rendering and generation service               | ✅                      |
+| `/health`     | Nginx     | Health check endpoint for monitoring                 | ❌                      |
+
+### Service Architecture
+
+The nginx reverse proxy routes requests to different backend services:
+
+- **TeamHub App** (`teamhub:3000`) - Main Next.js application
+- **Nextcloud** (`nextcloud:80`) - File storage and collaboration platform
+- **Remotion** (`remotion:3001`) - Video rendering service
+- **PostgreSQL** - Database for TeamHub and Nextcloud (internal)
+- **Redis** - Cache layer for TeamHub (internal)
+
+### Route Parameters
+
+Most routes accept query parameters for organization-scoped functionality:
+
+- **`organizationId`** (required) - Identifies the active organization
+- **`id`** (optional) - For selecting specific agents or data items
+- **`tab`** (optional) - For tab-based navigation within pages
+- **`tableId`** (optional) - For selecting specific data tables in insights
+
+### Example URLs
+
+```
+# Main TeamHub Application
+https://r1.teamxagents.com/
+https://r1.teamxagents.com/agents?organizationId=org-123
+https://r1.teamxagents.com/agents?organizationId=org-123&id=agent-456&tab=config
+https://r1.teamxagents.com/insights?organizationId=org-123&tableId=1
+https://r1.teamxagents.com/settings?organizationId=org-123
+
+# Additional Services
+https://r1.teamxagents.com/nextcloud/          # Nextcloud file storage
+https://r1.teamxagents.com/remotion/           # Remotion video rendering
+https://r1.teamxagents.com/health              # Health check endpoint
+```
+
+### Authentication Flow
+
+1. All routes except `/api/auth/*` require authentication
+2. Unauthenticated users are automatically redirected to `/api/auth/signin`
+3. After successful authentication, users are redirected to the requested page
+4. Session management is handled by NextAuth.js with secure cookies
+
+---
+
 ## Getting Started
 
 ### Prerequisites

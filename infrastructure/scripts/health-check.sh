@@ -152,21 +152,8 @@ if [ $NGINX_STATUS -eq 0 ]; then
         echo -e "${YELLOW}      ⚠️  TCP connection to localhost:80 fails${NC}"
     fi
 
-    # Try connecting to the specific container IP
-    nginx_container=$(docker ps -q --filter label=com.docker.swarm.service.name=teamhub_nginx | head -1)
-    if [ -n "$nginx_container" ]; then
-        container_ip=$(docker inspect $nginx_container --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{break}}{{end}}' 2>/dev/null || echo "")
-        if [ -n "$container_ip" ]; then
-            echo -e "${BLUE}      Container IP: $container_ip${NC}"
-            if timeout 3 curl -f --connect-timeout 2 --max-time 3 "http://$container_ip:80/health" >/dev/null 2>&1; then
-                echo -e "${GREEN}      ✅ Direct container access works${NC}"
-            else
-                echo -e "${YELLOW}      ⚠️  Direct container access fails${NC}"
-            fi
-        else
-            echo -e "${YELLOW}      ⚠️  Could not determine container IP${NC}"
-        fi
-    fi
+    # Removed direct container IP check - not needed in Docker Swarm mode
+    # Services are accessed through the ingress network, not direct container IPs
 fi
 
 # Endpoint checks
