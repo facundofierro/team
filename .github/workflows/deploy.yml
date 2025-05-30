@@ -147,6 +147,13 @@ jobs:
         run: |
           echo "🌐 Setting up Pinggy tunnel for main application..."
 
+          # Check if force redeploy is requested
+          if [ "${{ github.event.inputs.force_redeploy_pinggy || 'false' }}" = "true" ] || [ "${{ github.event.inputs.force_redeploy_all || 'false' }}" = "true" ]; then
+            echo "🔄 Force redeploying Pinggy tunnel..."
+            docker stop pinggy-tunnel 2>/dev/null || true
+            docker rm -f pinggy-tunnel 2>/dev/null || true
+          fi
+
           # Check if main app tunnel is already running
           if docker ps --filter "name=pinggy-tunnel" --filter "status=running" | grep -q pinggy-tunnel; then
             echo "✅ Pinggy tunnel is already running"
@@ -157,9 +164,9 @@ jobs:
             # Remove any stopped tunnel container
             docker rm -f pinggy-tunnel 2>/dev/null || true
 
-            # Start main app tunnel (port 443 -> nginx port 80)
+            # Start main app tunnel (port 443 -> localhost port 80)
             docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
-              -p 443 -R0:192.168.88.135:80 \
+              -p 443 -R0:127.0.0.1:80 \
               -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
               FpyP2PGUXy0@pro.pinggy.io
 
