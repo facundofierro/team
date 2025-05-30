@@ -121,7 +121,8 @@ services:
 
 configs:
   nginx_config:
-    file: ./infrastructure/configs/nginx.conf
+    external: true
+    name: ${NGINX_CONFIG_NAME:-teamhub_nginx_config_v1}
 
 volumes:
   postgres_data:

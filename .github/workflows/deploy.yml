@@ -10,8 +10,57 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      force_redeploy_all:
+        description: 'Force redeploy all services'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      force_redeploy_nginx:
+        description: 'Force redeploy Nginx service'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      force_redeploy_teamhub:
+        description: 'Force redeploy TeamHub application'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      force_redeploy_remotion:
+        description: 'Force redeploy Remotion service'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      force_redeploy_infrastructure:
+        description: 'Force redeploy Infrastructure (PostgreSQL, Redis)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      force_redeploy_nextcloud:
+        description: 'Force redeploy Nextcloud service'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      # Legacy support
       force_redeploy:
-        description: 'Force redeploy infrastructure (ignores existing services)'
+        description: '[DEPRECATED] Use force_redeploy_all instead'
         required: false
         default: 'false'
         type: choice
@@ -80,12 +129,20 @@ jobs:
 
       - name: Display deployment configuration
         run: |
-          echo "🔧 Deployment Configuration:"
+          echo "🔧 Enhanced Deployment Configuration:"
           echo "  - Container Registry: ghcr.io/${{ github.repository_owner }}"
           echo "  - Image Tag: ${{ needs.build-and-push.outputs.tag }}"
           echo "  - Remotion Image: ghcr.io/facundofierro/kadiel-learning/remotion-render:latest"
-          echo "  - Force Redeploy: ${{ github.event.inputs.force_redeploy || 'false' }}"
           echo "  - Trigger: ${{ github.event_name }}"
+          echo ""
+          echo "📋 Selective Redeployment Options:"
+          echo "  🔄 All Services:   ${{ github.event.inputs.force_redeploy_all || 'false' }}"
+          echo "  🌐 Nginx:          ${{ github.event.inputs.force_redeploy_nginx || 'false' }}"
+          echo "  🎯 TeamHub:        ${{ github.event.inputs.force_redeploy_teamhub || 'false' }}"
+          echo "  🎬 Remotion:       ${{ github.event.inputs.force_redeploy_remotion || 'false' }}"
+          echo "  🔧 Infrastructure: ${{ github.event.inputs.force_redeploy_infrastructure || 'false' }}"
+          echo "  ☁️  Nextcloud:      ${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
+          echo "  📜 Legacy:         ${{ github.event.inputs.force_redeploy || 'false' }}"
 
       - name: Setup Pinggy tunnel
         run: |
@@ -126,15 +183,25 @@ jobs:
         env:
           SUDO_PASSWORD: ${{ secrets.SUDO }}
         run: |
-          chmod +x infrastructure/scripts/deploy-application.sh
+          chmod +x infrastructure/scripts/deploy-application-enhanced.sh
           export PG_PASSWORD="${{ secrets.PG_PASSWORD }}"
           export NEXTCLOUD_ADMIN_PASSWORD="${{ secrets.NEXTCLOUD_ADMIN_PASSWORD }}"
           export NEXTCLOUD_DB_PASSWORD="${{ secrets.NEXTCLOUD_DB_PASSWORD }}"
           export CONTAINER_REGISTRY="ghcr.io/${{ github.repository_owner }}"
-          export FORCE_REDEPLOY="${{ github.event.inputs.force_redeploy || 'false' }}"
           export REMOTION_IMAGE="ghcr.io/facundofierro/kadiel-learning/remotion-render:latest"
 
-          infrastructure/scripts/deploy-application.sh ${{ needs.build-and-push.outputs.tag }}
+          # Enhanced granular deployment options
+          export FORCE_REDEPLOY_ALL="${{ github.event.inputs.force_redeploy_all || 'false' }}"
+          export FORCE_REDEPLOY_NGINX="${{ github.event.inputs.force_redeploy_nginx || 'false' }}"
+          export FORCE_REDEPLOY_TEAMHUB="${{ github.event.inputs.force_redeploy_teamhub || 'false' }}"
+          export FORCE_REDEPLOY_REMOTION="${{ github.event.inputs.force_redeploy_remotion || 'false' }}"
+          export FORCE_REDEPLOY_INFRASTRUCTURE="${{ github.event.inputs.force_redeploy_infrastructure || 'false' }}"
+          export FORCE_REDEPLOY_NEXTCLOUD="${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
+
+          # Legacy support
+          export FORCE_REDEPLOY="${{ github.event.inputs.force_redeploy || 'false' }}"
+
+          infrastructure/scripts/deploy-application-enhanced.sh ${{ needs.build-and-push.outputs.tag }}
 
       - name: Verify Pinggy tunnel after deployment
         run: |
