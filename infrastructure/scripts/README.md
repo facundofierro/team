@@ -11,8 +11,8 @@ export CONTAINER_REGISTRY=ghcr.io/your-username
 # 2. Build optimized container
 ./infrastructure/scripts/build-and-push.sh v1.0.0
 
-# 3. Deploy with size analysis
-./infrastructure/scripts/deploy-with-size-analysis.sh v1.0.0
+# 3. Deploy with enhanced features
+./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
 ```
 
 ## 📄 Available Scripts
@@ -44,27 +44,35 @@ DOCKERFILE_VARIANT=distroless ./build-and-push.sh v1.0.0
 DOCKERFILE_VARIANT=original ./build-and-push.sh v1.0.0
 ```
 
-### `deploy-application.sh`
+### `deploy-application-enhanced.sh`
 
-Enhanced deployment script with automatic image size logging.
+Enhanced deployment script with selective service redeployment and automatic image size logging.
 
 **Usage:**
 
 ```bash
-./infrastructure/scripts/deploy-application.sh [tag]
+./infrastructure/scripts/deploy-application-enhanced.sh [tag]
 
 # Environment variables:
-CONTAINER_REGISTRY=ghcr.io/user  # Required
-VERBOSE_DEPLOY=true             # Show detailed analysis
-FORCE_REDEPLOY=true             # Force redeployment
+CONTAINER_REGISTRY=ghcr.io/user     # Required
+VERBOSE_DEPLOY=true                 # Show detailed analysis
+FORCE_REDEPLOY_ALL=true            # Force redeployment of all services
+FORCE_REDEPLOY_NGINX=true          # Force redeploy only nginx
+FORCE_REDEPLOY_TEAMHUB=true        # Force redeploy only TeamHub
+FORCE_REDEPLOY_REMOTION=true       # Force redeploy only Remotion
+FORCE_REDEPLOY_INFRASTRUCTURE=true # Force redeploy only PostgreSQL/Redis
+FORCE_REDEPLOY_NEXTCLOUD=true      # Force redeploy only Nextcloud
 ```
 
 **Features:**
 
+- ✅ Selective service redeployment
+- ✅ Data volume safety checks
 - ✅ Pre-deployment image size analysis
 - ✅ Optimization recommendations
 - ✅ Post-deployment summary
 - ✅ Verbose layer analysis
+- ✅ Enhanced nginx config management
 
 ### `deploy-with-size-analysis.sh`
 

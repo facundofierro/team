@@ -8,13 +8,11 @@ This directory contains all project documentation and guides.
 
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture overview
 - **[NEXTCLOUD_SETUP.md](./NEXTCLOUD_SETUP.md)** - Nextcloud configuration guide
-- **[DEPLOYMENT_REFERENCE_FOR_NEW_REPOS.md](./DEPLOYMENT_REFERENCE_FOR_NEW_REPOS.md)** - Complete deployment reference
 
-### Legacy Documentation
+### Deployment & Optimization
 
-- **[DOCKERHUB_SETUP.md](./DOCKERHUB_SETUP.md)** - DockerHub setup (legacy)
-- **[REGISTRY_SETUP.md](./REGISTRY_SETUP.md)** - Private registry setup (legacy)
-- **[PINGGY_MULTI_PORT_SETUP.md](./PINGGY_MULTI_PORT_SETUP.md)** - Pinggy tunnel setup (legacy)
+- **[enhanced-deployment.md](./enhanced-deployment.md)** - Enhanced deployment system with selective redeployment
+- **[container-optimization.md](./container-optimization.md)** - Container optimization guide using Next.js standalone output
 
 ### Legal
 
@@ -22,10 +20,18 @@ This directory contains all project documentation and guides.
 
 ## Current Stack
 
-The project now uses:
+The project uses a simplified, modern deployment stack:
 
-- **GitHub Container Registry** for Docker images
-- **Simplified infrastructure** with single nginx configuration
-- **Self-hosted deployment** with automated CI/CD
+- **GitHub Container Registry (GHCR)** for Docker images
+- **Docker Swarm** for container orchestration
+- **Enhanced deployment system** with selective service redeployment
+- **Optimized containers** with Next.js standalone output
+- **Self-hosted infrastructure** with automated CI/CD
 
-For current deployment instructions, see the main [README.md](../README.md) in the project root.
+## Quick Start
+
+For deployment instructions, see:
+
+1. Main [README.md](../README.md) in the project root
+2. [enhanced-deployment.md](./enhanced-deployment.md) for advanced deployment options
+3. [container-optimization.md](./container-optimization.md) for optimizing container sizes

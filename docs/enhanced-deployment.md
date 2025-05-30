@@ -164,26 +164,18 @@ docker exec $(docker ps -q -f name=teamhub_nextcloud_db) pg_dump -U nextcloud ne
 The enhanced system is backward compatible:
 
 ```bash
-# Old way (still works)
-FORCE_REDEPLOY=true ./infrastructure/scripts/deploy-application.sh v1.0.0
-
-# New way (recommended)
+# Old way (still works with enhanced script)
 FORCE_REDEPLOY_ALL=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+
+# New way (recommended - selective deployment)
+FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
 ```
 
 ## Troubleshooting
 
 ### Config Conflicts
 
-If you encounter nginx config conflicts:
-
-```bash
-# Run the fix script on your server
-./infrastructure/scripts/simple-config-fix.sh
-
-# Or use the comprehensive fix
-./infrastructure/scripts/fix-nginx-config-conflict.sh
-```
+The enhanced deployment script now handles nginx config conflicts automatically with versioned configurations. If you encounter issues, the script will manage config cleanup and versioning.
 
 ### Service Health Checks
 

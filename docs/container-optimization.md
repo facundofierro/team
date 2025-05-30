@@ -120,8 +120,8 @@ The deployment script now automatically logs Docker image sizes during deploymen
 export CONTAINER_REGISTRY=ghcr.io/your-username
 ./infrastructure/scripts/deploy-with-size-analysis.sh v1.0.0
 
-# Or use the original script (now includes size logging)
-./infrastructure/scripts/deploy-application.sh v1.0.0
+# Or use the enhanced deployment script (includes size logging)
+./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
 ```
 
 **What you'll see during deployment:**
@@ -205,7 +205,7 @@ Replace your existing Docker build commands:
 
 ### Update Your Deployment Script
 
-The enhanced `infrastructure/scripts/deploy-application.sh` now includes:
+The enhanced `infrastructure/scripts/deploy-application-enhanced.sh` now includes:
 
 - ✅ **Pre-deployment size analysis** - Shows image details before deployment
 - ✅ **Optimization recommendations** - Suggests improvements based on size

@@ -62,10 +62,11 @@ infrastructure/
 ├── docker/
 │   └── docker-stack.yml         # Docker Swarm stack definition
 └── scripts/
-    ├── deploy-application.sh    # Main two-stage deployment script
+    ├── deploy-application-enhanced.sh # Main enhanced deployment script
     ├── health-check.sh          # Post-deployment health verification
-    ├── test-pinggy-fix.sh       # Legacy Pinggy script
-    ├── check-pinggy-domain.sh   # Legacy Pinggy script
+    ├── build-and-push.sh        # Build and push optimized images
+    ├── compare-containers.sh    # Compare container variants
+    ├── deploy-with-size-analysis.sh # Deployment with size analysis
     └── README.md                # Scripts documentation
 ```
 
@@ -112,7 +113,7 @@ export NEXTCLOUD_DB_PASSWORD="your-nextcloud-db-password"
 export CONTAINER_REGISTRY="ghcr.io/your-org/your-repo"
 
 # Normal deployment (smart - only deploys what's needed)
-./infrastructure/scripts/deploy-application.sh <image-tag>
+./infrastructure/scripts/deploy-application-enhanced.sh <image-tag>
 ```
 
 ### Force Redeploy
@@ -121,7 +122,7 @@ Use this when you want to redeploy everything regardless of current state:
 
 ```bash
 export FORCE_REDEPLOY="true"
-./infrastructure/scripts/deploy-application.sh <image-tag>
+./infrastructure/scripts/deploy-application-enhanced.sh <image-tag>
 ```
 
 ### Health Check
@@ -201,15 +202,6 @@ curl http://localhost/nextcloud/
 2. **Review health check output** at the end of deployment
 3. **Use force redeploy** if services are in inconsistent state:
    ```bash
-   export FORCE_REDEPLOY="true"
-   ./infrastructure/scripts/deploy-application.sh <image-tag>
+   export FORCE_REDEPLOY_ALL="true"
+   ./infrastructure/scripts/deploy-application-enhanced.sh <image-tag>
    ```
-
-## Legacy Scripts
-
-The `scripts/` directory contains some legacy Pinggy-related scripts that may be useful for specific deployment scenarios but are not part of the main workflow:
-
-- `test-pinggy-fix.sh` - Pinggy service testing
-- `check-pinggy-domain.sh` - Pinggy domain checking
-
-These are maintained for reference but not used in the current GitHub Container Registry workflow.
