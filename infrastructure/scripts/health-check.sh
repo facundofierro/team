@@ -3,7 +3,7 @@
 set -e
 
 # Health Check Script Version
-HEALTH_CHECK_VERSION="v2.1.0-remotion-integrated"
+HEALTH_CHECK_VERSION="v2.1.1-debug-enhanced"
 echo "🏥 Running post-deployment health check..."
 echo "=== Health Check for TeamHub Application Stack ==="
 echo "📋 Health Check Version: $HEALTH_CHECK_VERSION"
@@ -69,7 +69,7 @@ check_endpoint_with_retry() {
             # Try to get more details about the failure
             if [ $attempt -eq $max_attempts ]; then
                 echo -e "${BLUE}    Debug: Full curl output:${NC}"
-                curl -v --connect-timeout 5 --max-time 10 "$url" 2>&1 | head -10
+                curl -v --connect-timeout 5 --max-time 10 "$url" 2>&1 | head -10 || true
             fi
 
             if [ $attempt -lt $max_attempts ]; then
@@ -155,7 +155,7 @@ if [ $NGINX_STATUS -eq 0 ]; then
     # Try connecting to the specific container IP
     nginx_container=$(docker ps -q --filter label=com.docker.swarm.service.name=teamhub_nginx | head -1)
     if [ -n "$nginx_container" ]; then
-        container_ip=$(docker inspect $nginx_container --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' | head -1)
+        container_ip=$(docker inspect $nginx_container --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{break}}{{end}}' 2>/dev/null || echo "")
         if [ -n "$container_ip" ]; then
             echo -e "${BLUE}      Container IP: $container_ip${NC}"
             if timeout 3 curl -f --connect-timeout 2 --max-time 3 "http://$container_ip:80/health" >/dev/null 2>&1; then
@@ -163,6 +163,8 @@ if [ $NGINX_STATUS -eq 0 ]; then
             else
                 echo -e "${YELLOW}      ⚠️  Direct container access fails${NC}"
             fi
+        else
+            echo -e "${YELLOW}      ⚠️  Could not determine container IP${NC}"
         fi
     fi
 fi
@@ -191,6 +193,9 @@ echo "Note: These services are deployed separately and may not be available"
 
 # Remove the old Remotion check from here since it's now a core service
 
+echo ""
+echo "🔍 Debug: Proceeding to overall status calculation..."
+
 # Overall status
 echo ""
 echo "=== Overall Status ==="
@@ -198,15 +203,19 @@ echo "=== Overall Status ==="
 TOTAL_SERVICES=7
 HEALTHY_SERVICES=0
 
-[ $POSTGRES_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
-[ $REDIS_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
-[ $TEAMHUB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
-[ $NGINX_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
-[ $REMOTION_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
-[ $NEXTCLOUD_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
-[ $NEXTCLOUD_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
+echo "🔍 Debug: Calculating service health status..."
+
+[ $POSTGRES_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ PostgreSQL: healthy"
+[ $REDIS_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Redis: healthy"
+[ $TEAMHUB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ TeamHub: healthy"
+[ $NGINX_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nginx: healthy"
+[ $REMOTION_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Remotion: healthy"
+[ $NEXTCLOUD_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nextcloud: healthy"
+[ $NEXTCLOUD_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nextcloud DB: healthy"
 
 echo "Core services: $HEALTHY_SERVICES/$TOTAL_SERVICES healthy"
+
+echo "🔍 Debug: Endpoint status - Nginx Health: $NGINX_HEALTH_STATUS, Main App: $MAIN_APP_STATUS, Nextcloud: $NEXTCLOUD_ENDPOINT_STATUS, Remotion: $REMOTION_ENDPOINT_STATUS"
 
 # More lenient exit criteria - allow deployment to succeed if core services are up
 # even if some endpoints are temporarily not accessible
