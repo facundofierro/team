@@ -126,20 +126,52 @@ if [ $NGINX_STATUS -eq 0 ]; then
     else
         echo -e "${YELLOW}    ⚠️  Internal health check failed${NC}"
     fi
+
+    echo -e "${BLUE}  Docker networking diagnosis:${NC}"
+    echo -e "${BLUE}    Published ports:${NC}"
+    docker service inspect teamhub_nginx --format '{{range .Endpoint.Ports}}{{.PublishedPort}}:{{.TargetPort}}/{{.Protocol}} {{end}}' 2>/dev/null || echo "      Could not get port info"
+
+    echo -e "${BLUE}    Host port usage:${NC}"
+    ss -tuln | grep ":80 " || echo "      Port 80 not found in ss output"
+
+    echo -e "${BLUE}    Docker ingress network:${NC}"
+    docker network ls | grep ingress || echo "      No ingress network found"
+
+    echo -e "${BLUE}    Alternative connectivity tests:${NC}"
+    # Try different approaches to connect
+    if timeout 3 nc -z localhost 80 2>/dev/null; then
+        echo -e "${GREEN}      ✅ TCP connection to localhost:80 works${NC}"
+    else
+        echo -e "${YELLOW}      ⚠️  TCP connection to localhost:80 fails${NC}"
+    fi
+
+    # Try connecting to the specific container IP
+    local nginx_container=$(docker ps -q --filter label=com.docker.swarm.service.name=teamhub_nginx | head -1)
+    if [ -n "$nginx_container" ]; then
+        local container_ip=$(docker inspect $nginx_container --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' | head -1)
+        if [ -n "$container_ip" ]; then
+            echo -e "${BLUE}      Container IP: $container_ip${NC}"
+            if timeout 3 curl -f --connect-timeout 2 --max-time 3 "http://$container_ip:80/health" >/dev/null 2>&1; then
+                echo -e "${GREEN}      ✅ Direct container access works${NC}"
+            else
+                echo -e "${YELLOW}      ⚠️  Direct container access fails${NC}"
+            fi
+        fi
+    fi
 fi
 
 # Endpoint checks
 echo ""
 echo "=== Endpoint Health Checks ==="
 
-# Check nginx health endpoint with retry logic
-check_endpoint_with_retry "http://localhost:80/health" "Nginx Health Check"
+# Use 127.0.0.1 directly to avoid IPv6 localhost resolution issues
+check_endpoint_with_retry "http://127.0.0.1:80/health" "Nginx Health Check"
 NGINX_HEALTH_STATUS=$?
 
-check_endpoint_with_retry "http://localhost:80" "Main Application"
+check_endpoint_with_retry "http://127.0.0.1:80" "Main Application"
 MAIN_APP_STATUS=$?
 
-check_endpoint_with_retry "http://localhost:80/nextcloud/" "Nextcloud"
+check_endpoint_with_retry "http://127.0.0.1:80/nextcloud/" "Nextcloud"
 NEXTCLOUD_ENDPOINT_STATUS=$?
 
 # Optional external services (may not be deployed)
