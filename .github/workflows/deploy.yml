@@ -164,11 +164,10 @@ jobs:
             # Remove any stopped tunnel container
             docker rm -f pinggy-tunnel 2>/dev/null || true
 
-            # Start main app tunnel (port 443 -> localhost port 80)
+            # Start main app tunnel with correct syntax
             docker run --net=host --name=pinggy-tunnel -d pinggy/pinggy \
-              -p 443 -R0:127.0.0.1:80 \
-              -o StrictHostKeyChecking=no -o ServerAliveInterval=30 \
-              FpyP2PGUXy0@pro.pinggy.io
+              --token FpyP2PGUXy0 -p 443 -l 80 --notui \
+              pro.pinggy.io
 
             echo "⏳ Waiting for tunnel to establish connection..."
             sleep 15
@@ -219,6 +218,8 @@ jobs:
             echo "  - Remotion: https://ukjhwjyazp.a.pinggy.link/remotion/"
             echo "  - Nextcloud: https://ukjhwjyazp.a.pinggy.link/nextcloud/"
             echo "  - Health Check: https://ukjhwjyazp.a.pinggy.link/health"
+            echo "🔗 Recent tunnel logs:"
+            docker logs --tail 5 pinggy-tunnel 2>/dev/null || true
           else
             echo "⚠️  Pinggy tunnel is not running"
             echo "🔍 Checking tunnel logs:"
