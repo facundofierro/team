@@ -146,9 +146,9 @@ if [ $NGINX_STATUS -eq 0 ]; then
     fi
 
     # Try connecting to the specific container IP
-    local nginx_container=$(docker ps -q --filter label=com.docker.swarm.service.name=teamhub_nginx | head -1)
+    nginx_container=$(docker ps -q --filter label=com.docker.swarm.service.name=teamhub_nginx | head -1)
     if [ -n "$nginx_container" ]; then
-        local container_ip=$(docker inspect $nginx_container --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' | head -1)
+        container_ip=$(docker inspect $nginx_container --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' | head -1)
         if [ -n "$container_ip" ]; then
             echo -e "${BLUE}      Container IP: $container_ip${NC}"
             if timeout 3 curl -f --connect-timeout 2 --max-time 3 "http://$container_ip:80/health" >/dev/null 2>&1; then
