@@ -58,9 +58,8 @@ on:
         options:
           - 'false'
           - 'true'
-      # Legacy support
-      force_redeploy:
-        description: '[DEPRECATED] Use force_redeploy_all instead'
+      force_redeploy_pinggy:
+        description: 'Force redeploy Pinggy tunnel'
         required: false
         default: 'false'
         type: choice
@@ -142,7 +141,7 @@ jobs:
           echo "  🎬 Remotion:       ${{ github.event.inputs.force_redeploy_remotion || 'false' }}"
           echo "  🔧 Infrastructure: ${{ github.event.inputs.force_redeploy_infrastructure || 'false' }}"
           echo "  ☁️  Nextcloud:      ${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
-          echo "  📜 Legacy:         ${{ github.event.inputs.force_redeploy || 'false' }}"
+          echo "  🚇 Pinggy:         ${{ github.event.inputs.force_redeploy_pinggy || 'false' }}"
 
       - name: Setup Pinggy tunnel
         run: |
@@ -197,9 +196,7 @@ jobs:
           export FORCE_REDEPLOY_REMOTION="${{ github.event.inputs.force_redeploy_remotion || 'false' }}"
           export FORCE_REDEPLOY_INFRASTRUCTURE="${{ github.event.inputs.force_redeploy_infrastructure || 'false' }}"
           export FORCE_REDEPLOY_NEXTCLOUD="${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
-
-          # Legacy support
-          export FORCE_REDEPLOY="${{ github.event.inputs.force_redeploy || 'false' }}"
+          export FORCE_REDEPLOY_PINGGY="${{ github.event.inputs.force_redeploy_pinggy || 'false' }}"
 
           infrastructure/scripts/deploy-application-enhanced.sh ${{ needs.build-and-push.outputs.tag }}
 
