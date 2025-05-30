@@ -101,6 +101,9 @@ TEAMHUB_STATUS=$?
 check_service "teamhub_nginx" "Nginx Reverse Proxy"
 NGINX_STATUS=$?
 
+check_service "teamhub_remotion" "Remotion Rendering Service"
+REMOTION_STATUS=$?
+
 check_service "teamhub_nextcloud" "Nextcloud"
 NEXTCLOUD_STATUS=$?
 
@@ -174,28 +177,28 @@ MAIN_APP_STATUS=$?
 check_endpoint_with_retry "http://127.0.0.1:80/nextcloud/" "Nextcloud"
 NEXTCLOUD_ENDPOINT_STATUS=$?
 
+check_endpoint_with_retry "http://127.0.0.1:80/remotion/health" "Remotion"
+REMOTION_ENDPOINT_STATUS=$?
+
 # Optional external services (may not be deployed)
 echo ""
 echo "=== Optional External Services ==="
 echo "Note: These services are deployed separately and may not be available"
 
-if curl -f --connect-timeout 5 --max-time 10 "http://localhost:80/remotion/" >/dev/null 2>&1; then
-    echo -e "${GREEN}✅ Remotion service is accessible${NC}"
-else
-    echo -e "${YELLOW}⚠️  Remotion service is not available (deployed separately)${NC}"
-fi
+# Remove the old Remotion check from here since it's now a core service
 
 # Overall status
 echo ""
 echo "=== Overall Status ==="
 
-TOTAL_SERVICES=6
+TOTAL_SERVICES=7
 HEALTHY_SERVICES=0
 
 [ $POSTGRES_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $REDIS_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $TEAMHUB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $NGINX_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
+[ $REMOTION_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $NEXTCLOUD_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 [ $NEXTCLOUD_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++))
 
