@@ -20,6 +20,15 @@ export async function POST(req: NextRequest) {
     const { text, agentId, agentCloneId, memoryRules, storeRule } =
       await req.json()
 
+    // Validate required parameters
+    if (!text || typeof text !== 'string' || text.trim().length === 0) {
+      return new Response('Text message is required', { status: 400 })
+    }
+
+    if (!agentId || typeof agentId !== 'string') {
+      return new Response('Agent ID is required', { status: 400 })
+    }
+
     // Verify agent belongs to user's organization
     const agent = await db.getAgent(agentId)
     if (

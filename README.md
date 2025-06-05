@@ -2,7 +2,7 @@
 
 ## Overview
 
-TeamHub is a modern platform for creating and managing organizations, each with its own set of AI agents. Designed for multi-tenant environments, TeamHub enables organizations to securely manage their own agents, data, and workflows, all within a beautiful, accessible UI built with [shadcn/ui](https://ui.shadcn.com/) components.
+TeamHub agents is a modern platform for creating and managing organizations, each with its own set of AI agents. Designed for multi-tenant environments, TeamHub enables organizations to securely manage their own agents, data, and workflows, all within a beautiful, accessible UI built with [shadcn/ui](https://ui.shadcn.com/) components.
 
 ## Features
 
