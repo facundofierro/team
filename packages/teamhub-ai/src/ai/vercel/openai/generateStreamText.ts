@@ -11,12 +11,12 @@ export async function generateOpenAIStream(params: {
 }) {
   const { messages, systemPrompt = '' } = params
 
-  const { textStream } = streamText({
+  const result = streamText({
     model: openaiAI('gpt-4o'),
-    prompt: systemPrompt,
+    system: systemPrompt,
     messages,
     maxSteps: 5,
   })
 
-  return textStream
+  return result.toDataStreamResponse()
 }
