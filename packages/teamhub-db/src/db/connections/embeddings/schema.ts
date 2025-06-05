@@ -11,6 +11,9 @@ import {
   customType,
 } from 'drizzle-orm/pg-core'
 
+// Define the embeddings schema
+const embeddingsSchema = pgSchema('embeddings')
+
 // Define custom vector type
 const vector = customType<{ data: number[] }>({
   dataType() {
@@ -22,7 +25,7 @@ const vector = customType<{ data: number[] }>({
 })
 
 // Embeddings table
-export const embedding = pgTable(
+export const embedding = embeddingsSchema.table(
   'embedding',
   {
     id: text('id').primaryKey(),

@@ -30,7 +30,8 @@ export async function sendChat(params: {
   const agent = await db.getAgent(agentId)
   if (!agent) throw new Error('Agent not found')
 
-  const memories = await dbMemories(databaseName).getAgentMemories(
+  const memoryDb = await dbMemories(databaseName)
+  const memories = await memoryDb.getAgentMemories(
     agentId,
     agentCloneId,
     '',
@@ -39,7 +40,7 @@ export async function sendChat(params: {
 
   // Store user input in memory if required
   if (storeRule?.shouldStore) {
-    await dbMemories(databaseName).createMemory({
+    await memoryDb.createMemory({
       id: generateUUID(),
       agentId,
       agentCloneId,
@@ -60,11 +61,5 @@ export async function sendChat(params: {
     memories,
   })
 
-  return new Response(streamResponse, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-    },
-  })
+  return streamResponse
 }

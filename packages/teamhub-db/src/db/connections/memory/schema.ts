@@ -11,8 +11,11 @@ import {
   customType,
 } from 'drizzle-orm/pg-core'
 
+// Define the memory schema
+const memorySchema = pgSchema('memory')
+
 // Memory table (chat/interaction history)
-export const memory = pgTable(
+export const memory = memorySchema.table(
   'memory',
   {
     id: text('id').primaryKey(),

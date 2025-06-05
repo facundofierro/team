@@ -34,6 +34,7 @@ export { authAdapter } from './authAdapter'
 
 export * from './schema'
 export * from './functions/agency'
+export * from './functions/utils/database'
 export * from './types'
 export * from './constants'
 

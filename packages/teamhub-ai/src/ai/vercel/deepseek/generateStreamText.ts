@@ -1,8 +1,8 @@
 import { Message as VercelMessage, streamText } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
+import { createDeepSeek } from '@ai-sdk/deepseek'
 
-const deepseekAI = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY ?? '',
+const deepseekAI = createDeepSeek({
+  apiKey: process.env.DEEPSEEK_API_KEY ?? '',
 })
 
 export async function generateDeepseekStream(params: {
@@ -11,11 +11,11 @@ export async function generateDeepseekStream(params: {
 }) {
   const { messages, systemPrompt = '' } = params
 
-  const { textStream } = streamText({
-    model: deepseekAI('gpt-4o'),
-    prompt: systemPrompt,
+  const result = streamText({
+    model: deepseekAI('deepseek-chat'),
+    system: systemPrompt,
     messages,
   })
 
-  return textStream
+  return result.toDataStreamResponse()
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useChat, Message } from 'ai/react'
+import { useChat, Message } from '@ai-sdk/react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -53,11 +53,21 @@ export function ChatCard({ scheduled }: ChatCardProps) {
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
       api: '/api/chat',
-      body: {
-        agentId: selectedAgent?.id,
-        agentCloneId: undefined, // Add this when implementing instance selection
-        memoryRules: [], // Add your memory rules here
-        storeRule: true,
+      experimental_prepareRequestBody: ({ messages }) => {
+        // Get the last message content as text
+        const lastMessage = messages[messages.length - 1]
+        return {
+          text: lastMessage?.content || '',
+          agentId: selectedAgent?.id,
+          agentCloneId: undefined, // Add this when implementing instance selection
+          memoryRules: [], // Add your memory rules here
+          storeRule: {
+            messageType: 'user_message',
+            shouldStore: true,
+            retentionDays: 30,
+            category: 'chat',
+          },
+        }
       },
     })
 

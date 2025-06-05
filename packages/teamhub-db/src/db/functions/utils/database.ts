@@ -20,6 +20,97 @@ const getSchema = (type: DatabaseType) => {
   }
 }
 
+// Function to ensure tables exist in organization databases
+export async function ensureOrgTablesExist(orgDbName: string) {
+  const host = process.env.PG_HOST
+  const user = process.env.PG_USER
+  const password = process.env.PG_PASSWORD
+  if (!host || !user || !password) {
+    throw new Error('Missing PG_HOST, PG_USER, or PG_PASSWORD env vars')
+  }
+  const orgDbUrl = `postgres://${user}:${password}@${host}:5432/${orgDbName}`
+  const pool = new Pool({ connectionString: orgDbUrl })
+
+  try {
+    // Create memory table if not exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS memory.memory (
+        id text PRIMARY KEY,
+        agent_id text,
+        agent_clone_id text,
+        message_id text,
+        type text NOT NULL,
+        category text NOT NULL,
+        content text,
+        structured_data jsonb,
+        binary_data text,
+        created_at timestamp DEFAULT now(),
+        expires_at timestamp
+      );
+    `)
+
+    // Create indexes for memory table
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS memory_agent_type_idx ON memory.memory(agent_id, type);
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS memory_agent_category_idx ON memory.memory(agent_id, category);
+    `)
+
+    console.log(`✅ Memory tables created for: ${orgDbName}`)
+
+    // Try to create embeddings table if pgvector is available
+    let vectorExtensionAvailable = false
+    try {
+      await pool.query(`CREATE EXTENSION IF NOT EXISTS vector;`)
+      vectorExtensionAvailable = true
+      console.log(`✅ pgvector extension available for: ${orgDbName}`)
+    } catch (error: any) {
+      console.warn(
+        `⚠️  pgvector extension not available for ${orgDbName}, skipping embeddings table creation`
+      )
+    }
+
+    if (vectorExtensionAvailable) {
+      try {
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS embeddings.embedding (
+            id text PRIMARY KEY,
+            type text NOT NULL,
+            reference_id text NOT NULL,
+            vector vector NOT NULL,
+            version text NOT NULL,
+            model text NOT NULL,
+            dimension integer NOT NULL,
+            is_deleted boolean DEFAULT false,
+            metadata jsonb DEFAULT '{}',
+            created_at timestamp DEFAULT now()
+          );
+        `)
+
+        // Create vector index for embeddings
+        await pool.query(`
+          CREATE INDEX IF NOT EXISTS vector_idx ON embeddings.embedding USING ivfflat (vector vector_cosine_ops);
+        `)
+
+        console.log(`✅ Embeddings tables created for: ${orgDbName}`)
+      } catch (error: any) {
+        console.warn(
+          `⚠️  Could not create embeddings table for ${orgDbName}:`,
+          error.message
+        )
+      }
+    }
+
+    console.log(`✅ Tables setup completed for: ${orgDbName}`)
+  } catch (error) {
+    console.error(`❌ Error ensuring tables for ${orgDbName}:`, error)
+    throw error
+  } finally {
+    await pool.end()
+  }
+}
+
 // MAIN DB HELPERS (agency/auth)
 export async function ensureMainDatabaseAndSchemas() {
   const host = process.env.PG_HOST
@@ -111,6 +202,9 @@ export async function createOrgDatabaseAndSchemas(orgDbName: string) {
   } finally {
     await pool.end()
   }
+
+  // Ensure tables exist
+  await ensureOrgTablesExist(orgDbName)
 }
 
 export function getOrgDb(orgDbName: string) {
