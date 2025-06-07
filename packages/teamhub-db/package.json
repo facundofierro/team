@@ -15,7 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@auth/core": "^0.37.4",
+    "@auth/core": "^0.34.2",
     "@types/pg": "^8.15.1",
     "@vercel/kv": "^1.0.1",
     "@vercel/postgres": "^0.8.0",

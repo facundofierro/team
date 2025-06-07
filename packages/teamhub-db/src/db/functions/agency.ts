@@ -111,7 +111,7 @@ export async function getOrganizationSettings(
 export async function updateOrganizationSettings(
   settings: OrganizationSettings
 ) {
-  const { messageTypes, organizationId } = settings
+  const { messageTypes, tools: organizationTools, organizationId } = settings
 
   // Get existing message types
   const existingMessageTypes = await db
@@ -173,6 +173,71 @@ export async function updateOrganizationSettings(
 
   // Execute all updates in parallel
   await Promise.all(updatePromises)
+
+  // Handle tools if provided
+  if (organizationTools) {
+    // Get existing tools
+    const existingTools = await db
+      .select()
+      .from(tools)
+      .where(eq(tools.organizationId, organizationId))
+
+    // Create a map of existing tools by ID for easy lookup
+    const existingToolsMap = new Map(
+      existingTools.map((tool) => [tool.id, tool])
+    )
+
+    // Update or insert tools
+    const toolUpdatePromises = organizationTools.map(async (tool) => {
+      if (existingToolsMap.has(tool.id)) {
+        // Update existing tool
+        return db
+          .update(tools)
+          .set({
+            name: tool.name,
+            description: tool.description,
+            configuration: tool.configuration,
+            schema: tool.schema,
+            metadata: tool.metadata,
+            version: tool.version,
+            isActive: tool.isActive,
+            isManaged: tool.isManaged,
+          })
+          .where(
+            and(eq(tools.id, tool.id), eq(tools.organizationId, organizationId))
+          )
+      }
+
+      // Insert new tool
+      return db.insert(tools).values({
+        ...tool,
+        organizationId,
+      })
+    })
+
+    // Set isActive = false for tools that are no longer in the settings
+    const currentToolIds = new Set(organizationTools.map((tool) => tool.id))
+    const toolsToDeactivate = existingTools
+      .filter((tool) => !currentToolIds.has(tool.id))
+      .map((tool) => tool.id)
+
+    if (toolsToDeactivate.length > 0) {
+      toolUpdatePromises.push(
+        db
+          .update(tools)
+          .set({ isActive: false })
+          .where(
+            and(
+              inArray(tools.id, toolsToDeactivate),
+              eq(tools.organizationId, organizationId)
+            )
+          )
+      )
+    }
+
+    // Execute all tool updates in parallel
+    await Promise.all(toolUpdatePromises)
+  }
 }
 
 // Agent functions

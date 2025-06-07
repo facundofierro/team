@@ -99,6 +99,7 @@ export function SettingsDetails({
               <ToolsCard
                 tools={settings.tools}
                 toolTypes={settings.toolTypes}
+                organizationId={settings.organizationId}
                 onChange={(tools) => handleChange({ tools })}
               />
             </TabsContent>
