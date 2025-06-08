@@ -97,12 +97,12 @@ export function ChatCard({ scheduled }: ChatCardProps) {
   }
 
   return (
-    <Card className="flex h-full">
+    <Card className="flex h-full overflow-hidden bg-white">
       {/* Instances Sidebar - Only shown if agent.doesClone is true */}
       {selectedAgent?.doesClone && (
         <div
           className={cn(
-            'border-r transition-all duration-300',
+            'border-r transition-all duration-300 flex-shrink-0',
             isInstancesOpen ? 'w-64' : 'w-12'
           )}
         >
@@ -131,12 +131,14 @@ export function ChatCard({ scheduled }: ChatCardProps) {
       )}
 
       {/* Main Chat Area */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0 bg-[#f8f9fa]">
         {/* Agent Info Bar */}
         {selectedAgent && (
-          <div className="flex items-center justify-between p-4 border-b bg-muted/30">
+          <div className="flex items-center justify-between p-4 border-b bg-white flex-shrink-0">
             <div className="flex items-center gap-2">
-              <h2 className="font-medium">{selectedAgent.name}</h2>
+              <h2 className="font-medium text-gray-900">
+                {selectedAgent.name}
+              </h2>
               {availableToolsCount > 0 && (
                 <div className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
                   <Wrench className="w-3 h-3" />
@@ -153,7 +155,7 @@ export function ChatCard({ scheduled }: ChatCardProps) {
             <SheetTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex items-center justify-start w-full gap-2 h-14 hover:bg-accent"
+                className="flex items-center justify-start w-full gap-2 h-14 hover:bg-accent flex-shrink-0"
               >
                 <Calendar className="w-4 h-4" />
                 <span>Scheduled task - Click to view details</span>
@@ -172,104 +174,109 @@ export function ChatCard({ scheduled }: ChatCardProps) {
         )}
 
         {/* Chat Messages Area */}
-        <ScrollArea className="flex-1 px-4">
+        <ScrollArea className="flex-1 px-4 min-h-0">
           <div className="py-4 space-y-4">
             {messages.map((message: Message) => (
               <div
                 key={message.id}
                 className={cn(
-                  'p-4 rounded-lg max-w-[80%]',
+                  'p-4 rounded-lg max-w-[80%] break-words',
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-muted'
+                    ? 'bg-gray-100/60 ml-auto text-orange-600 font-medium'
+                    : 'bg-gray-100/40 text-gray-900'
                 )}
               >
-                <p className="text-sm">{message.content}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {message.content}
+                </p>
               </div>
             ))}
+            {isLoading && (
+              <div className="bg-gray-100/40 text-gray-900 p-4 rounded-lg max-w-[80%]">
+                <p className="text-sm">Thinking...</p>
+              </div>
+            )}
           </div>
         </ScrollArea>
 
         {/* Message Input Area */}
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-2 p-4 border-t"
-        >
-          <MemorySelectionBar
-            selectedMemories={selectedMemories}
-            onAddMemory={handleAddMemory}
-            onRemoveMemory={handleRemoveMemory}
-            onClearAllMemories={handleClearAllMemories}
-            hasInstances={selectedAgent?.doesClone ?? false}
-            instancesCollapsed={!isInstancesOpen}
-          />
-
-          <div className="flex gap-2">
-            <Textarea
-              placeholder="Type your message..."
-              value={input}
-              onChange={handleInputChange}
-              className="flex-1 h-36"
-              rows={1}
-              disabled={isLoading}
+        <div className="flex-shrink-0 border-t bg-white">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2 p-4">
+            <MemorySelectionBar
+              selectedMemories={selectedMemories}
+              onAddMemory={handleAddMemory}
+              onRemoveMemory={handleRemoveMemory}
+              onClearAllMemories={handleClearAllMemories}
+              hasInstances={selectedAgent?.doesClone ?? false}
+              instancesCollapsed={!isInstancesOpen}
             />
 
-            <div className="flex flex-col justify-around w-24">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    type="button"
-                    className="w-full"
-                  >
-                    New Task
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Create task for agent</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-4">
-                    {/* Task creation form would go here */}
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    type="button"
-                    className="w-full"
-                  >
-                    Message
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Send new message to agent</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-4">
-                    {/* Task creation form would go here */}
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <Button
-                variant="default"
-                className="w-full"
-                size="icon"
-                type="submit"
+            <div className="flex gap-2">
+              <Textarea
+                placeholder="Type your message..."
+                value={input}
+                onChange={handleInputChange}
+                className="flex-1 h-36 resize-none"
+                rows={1}
                 disabled={isLoading}
-              >
-                Send
-                <Send className="w-5 h-5" />
-              </Button>
+              />
+
+              <div className="flex flex-col justify-around w-24 flex-shrink-0">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      type="button"
+                      className="w-full text-xs"
+                    >
+                      New Task
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Create task for agent</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      {/* Task creation form would go here */}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      type="button"
+                      className="w-full text-xs"
+                    >
+                      Message
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Send new message to agent</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      {/* Task creation form would go here */}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <Button
+                  variant="default"
+                  className="w-full bg-orange-500 hover:bg-orange-600"
+                  size="icon"
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </Card>
   )
