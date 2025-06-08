@@ -34,56 +34,20 @@ export async function sendChat(params: {
     tools = [],
   } = params
 
-  // Get the latest user message for logging and storage
-  const latestUserMessage =
-    messages.filter((m) => m.role === 'user').pop()?.content || ''
-
-  console.log('💬 SendChat: Starting chat processing')
-  console.log('💬 SendChat: Database:', databaseName)
-  console.log('💬 SendChat: Agent ID:', agentId)
-  console.log('💬 SendChat: Agent Clone ID:', agentCloneId)
-  console.log('💬 SendChat: Messages count:', messages.length)
-  console.log(
-    '💬 SendChat: Latest user message length:',
-    latestUserMessage.length
-  )
-  console.log('💬 SendChat: Tools count:', tools.length)
-  console.log(
-    '💬 SendChat: Tools:',
-    tools.map((tool) => ({
-      id: (tool as any).id,
-      type: (tool as any).type,
-      name: (tool as any).name,
-      isManaged: (tool as any).isManaged,
-    }))
-  )
-
   try {
-    console.log('🔍 SendChat: Fetching agent...')
-    // Get agent
     const agent = await db.getAgent(agentId)
     if (!agent) {
-      console.error('❌ SendChat: Agent not found:', agentId)
       throw new Error('Agent not found')
     }
 
-    console.log('✅ SendChat: Agent found:', agent.name)
-
-    console.log('🧠 SendChat: Fetching memories...')
-    // Get relevant memories using the memories database
     const memoryDb = await dbMemories(databaseName)
-    const memories = await memoryDb.getAgentMemories(
-      agentId,
+    const memories = await memoryDb.getAgentMemories(agentId, {
       agentCloneId,
-      '', // type filter (empty = all types)
-      [] // categories filter (empty = all categories)
-    )
+    })
 
-    console.log('✅ SendChat: Found memories:', memories.length)
+    console.log('🎬 SendChat: Calling generateStreamText (without await)...')
 
-    console.log('🤖 SendChat: Generating stream response...')
-    // Generate response using AI
-    const stream = await generateStreamText({
+    const streamPromise = generateStreamText({
       messages,
       agentId,
       systemPrompt: agent.systemPrompt || '',
@@ -91,36 +55,34 @@ export async function sendChat(params: {
       tools,
     })
 
-    console.log('✅ SendChat: Stream generated successfully')
-
-    // Store the interaction if storeRule is provided
+    // Background task: store message after stream starts
     if (storeRule) {
-      console.log('💾 SendChat: Storing message...')
-      try {
-        await db.createMessage({
+      const latestUserMessage =
+        messages.filter((m) => m.role === 'user').pop()?.content || ''
+
+      // Run this in background without blocking the stream
+      setImmediate(() => {
+        db.createMessage({
           id: generateUUID(),
-          fromAgentId: null, // User message
+          fromAgentId: null,
           toAgentId: agentId,
           toAgentCloneId: agentCloneId || null,
           type: storeRule.messageType,
           content: latestUserMessage,
           metadata: {},
           status: 'completed',
+        }).catch((error) => {
+          console.error('❌ SendChat: background message store failed:', error)
         })
-        console.log('✅ SendChat: Message stored successfully')
-      } catch (error) {
-        console.error('❌ SendChat: Error storing message:', error)
-        // Don't fail the entire request if storage fails
-      }
+      })
     }
 
-    return stream
+    console.log('🎬 SendChat: Returning stream promise...')
+    return streamPromise
   } catch (error) {
     console.error('💥 SendChat: Error processing chat:', error)
-    console.error(
-      '💥 SendChat: Error stack:',
-      error instanceof Error ? error.stack : 'No stack trace'
-    )
-    throw error
+    return new Response('An error occurred during stream generation.', {
+      status: 500,
+    })
   }
 }

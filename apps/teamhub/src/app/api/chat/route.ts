@@ -128,8 +128,8 @@ export async function POST(req: NextRequest) {
 
     console.log('🚀 Chat API: Calling sendChat with tools...')
 
-    // Call sendChat with tools
-    const result = await sendChat({
+    // Call sendChat with tools and return the promise for the stream
+    return sendChat({
       databaseName: organizations[0].databaseName,
       messages,
       agentId,
@@ -138,9 +138,6 @@ export async function POST(req: NextRequest) {
       storeRule,
       tools: activeTools,
     })
-
-    console.log('✅ Chat API: sendChat completed successfully')
-    return result
   } catch (error) {
     console.error('💥 Chat API: Error processing request:', error)
     console.error(

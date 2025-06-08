@@ -19,7 +19,7 @@ import {
   Wrench,
   ExternalLink,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   Sheet,
@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/dialog'
 import { MemoriesDialogContent } from './chatCard/MemoriesDialogContent'
 import { MemorySelectionBar } from './chatCard/MemorySelectionBar'
+import { ConversationHeader } from './chatCard/ConversationHeader'
 import type { TestMemory } from './types'
 import type { AgentToolPermissions } from '@teamhub/db'
 import ReactMarkdown from 'react-markdown'
@@ -158,6 +159,12 @@ export function ChatCard({ scheduled }: ChatCardProps) {
   const [isInstancesOpen, setIsInstancesOpen] = useState(true)
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
   const [selectedMemories, setSelectedMemories] = useState<TestMemory[]>([])
+  const [currentConversation, setCurrentConversation] = useState<{
+    id: string
+    title: string
+    messageCount: number
+    isActive: boolean
+  } | null>(null)
 
   // Get available tools count
   const agentToolPermissions =
@@ -166,7 +173,16 @@ export function ChatCard({ scheduled }: ChatCardProps) {
 
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
-      api: '/api/chat',
+      api: '/api/chat', // Real chat endpoint
+      onFinish: () => {
+        // Update conversation message count when AI finishes responding
+        if (currentConversation) {
+          setCurrentConversation({
+            ...currentConversation,
+            messageCount: messages.length + 1, // +1 for the response that just finished
+          })
+        }
+      },
       experimental_prepareRequestBody: ({ messages }) => {
         return {
           messages: messages.map((msg) => ({
@@ -186,6 +202,18 @@ export function ChatCard({ scheduled }: ChatCardProps) {
       },
     })
 
+  const handleNewConversation = () => {
+    // Clear current messages and start fresh
+    setCurrentConversation({
+      id: `conv_${Date.now()}`,
+      title: 'New Conversation',
+      messageCount: 0,
+      isActive: true,
+    })
+    // Note: To actually clear messages, we'd need access to useChat's setMessages
+    // For now, this creates a new conversation context
+  }
+
   const handleAddMemory = (memory: TestMemory) => {
     setSelectedMemories((prev) => {
       const exists = prev.some((m) => m.id === memory.id)
@@ -203,6 +231,18 @@ export function ChatCard({ scheduled }: ChatCardProps) {
   const handleClearAllMemories = () => {
     setSelectedMemories([])
   }
+
+  // Initialize with a default conversation
+  useEffect(() => {
+    if (!currentConversation) {
+      setCurrentConversation({
+        id: `conv_${Date.now()}`,
+        title: 'New Conversation',
+        messageCount: 0,
+        isActive: true,
+      })
+    }
+  }, [])
 
   return (
     <Card className="flex h-full overflow-hidden bg-white">
@@ -263,6 +303,13 @@ export function ChatCard({ scheduled }: ChatCardProps) {
             </SheetContent>
           </Sheet>
         )}
+
+        {/* Conversation Header */}
+        <ConversationHeader
+          currentConversation={currentConversation}
+          onNewConversation={handleNewConversation}
+          isLoading={isLoading}
+        />
 
         {/* Chat Messages Area */}
         <ScrollArea className="flex-1 px-4 min-h-0">

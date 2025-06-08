@@ -25,9 +25,26 @@ const nextConfig = {
       },
     ]
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.externals = config.externals || []
     config.externals.push('pg-cloudflare')
+
+    // Handle Node.js modules in client-side code
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        os: false,
+        crypto: false,
+        stream: false,
+        net: false,
+        tls: false,
+        'pg-native': false,
+        bindings: false,
+      }
+    }
+
     return config
   },
 }

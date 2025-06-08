@@ -480,8 +480,6 @@ export async function updateCronLastRun(id: string): Promise<Cron> {
 }
 
 export async function createNewAgent(parentId?: string) {
-  'use server'
-
   const newAgent = await createAgent({
     id: genRandomId(),
     name: 'New Agent',

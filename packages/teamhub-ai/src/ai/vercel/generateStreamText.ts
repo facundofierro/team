@@ -49,16 +49,50 @@ export async function generateStreamText(params: {
     openai: generateOpenAIStream,
   }
 
-  // Filter memories with valid content and convert to messages
-  const memoryMessages: VercelMessage[] = memories
-    .filter(
-      (memory: Memory) => memory.content && memory.content.trim().length > 0
-    )
-    .map((memory: Memory) => ({
-      id: crypto.randomUUID(),
-      role: 'user' as const,
-      content: memory.content!,
-    }))
+  console.log(
+    `🎯 GenerateStreamText: Selected AI Provider: ${provider.toUpperCase()}`
+  )
+  console.log(
+    `🎯 GenerateStreamText: Available providers:`,
+    Object.keys(generators)
+  )
+  console.log(
+    `🎯 GenerateStreamText: Generator function:`,
+    generators[provider]?.name || 'unknown'
+  )
+
+  const memoryMessages: VercelMessage[] = memories.reduce(
+    (acc: VercelMessage[], memory: Memory) => {
+      if (!memory.content) {
+        return acc
+      }
+      // memory.content is JSONB, so it can be an object, array, or primitive.
+      // We need to convert it to a meaningful string.
+      let contentString: string
+      if (typeof memory.content === 'string') {
+        contentString = memory.content
+      } else {
+        contentString = JSON.stringify(memory.content)
+      }
+
+      // Filter out empty/useless content
+      if (
+        contentString.trim().length === 0 ||
+        contentString === '{}' ||
+        contentString === '[]'
+      ) {
+        return acc
+      }
+
+      acc.push({
+        id: crypto.randomUUID(),
+        role: 'user' as const,
+        content: `Recalled memory titled '${memory.title}': ${contentString}`,
+      })
+      return acc
+    },
+    []
+  )
 
   console.log(
     '💭 GenerateStreamText: Memory messages count:',
@@ -124,9 +158,31 @@ export async function generateStreamText(params: {
     Object.keys(aiTools).length
   )
 
-  return generators[provider]({
+  console.log('📦 GenerateStreamText: Final payload to be sent to AI:', {
+    systemPrompt: systemPrompt,
+    messages: messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+      toolInvocations: (m as any).toolInvocations,
+    })),
+    tools: Object.keys(aiTools),
+  })
+
+  console.log(
+    `🚀 GenerateStreamText: Calling ${provider.toUpperCase()} generator...`
+  )
+  console.log(
+    `🚀 GenerateStreamText: Function to call: ${generators[provider]?.name}`
+  )
+
+  const result = generators[provider]({
     systemPrompt,
     messages,
     tools: aiTools,
   })
+
+  console.log(
+    `✅ GenerateStreamText: ${provider.toUpperCase()} generator called successfully`
+  )
+  return result
 }

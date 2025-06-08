@@ -96,7 +96,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push TeamHub Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -105,6 +105,18 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/teamhub:latest
             ghcr.io/${{ github.repository_owner }}/teamhub:${{ needs.prepare-tag.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push PostgreSQL with pgvector image
+        uses: docker/build-push-action@v5
+        with:
+          context: infrastructure/docker
+          file: infrastructure/docker/Dockerfile.postgres-pgvector
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/postgres-pgvector:latest
+            ghcr.io/${{ github.repository_owner }}/postgres-pgvector:${{ needs.prepare-tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
