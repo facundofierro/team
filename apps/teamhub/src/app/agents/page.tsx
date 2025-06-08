@@ -23,7 +23,7 @@ async function createAgent(formData: FormData) {
     maxInstances: 1,
     policyDefinitions: {},
     memoryRules: {},
-    toolPermissions: {},
+    toolPermissions: { rules: [] },
     isActive: true,
     organizationId,
   })
@@ -61,6 +61,10 @@ export default async function AgentsPage({ searchParams }: PageProps) {
   const agents: Agent[] = await db.getAgents(organizationId)
   const selectedAgent = id ? (await db.getAgent(id)) || undefined : undefined
 
+  // Get organization tools for the agent detail
+  const organizationSettings = await db.getOrganizationSettings(organizationId)
+  const availableTools = organizationSettings.tools
+
   return (
     <div className="flex h-screen bg-background">
       <div className="border-r w-60">
@@ -76,6 +80,7 @@ export default async function AgentsPage({ searchParams }: PageProps) {
           defaultTab={tab}
           agent={selectedAgent}
           onSave={updateAgent}
+          availableTools={availableTools}
         />
       </div>
     </div>

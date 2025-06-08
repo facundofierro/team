@@ -16,8 +16,10 @@ import {
   X,
   Trash2,
   MoreHorizontal,
+  Wrench,
+  ExternalLink,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   Sheet,
@@ -36,7 +38,10 @@ import {
 } from '@/components/ui/dialog'
 import { MemoriesDialogContent } from './chatCard/MemoriesDialogContent'
 import { MemorySelectionBar } from './chatCard/MemorySelectionBar'
+import { ConversationHeader } from './chatCard/ConversationHeader'
 import type { TestMemory } from './types'
+import type { AgentToolPermissions } from '@teamhub/db'
+import ReactMarkdown from 'react-markdown'
 
 type ChatCardProps = {
   scheduled?: {
@@ -45,19 +50,145 @@ type ChatCardProps = {
   }
 }
 
+// Component to format message content with markdown support
+function MessageContent({
+  content,
+  isUser,
+}: {
+  content: string
+  isUser: boolean
+}) {
+  if (isUser) {
+    // For user messages, keep simple text formatting with URL detection
+    const urlRegex = /(https?:\/\/[^\s]+)/g
+    const parts = content.split(urlRegex)
+
+    return (
+      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+        {parts.map((part, index) => {
+          if (urlRegex.test(part)) {
+            return (
+              <a
+                key={index}
+                href={part}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 underline hover:no-underline transition-colors text-orange-700 hover:text-orange-800"
+              >
+                {part}
+                <ExternalLink className="w-3 h-3 inline" />
+              </a>
+            )
+          }
+          return part
+        })}
+      </p>
+    )
+  }
+
+  // For AI messages, use full markdown rendering
+  return (
+    <div className="text-sm leading-relaxed text-gray-900">
+      <ReactMarkdown
+        components={{
+          // Custom link component
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline hover:no-underline transition-colors"
+            >
+              {children}
+              <ExternalLink className="w-3 h-3 inline" />
+            </a>
+          ),
+          // Custom paragraph styling
+          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+          // Custom list styling
+          ul: ({ children }) => (
+            <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>
+          ),
+          ol: ({ children }) => (
+            <ol className="list-decimal list-inside mb-2 space-y-1">
+              {children}
+            </ol>
+          ),
+          li: ({ children }) => <li className="ml-2">{children}</li>,
+          // Custom bold text styling
+          strong: ({ children }) => (
+            <strong className="font-semibold text-gray-900">{children}</strong>
+          ),
+          // Custom italic text styling
+          em: ({ children }) => (
+            <em className="italic text-gray-800">{children}</em>
+          ),
+          // Custom code styling
+          code: ({ children }) => (
+            <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono">
+              {children}
+            </code>
+          ),
+          // Custom code block styling
+          pre: ({ children }) => (
+            <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto mb-2">
+              {children}
+            </pre>
+          ),
+          // Custom heading styling
+          h1: ({ children }) => (
+            <h1 className="text-lg font-bold mb-2 text-gray-900">{children}</h1>
+          ),
+          h2: ({ children }) => (
+            <h2 className="text-base font-bold mb-2 text-gray-900">
+              {children}
+            </h2>
+          ),
+          h3: ({ children }) => (
+            <h3 className="text-sm font-bold mb-1 text-gray-900">{children}</h3>
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  )
+}
+
 export function ChatCard({ scheduled }: ChatCardProps) {
   const [isInstancesOpen, setIsInstancesOpen] = useState(true)
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
   const [selectedMemories, setSelectedMemories] = useState<TestMemory[]>([])
+  const [currentConversation, setCurrentConversation] = useState<{
+    id: string
+    title: string
+    messageCount: number
+    isActive: boolean
+  } | null>(null)
+
+  // Get available tools count
+  const agentToolPermissions =
+    selectedAgent?.toolPermissions as AgentToolPermissions
+  const availableToolsCount = agentToolPermissions?.rules?.length || 0
 
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
-      api: '/api/chat',
+      api: '/api/chat', // Real chat endpoint
+      onFinish: () => {
+        // Update conversation message count when AI finishes responding
+        if (currentConversation) {
+          setCurrentConversation({
+            ...currentConversation,
+            messageCount: messages.length + 1, // +1 for the response that just finished
+          })
+        }
+      },
       experimental_prepareRequestBody: ({ messages }) => {
-        // Get the last message content as text
-        const lastMessage = messages[messages.length - 1]
         return {
-          text: lastMessage?.content || '',
+          messages: messages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
           agentId: selectedAgent?.id,
           agentCloneId: undefined, // Add this when implementing instance selection
           memoryRules: [], // Add your memory rules here
@@ -70,6 +201,18 @@ export function ChatCard({ scheduled }: ChatCardProps) {
         }
       },
     })
+
+  const handleNewConversation = () => {
+    // Clear current messages and start fresh
+    setCurrentConversation({
+      id: `conv_${Date.now()}`,
+      title: 'New Conversation',
+      messageCount: 0,
+      isActive: true,
+    })
+    // Note: To actually clear messages, we'd need access to useChat's setMessages
+    // For now, this creates a new conversation context
+  }
 
   const handleAddMemory = (memory: TestMemory) => {
     setSelectedMemories((prev) => {
@@ -89,13 +232,25 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     setSelectedMemories([])
   }
 
+  // Initialize with a default conversation
+  useEffect(() => {
+    if (!currentConversation) {
+      setCurrentConversation({
+        id: `conv_${Date.now()}`,
+        title: 'New Conversation',
+        messageCount: 0,
+        isActive: true,
+      })
+    }
+  }, [])
+
   return (
-    <Card className="flex h-full">
+    <Card className="flex h-full overflow-hidden bg-white">
       {/* Instances Sidebar - Only shown if agent.doesClone is true */}
       {selectedAgent?.doesClone && (
         <div
           className={cn(
-            'border-r transition-all duration-300',
+            'border-r transition-all duration-300 flex-shrink-0',
             isInstancesOpen ? 'w-64' : 'w-12'
           )}
         >
@@ -124,14 +279,14 @@ export function ChatCard({ scheduled }: ChatCardProps) {
       )}
 
       {/* Main Chat Area */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0 bg-[#f8f9fa]">
         {/* Scheduled Information Bar */}
         {scheduled && (
           <Sheet>
             <SheetTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex items-center justify-start w-full gap-2 h-14 hover:bg-accent"
+                className="flex items-center justify-start w-full gap-2 h-14 hover:bg-accent flex-shrink-0"
               >
                 <Calendar className="w-4 h-4" />
                 <span>Scheduled task - Click to view details</span>
@@ -149,105 +304,118 @@ export function ChatCard({ scheduled }: ChatCardProps) {
           </Sheet>
         )}
 
+        {/* Conversation Header */}
+        <ConversationHeader
+          currentConversation={currentConversation}
+          onNewConversation={handleNewConversation}
+          isLoading={isLoading}
+        />
+
         {/* Chat Messages Area */}
-        <ScrollArea className="flex-1 px-4">
+        <ScrollArea className="flex-1 px-4 min-h-0">
           <div className="py-4 space-y-4">
             {messages.map((message: Message) => (
               <div
                 key={message.id}
                 className={cn(
-                  'p-4 rounded-lg max-w-[80%]',
+                  'p-4 rounded-lg max-w-[80%] break-words',
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-muted'
+                    ? 'bg-gray-100/60 ml-auto text-orange-600 font-medium'
+                    : 'bg-gray-100/40 text-gray-900'
                 )}
               >
-                <p className="text-sm">{message.content}</p>
+                <MessageContent
+                  content={message.content}
+                  isUser={message.role === 'user'}
+                />
               </div>
             ))}
+            {isLoading && (
+              <div className="bg-gray-100/40 text-gray-900 p-4 rounded-lg max-w-[80%]">
+                <p className="text-sm">Thinking...</p>
+              </div>
+            )}
           </div>
         </ScrollArea>
 
         {/* Message Input Area */}
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-2 p-4 border-t"
-        >
-          <MemorySelectionBar
-            selectedMemories={selectedMemories}
-            onAddMemory={handleAddMemory}
-            onRemoveMemory={handleRemoveMemory}
-            onClearAllMemories={handleClearAllMemories}
-            hasInstances={selectedAgent?.doesClone ?? false}
-            instancesCollapsed={!isInstancesOpen}
-          />
-
-          <div className="flex gap-2">
-            <Textarea
-              placeholder="Type your message..."
-              value={input}
-              onChange={handleInputChange}
-              className="flex-1 h-36"
-              rows={1}
-              disabled={isLoading}
+        <div className="flex-shrink-0 border-t bg-white">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-2 p-4">
+            <MemorySelectionBar
+              selectedMemories={selectedMemories}
+              onAddMemory={handleAddMemory}
+              onRemoveMemory={handleRemoveMemory}
+              onClearAllMemories={handleClearAllMemories}
+              hasInstances={selectedAgent?.doesClone ?? false}
+              instancesCollapsed={!isInstancesOpen}
             />
 
-            <div className="flex flex-col justify-around w-24">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    type="button"
-                    className="w-full"
-                  >
-                    New Task
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Create task for agent</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-4">
-                    {/* Task creation form would go here */}
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    type="button"
-                    className="w-full"
-                  >
-                    Message
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Send new message to agent</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-4">
-                    {/* Task creation form would go here */}
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <Button
-                variant="default"
-                className="w-full"
-                size="icon"
-                type="submit"
+            <div className="flex gap-2">
+              <Textarea
+                placeholder="Type your message..."
+                value={input}
+                onChange={handleInputChange}
+                className="flex-1 h-36 resize-none"
+                rows={1}
                 disabled={isLoading}
-              >
-                Send
-                <Send className="w-5 h-5" />
-              </Button>
+              />
+
+              <div className="flex flex-col justify-around w-24 flex-shrink-0">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      type="button"
+                      className="w-full text-xs"
+                    >
+                      New Task
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Create task for agent</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      {/* Task creation form would go here */}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      type="button"
+                      className="w-full text-xs"
+                    >
+                      Message
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Send new message to agent</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      {/* Task creation form would go here */}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+
+                <Button
+                  variant="default"
+                  className="w-full bg-orange-500 hover:bg-orange-600"
+                  size="icon"
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </Card>
   )

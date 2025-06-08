@@ -30,6 +30,7 @@ export function OrganizationSwitcher({
   const [isOpen, setIsOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [newOrgName, setNewOrgName] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
   const { currentOrganization, setCurrentOrganization } = useOrganizationStore()
   const { setSelectedAgentId, setSelectedAgent } = useAgentStore()
   const router = useRouter()
@@ -45,12 +46,27 @@ export function OrganizationSwitcher({
   }
 
   const handleCreateOrganization = async () => {
-    if (!newOrgName.trim()) return
+    if (!newOrgName.trim() || isCreating) return
 
-    const formData = new FormData()
-    formData.set('name', newOrgName.trim())
+    setIsCreating(true)
 
-    await createOrganization(formData, pathname, window.location.search)
+    try {
+      const formData = new FormData()
+      formData.set('name', newOrgName.trim())
+
+      await createOrganization(formData, pathname, window.location.search)
+
+      // Reset form state
+      setNewOrgName('')
+      setIsCreateDialogOpen(false)
+    } catch (error: any) {
+      console.error('Failed to create organization:', error)
+      const errorMessage =
+        error?.message || 'Failed to create organization. Please try again.'
+      alert(errorMessage)
+    } finally {
+      setIsCreating(false)
+    }
   }
 
   // If no organizations exist, show create organization dialog
@@ -79,9 +95,20 @@ export function OrganizationSwitcher({
             placeholder="Organization name"
             value={newOrgName}
             onChange={(e) => setNewOrgName(e.target.value)}
+            disabled={isCreating}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleCreateOrganization()
+              }
+            }}
           />
           <DialogFooter>
-            <Button onClick={handleCreateOrganization}>Create</Button>
+            <Button
+              onClick={handleCreateOrganization}
+              disabled={!newOrgName.trim() || isCreating}
+            >
+              {isCreating ? 'Creating...' : 'Create'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -143,9 +170,30 @@ export function OrganizationSwitcher({
             placeholder="Organization name"
             value={newOrgName}
             onChange={(e) => setNewOrgName(e.target.value)}
+            disabled={isCreating}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleCreateOrganization()
+              }
+            }}
           />
           <DialogFooter>
-            <Button onClick={handleCreateOrganization}>Create</Button>
+            <Button
+              onClick={handleCreateOrganization}
+              disabled={!newOrgName.trim() || isCreating}
+            >
+              {isCreating ? 'Creating...' : 'Create'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsCreateDialogOpen(false)
+                setNewOrgName('')
+              }}
+              disabled={isCreating}
+            >
+              Cancel
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

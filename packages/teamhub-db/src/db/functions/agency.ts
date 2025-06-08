@@ -111,7 +111,7 @@ export async function getOrganizationSettings(
 export async function updateOrganizationSettings(
   settings: OrganizationSettings
 ) {
-  const { messageTypes, organizationId } = settings
+  const { messageTypes, tools: organizationTools, organizationId } = settings
 
   // Get existing message types
   const existingMessageTypes = await db
@@ -173,6 +173,71 @@ export async function updateOrganizationSettings(
 
   // Execute all updates in parallel
   await Promise.all(updatePromises)
+
+  // Handle tools if provided
+  if (organizationTools) {
+    // Get existing tools
+    const existingTools = await db
+      .select()
+      .from(tools)
+      .where(eq(tools.organizationId, organizationId))
+
+    // Create a map of existing tools by ID for easy lookup
+    const existingToolsMap = new Map(
+      existingTools.map((tool) => [tool.id, tool])
+    )
+
+    // Update or insert tools
+    const toolUpdatePromises = organizationTools.map(async (tool) => {
+      if (existingToolsMap.has(tool.id)) {
+        // Update existing tool
+        return db
+          .update(tools)
+          .set({
+            name: tool.name,
+            description: tool.description,
+            configuration: tool.configuration,
+            schema: tool.schema,
+            metadata: tool.metadata,
+            version: tool.version,
+            isActive: tool.isActive,
+            isManaged: tool.isManaged,
+          })
+          .where(
+            and(eq(tools.id, tool.id), eq(tools.organizationId, organizationId))
+          )
+      }
+
+      // Insert new tool
+      return db.insert(tools).values({
+        ...tool,
+        organizationId,
+      })
+    })
+
+    // Set isActive = false for tools that are no longer in the settings
+    const currentToolIds = new Set(organizationTools.map((tool) => tool.id))
+    const toolsToDeactivate = existingTools
+      .filter((tool) => !currentToolIds.has(tool.id))
+      .map((tool) => tool.id)
+
+    if (toolsToDeactivate.length > 0) {
+      toolUpdatePromises.push(
+        db
+          .update(tools)
+          .set({ isActive: false })
+          .where(
+            and(
+              inArray(tools.id, toolsToDeactivate),
+              eq(tools.organizationId, organizationId)
+            )
+          )
+      )
+    }
+
+    // Execute all tool updates in parallel
+    await Promise.all(toolUpdatePromises)
+  }
 }
 
 // Agent functions
@@ -252,39 +317,74 @@ export async function getActiveTools(): Promise<ToolWithTypes[]> {
 
 function isAllowedTime(allowedTimeStart: string, allowedTimeEnd: string) {
   const now = new Date()
+
+  // Parse HH:MM format
+  const [startHour, startMinute] = allowedTimeStart
+    .split(':')
+    .map((s) => parseInt(s, 10))
+  const [endHour, endMinute] = allowedTimeEnd
+    .split(':')
+    .map((s) => parseInt(s, 10))
+
   const start = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate(),
-    parseInt(allowedTimeStart, 10)
+    startHour,
+    startMinute,
+    0
   )
   const end = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate(),
-    parseInt(allowedTimeEnd, 10)
+    endHour,
+    endMinute,
+    59 // Include the full minute
   )
+
+  console.log('🕐 isAllowedTime: Current time:', now.toTimeString())
+  console.log('🕐 isAllowedTime: Start time:', start.toTimeString())
+  console.log('🕐 isAllowedTime: End time:', end.toTimeString())
+  console.log('🕐 isAllowedTime: Within range:', now >= start && now <= end)
+
   return now >= start && now <= end
 }
 
 export async function verifyToolUsage(toolTypeId: string) {
+  console.log('🔍 VerifyToolUsage: Checking usage for tool type:', toolTypeId)
+
   const [toolType] = await db
     .select()
     .from(toolTypes)
     .where(eq(toolTypes.id, toolTypeId))
 
   if (!toolType) {
+    console.log(
+      '🔧 VerifyToolUsage: Tool type not found, creating with default values...'
+    )
     const newType = await db
       .insert(toolTypes)
       .values({
         id: toolTypeId,
         type: toolTypeId,
         monthlyUsage: 1,
+        allowedUsage: 1000, // Default to 1000 for new tool types
         configurationParams: {},
       })
       .returning()
+    console.log(
+      '✅ VerifyToolUsage: Created new tool type with 1000 usage limit'
+    )
     return newType[0]
   }
+
+  console.log(
+    '📊 VerifyToolUsage: Current usage:',
+    toolType.monthlyUsage,
+    '/',
+    toolType.allowedUsage
+  )
 
   const hasExceededUsage = toolType.monthlyUsage >= toolType.allowedUsage
   const isWithinAllowedTime = isAllowedTime(
@@ -292,10 +392,15 @@ export async function verifyToolUsage(toolTypeId: string) {
     toolType.allowedTimeEnd
   )
 
+  console.log('⏰ VerifyToolUsage: Within allowed time:', isWithinAllowedTime)
+  console.log('📈 VerifyToolUsage: Usage exceeded:', hasExceededUsage)
+
   if (hasExceededUsage || !isWithinAllowedTime) {
+    console.log('❌ VerifyToolUsage: Tool usage not allowed')
     return false
   }
 
+  console.log('✅ VerifyToolUsage: Incrementing usage counter...')
   await db
     .update(toolTypes)
     .set({
@@ -303,7 +408,24 @@ export async function verifyToolUsage(toolTypeId: string) {
     })
     .where(eq(toolTypes.id, toolTypeId))
 
+  console.log('✅ VerifyToolUsage: Usage verified and incremented')
   return true
+}
+
+// Helper function to reset tool usage (useful for testing)
+export async function resetToolUsage(toolTypeId: string) {
+  console.log('🔄 ResetToolUsage: Resetting usage for tool type:', toolTypeId)
+
+  const result = await db
+    .update(toolTypes)
+    .set({
+      monthlyUsage: 0,
+    })
+    .where(eq(toolTypes.id, toolTypeId))
+    .returning()
+
+  console.log('✅ ResetToolUsage: Usage reset for tool type:', toolTypeId)
+  return result[0]
 }
 
 // Cron functions
@@ -358,8 +480,6 @@ export async function updateCronLastRun(id: string): Promise<Cron> {
 }
 
 export async function createNewAgent(parentId?: string) {
-  'use server'
-
   const newAgent = await createAgent({
     id: genRandomId(),
     name: 'New Agent',

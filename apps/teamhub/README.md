@@ -148,6 +148,32 @@ TeamHub is built as a modern monorepo with the following structure:
 3. Agents will remember context and previous conversations
 4. Use different message types for various interactions
 
+### Setting Up Authentication
+
+#### For Production (Yandex OAuth)
+
+1. Create a Yandex OAuth application
+2. Set `YANDEX_CLIENT_ID` and `YANDEX_CLIENT_SECRET`
+3. Add allowed emails to `ALLOWED_EMAILS`
+
+#### For Testing (Google OAuth)
+
+1. Create a Google OAuth application in Google Cloud Console
+2. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+3. Add your test emails to `ALLOWED_EMAILS`
+
+#### For Development (Email/Password)
+
+1. Set `ENABLE_CREDENTIALS_AUTH=true`
+2. Set test credentials: `TEST_USER_EMAIL` and `TEST_USER_PASSWORD`
+3. Add the test email to `ALLOWED_EMAILS`
+
+#### For Automated Testing (Test User)
+
+1. Set `ENABLE_TEST_USER=true`
+2. Set `TEST_USER_EMAIL` (this will allow instant login)
+3. Add the test email to `ALLOWED_EMAILS`
+
 ### Managing Tools
 
 1. Go to "Settings" → "Tools"

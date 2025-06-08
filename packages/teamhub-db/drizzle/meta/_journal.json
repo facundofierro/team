@@ -8,6 +8,13 @@
       "when": 1739475617483,
       "tag": "0000_smiling_bug",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1749343948687,
+      "tag": "0001_legal_toxin",
+      "breakpoints": true
     }
   ]
 }

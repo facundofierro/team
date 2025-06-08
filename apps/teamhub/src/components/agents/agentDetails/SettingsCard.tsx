@@ -9,20 +9,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import type { Agent } from '@teamhub/db'
+import { Plus, Trash2 } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
+import type { Agent, ToolWithTypes } from '@teamhub/db'
 import type {
   AgentToolPermission,
   AgentPolicyRule,
   AgentMemoryRule,
+  AgentToolPermissions,
 } from '@teamhub/db'
 
 type SettingsCardProps = {
   agent?: Agent
   onChange?: (agent: Partial<Agent>) => Promise<void>
+  availableTools?: ToolWithTypes[]
 }
 
-export function SettingsCard({ agent, onChange }: SettingsCardProps) {
+export function SettingsCard({
+  agent,
+  onChange,
+  availableTools = [],
+}: SettingsCardProps) {
   const [formData, setFormData] = useState<Partial<Agent>>({
     name: '',
     isActive: true,
@@ -35,9 +47,13 @@ export function SettingsCard({ agent, onChange }: SettingsCardProps) {
     memoryRules: {},
   })
 
-  const [tools, setTools] = useState<AgentToolPermission[]>([])
+  const [selectedToolIds, setSelectedToolIds] = useState<Set<string>>(new Set())
+  const [toolPermissions, setToolPermissions] = useState<
+    Record<string, AgentToolPermission>
+  >({})
   const [policies, setPolicies] = useState<AgentPolicyRule[]>([])
   const [memoryRules, setMemoryRules] = useState<AgentMemoryRule[]>([])
+  const [isAddingTool, setIsAddingTool] = useState(false)
 
   // Initialize data when agent changes
   useEffect(() => {
@@ -54,14 +70,23 @@ export function SettingsCard({ agent, onChange }: SettingsCardProps) {
         memoryRules: agent.memoryRules,
       })
 
-      // Initialize tools, policies, and memory rules from agent data
-      setTools(
-        Object.entries(agent.toolPermissions || {}).map(([toolId, name]) => ({
-          toolId,
-          name: String(name),
-          permissions: [],
-        }))
-      )
+      // Parse tool permissions properly
+      const agentToolPermissions = agent.toolPermissions as AgentToolPermissions
+      if (agentToolPermissions?.rules) {
+        const toolIds = new Set(
+          agentToolPermissions.rules.map((rule) => rule.toolId)
+        )
+        setSelectedToolIds(toolIds)
+
+        const permissionsMap: Record<string, AgentToolPermission> = {}
+        agentToolPermissions.rules.forEach((rule) => {
+          permissionsMap[rule.toolId] = rule
+        })
+        setToolPermissions(permissionsMap)
+      } else {
+        setSelectedToolIds(new Set())
+        setToolPermissions({})
+      }
 
       setPolicies(
         Object.entries(agent.policyDefinitions || {}).map(([id, rules]) => ({
@@ -90,13 +115,69 @@ export function SettingsCard({ agent, onChange }: SettingsCardProps) {
     onChange?.({ id: agent?.id, ...updatedData })
   }
 
-  const handleAddTool = () => {
-    const newTool: AgentToolPermission = {
-      toolId: crypto.randomUUID(),
-      maxUsagePerDay: 0,
-      role: '',
+  const handleAddTool = (toolId: string) => {
+    const newSelectedToolIds = new Set(selectedToolIds)
+    const newToolPermissions = { ...toolPermissions }
+
+    // Add tool with default permissions
+    newSelectedToolIds.add(toolId)
+    newToolPermissions[toolId] = {
+      toolId,
+      maxUsagePerDay: 0, // 0 means unlimited
+      role: undefined,
     }
-    setTools([...tools, newTool])
+
+    setSelectedToolIds(newSelectedToolIds)
+    setToolPermissions(newToolPermissions)
+
+    // Update the agent with new tool permissions
+    const agentToolPermissions: AgentToolPermissions = {
+      rules: Array.from(newSelectedToolIds).map((id) => newToolPermissions[id]),
+    }
+
+    handleChange('toolPermissions', agentToolPermissions)
+    setIsAddingTool(false)
+  }
+
+  const handleRemoveTool = (toolId: string) => {
+    const newSelectedToolIds = new Set(selectedToolIds)
+    const newToolPermissions = { ...toolPermissions }
+
+    // Remove tool
+    newSelectedToolIds.delete(toolId)
+    delete newToolPermissions[toolId]
+
+    setSelectedToolIds(newSelectedToolIds)
+    setToolPermissions(newToolPermissions)
+
+    // Update the agent with new tool permissions
+    const agentToolPermissions: AgentToolPermissions = {
+      rules: Array.from(newSelectedToolIds).map((id) => newToolPermissions[id]),
+    }
+
+    handleChange('toolPermissions', agentToolPermissions)
+  }
+
+  const handleUpdateToolPermission = (
+    toolId: string,
+    field: keyof AgentToolPermission,
+    value: any
+  ) => {
+    const newToolPermissions = {
+      ...toolPermissions,
+      [toolId]: {
+        ...toolPermissions[toolId],
+        [field]: value,
+      },
+    }
+    setToolPermissions(newToolPermissions)
+
+    // Update the agent with new tool permissions
+    const agentToolPermissions: AgentToolPermissions = {
+      rules: Array.from(selectedToolIds).map((id) => newToolPermissions[id]),
+    }
+
+    handleChange('toolPermissions', agentToolPermissions)
   }
 
   const handleAddPolicy = () => {
@@ -184,18 +265,90 @@ export function SettingsCard({ agent, onChange }: SettingsCardProps) {
           </h3>
           <ScrollArea className="flex-1 min-h-0 border rounded-md">
             <div className="p-4 space-y-4">
-              {tools.map((tool) => (
-                <Card key={tool.toolId} className="p-4">
-                  <p className="font-medium">{tool.toolId}</p>
-                </Card>
-              ))}
+              {/* Show assigned tools */}
+              {Array.from(selectedToolIds).map((toolId) => {
+                const tool = availableTools.find((t) => t.id === toolId)
+                const permission = toolPermissions[toolId]
+
+                if (!tool) return null
+
+                return (
+                  <Card key={tool.id} className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{tool.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {tool.type}
+                          </p>
+                          {tool.description && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {tool.description}
+                            </p>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-600"
+                          onClick={() => handleRemoveTool(tool.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      {permission && (
+                        <div className="pt-2 border-t space-y-2">
+                          <div className="space-y-1">
+                            <Label className="text-xs">
+                              Max Usage Per Day (0 = unlimited)
+                            </Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={permission.maxUsagePerDay || 0}
+                              onChange={(e) =>
+                                handleUpdateToolPermission(
+                                  tool.id,
+                                  'maxUsagePerDay',
+                                  parseInt(e.target.value) || 0
+                                )
+                              }
+                              className="h-8"
+                            />
+                          </div>
+                          {permission.role !== undefined && (
+                            <div className="space-y-1">
+                              <Label className="text-xs">Role</Label>
+                              <Input
+                                value={permission.role || ''}
+                                onChange={(e) =>
+                                  handleUpdateToolPermission(
+                                    tool.id,
+                                    'role',
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Optional role"
+                                className="h-8"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                )
+              })}
+
+              {/* Add Tool Button */}
               <Card
                 className="flex items-center justify-center p-6 border-dashed cursor-pointer hover:border-primary"
-                onClick={handleAddTool}
+                onClick={() => setIsAddingTool(true)}
               >
                 <div className="space-y-2 text-center">
                   <Plus className="w-6 h-6 mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Add new tool</p>
+                  <p className="text-sm text-muted-foreground">Add tool</p>
                 </div>
               </Card>
             </div>
@@ -265,6 +418,54 @@ export function SettingsCard({ agent, onChange }: SettingsCardProps) {
           </ScrollArea>
         </div>
       </div>
+
+      {/* Add Tool Sheet */}
+      <Sheet open={isAddingTool} onOpenChange={setIsAddingTool}>
+        <SheetContent className="sm:max-w-[400px] w-3/4">
+          <SheetHeader>
+            <SheetTitle>Add Tool to Agent</SheetTitle>
+          </SheetHeader>
+          <div className="grid gap-4 py-4">
+            <ScrollArea className="h-[400px] w-full">
+              <div className="space-y-2">
+                {availableTools.length === 0 ? (
+                  <div className="text-center py-6 text-sm text-muted-foreground">
+                    No tools available for this organization. Add tools in
+                    Settings first.
+                  </div>
+                ) : (
+                  availableTools
+                    .filter((tool) => !selectedToolIds.has(tool.id)) // Only show unassigned tools
+                    .map((tool) => (
+                      <button
+                        key={tool.id}
+                        onClick={() => handleAddTool(tool.id)}
+                        className="w-full text-left p-3 rounded-md border transition-colors hover:bg-muted"
+                      >
+                        <div className="font-medium">{tool.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {tool.type}
+                        </div>
+                        {tool.description && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {tool.description}
+                          </div>
+                        )}
+                      </button>
+                    ))
+                )}
+                {availableTools.filter((tool) => !selectedToolIds.has(tool.id))
+                  .length === 0 &&
+                  availableTools.length > 0 && (
+                    <div className="text-center py-6 text-sm text-muted-foreground">
+                      All available tools have been added to this agent.
+                    </div>
+                  )}
+              </div>
+            </ScrollArea>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

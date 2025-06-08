@@ -17,7 +17,7 @@ const generateId = () => Math.random().toString(36).substring(2, 9)
 
 export const organization = agency.table('organization', {
   id: text('id').primaryKey(),
-  name: text('name').notNull(),
+  name: text('name').notNull().unique(),
   userId: text('user_id').references(() => users.id),
   databaseName: text('database_name').notNull(),
   databaseUrl: text('database_url'), // optional for external connections

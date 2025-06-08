@@ -2,12 +2,27 @@ import { ToolTypeWithTypes, db } from '@teamhub/db'
 import { searchGoogle, SearchGoogleParameters } from './tools/searchGoogle'
 import { searchYandex, SearchYandexParameters } from './tools/searchYandex'
 import {
+  searchYandexGrpc,
+  SearchYandexGrpcParameters,
+} from './tools/searchYandexGrpc'
+import {
+  searchYandexGen,
+  SearchYandexGenParameters,
+} from './tools/searchYandexGen'
+import {
   searchDuckDuckGo,
   SearchDuckDuckGoParameters,
 } from './tools/searchDuckDuckGo'
+import { tool } from 'ai'
 import { z } from 'zod'
 
-const TOOLS = [searchGoogle, searchDuckDuckGo, searchYandex]
+const TOOLS = [
+  searchGoogle,
+  searchDuckDuckGo,
+  searchYandex,
+  searchYandexGrpc,
+  searchYandexGen,
+]
 
 export const getToolTypes = async () => {
   const toolTypes = TOOLS.map(
@@ -31,25 +46,109 @@ export const getToolTypes = async () => {
   return toolTypes
 }
 
-export const getToolHandler = async (toolId: string) => {
-  const tool = await db.getTool(toolId)
+export const getToolHandler = (type: string) => {
+  const tool = TOOLS.find((t) => t.type === type)
   if (!tool) {
-    throw new Error('Tool not found')
+    throw new Error(`Tool ${type} not found`)
+  }
+  return tool.handler
+}
+
+export const getAISDKTool = async (toolRecord: any) => {
+  console.log('🔧 Tool Executor: Creating AI SDK tool for:', toolRecord.type)
+  console.log(
+    '🔧 Tool Executor: Tool record:',
+    JSON.stringify(
+      {
+        id: toolRecord.id,
+        type: toolRecord.type,
+        isManaged: toolRecord.isManaged,
+        hasConfiguration: !!toolRecord.configuration,
+        configurationKeys: Object.keys(toolRecord.configuration || {}),
+      },
+      null,
+      2
+    )
+  )
+
+  const toolDefinition = TOOLS.find((t) => t.type === toolRecord.type)
+  if (!toolDefinition) {
+    console.error(
+      '❌ Tool Executor: Tool definition not found for type:',
+      toolRecord.type
+    )
+    throw new Error(`Tool definition not found for type: ${toolRecord.type}`)
   }
 
-  const toolHandler = TOOLS.find((t) => t.id === tool.id)
-  if (!toolHandler) {
-    throw new Error('Tool handler not found')
-  }
+  console.log('✅ Tool Executor: Found tool definition:', toolDefinition.type)
 
-  return async (params: unknown) => {
-    const isAllowed = await db.verifyToolUsage(tool.id)
-    if (!isAllowed) {
-      throw new Error('Tool usage limit exceeded')
-    }
-    const result = await toolHandler.handler(params, tool.configuration)
-    return result
-  }
+  return tool({
+    description: toolDefinition.description || undefined,
+    parameters: toolDefinition.parametersSchema,
+    execute: async (params) => {
+      console.log('🚀 Tool Executor: Starting tool execution')
+      console.log('🚀 Tool Executor: Tool type:', toolRecord.type)
+      console.log('🚀 Tool Executor: Tool ID:', toolRecord.id)
+      console.log(
+        '🚀 Tool Executor: Parameters:',
+        JSON.stringify(params, null, 2)
+      )
+
+      try {
+        console.log('⏱️ Tool Executor: Verifying tool usage...')
+        const isAllowed = await db.verifyToolUsage(toolRecord.type)
+        if (!isAllowed) {
+          console.error(
+            '❌ Tool Executor: Tool usage limit exceeded for type:',
+            toolRecord.type
+          )
+          throw new Error('Tool usage limit exceeded')
+        }
+        console.log('✅ Tool Executor: Tool usage verified')
+
+        console.log('🔧 Tool Executor: Calling tool handler...')
+        const startTime = Date.now()
+
+        const result = await toolDefinition.handler(
+          params,
+          toolRecord.configuration
+        )
+
+        const endTime = Date.now()
+        console.log(
+          `⏱️ Tool Executor: Tool execution completed in ${
+            endTime - startTime
+          }ms`
+        )
+        console.log('🎯 Tool Executor: Tool result type:', typeof result)
+        console.log(
+          '🎯 Tool Executor: Tool result length:',
+          Array.isArray(result) ? result.length : 'not an array'
+        )
+
+        if (Array.isArray(result) && result.length > 0) {
+          console.log(
+            '🎯 Tool Executor: First result sample:',
+            JSON.stringify(result[0], null, 2)
+          )
+        } else {
+          console.log(
+            '🎯 Tool Executor: Full result:',
+            JSON.stringify(result, null, 2)
+          )
+        }
+
+        return result
+      } catch (error) {
+        console.error('💥 Tool Executor: Error during tool execution:', error)
+        console.error(
+          '💥 Tool Executor: Error stack:',
+          error instanceof Error ? error.stack : 'No stack trace'
+        )
+        throw error
+      }
+    },
+  })
 }
 
 export type ToolTypeDefinition = ToolTypeWithTypes & {

@@ -2,7 +2,7 @@ version: '3.8'
 services:
   # PostgreSQL database for teamhub
   postgres:
-    image: postgres:15
+    image: ${POSTGRES_PGVECTOR_IMAGE:-ghcr.io/facundofierro/postgres-pgvector:latest}
     deploy:
       replicas: 1
       placement:

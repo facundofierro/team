@@ -99,7 +99,10 @@ export function SettingsDetails({
               <ToolsCard
                 tools={settings.tools}
                 toolTypes={settings.toolTypes}
+                organizationId={settings.organizationId}
                 onChange={(tools) => handleChange({ tools })}
+                onSave={onSave}
+                allSettings={settings}
               />
             </TabsContent>
 
@@ -127,13 +130,25 @@ export function SettingsDetails({
         </div>
 
         {hasChanges && (
-          <div className="flex items-center justify-end h-16 gap-2 px-4 mt-4 bg-cardLight rounded-xl">
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button variant="default" onClick={handleSave}>
-              Save changes
-            </Button>
+          <div className="flex items-center justify-between h-16 gap-2 px-4 mt-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-amber-800">
+                You have unsaved changes that need to be saved to the database
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                onClick={handleSave}
+                className="bg-amber-600 hover:bg-amber-700"
+              >
+                Save changes
+              </Button>
+            </div>
           </div>
         )}
       </div>

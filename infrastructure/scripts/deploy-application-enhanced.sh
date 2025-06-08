@@ -358,6 +358,7 @@ deploy_full_stack() {
     export NEXTCLOUD_DB_PASSWORD="${NEXTCLOUD_DB_PASSWORD}"
     export PG_PASSWORD="${PG_PASSWORD}"
     export REMOTION_IMAGE="${REMOTION_IMAGE}"
+    export POSTGRES_PGVECTOR_IMAGE="${POSTGRES_PGVECTOR_IMAGE:-${CONTAINER_REGISTRY}/postgres-pgvector:${IMAGE_TAG}}"
 
     echo -e "${BLUE}🚀 Deploying application stack...${NC}"
     docker stack deploy -c ./docker-stack-temp.yml teamhub
