@@ -26,11 +26,11 @@ export async function POST(req: NextRequest) {
 
     console.log('✅ Chat API: Organization found:', organizations[0].id)
 
-    const { text, agentId, agentCloneId, memoryRules, storeRule } =
+    const { messages, agentId, agentCloneId, memoryRules, storeRule } =
       await req.json()
 
     console.log('📋 Chat API: Request data:', {
-      textLength: text?.length,
+      messagesCount: messages?.length,
       agentId,
       agentCloneId,
       hasMemoryRules: !!memoryRules,
@@ -38,9 +38,9 @@ export async function POST(req: NextRequest) {
     })
 
     // Validate required parameters
-    if (!text || typeof text !== 'string' || text.trim().length === 0) {
-      console.error('❌ Chat API: Invalid or missing text parameter')
-      return new Response('Text is required', { status: 400 })
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      console.error('❌ Chat API: Invalid or missing messages parameter')
+      return new Response('Messages array is required', { status: 400 })
     }
 
     if (!agentId || typeof agentId !== 'string') {
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
     // Call sendChat with tools
     const result = await sendChat({
       databaseName: organizations[0].databaseName,
-      text,
+      messages,
       agentId,
       agentCloneId,
       memoryRules,

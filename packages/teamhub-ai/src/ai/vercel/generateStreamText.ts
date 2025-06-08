@@ -7,7 +7,7 @@ import { getAISDKTool } from '../../tools'
 export type AIProvider = 'deepseek' | 'openai'
 
 export async function generateStreamText(params: {
-  text: string
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>
   agentId: string
   systemPrompt?: string
   memories: MemoryWithTypes[]
@@ -18,21 +18,30 @@ export async function generateStreamText(params: {
     provider = 'deepseek',
     systemPrompt = '',
     memories,
-    text,
+    messages: inputMessages,
     tools = [],
   } = params
 
   console.log('🤖 GenerateStreamText: Starting text generation')
   console.log('🤖 GenerateStreamText: Provider:', provider)
   console.log('🤖 GenerateStreamText: Agent ID:', params.agentId)
-  console.log('🤖 GenerateStreamText: Text length:', text.length)
+  console.log(
+    '🤖 GenerateStreamText: Input messages count:',
+    inputMessages.length
+  )
   console.log('🤖 GenerateStreamText: Memories count:', memories.length)
   console.log('🤖 GenerateStreamText: Tools count:', tools.length)
 
-  // Validate text parameter
-  if (!text || typeof text !== 'string') {
-    console.error('❌ GenerateStreamText: Invalid text parameter')
-    throw new Error('Text parameter is required and must be a string')
+  // Validate messages parameter
+  if (
+    !inputMessages ||
+    !Array.isArray(inputMessages) ||
+    inputMessages.length === 0
+  ) {
+    console.error('❌ GenerateStreamText: Invalid messages parameter')
+    throw new Error(
+      'Messages parameter is required and must be a non-empty array'
+    )
   }
 
   const generators = {
@@ -56,14 +65,14 @@ export async function generateStreamText(params: {
     memoryMessages.length
   )
 
-  const messages: VercelMessage[] = [
-    ...memoryMessages,
-    {
-      id: crypto.randomUUID(),
-      role: 'user' as const,
-      content: text.trim() || 'Hello', // Ensure we always have content
-    },
-  ]
+  // Convert input messages to Vercel format and combine with memory messages
+  const conversationMessages: VercelMessage[] = inputMessages.map((msg) => ({
+    id: crypto.randomUUID(),
+    role: msg.role,
+    content: msg.content.trim() || 'Hello', // Ensure we always have content
+  }))
+
+  const messages: VercelMessage[] = [...memoryMessages, ...conversationMessages]
 
   console.log('📨 GenerateStreamText: Total messages count:', messages.length)
 

@@ -168,10 +168,11 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     useChat({
       api: '/api/chat',
       experimental_prepareRequestBody: ({ messages }) => {
-        // Get the last message content as text
-        const lastMessage = messages[messages.length - 1]
         return {
-          text: lastMessage?.content || '',
+          messages: messages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
           agentId: selectedAgent?.id,
           agentCloneId: undefined, // Add this when implementing instance selection
           memoryRules: [], // Add your memory rules here

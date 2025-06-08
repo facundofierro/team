@@ -17,7 +17,7 @@ const generateUUID = () => {
 
 export async function sendChat(params: {
   databaseName: string
-  text: string
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>
   agentId: string
   agentCloneId?: string
   memoryRules?: AgentMemoryRule[]
@@ -26,7 +26,7 @@ export async function sendChat(params: {
 }) {
   const {
     databaseName,
-    text,
+    messages,
     agentId,
     agentCloneId,
     memoryRules,
@@ -34,11 +34,19 @@ export async function sendChat(params: {
     tools = [],
   } = params
 
+  // Get the latest user message for logging and storage
+  const latestUserMessage =
+    messages.filter((m) => m.role === 'user').pop()?.content || ''
+
   console.log('💬 SendChat: Starting chat processing')
   console.log('💬 SendChat: Database:', databaseName)
   console.log('💬 SendChat: Agent ID:', agentId)
   console.log('💬 SendChat: Agent Clone ID:', agentCloneId)
-  console.log('💬 SendChat: Text length:', text.length)
+  console.log('💬 SendChat: Messages count:', messages.length)
+  console.log(
+    '💬 SendChat: Latest user message length:',
+    latestUserMessage.length
+  )
   console.log('💬 SendChat: Tools count:', tools.length)
   console.log(
     '💬 SendChat: Tools:',
@@ -76,7 +84,7 @@ export async function sendChat(params: {
     console.log('🤖 SendChat: Generating stream response...')
     // Generate response using AI
     const stream = await generateStreamText({
-      text,
+      messages,
       agentId,
       systemPrompt: agent.systemPrompt || '',
       memories,
@@ -95,7 +103,7 @@ export async function sendChat(params: {
           toAgentId: agentId,
           toAgentCloneId: agentCloneId || null,
           type: storeRule.messageType,
-          content: text,
+          content: latestUserMessage,
           metadata: {},
           status: 'completed',
         })
