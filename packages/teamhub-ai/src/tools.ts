@@ -2,6 +2,10 @@ import { ToolTypeWithTypes, db } from '@teamhub/db'
 import { searchGoogle, SearchGoogleParameters } from './tools/searchGoogle'
 import { searchYandex, SearchYandexParameters } from './tools/searchYandex'
 import {
+  searchYandexGrpc,
+  SearchYandexGrpcParameters,
+} from './tools/searchYandexGrpc'
+import {
   searchYandexGen,
   SearchYandexGenParameters,
 } from './tools/searchYandexGen'
@@ -12,7 +16,13 @@ import {
 import { tool } from 'ai'
 import { z } from 'zod'
 
-const TOOLS = [searchGoogle, searchDuckDuckGo, searchYandex, searchYandexGen]
+const TOOLS = [
+  searchGoogle,
+  searchDuckDuckGo,
+  searchYandex,
+  searchYandexGrpc,
+  searchYandexGen,
+]
 
 export const getToolTypes = async () => {
   const toolTypes = TOOLS.map(

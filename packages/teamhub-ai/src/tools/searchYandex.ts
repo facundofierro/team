@@ -183,7 +183,37 @@ export const searchYandex: ToolTypeDefinition = {
         )
       }
 
-      // Build the Yandex Cloud Search API request according to official documentation
+      // Test IAM token validity before making the search request
+      console.log('🧪 Yandex Search Tool: Testing IAM token validity...')
+      const tokenTestResponse = await fetch(
+        'https://iam.api.cloud.yandex.net/iam/v1/tokens',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${YANDEX_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            yandexPassportOauthToken: '', // This will fail but tell us if the token format is correct
+          }),
+        }
+      )
+
+      console.log('🧪 Token test response status:', tokenTestResponse.status)
+
+      if (tokenTestResponse.status === 401) {
+        console.error('❌ IAM token appears to be invalid or expired')
+        throw new Error(
+          'The YANDEX_API_KEY (IAM token) appears to be invalid or expired. IAM tokens typically expire after 12 hours. Please generate a new IAM token using: `yc iam create-token` or refresh it through the Yandex Cloud console.'
+        )
+      } else if (tokenTestResponse.status === 403) {
+        console.error('❌ IAM token lacks necessary permissions')
+        throw new Error(
+          'The YANDEX_API_KEY (IAM token) lacks the necessary permissions. Please ensure your service account has the `search-api.user` role assigned.'
+        )
+      }
+
+      // Build the Yandex Cloud Search API request according to official Russian documentation
       const requestParams = {
         query: {
           searchType: 'SEARCH_TYPE_RU',
@@ -195,10 +225,39 @@ export const searchYandex: ToolTypeDefinition = {
               ? 'FAMILY_MODE_NONE'
               : 'FAMILY_MODE_MODERATE',
           page: (page || 0).toString(),
+          fixTypoMode:
+            fixTypoMode === 'off' ? 'FIX_TYPO_MODE_OFF' : 'FIX_TYPO_MODE_ON',
         },
-        maxPassages: (maxPassages || 4).toString(),
+        sortSpec: sortMode
+          ? {
+              sortMode:
+                sortMode === 'date'
+                  ? 'SORT_MODE_BY_TIME'
+                  : 'SORT_MODE_BY_RELEVANCE',
+              sortOrder:
+                sortOrder === 'ascending'
+                  ? 'SORT_ORDER_ASC'
+                  : 'SORT_ORDER_DESC',
+            }
+          : undefined,
+        groupSpec: {
+          groupMode:
+            groupMode === 'site' ? 'GROUP_MODE_DEEP' : 'GROUP_MODE_FLAT',
+          groupsOnPage: groupsPerPage || 20,
+          docsInGroup: docsPerGroup || 1,
+        },
+        maxPassages: maxPassages || 4,
         region: region || '225',
+        l10n:
+          language === 'be'
+            ? 'LOCALIZATION_BE'
+            : language === 'kk'
+            ? 'LOCALIZATION_KK'
+            : language === 'uk'
+            ? 'LOCALIZATION_UK'
+            : 'LOCALIZATION_RU',
         folderId: YANDEX_USER_ID,
+        responseFormat: 'FORMAT_XML',
         userAgent: 'TeamHub/1.0',
       }
 
@@ -269,6 +328,30 @@ export const searchYandex: ToolTypeDefinition = {
           '❌ Yandex Search Tool: API error response:',
           responseText
         )
+
+        // Provide more specific error messages for common issues
+        if (response.status === 403) {
+          const errorDetails = JSON.parse(responseText)
+          if (
+            errorDetails.code === 7 &&
+            errorDetails.message === 'Permission denied'
+          ) {
+            throw new Error(
+              `Yandex Cloud Search API Permission Denied (403). This typically means:
+              1. Your IAM token has expired (they expire every 12 hours)
+              2. Your service account lacks the 'search-api.user' role
+              3. The folder ID (${YANDEX_USER_ID}) doesn't exist or you don't have access to it
+
+              To fix this:
+              - Generate a new IAM token: \`yc iam create-token\`
+              - Verify your service account has the correct role: \`yc iam service-accounts list\`
+              - Check folder permissions: \`yc resource-manager folder list\`
+
+              Error details: ${responseText}`
+            )
+          }
+        }
+
         throw new Error(
           `Yandex API error: ${response.status} ${
             response.statusText
@@ -276,44 +359,82 @@ export const searchYandex: ToolTypeDefinition = {
         )
       }
 
-      // Parse response according to official docs: JSON wrapper with rawData containing XML
-      let responseData
+      // Parse response according to official Russian documentation
+      let jsonWrapper
       try {
-        const jsonWrapper = JSON.parse(responseText)
+        jsonWrapper = JSON.parse(responseText)
         console.log(
           '📊 Yandex Search Tool: JSON wrapper response:',
           JSON.stringify(jsonWrapper, null, 2).substring(0, 500) + '...'
         )
-
-        if (jsonWrapper.rawData) {
-          // The rawData is base64 encoded XML according to docs
-          responseData = Buffer.from(jsonWrapper.rawData, 'base64').toString(
-            'utf-8'
-          )
-          console.log(
-            '📊 Yandex Search Tool: Decoded XML response (first 1000 chars):',
-            responseData.substring(0, 1000)
-          )
-        } else {
-          throw new Error(
-            'No rawData field found in response (expected according to official docs)'
-          )
-        }
       } catch (error) {
-        console.error('❌ Yandex Search Tool: Failed to parse response:', error)
-        throw new Error(
-          `Failed to parse API response according to docs: ${error}`
+        console.error(
+          '❌ Yandex Search Tool: Failed to parse JSON wrapper:',
+          error
         )
+        throw new Error(`Failed to parse API response as JSON: ${error}`)
+      }
+
+      // Check for API errors first
+      if (jsonWrapper && jsonWrapper.error) {
+        console.error(
+          '❌ Yandex Search Tool: API returned error:',
+          jsonWrapper.error
+        )
+        throw new Error(
+          `Yandex API error: ${jsonWrapper.error.message || 'Unknown error'}`
+        )
+      }
+
+      // Handle asynchronous response format according to Russian docs
+      let rawData
+      if (jsonWrapper.rawData) {
+        // Direct response (synchronous mode)
+        rawData = jsonWrapper.rawData
+        console.log('📊 Direct response mode detected')
+      } else if (jsonWrapper.response && jsonWrapper.response.rawData) {
+        // Asynchronous response format
+        rawData = jsonWrapper.response.rawData
+        console.log('📊 Asynchronous response mode detected')
+      } else if (jsonWrapper.done === false) {
+        // Operation still in progress
+        console.error('❌ Yandex Search Tool: Operation still in progress')
+        throw new Error(
+          'Search operation is still in progress. This suggests the API is running in asynchronous mode, but the operation has not completed yet.'
+        )
+      } else {
+        console.error('❌ Yandex Search Tool: No rawData in response')
+        console.log(
+          '📊 Available response keys:',
+          Object.keys(jsonWrapper || {})
+        )
+        console.log('📊 Full response:', JSON.stringify(jsonWrapper, null, 2))
+        throw new Error(
+          'API response missing rawData field (expected according to Russian official docs)'
+        )
+      }
+
+      // Decode rawData (base64 encoded XML according to Russian docs)
+      let responseData
+      try {
+        responseData = Buffer.from(rawData, 'base64').toString('utf-8')
+        console.log(
+          '📊 Yandex Search Tool: Decoded rawData (first 1000 chars):',
+          responseData.substring(0, 1000)
+        )
+      } catch (error) {
+        console.error('❌ Yandex Search Tool: Failed to decode rawData:', error)
+        throw new Error(`Failed to decode rawData as base64: ${error}`)
       }
 
       // Parse XML response according to official documentation
       const results: SearchYandexResult[] = []
 
-      // Extract search results from XML response using regex parsing
+      // Extract search results from XML using regex
       const docRegex = /<doc[^>]*>(.*?)<\/doc>/gs
-      const urlRegex = /<url>(.*?)<\/url>/s
-      const titleRegex = /<title>(.*?)<\/title>/s
-      const passagesRegex = /<passages>(.*?)<\/passages>/s
+      const urlRegex = /<url[^>]*>(.*?)<\/url>/s
+      const titleRegex = /<title[^>]*>(.*?)<\/title>/s
+      const passagesRegex = /<passages[^>]*>(.*?)<\/passages>/s
 
       let match
       let docCount = 0
@@ -329,7 +450,6 @@ export const searchYandex: ToolTypeDefinition = {
 
         let snippet = 'No snippet available'
         if (passagesMatch) {
-          // Clean up passages by removing XML tags and getting text content
           snippet = passagesMatch[1]
             .replace(/<[^>]*>/g, '') // Remove XML tags
             .replace(/&lt;/g, '<')
@@ -343,7 +463,7 @@ export const searchYandex: ToolTypeDefinition = {
           title: titleMatch
             ? titleMatch[1].replace(/<[^>]*>/g, '').trim()
             : 'No title',
-          link: urlMatch ? urlMatch[1] : 'No URL',
+          link: urlMatch ? urlMatch[1].trim() : 'No URL',
           snippet: snippet,
         }
 
@@ -360,28 +480,17 @@ export const searchYandex: ToolTypeDefinition = {
         )
       }
 
-      // Check for XML error elements
+      // Check for XML errors
       if (responseData.includes('<error>')) {
         const errorMatch = /<error[^>]*>(.*?)<\/error>/s.exec(responseData)
         const errorText = errorMatch ? errorMatch[1] : 'Unknown XML error'
-        console.error(
-          '❌ Yandex Search Tool: API returned XML error:',
-          errorText
-        )
-        throw new Error(`Yandex API XML error: ${errorText}`)
+        console.error('❌ Yandex Search Tool: XML error:', errorText)
+        throw new Error(`Yandex Search API XML error: ${errorText}`)
       }
 
       if (results.length === 0) {
-        console.error('❌ Yandex Search Tool: No results found in API response')
-
-        // Check if we have a valid XML response structure but no results
-        if (responseData && !responseData.includes('<error>')) {
-          throw new Error(
-            'No search results found - the query may be too specific or there may be no matching content'
-          )
-        }
-
-        throw new Error('No search results found')
+        console.error('❌ Yandex Search Tool: No search results found')
+        throw new Error('No search results found in XML response')
       }
 
       console.log(

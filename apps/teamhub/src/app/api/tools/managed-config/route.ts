@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
 
     switch (toolType) {
       case 'searchYandex':
+      case 'searchYandexGrpc':
         configuration = {
           YANDEX_API_KEY: process.env.YANDEX_API_KEY || '',
           YANDEX_USER_KEY: process.env.YANDEX_USER_KEY || '',
