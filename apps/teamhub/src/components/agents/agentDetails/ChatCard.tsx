@@ -16,6 +16,7 @@ import {
   X,
   Trash2,
   MoreHorizontal,
+  Wrench,
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -37,6 +38,7 @@ import {
 import { MemoriesDialogContent } from './chatCard/MemoriesDialogContent'
 import { MemorySelectionBar } from './chatCard/MemorySelectionBar'
 import type { TestMemory } from './types'
+import type { AgentToolPermissions } from '@teamhub/db'
 
 type ChatCardProps = {
   scheduled?: {
@@ -49,6 +51,11 @@ export function ChatCard({ scheduled }: ChatCardProps) {
   const [isInstancesOpen, setIsInstancesOpen] = useState(true)
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
   const [selectedMemories, setSelectedMemories] = useState<TestMemory[]>([])
+
+  // Get available tools count
+  const agentToolPermissions =
+    selectedAgent?.toolPermissions as AgentToolPermissions
+  const availableToolsCount = agentToolPermissions?.rules?.length || 0
 
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
@@ -125,6 +132,21 @@ export function ChatCard({ scheduled }: ChatCardProps) {
 
       {/* Main Chat Area */}
       <div className="flex flex-col flex-1">
+        {/* Agent Info Bar */}
+        {selectedAgent && (
+          <div className="flex items-center justify-between p-4 border-b bg-muted/30">
+            <div className="flex items-center gap-2">
+              <h2 className="font-medium">{selectedAgent.name}</h2>
+              {availableToolsCount > 0 && (
+                <div className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                  <Wrench className="w-3 h-3" />
+                  <span>{availableToolsCount} tools</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Scheduled Information Bar */}
         {scheduled && (
           <Sheet>

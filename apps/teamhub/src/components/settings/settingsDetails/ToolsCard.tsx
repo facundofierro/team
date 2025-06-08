@@ -42,6 +42,22 @@ type AddToolSheetProps = {
   onAdd: (tool: Partial<ToolWithTypes>) => void
 }
 
+// Helper function to get managed tool configuration
+async function getManagedToolConfiguration(
+  toolType: string
+): Promise<Record<string, string>> {
+  try {
+    const response = await fetch(`/api/tools/managed-config?type=${toolType}`)
+    if (response.ok) {
+      const data = await response.json()
+      return data.configuration || {}
+    }
+  } catch (error) {
+    console.warn('Failed to get managed tool configuration:', error)
+  }
+  return {}
+}
+
 function AddToolSheet({
   isOpen,
   onClose,
@@ -70,12 +86,20 @@ function AddToolSheet({
     if (!selectedType) return
     if (!name.trim()) return
 
+    let finalConfig = config
+
+    // If it's a managed tool, get the configuration from environment variables
+    if (isManaged && selectedType.canBeManaged) {
+      const managedConfig = await getManagedToolConfiguration(selectedType.type)
+      finalConfig = { ...config, ...managedConfig }
+    }
+
     const toolData = {
       id: crypto.randomUUID(),
       type: selectedType.type,
       name,
       description: selectedType.description || '',
-      configuration: config,
+      configuration: finalConfig,
       schema: {}, // We'll need to define this based on the tool type
       metadata: {},
       version: '1.0.0',
@@ -106,73 +130,69 @@ function AddToolSheet({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleCancel}>
-      <SheetContent className="sm:max-w-[400px] w-3/4">
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[600px] sm:max-w-[600px]">
         <SheetHeader>
-          <SheetTitle>Add New Tool</SheetTitle>
+          <SheetTitle>Add Tool</SheetTitle>
         </SheetHeader>
         <div className="grid gap-4 py-4">
-          {/* Tool Type Selection */}
+          {/* Search for tool types */}
           <div className="grid gap-2">
-            <Label>Tool Type</Label>
+            <Label>Search Tool Types</Label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
+                placeholder="Search for tools..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for tool types..."
                 className="pl-10"
               />
             </div>
+          </div>
 
-            <ScrollArea className="h-[200px] w-full border rounded-md">
-              <div className="p-2">
-                {filteredToolTypes.length === 0 ? (
-                  <div className="text-center py-6 text-sm text-muted-foreground">
-                    {searchQuery
-                      ? 'No tool types found matching your search.'
-                      : 'No tool types available.'}
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {filteredToolTypes.map((type) => (
-                      <button
-                        key={type.type}
-                        onClick={() => setSelectedType(type)}
-                        className={cn(
-                          'w-full text-left p-3 rounded-md border transition-colors',
-                          selectedType?.type === type.type
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-background hover:bg-muted'
-                        )}
-                      >
-                        <div className="font-medium">{type.type}</div>
+          {/* Tool type selection */}
+          <div className="grid gap-2">
+            <Label>Select Tool Type</Label>
+            <ScrollArea className="h-64 border rounded-md">
+              <div className="p-2 space-y-2">
+                {filteredToolTypes.map((type) => (
+                  <div
+                    key={type.id}
+                    className={cn(
+                      'p-3 border rounded-md cursor-pointer transition-colors',
+                      selectedType?.id === type.id
+                        ? 'border-primary bg-primary/5'
+                        : 'border-gray-200 hover:border-gray-300'
+                    )}
+                    onClick={() => setSelectedType(type)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium">{type.type}</h4>
                         {type.description && (
-                          <div className="text-sm text-muted-foreground mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {type.description}
-                          </div>
+                          </p>
                         )}
-                        {type.canBeManaged && (
-                          <div className="text-xs mt-1 opacity-70">
-                            • Can be managed
-                          </div>
-                        )}
-                      </button>
-                    ))}
+                      </div>
+                      {type.canBeManaged && (
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          Manageable
+                        </span>
+                      )}
+                    </div>
                   </div>
+                ))}
+                {filteredToolTypes.length === 0 && (
+                  <p className="text-center text-gray-500 py-4">
+                    No tool types found
+                  </p>
                 )}
               </div>
             </ScrollArea>
-
-            {searchQuery && filteredToolTypes.length >= 10 && (
-              <div className="text-xs text-muted-foreground">
-                Showing first 10 results. Refine your search for more specific
-                results.
-              </div>
-            )}
           </div>
 
-          {/* Tool Name */}
+          {/* Tool name */}
           {selectedType && (
             <div className="grid gap-2">
               <Label>Tool Name</Label>
@@ -202,12 +222,19 @@ function AddToolSheet({
                   {selectedType.managedPriceDescription}
                 </p>
               )}
+              {isManaged && (
+                <p className="text-sm text-blue-600">
+                  Managed tools will use environment variables for
+                  configuration.
+                </p>
+              )}
             </div>
           )}
 
-          {/* Configuration Parameters */}
+          {/* Configuration Parameters - Only show if NOT managed */}
           {!!selectedType?.configurationParams &&
-            Object.keys(selectedType.configurationParams).length > 0 && (
+            Object.keys(selectedType.configurationParams).length > 0 &&
+            !isManaged && (
               <div className="grid gap-4">
                 <Label>Configuration</Label>
                 {Object.entries(selectedType.configurationParams).map(
@@ -301,30 +328,23 @@ export function ToolsCard({
   }
 
   return (
-    <Card className="h-full bg-cardLight">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Tools</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            {onSave && allSettings
-              ? 'Tools are automatically saved when added or removed'
-              : 'Remember to save changes after adding or removing tools'}
-          </p>
-        </div>
-        <Button size="sm" onClick={() => setIsAddingTool(true)}>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle>Tools</CardTitle>
+        <Button onClick={() => setIsAddingTool(true)} size="sm">
           <Plus className="w-4 h-4 mr-2" />
           Add Tool
         </Button>
       </CardHeader>
       <CardContent>
-        <Table className="bg-white rounded-md">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-[120px]">Actions</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

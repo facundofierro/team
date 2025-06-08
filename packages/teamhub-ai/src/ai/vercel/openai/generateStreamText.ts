@@ -8,13 +8,15 @@ const openaiAI = createOpenAI({
 export async function generateOpenAIStream(params: {
   messages: VercelMessage[]
   systemPrompt: string
+  tools?: Record<string, any>
 }) {
-  const { messages, systemPrompt = '' } = params
+  const { messages, systemPrompt = '', tools } = params
 
   const result = streamText({
     model: openaiAI('gpt-4o'),
     system: systemPrompt,
     messages,
+    tools,
     maxSteps: 5,
   })
 
