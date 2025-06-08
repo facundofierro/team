@@ -17,6 +17,7 @@ import {
   Trash2,
   MoreHorizontal,
   Wrench,
+  ExternalLink,
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -39,12 +40,118 @@ import { MemoriesDialogContent } from './chatCard/MemoriesDialogContent'
 import { MemorySelectionBar } from './chatCard/MemorySelectionBar'
 import type { TestMemory } from './types'
 import type { AgentToolPermissions } from '@teamhub/db'
+import ReactMarkdown from 'react-markdown'
 
 type ChatCardProps = {
   scheduled?: {
     date: Date
     description: string
   }
+}
+
+// Component to format message content with markdown support
+function MessageContent({
+  content,
+  isUser,
+}: {
+  content: string
+  isUser: boolean
+}) {
+  if (isUser) {
+    // For user messages, keep simple text formatting with URL detection
+    const urlRegex = /(https?:\/\/[^\s]+)/g
+    const parts = content.split(urlRegex)
+
+    return (
+      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+        {parts.map((part, index) => {
+          if (urlRegex.test(part)) {
+            return (
+              <a
+                key={index}
+                href={part}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 underline hover:no-underline transition-colors text-orange-700 hover:text-orange-800"
+              >
+                {part}
+                <ExternalLink className="w-3 h-3 inline" />
+              </a>
+            )
+          }
+          return part
+        })}
+      </p>
+    )
+  }
+
+  // For AI messages, use full markdown rendering
+  return (
+    <div className="text-sm leading-relaxed text-gray-900">
+      <ReactMarkdown
+        components={{
+          // Custom link component
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline hover:no-underline transition-colors"
+            >
+              {children}
+              <ExternalLink className="w-3 h-3 inline" />
+            </a>
+          ),
+          // Custom paragraph styling
+          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+          // Custom list styling
+          ul: ({ children }) => (
+            <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>
+          ),
+          ol: ({ children }) => (
+            <ol className="list-decimal list-inside mb-2 space-y-1">
+              {children}
+            </ol>
+          ),
+          li: ({ children }) => <li className="ml-2">{children}</li>,
+          // Custom bold text styling
+          strong: ({ children }) => (
+            <strong className="font-semibold text-gray-900">{children}</strong>
+          ),
+          // Custom italic text styling
+          em: ({ children }) => (
+            <em className="italic text-gray-800">{children}</em>
+          ),
+          // Custom code styling
+          code: ({ children }) => (
+            <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono">
+              {children}
+            </code>
+          ),
+          // Custom code block styling
+          pre: ({ children }) => (
+            <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto mb-2">
+              {children}
+            </pre>
+          ),
+          // Custom heading styling
+          h1: ({ children }) => (
+            <h1 className="text-lg font-bold mb-2 text-gray-900">{children}</h1>
+          ),
+          h2: ({ children }) => (
+            <h2 className="text-base font-bold mb-2 text-gray-900">
+              {children}
+            </h2>
+          ),
+          h3: ({ children }) => (
+            <h3 className="text-sm font-bold mb-1 text-gray-900">{children}</h3>
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  )
 }
 
 export function ChatCard({ scheduled }: ChatCardProps) {
@@ -132,23 +239,6 @@ export function ChatCard({ scheduled }: ChatCardProps) {
 
       {/* Main Chat Area */}
       <div className="flex flex-col flex-1 min-w-0 bg-[#f8f9fa]">
-        {/* Agent Info Bar */}
-        {selectedAgent && (
-          <div className="flex items-center justify-between p-4 border-b bg-white flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <h2 className="font-medium text-gray-900">
-                {selectedAgent.name}
-              </h2>
-              {availableToolsCount > 0 && (
-                <div className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
-                  <Wrench className="w-3 h-3" />
-                  <span>{availableToolsCount} tools</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Scheduled Information Bar */}
         {scheduled && (
           <Sheet>
@@ -186,9 +276,10 @@ export function ChatCard({ scheduled }: ChatCardProps) {
                     : 'bg-gray-100/40 text-gray-900'
                 )}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
+                <MessageContent
+                  content={message.content}
+                  isUser={message.role === 'user'}
+                />
               </div>
             ))}
             {isLoading && (
