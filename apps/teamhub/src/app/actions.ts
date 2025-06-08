@@ -17,22 +17,35 @@ export async function createOrganization(
   if (!session) throw new Error('Unauthorized')
   if (!session.user) throw new Error('Unauthorized')
 
-  const newOrg = await db.createOrganization({
-    id: crypto.randomUUID(),
-    name: name.trim(),
-    databaseName: name
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '_'),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    userId: session.user.id,
-  })
+  try {
+    const newOrg = await db.createOrganization({
+      id: crypto.randomUUID(),
+      name: name.trim(),
+      databaseName: name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '_'),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      userId: session.user.id,
+    })
 
-  // Create new URLSearchParams from the string
-  const searchParams = new URLSearchParams(currentSearchParams)
-  searchParams.set('organizationId', newOrg.id)
+    // Create new URLSearchParams from the string
+    const searchParams = new URLSearchParams(currentSearchParams)
+    searchParams.set('organizationId', newOrg.id)
 
-  revalidatePath('/')
-  redirect(`${currentPath}?${searchParams.toString()}`)
+    revalidatePath('/')
+    redirect(`${currentPath}?${searchParams.toString()}`)
+  } catch (error: any) {
+    // Handle unique constraint violation
+    if (
+      error?.code === '23505' &&
+      error?.constraint === 'organization_name_unique'
+    ) {
+      throw new Error(
+        'An organization with this name already exists. Please choose a different name.'
+      )
+    }
+    throw error
+  }
 }
