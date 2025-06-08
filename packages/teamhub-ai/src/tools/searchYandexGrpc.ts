@@ -312,10 +312,10 @@ export const searchYandexGrpc: ToolTypeDefinition = {
       const results: SearchYandexGrpcResult[] = []
 
       // Use regex to extract documents from XML
-      const docRegex = /<doc[^>]*>(.*?)<\/doc>/gs
-      const urlRegex = /<url[^>]*>(.*?)<\/url>/s
-      const titleRegex = /<title[^>]*>(.*?)<\/title>/s
-      const passagesRegex = /<passages[^>]*>(.*?)<\/passages>/s
+      const docRegex = /<doc[^>]*>([\s\S]*?)<\/doc>/g
+      const urlRegex = /<url[^>]*>([\s\S]*?)<\/url>/
+      const titleRegex = /<title[^>]*>([\s\S]*?)<\/title>/
+      const passagesRegex = /<passages[^>]*>([\s\S]*?)<\/passages>/
 
       let match
       let docCount = 0

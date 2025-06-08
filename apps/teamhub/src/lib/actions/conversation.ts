@@ -11,6 +11,7 @@ import {
   enhanceConversationTitle,
   type ConversationProcessingOptions,
 } from '@teamhub/ai'
+import { auth } from '@/auth'
 
 /**
  * Get the active conversation for an agent
@@ -50,11 +51,16 @@ export async function getRecentConversations(
  */
 export async function startNewConversation(
   agentId: string,
-  userId: string,
   firstMessage: string,
   orgDatabaseName: string
 ): Promise<ConversationMemory> {
   try {
+    // Get user ID from auth context
+    const session = await auth()
+    if (!session?.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
     const memoryFunctions = await dbMemories(orgDatabaseName)
 
     // Generate AI-powered title in the background
@@ -72,7 +78,7 @@ export async function startNewConversation(
     const newConversation = await memoryFunctions.startNewConversation(
       agentId,
       null, // agentCloneId - for future use with instances
-      userId,
+      session.user.id,
       conversationTitle
     )
 

@@ -27,8 +27,20 @@ export default async function SettingsPage({ searchParams }: PageProps) {
       ? params.organizationId
       : undefined
 
+  // During build time, we might not have organizationId, so return a basic component
   if (!organizationId) {
-    redirect('/')
+    return (
+      <div className="flex h-screen bg-background">
+        <div className="flex-1 h-full bg-background">
+          <div className="p-6">
+            <h1 className="text-2xl font-bold">Settings</h1>
+            <p className="text-muted-foreground">
+              Please select an organization to view settings.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const settings = await db.getOrganizationSettings(organizationId)
