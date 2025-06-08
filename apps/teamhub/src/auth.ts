@@ -154,6 +154,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
+    async redirect() {
+      return '/dashboard'
+    },
     async signIn({ user }) {
       const email = user.email ?? ''
       const isAllowed = allowedEmails.includes(email)
