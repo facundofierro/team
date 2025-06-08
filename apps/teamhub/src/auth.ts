@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth'
-import Yandex from '@auth/core/providers/yandex'
+import Yandex from 'next-auth/providers/yandex'
 import { authAdapter } from '@teamhub/db'
 
 const allowedEmails = process.env.ALLOWED_EMAILS?.split(',') || []
@@ -8,7 +8,7 @@ if (!process.env.NEXTAUTH_SECRET) {
   throw new Error('NEXTAUTH_SECRET must be set')
 }
 
-export const { handlers, auth } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: authAdapter,
   providers: [
     Yandex({
@@ -28,7 +28,7 @@ export const { handlers, auth } = NextAuth({
       userinfo: 'https://login.yandex.ru/info',
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET + '=',
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -38,21 +38,10 @@ export const { handlers, auth } = NextAuth({
       const email = user.email ?? ''
       const isAllowed = allowedEmails.includes(email)
       if (!isAllowed) {
-        console.warn(
-          `SignIn denied for email: ${email}. Allowed emails: [${allowedEmails.join(
-            ', '
-          )}]`
-        )
-      } else {
-        console.log(`SignIn allowed for email: ${email}`)
+        console.warn(`Access denied for email: ${email}`)
+        return false
       }
-      return isAllowed
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.sub!
-      }
-      return session
+      return true
     },
     async jwt({ token, user }) {
       if (user) {
@@ -60,14 +49,11 @@ export const { handlers, auth } = NextAuth({
       }
       return token
     },
-    async redirect({ url, baseUrl }) {
-      // After signin, redirect to dashboard
-      if (url.startsWith('/api/auth/signin')) {
-        return `${baseUrl}/dashboard`
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string
       }
-      // Otherwise allow internal redirects
-      if (url.startsWith(baseUrl)) return baseUrl
-      return baseUrl
+      return session
     },
   },
 })
