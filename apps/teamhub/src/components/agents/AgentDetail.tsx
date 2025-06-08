@@ -9,7 +9,7 @@ import {
 import { ChatCard } from './agentDetails/ChatCard'
 import { DashboardCard } from './agentDetails/DashboardCard'
 import { SettingsCard } from './agentDetails/SettingsCard'
-import type { Agent } from '@teamhub/db'
+import type { Agent, ToolWithTypes } from '@teamhub/db'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Skeleton } from '../../components/ui/skeleton'
 import { useEffect, useState } from 'react'
@@ -21,12 +21,14 @@ type AgentDetailProps = {
   defaultTab?: string
   agent?: Agent
   onSave?: (agent: Partial<Agent>) => Promise<void>
+  availableTools?: ToolWithTypes[]
 }
 
 export function AgentDetail({
   defaultTab = 'chat',
   agent,
   onSave,
+  availableTools = [],
 }: AgentDetailProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -162,6 +164,7 @@ export function AgentDetail({
               <SettingsCard
                 agent={selectedAgent || undefined}
                 onChange={handleChange}
+                availableTools={availableTools}
               />
             </TabsContent>
           </div>
