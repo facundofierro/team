@@ -72,14 +72,13 @@ export function useConversationManager({
   }
 
   const startNewConversationAction = useCallback(
-    async (firstMessage: string, userId: string) => {
+    async (firstMessage: string) => {
       if (!selectedAgent?.id || isCreatingConversation) return null
 
       setIsCreatingConversation(true)
       try {
         const newConversation = await startNewConversation(
           selectedAgent.id,
-          userId,
           firstMessage,
           orgDatabaseName
         )

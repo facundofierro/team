@@ -431,10 +431,10 @@ export const searchYandex: ToolTypeDefinition = {
       const results: SearchYandexResult[] = []
 
       // Extract search results from XML using regex
-      const docRegex = /<doc[^>]*>(.*?)<\/doc>/gs
-      const urlRegex = /<url[^>]*>(.*?)<\/url>/s
-      const titleRegex = /<title[^>]*>(.*?)<\/title>/s
-      const passagesRegex = /<passages[^>]*>(.*?)<\/passages>/s
+      const docRegex = /<doc[^>]*>([\s\S]*?)<\/doc>/g
+      const urlRegex = /<url[^>]*>([\s\S]*?)<\/url>/
+      const titleRegex = /<title[^>]*>([\s\S]*?)<\/title>/
+      const passagesRegex = /<passages[^>]*>([\s\S]*?)<\/passages>/
 
       let match
       let docCount = 0
@@ -482,7 +482,7 @@ export const searchYandex: ToolTypeDefinition = {
 
       // Check for XML errors
       if (responseData.includes('<error>')) {
-        const errorMatch = /<error[^>]*>(.*?)<\/error>/s.exec(responseData)
+        const errorMatch = /<error[^>]*>([\s\S]*?)<\/error>/.exec(responseData)
         const errorText = errorMatch ? errorMatch[1] : 'Unknown XML error'
         console.error('❌ Yandex Search Tool: XML error:', errorText)
         throw new Error(`Yandex Search API XML error: ${errorText}`)
