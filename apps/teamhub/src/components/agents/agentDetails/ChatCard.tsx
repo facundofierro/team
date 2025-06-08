@@ -332,7 +332,20 @@ export function ChatCard({ scheduled }: ChatCardProps) {
             ))}
             {isLoading && (
               <div className="bg-gray-100/40 text-gray-900 p-4 rounded-lg max-w-[80%]">
-                <p className="text-sm">Thinking...</p>
+                <div className="flex items-center gap-2">
+                  <Brain className="w-4 h-4 animate-pulse text-orange-500" />
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
+                    <div
+                      className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.1s' }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.2s' }}
+                    ></div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
