@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Plus, Trash2, Settings2, Search } from 'lucide-react'
-import { ToolType, ToolWithTypes } from '@teamhub/db'
+import { ToolType, ToolWithTypes, OrganizationSettings } from '@teamhub/db'
 import {
   Sheet,
   SheetContent,
@@ -23,12 +23,15 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useState, useMemo } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import React from 'react'
 
 type ToolCardProps = {
   tools: ToolWithTypes[]
   toolTypes: ToolType[]
   organizationId: string
   onChange: (tools: ToolWithTypes[]) => void
+  onSave?: (settings: OrganizationSettings) => Promise<void>
+  allSettings?: OrganizationSettings
 }
 
 type AddToolSheetProps = {
@@ -65,6 +68,7 @@ function AddToolSheet({
 
   const handleSubmit = async () => {
     if (!selectedType) return
+    if (!name.trim()) return
 
     const toolData = {
       id: crypto.randomUUID(),
@@ -250,22 +254,63 @@ export function ToolsCard({
   toolTypes,
   organizationId,
   onChange,
+  onSave,
+  allSettings,
 }: ToolCardProps) {
   const [isAddingTool, setIsAddingTool] = useState(false)
 
   const handleAddTool = async (newTool: Partial<ToolWithTypes>) => {
     // Add the tool to the local state immediately for UI responsiveness
-    onChange([...tools, newTool as ToolWithTypes])
+    const updatedTools = [...tools, newTool as ToolWithTypes]
+
+    // If we have onSave and allSettings, save directly to database
+    if (onSave && allSettings) {
+      try {
+        const updatedSettings = {
+          ...allSettings,
+          tools: updatedTools,
+        }
+        await onSave(updatedSettings)
+      } catch (error) {
+        console.error('Error saving tool to database:', error)
+        // Still update local state so user sees the tool was added
+      }
+    }
+
+    onChange(updatedTools)
   }
 
-  const handleRemoveTool = (toolId: string) => {
-    onChange(tools.filter((tool) => tool.id !== toolId))
+  const handleRemoveTool = async (toolId: string) => {
+    const updatedTools = tools.filter((tool) => tool.id !== toolId)
+
+    // If we have onSave and allSettings, save directly to database
+    if (onSave && allSettings) {
+      try {
+        const updatedSettings = {
+          ...allSettings,
+          tools: updatedTools,
+        }
+        await onSave(updatedSettings)
+      } catch (error) {
+        console.error('Error removing tool from database:', error)
+        // Still update local state so user sees the tool was removed
+      }
+    }
+
+    onChange(updatedTools)
   }
 
   return (
     <Card className="h-full bg-cardLight">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Tools</CardTitle>
+        <div>
+          <CardTitle>Tools</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            {onSave && allSettings
+              ? 'Tools are automatically saved when added or removed'
+              : 'Remember to save changes after adding or removing tools'}
+          </p>
+        </div>
         <Button size="sm" onClick={() => setIsAddingTool(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Add Tool
