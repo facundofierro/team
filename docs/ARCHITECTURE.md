@@ -88,10 +88,10 @@ Set these as GitHub Secrets:
 
 ```bash
 # Enhanced deployment with selective redeployment
-FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy.sh v1.0.0
 
 # Full deployment
-FORCE_REDEPLOY_ALL=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_ALL=true ./infrastructure/scripts/deploy.sh v1.0.0
 
 # Health checks
 ./infrastructure/scripts/health-check.sh
