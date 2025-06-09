@@ -42,9 +42,14 @@ import { MemoriesDialogContent } from './chatCard/MemoriesDialogContent'
 import { MemorySelectionBar } from './chatCard/MemorySelectionBar'
 import { ConversationHeader } from './chatCard/ConversationHeader'
 import { useConversationManager } from './chatCard/useConversationManager'
-import type { TestMemory } from './types'
 import type { AgentToolPermissions, ConversationMemory } from '@teamhub/db'
 import ReactMarkdown from 'react-markdown'
+
+// Simple type for chat memory selection (temporary until full migration to DB types)
+type TestMemory = {
+  id: string
+  name: string
+}
 
 // Tool call interfaces
 interface ToolCall {
@@ -53,7 +58,8 @@ interface ToolCall {
   arguments: Record<string, any>
   result?: any
   status: 'pending' | 'success' | 'error'
-  timestamp: Date
+  timestamp: string
+  stepNumber: number
 }
 
 interface ToolCallMessage extends Message {
@@ -70,27 +76,39 @@ function ToolCallDialog({ toolCall }: { toolCall: ToolCall }) {
           size="sm"
           className="h-auto p-2 text-left justify-start"
         >
-          <div className="flex items-center gap-2">
-            <Code className="w-3 h-3" />
-            <span className="text-xs font-medium">{toolCall.name}</span>
-            <Eye className="w-3 h-3 opacity-60" />
+          <div className="flex items-center gap-2 w-full">
+            <div
+              className={cn(
+                'w-2 h-2 rounded-full flex-shrink-0',
+                toolCall.status === 'success'
+                  ? 'bg-green-500'
+                  : toolCall.status === 'error'
+                  ? 'bg-red-500'
+                  : 'bg-yellow-500 animate-pulse'
+              )}
+            />
+            <Wrench className="w-3 h-3 text-blue-600" />
+            <span className="text-xs text-blue-600 font-medium truncate">
+              {toolCall.name}
+            </span>
+            <Eye className="w-3 h-3 text-blue-400 ml-auto" />
           </div>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Wrench className="w-4 h-4" />
+            <Wrench className="w-4 h-4 text-blue-600" />
             Tool Call: {toolCall.name}
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 overflow-y-auto">
+        <div className="space-y-4">
           <div>
-            <h4 className="font-medium text-sm text-gray-700 mb-2">Status</h4>
+            <h4 className="font-semibold text-sm mb-2">Status</h4>
             <div className="flex items-center gap-2">
               <div
                 className={cn(
-                  'w-2 h-2 rounded-full',
+                  'w-3 h-3 rounded-full',
                   toolCall.status === 'success'
                     ? 'bg-green-500'
                     : toolCall.status === 'error'
@@ -99,25 +117,27 @@ function ToolCallDialog({ toolCall }: { toolCall: ToolCall }) {
                 )}
               />
               <span className="text-sm capitalize">{toolCall.status}</span>
-              <span className="text-xs text-gray-500 ml-auto">
-                {toolCall.timestamp.toLocaleTimeString()}
-              </span>
             </div>
           </div>
 
           <div>
-            <h4 className="font-medium text-sm text-gray-700 mb-2">
-              Arguments
-            </h4>
-            <pre className="bg-gray-100 p-3 rounded-md text-xs overflow-x-auto">
+            <h4 className="font-semibold text-sm mb-2">Timestamp</h4>
+            <p className="text-sm text-gray-600">
+              {new Date(toolCall.timestamp).toLocaleString()}
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-sm mb-2">Arguments</h4>
+            <pre className="text-xs bg-gray-100 p-3 rounded-lg overflow-x-auto">
               {JSON.stringify(toolCall.arguments, null, 2)}
             </pre>
           </div>
 
           {toolCall.result && (
             <div>
-              <h4 className="font-medium text-sm text-gray-700 mb-2">Result</h4>
-              <pre className="bg-gray-100 p-3 rounded-md text-xs overflow-x-auto max-h-40">
+              <h4 className="font-semibold text-sm mb-2">Result</h4>
+              <pre className="text-xs bg-gray-100 p-3 rounded-lg overflow-x-auto max-h-60">
                 {typeof toolCall.result === 'string'
                   ? toolCall.result
                   : JSON.stringify(toolCall.result, null, 2)}
@@ -141,20 +161,6 @@ function ToolCallIndicator({ toolCalls }: { toolCalls: ToolCall[] }) {
           key={toolCall.id}
           className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md"
         >
-          <div
-            className={cn(
-              'w-2 h-2 rounded-full flex-shrink-0',
-              toolCall.status === 'success'
-                ? 'bg-green-500'
-                : toolCall.status === 'error'
-                ? 'bg-red-500'
-                : 'bg-yellow-500 animate-pulse'
-            )}
-          />
-          <Wrench className="w-3 h-3 text-blue-600 flex-shrink-0" />
-          <span className="text-xs text-blue-700 font-medium flex-1">
-            Called {toolCall.name}
-          </span>
           <ToolCallDialog toolCall={toolCall} />
         </div>
       ))}
@@ -162,56 +168,11 @@ function ToolCallIndicator({ toolCalls }: { toolCalls: ToolCall[] }) {
   )
 }
 
-// Function to extract or simulate tool calls from message content
+// Function to extract tool calls from message content (no longer used, kept for compatibility)
 function extractToolCalls(message: Message): ToolCall[] {
-  // This is a mock implementation - in a real scenario, tool calls would be
-  // included in the message data structure from the AI SDK
-
-  // For now, we'll simulate tool calls by looking for certain patterns in AI messages
-  if (message.role !== 'assistant') return []
-
-  const toolCalls: ToolCall[] = []
-  const content = message.content.toLowerCase()
-
-  // Simulate tool calls based on content patterns
-  if (content.includes('search') || content.includes('finding')) {
-    toolCalls.push({
-      id: `tool_${Date.now()}_search`,
-      name: 'web_search',
-      arguments: { query: 'extracted search terms' },
-      result: 'Search completed successfully',
-      status: 'success',
-      timestamp: new Date(),
-    })
-  }
-
-  if (
-    content.includes('file') ||
-    content.includes('read') ||
-    content.includes('write')
-  ) {
-    toolCalls.push({
-      id: `tool_${Date.now()}_file`,
-      name: 'file_operations',
-      arguments: { action: 'read', path: '/path/to/file' },
-      result: 'File operation completed',
-      status: 'success',
-      timestamp: new Date(),
-    })
-  }
-
-  if (content.includes('database') || content.includes('query')) {
-    toolCalls.push({
-      id: `tool_${Date.now()}_db`,
-      name: 'database_query',
-      arguments: { sql: 'SELECT * FROM table' },
-      result: 'Query executed successfully',
-      status: 'success',
-      timestamp: new Date(),
-    })
-  }
-
-  return toolCalls
+  // Tool calls are now separate messages in the conversation
+  // This function is kept for compatibility but not actively used
+  return []
 }
 
 type ChatCardProps = {
@@ -394,6 +355,16 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     selectedAgent?.toolPermissions as AgentToolPermissions
   const availableToolsCount = agentToolPermissions?.rules?.length || 0
 
+  // State for tracking processed tool call IDs to prevent duplicates
+  const [processedToolCallIds, setProcessedToolCallIds] = useState<Set<string>>(
+    new Set()
+  )
+
+  // Separate state for tool call messages that persist independently
+  const [toolCallMessages, setToolCallMessages] = useState<
+    (Message & { toolCall?: ToolCall })[]
+  >([])
+
   const {
     messages,
     input,
@@ -401,6 +372,7 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     handleSubmit,
     isLoading,
     setMessages,
+    data,
   } = useChat({
     id: chatId, // Dynamic ID for resetting chat
     api: '/api/chat', // Real chat endpoint
@@ -447,6 +419,50 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     },
   })
 
+  // Process streaming data for tool calls
+  useEffect(() => {
+    if (data && Array.isArray(data)) {
+      for (const item of data) {
+        if (typeof item === 'object' && item !== null) {
+          const dataItem = item as any
+
+          if (dataItem.type === 'tool-call' && dataItem.toolCall) {
+            const toolCallId = dataItem.toolCall.id
+
+            // Skip if we've already processed this tool call
+            if (processedToolCallIds.has(toolCallId)) {
+              continue
+            }
+
+            // Create a new tool call message with the tool call data
+            const toolCallMessage: Message & { toolCall?: ToolCall } = {
+              id: `tool-${toolCallId}`,
+              role: 'system' as const,
+              content: `Tool execution: ${dataItem.toolCall.name}`,
+              createdAt: new Date(),
+              toolCall: dataItem.toolCall,
+            }
+
+            // Add the tool call message to our separate tool call messages state
+            setToolCallMessages((prevToolMessages) => {
+              // Check if this tool call message already exists
+              const exists = prevToolMessages.some(
+                (msg) => msg.id === toolCallMessage.id
+              )
+              if (exists) {
+                return prevToolMessages
+              }
+              return [...prevToolMessages, toolCallMessage]
+            })
+
+            // Mark this tool call as processed
+            setProcessedToolCallIds((prev) => new Set([...prev, toolCallId]))
+          }
+        }
+      }
+    }
+  }, [data, processedToolCallIds])
+
   // Enhanced new conversation handler
   const handleNewConversation = useCallback(async () => {
     // Complete current conversation if it exists
@@ -466,6 +482,10 @@ export function ChatCard({ scheduled }: ChatCardProps) {
 
     // Clear selected memories
     setSelectedMemories([])
+
+    // Clear tool call tracking state
+    setProcessedToolCallIds(new Set())
+    setToolCallMessages([])
 
     // Note: New conversation will be created when the first message is sent
     // This is handled in the enhanced handleSubmit below
@@ -638,29 +658,54 @@ export function ChatCard({ scheduled }: ChatCardProps) {
         {/* Chat Messages Area */}
         <ScrollArea className="flex-1 px-4 min-h-0">
           <div className="py-4 space-y-4">
-            {messages.map((message: Message) => {
-              const messageWithToolCalls: ToolCallMessage = {
-                ...message,
-                toolCalls: extractToolCalls(message),
-              }
-
-              return (
-                <div
-                  key={message.id}
-                  className={cn(
-                    'p-4 rounded-lg max-w-[80%] break-words',
-                    message.role === 'user'
-                      ? 'bg-gray-100/60 ml-auto text-orange-600 font-medium'
-                      : 'bg-gray-100/40 text-gray-900'
-                  )}
-                >
-                  <MessageContent
-                    message={messageWithToolCalls}
-                    isUser={message.role === 'user'}
-                  />
-                </div>
+            {(() => {
+              // Combine and sort all messages by creation time
+              const allMessages = [...messages, ...toolCallMessages].sort(
+                (a, b) => {
+                  const timeA = a.createdAt
+                    ? new Date(a.createdAt).getTime()
+                    : 0
+                  const timeB = b.createdAt
+                    ? new Date(b.createdAt).getTime()
+                    : 0
+                  return timeA - timeB
+                }
               )
-            })}
+
+              return allMessages.map(
+                (message: Message & { toolCall?: ToolCall }) => {
+                  // Check if this is a tool call message
+                  if (message.role === 'system' && message.toolCall) {
+                    return (
+                      <div
+                        key={message.id}
+                        className="p-4 rounded-lg max-w-[80%] break-words bg-blue-50 border border-blue-200"
+                      >
+                        <ToolCallIndicator toolCalls={[message.toolCall]} />
+                      </div>
+                    )
+                  }
+
+                  // Regular message rendering
+                  return (
+                    <div
+                      key={message.id}
+                      className={cn(
+                        'p-4 rounded-lg max-w-[80%] break-words',
+                        message.role === 'user'
+                          ? 'bg-gray-100/60 ml-auto text-orange-600 font-medium'
+                          : 'bg-gray-100/40 text-gray-900'
+                      )}
+                    >
+                      <MessageContent
+                        message={{ ...message, toolCalls: [] }}
+                        isUser={message.role === 'user'}
+                      />
+                    </div>
+                  )
+                }
+              )
+            })()}
             {isLoading && (
               <div className="bg-gray-100/40 text-gray-900 p-4 rounded-lg max-w-[80%]">
                 <div className="flex items-center gap-2">
