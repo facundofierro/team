@@ -49,3 +49,29 @@ export async function createOrganization(
     throw error
   }
 }
+
+export async function ensureOrganizationDatabaseSetup(organizationId: string) {
+  const session = await auth()
+  if (!session || !session.user?.id) throw new Error('Unauthorized')
+
+  try {
+    // Get organization info
+    const organizations = await db.getOrganizations(session.user.id)
+    const organization = organizations.find((org) => org.id === organizationId)
+
+    if (!organization) {
+      throw new Error('Organization not found')
+    }
+
+    // First ensure the database exists, then ensure schemas and tables exist
+    const { createOrgDatabaseAndSchemas } = await import(
+      '@teamhub/db/src/db/functions/utils/database'
+    )
+    await createOrgDatabaseAndSchemas(organization.databaseName)
+
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error ensuring organization database setup:', error)
+    return { success: false, error: error.message }
+  }
+}

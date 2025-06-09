@@ -11,14 +11,17 @@ import {
 } from '@/components/ui/dialog'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { PlusCircle } from 'lucide-react'
+import { PlusCircle, Database, CheckCircle, AlertCircle } from 'lucide-react'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import { useAgentStore } from '@/stores/agentStore'
 import { cn } from '@/lib/utils'
 import { useRouter, usePathname } from 'next/navigation'
 import { Organization, NewOrganization } from '@teamhub/db'
 import { Input } from '@/components/ui/input'
-import { createOrganization } from '@/app/actions'
+import {
+  createOrganization,
+  ensureOrganizationDatabaseSetup,
+} from '@/app/actions'
 
 type OrganizationSwitcherProps = {
   organizations: Organization[]
@@ -31,18 +34,57 @@ export function OrganizationSwitcher({
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [newOrgName, setNewOrgName] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [isSwitching, setIsSwitching] = useState<string | null>(null)
+  const [setupStatus, setSetupStatus] = useState<{
+    [key: string]: 'loading' | 'success' | 'error'
+  }>({})
   const { currentOrganization, setCurrentOrganization } = useOrganizationStore()
   const { setSelectedAgentId, setSelectedAgent } = useAgentStore()
   const router = useRouter()
   const pathname = usePathname()
 
-  const handleOrganizationSwitch = (org: Organization) => {
-    setCurrentOrganization(org)
-    setSelectedAgentId(null)
-    setSelectedAgent(null)
-    setIsOpen(false)
-    // Refresh the current page with new organizationId
-    router.push(`${pathname}?organizationId=${org.id}`)
+  const handleOrganizationSwitch = async (org: Organization) => {
+    setIsSwitching(org.id)
+    setSetupStatus((prev) => ({ ...prev, [org.id]: 'loading' }))
+
+    try {
+      // Ensure database schemas exist for this organization
+      const result = await ensureOrganizationDatabaseSetup(org.id)
+
+      if (result.success) {
+        setSetupStatus((prev) => ({ ...prev, [org.id]: 'success' }))
+        setCurrentOrganization(org)
+        setSelectedAgentId(null)
+        setSelectedAgent(null)
+        setIsOpen(false)
+        // Refresh the current page with new organizationId
+        router.push(`${pathname}?organizationId=${org.id}`)
+      } else {
+        setSetupStatus((prev) => ({ ...prev, [org.id]: 'error' }))
+        console.error('Database setup failed:', result.error)
+        alert(`Failed to setup database for organization: ${result.error}`)
+      }
+    } catch (error: any) {
+      setSetupStatus((prev) => ({ ...prev, [org.id]: 'error' }))
+      console.error('Error switching organization:', error)
+      alert(`Error switching organization: ${error.message}`)
+    } finally {
+      setIsSwitching(null)
+    }
+  }
+
+  const getStatusIcon = (orgId: string) => {
+    const status = setupStatus[orgId]
+    switch (status) {
+      case 'loading':
+        return <Database className="w-4 h-4 animate-spin" />
+      case 'success':
+        return <CheckCircle className="w-4 h-4 text-green-500" />
+      case 'error':
+        return <AlertCircle className="w-4 h-4 text-red-500" />
+      default:
+        return null
+    }
   }
 
   const handleCreateOrganization = async () => {
@@ -139,11 +181,20 @@ export function OrganizationSwitcher({
                 key={org.id}
                 className={cn(
                   'p-4 cursor-pointer hover:bg-accent transition-colors',
-                  currentOrganization?.id === org.id ? 'bg-accent' : ''
+                  currentOrganization?.id === org.id ? 'bg-accent' : '',
+                  isSwitching === org.id ? 'opacity-50 pointer-events-none' : ''
                 )}
                 onClick={() => handleOrganizationSwitch(org)}
               >
-                <p className="text-sm font-medium">{org.name}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">{org.name}</p>
+                  {getStatusIcon(org.id)}
+                </div>
+                {isSwitching === org.id && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Setting up database...
+                  </p>
+                )}
               </Card>
             ))}
             <Button

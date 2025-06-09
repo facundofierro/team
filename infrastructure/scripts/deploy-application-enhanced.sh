@@ -257,6 +257,19 @@ EOF
         sleep 10
     done
 
+    # Auto-install pgvector extension on all databases
+    echo -e "${BLUE}🔧 Ensuring pgvector extension is available...${NC}"
+    if [ -f "infrastructure/scripts/install-pgvector.sh" ]; then
+        chmod +x infrastructure/scripts/install-pgvector.sh
+        if ./infrastructure/scripts/install-pgvector.sh; then
+            echo -e "${GREEN}✅ pgvector extension setup completed${NC}"
+        else
+            echo -e "${YELLOW}⚠️  pgvector extension setup had issues, but continuing deployment${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  pgvector auto-install script not found, skipping...${NC}"
+    fi
+
     # Wait for Redis
     for i in {1..10}; do
         if docker service ls --filter name=teamhub_redis --format "{{.Replicas}}" | grep -q "1/1"; then

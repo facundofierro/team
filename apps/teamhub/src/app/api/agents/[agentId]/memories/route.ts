@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbMemories } from '@teamhub/db'
+import { dbMemories, db } from '@teamhub/db'
 import { auth } from '@/auth'
 
 export async function GET(
@@ -27,10 +27,22 @@ export async function GET(
       )
     }
 
+    // Get organization info to resolve the actual database name
+    const organizations = await db.getOrganizations(session.user.id)
+    const organization = organizations.find((org) => org.id === organizationId)
+
+    if (!organization) {
+      return NextResponse.json(
+        { error: 'Organization not found' },
+        { status: 404 }
+      )
+    }
+
     // For now, return empty memories array if database connection fails
     // This prevents the 500 error while the database setup is being resolved
     try {
-      const memoryDb = await dbMemories(organizationId)
+      // Use the organization's database name, not the organization ID
+      const memoryDb = await dbMemories(organization.databaseName)
 
       let memories
 
@@ -51,7 +63,12 @@ export async function GET(
 
       return NextResponse.json({ memories })
     } catch (dbError) {
-      console.warn('Database not ready for organization:', organizationId)
+      console.warn(
+        'Database not ready for organization:',
+        organizationId,
+        'database:',
+        organization.databaseName
+      )
       // Return empty memories array when database is not set up yet
       return NextResponse.json({ memories: [] })
     }

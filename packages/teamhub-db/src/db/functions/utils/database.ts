@@ -20,6 +20,91 @@ const getSchema = (type: DatabaseType) => {
   }
 }
 
+// Function to automatically install pgvector extension when missing
+async function installPgvectorExtension(
+  pool: Pool,
+  orgDbName: string
+): Promise<boolean> {
+  console.log(`🔧 Attempting to install pgvector extension for ${orgDbName}...`)
+
+  try {
+    // Try to create the extension
+    await pool.query(`CREATE EXTENSION IF NOT EXISTS vector;`)
+
+    // Verify the extension was created successfully
+    const result = await pool.query(`
+      SELECT extversion
+      FROM pg_extension
+      WHERE extname = 'vector';
+    `)
+
+    if (result.rows.length > 0) {
+      console.log(
+        `✅ pgvector extension successfully installed for ${orgDbName} (version: ${result.rows[0].extversion})`
+      )
+      return true
+    } else {
+      console.warn(
+        `⚠️  pgvector extension creation appeared to succeed but extension not found in ${orgDbName}`
+      )
+      return false
+    }
+  } catch (error: any) {
+    // Check if it's a permission issue or missing binary
+    if (error.message.includes('permission denied')) {
+      console.error(
+        `❌ Permission denied installing pgvector extension in ${orgDbName}. Database user may need SUPERUSER privileges.`
+      )
+    } else if (
+      error.message.includes('could not open extension control file')
+    ) {
+      console.error(
+        `❌ pgvector extension files not found in ${orgDbName}. The PostgreSQL image may not have pgvector installed.`
+      )
+    } else {
+      console.error(
+        `❌ Failed to install pgvector extension in ${orgDbName}:`,
+        error.message
+      )
+    }
+    return false
+  }
+}
+
+// Enhanced function to check if pgvector extension is available
+async function checkPgvectorAvailability(
+  pool: Pool,
+  orgDbName: string
+): Promise<boolean> {
+  try {
+    // First, check if the extension is already installed
+    const existingResult = await pool.query(`
+      SELECT extversion
+      FROM pg_extension
+      WHERE extname = 'vector';
+    `)
+
+    if (existingResult.rows.length > 0) {
+      console.log(
+        `✅ pgvector extension already available for ${orgDbName} (version: ${existingResult.rows[0].extversion})`
+      )
+      return true
+    }
+
+    // If not installed, try to install it
+    console.log(
+      `🔍 pgvector extension not found for ${orgDbName}, attempting installation...`
+    )
+    return await installPgvectorExtension(pool, orgDbName)
+  } catch (error: any) {
+    console.warn(
+      `⚠️  Could not check pgvector availability for ${orgDbName}:`,
+      error.message
+    )
+    return false
+  }
+}
+
 // Function to ensure tables exist in organization databases
 export async function ensureOrgTablesExist(orgDbName: string) {
   const host = process.env.PG_HOST
@@ -37,17 +122,11 @@ export async function ensureOrgTablesExist(orgDbName: string) {
 
     console.log(`✅ Memory tables created for: ${orgDbName}`)
 
-    // Try to create embeddings table if pgvector is available
-    let vectorExtensionAvailable = false
-    try {
-      await pool.query(`CREATE EXTENSION IF NOT EXISTS vector;`)
-      vectorExtensionAvailable = true
-      console.log(`✅ pgvector extension available for: ${orgDbName}`)
-    } catch (error: any) {
-      console.warn(
-        `⚠️  pgvector extension not available for ${orgDbName}, skipping embeddings table creation`
-      )
-    }
+    // Enhanced pgvector availability check with automatic installation
+    const vectorExtensionAvailable = await checkPgvectorAvailability(
+      pool,
+      orgDbName
+    )
 
     if (vectorExtensionAvailable) {
       try {
@@ -78,6 +157,10 @@ export async function ensureOrgTablesExist(orgDbName: string) {
           error.message
         )
       }
+    } else {
+      console.warn(
+        `⚠️  pgvector extension not available for ${orgDbName}, skipping embeddings table creation`
+      )
     }
 
     console.log(`✅ Tables setup completed for: ${orgDbName}`)
@@ -96,17 +179,11 @@ async function migrateMemoryTables(pool: Pool, orgDbName: string) {
     await pool.query(`CREATE SCHEMA IF NOT EXISTS memory;`)
     await pool.query(`CREATE SCHEMA IF NOT EXISTS embeddings;`)
 
-    // Check if pgvector extension is available
-    let vectorExtensionAvailable = false
-    try {
-      await pool.query(`CREATE EXTENSION IF NOT EXISTS vector;`)
-      vectorExtensionAvailable = true
-      console.log(`✅ pgvector extension available for: ${orgDbName}`)
-    } catch (error) {
-      console.warn(
-        `⚠️  pgvector extension not available for ${orgDbName}, creating table without vector column`
-      )
-    }
+    // Enhanced pgvector availability check with automatic installation
+    const vectorExtensionAvailable = await checkPgvectorAvailability(
+      pool,
+      orgDbName
+    )
 
     // Create the new unified memory table with conditional vector column
     const createTableQuery = vectorExtensionAvailable
@@ -236,6 +313,10 @@ async function migrateMemoryTables(pool: Pool, orgDbName: string) {
           error
         )
       }
+    } else {
+      console.warn(
+        `⚠️  pgvector extension not available for ${orgDbName}, creating table without vector column`
+      )
     }
   } catch (error) {
     console.error(`❌ Error migrating memory tables for ${orgDbName}:`, error)

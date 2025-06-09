@@ -73,6 +73,7 @@ FORCE_REDEPLOY_NEXTCLOUD=true      # Force redeploy only Nextcloud
 - ✅ Post-deployment summary
 - ✅ Verbose layer analysis
 - ✅ Enhanced nginx config management
+- ✅ Automatic pgvector extension installation
 
 ### `deploy-with-size-analysis.sh`
 
@@ -117,6 +118,38 @@ Original             847MB      Standard Alpine + full node_modules
 Optimized            156MB      Alpine + standalone output
 Ultra-minimal        89MB       Distroless + standalone output
 ```
+
+### `install-pgvector.sh`
+
+Automatically installs the pgvector extension on all databases that need it.
+
+**Usage:**
+
+```bash
+./infrastructure/scripts/install-pgvector.sh
+```
+
+**Features:**
+
+- ✅ Auto-discovers all user databases
+- ✅ Checks if pgvector is already installed
+- ✅ Provides detailed diagnostics on failure
+- ✅ Comprehensive installation summary
+- ✅ Verification of successful installation
+
+**Note:** This script is automatically run during deployment when PostgreSQL becomes ready.
+
+### `redeploy-postgres-pgvector.sh`
+
+**⚠️ DESTRUCTIVE OPERATION** - Completely redeploys PostgreSQL with pgvector support by destroying all existing data.
+
+**Usage:**
+
+```bash
+./infrastructure/scripts/redeploy-postgres-pgvector.sh
+```
+
+**Warning:** This script will delete all PostgreSQL data. Only use if you need to migrate from a non-pgvector PostgreSQL to one with pgvector support.
 
 ## 📊 Image Size Analysis
 
