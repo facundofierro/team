@@ -389,12 +389,32 @@ export async function createOrgDatabaseAndSchemas(orgDbName: string) {
   const orgDbUrl = `postgres://${user}:${password}@${host}:5432/${orgDbName}`
   const adminUrl = `postgres://${user}:${password}@${host}:5432/postgres`
 
-  // Create org DB if not exists
+  // Create org DB if not exists, using pgvector template if available
   const client = new Client({ connectionString: adminUrl })
   try {
     await client.connect()
-    await client.query(`CREATE DATABASE "${orgDbName}"`)
-    console.log(`Database ${orgDbName} created successfully.`)
+
+    // Check if template_pgvector exists
+    const templateResult = await client.query(`
+      SELECT 1 FROM pg_database WHERE datname = 'template_pgvector'
+    `)
+
+    const createDbQuery =
+      templateResult.rows.length > 0
+        ? `CREATE DATABASE "${orgDbName}" WITH TEMPLATE template_pgvector`
+        : `CREATE DATABASE "${orgDbName}"`
+
+    await client.query(createDbQuery)
+
+    if (templateResult.rows.length > 0) {
+      console.log(
+        `Database ${orgDbName} created successfully with pgvector template.`
+      )
+    } else {
+      console.log(
+        `Database ${orgDbName} created successfully (no pgvector template available).`
+      )
+    }
   } catch (err: any) {
     if (err.code === '42P04') {
       // 42P04 is 'duplicate_database'
