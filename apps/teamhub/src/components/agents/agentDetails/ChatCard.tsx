@@ -89,7 +89,9 @@ function ToolCallDialog({ toolCall }: { toolCall: ToolCall }) {
             />
             <Wrench className="w-3 h-3 text-blue-600" />
             <span className="text-xs text-blue-600 font-medium truncate">
-              {toolCall.name}
+              {toolCall.name === 'searchYandex'
+                ? 'Yandex Search'
+                : toolCall.name}
             </span>
             <Eye className="w-3 h-3 text-blue-400 ml-auto" />
           </div>
@@ -99,7 +101,7 @@ function ToolCallDialog({ toolCall }: { toolCall: ToolCall }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wrench className="w-4 h-4 text-blue-600" />
-            Tool Call: {toolCall.name}
+            {toolCall.name === 'searchYandex' ? 'Yandex Search' : toolCall.name}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
@@ -435,11 +437,12 @@ export function ChatCard({ scheduled }: ChatCardProps) {
             }
 
             // Create a new tool call message with the tool call data
+            // Use a timestamp that ensures it appears before the assistant response
             const toolCallMessage: Message & { toolCall?: ToolCall } = {
               id: `tool-${toolCallId}`,
               role: 'system' as const,
               content: `Tool execution: ${dataItem.toolCall.name}`,
-              createdAt: new Date(),
+              createdAt: new Date(Date.now() - 1000), // 1 second earlier to ensure proper ordering
               toolCall: dataItem.toolCall,
             }
 
@@ -659,7 +662,7 @@ export function ChatCard({ scheduled }: ChatCardProps) {
         <ScrollArea className="flex-1 px-4 min-h-0">
           <div className="py-4 space-y-4">
             {(() => {
-              // Combine and sort all messages by creation time
+              // Combine and sort all messages with proper ordering logic
               const allMessages = [...messages, ...toolCallMessages].sort(
                 (a, b) => {
                   const timeA = a.createdAt
@@ -668,6 +671,25 @@ export function ChatCard({ scheduled }: ChatCardProps) {
                   const timeB = b.createdAt
                     ? new Date(b.createdAt).getTime()
                     : 0
+
+                  // If timestamps are very close (within 2 seconds), enforce logical order
+                  if (Math.abs(timeA - timeB) < 2000) {
+                    // Tool calls (system messages) should come before assistant responses
+                    if (a.role === 'system' && b.role === 'assistant') return -1
+                    if (a.role === 'assistant' && b.role === 'system') return 1
+                    // User messages should come before everything else
+                    if (
+                      a.role === 'user' &&
+                      (b.role === 'system' || b.role === 'assistant')
+                    )
+                      return -1
+                    if (
+                      (a.role === 'system' || a.role === 'assistant') &&
+                      b.role === 'user'
+                    )
+                      return 1
+                  }
+
                   return timeA - timeB
                 }
               )
