@@ -216,7 +216,7 @@ jobs:
           export FORCE_REDEPLOY_NEXTCLOUD="${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
           export FORCE_REDEPLOY_PINGGY="${{ github.event.inputs.force_redeploy_pinggy || 'false' }}"
 
-          infrastructure/scripts/deploy-application-enhanced.sh ${{ needs.build-and-push.outputs.tag }}
+          infrastructure/scripts/deploy.sh ${{ needs.build-and-push.outputs.tag }}
 
       - name: Verify Pinggy tunnel after deployment
         run: |

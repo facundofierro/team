@@ -62,11 +62,9 @@ infrastructure/
 ├── docker/
 │   └── docker-stack.yml         # Docker Swarm stack definition
 └── scripts/
-    ├── deploy-application-enhanced.sh # Main enhanced deployment script
+    ├── deploy.sh                    # Main deployment script
     ├── health-check.sh          # Post-deployment health verification
-    ├── build-and-push.sh        # Build and push optimized images
-    ├── compare-containers.sh    # Compare container variants
-    ├── deploy-with-size-analysis.sh # Deployment with size analysis
+    ├── install-pgvector.sh      # Install pgvector extension on databases
     └── README.md                # Scripts documentation
 ```
 
@@ -113,7 +111,7 @@ export NEXTCLOUD_DB_PASSWORD="your-nextcloud-db-password"
 export CONTAINER_REGISTRY="ghcr.io/your-org/your-repo"
 
 # Normal deployment (smart - only deploys what's needed)
-./infrastructure/scripts/deploy-application-enhanced.sh <image-tag>
+./infrastructure/scripts/deploy.sh <image-tag>
 ```
 
 ### Force Redeploy
@@ -122,7 +120,7 @@ Use this when you want to redeploy everything regardless of current state:
 
 ```bash
 export FORCE_REDEPLOY="true"
-./infrastructure/scripts/deploy-application-enhanced.sh <image-tag>
+./infrastructure/scripts/deploy.sh <image-tag>
 ```
 
 ### Health Check
@@ -203,5 +201,5 @@ curl http://localhost/nextcloud/
 3. **Use force redeploy** if services are in inconsistent state:
    ```bash
    export FORCE_REDEPLOY_ALL="true"
-   ./infrastructure/scripts/deploy-application-enhanced.sh <image-tag>
+   ./infrastructure/scripts/deploy.sh <image-tag>
    ```
