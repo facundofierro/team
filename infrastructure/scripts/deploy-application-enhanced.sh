@@ -248,26 +248,50 @@ EOF
     sleep 20
 
     # Wait for PostgreSQL
-    for i in {1..10}; do
+    postgres_ready=false
+    for i in {1..15}; do
         if docker service ls --filter name=teamhub_postgres --format "{{.Replicas}}" | grep -q "1/1"; then
-            echo -e "${GREEN}✅ PostgreSQL is ready${NC}"
-            break
+            echo -e "${GREEN}✅ PostgreSQL service is ready${NC}"
+            # Additional wait to ensure the container is actually running and accessible
+            echo "⏳ Waiting for PostgreSQL container to be accessible..."
+            sleep 15
+
+            # Verify PostgreSQL container is running and accessible
+            POSTGRES_CONTAINER=$(docker ps --filter "name=teamhub_postgres" --format "{{.ID}}")
+            if [ -n "$POSTGRES_CONTAINER" ]; then
+                # Test if we can connect to PostgreSQL
+                if docker exec "$POSTGRES_CONTAINER" psql -U teamhub -d teamhub -c "SELECT 1;" >/dev/null 2>&1; then
+                    echo -e "${GREEN}✅ PostgreSQL is fully ready and accessible${NC}"
+                    postgres_ready=true
+                    break
+                else
+                    echo "PostgreSQL container found but not yet accepting connections... (attempt $i/15)"
+                fi
+            else
+                echo "PostgreSQL service ready but container not found yet... (attempt $i/15)"
+            fi
+        else
+            echo "Waiting for PostgreSQL service... (attempt $i/15)"
         fi
-        echo "Waiting for PostgreSQL... (attempt $i/10)"
         sleep 10
     done
 
     # Auto-install pgvector extension on all databases
-    echo -e "${BLUE}🔧 Ensuring pgvector extension is available...${NC}"
-    if [ -f "infrastructure/scripts/install-pgvector.sh" ]; then
-        chmod +x infrastructure/scripts/install-pgvector.sh
-        if ./infrastructure/scripts/install-pgvector.sh; then
-            echo -e "${GREEN}✅ pgvector extension setup completed${NC}"
+    if [ "$postgres_ready" = true ]; then
+        echo -e "${BLUE}🔧 Ensuring pgvector extension is available...${NC}"
+        if [ -f "infrastructure/scripts/install-pgvector.sh" ]; then
+            chmod +x infrastructure/scripts/install-pgvector.sh
+            if ./infrastructure/scripts/install-pgvector.sh; then
+                echo -e "${GREEN}✅ pgvector extension setup completed${NC}"
+            else
+                echo -e "${YELLOW}⚠️  pgvector extension setup had issues, but continuing deployment${NC}"
+            fi
         else
-            echo -e "${YELLOW}⚠️  pgvector extension setup had issues, but continuing deployment${NC}"
+            echo -e "${YELLOW}⚠️  pgvector auto-install script not found, skipping...${NC}"
         fi
     else
-        echo -e "${YELLOW}⚠️  pgvector auto-install script not found, skipping...${NC}"
+        echo -e "${RED}❌ PostgreSQL not ready after 15 attempts, skipping pgvector installation${NC}"
+        echo -e "${YELLOW}💡 You can manually install pgvector later by running: ./infrastructure/scripts/install-pgvector.sh${NC}"
     fi
 
     # Wait for Redis
