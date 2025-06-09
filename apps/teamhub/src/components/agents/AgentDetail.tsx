@@ -151,7 +151,7 @@ export function AgentDetail({
               className="h-full m-0 bg-cardLight rounded-xl"
             >
               <MemoryCard
-                memories={[]}
+                agentId={selectedAgent?.id || ''}
                 selectedMemoryId={undefined}
                 onMemorySelect={() => {}}
               />

@@ -1,10 +1,29 @@
-import { Message as VercelMessage, streamText, tool } from 'ai'
+import {
+  Message as VercelMessage,
+  streamText,
+  tool,
+  createDataStreamResponse,
+  StreamData,
+} from 'ai'
 import { MemoryWithTypes, Memory, AgentToolPermission } from '@teamhub/db'
 import { generateDeepseekStream } from './deepseek/generateStreamText'
 import { generateOpenAIStream } from './openai/generateStreamText'
 import { getAISDKTool } from '../../tools'
+import { createDeepSeek } from '@ai-sdk/deepseek'
+import { createOpenAI } from '@ai-sdk/openai'
 
 export type AIProvider = 'deepseek' | 'openai'
+
+// Tool call metadata interface for tracking
+interface ToolCallMetadata {
+  id: string
+  name: string
+  arguments: Record<string, any>
+  result?: any
+  status: 'pending' | 'success' | 'error'
+  timestamp: Date
+  stepNumber: number
+}
 
 export async function generateStreamText(params: {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>
@@ -44,21 +63,22 @@ export async function generateStreamText(params: {
     )
   }
 
-  const generators = {
-    deepseek: generateDeepseekStream,
-    openai: generateOpenAIStream,
+  // Set up AI provider models
+  const deepseekAI = createDeepSeek({
+    apiKey: process.env.DEEPSEEK_API_KEY ?? '',
+  })
+
+  const openaiAI = createOpenAI({
+    apiKey: process.env.OPENAI_API_KEY ?? '',
+  })
+
+  const models = {
+    deepseek: deepseekAI('deepseek-chat'),
+    openai: openaiAI('gpt-4o'),
   }
 
   console.log(
     `🎯 GenerateStreamText: Selected AI Provider: ${provider.toUpperCase()}`
-  )
-  console.log(
-    `🎯 GenerateStreamText: Available providers:`,
-    Object.keys(generators)
-  )
-  console.log(
-    `🎯 GenerateStreamText: Generator function:`,
-    generators[provider]?.name || 'unknown'
   )
 
   const memoryMessages: VercelMessage[] = memories.reduce(
@@ -169,20 +189,147 @@ export async function generateStreamText(params: {
   })
 
   console.log(
-    `🚀 GenerateStreamText: Calling ${provider.toUpperCase()} generator...`
-  )
-  console.log(
-    `🚀 GenerateStreamText: Function to call: ${generators[provider]?.name}`
+    `🚀 GenerateStreamText: Creating data stream response with tool tracking...`
   )
 
-  const result = generators[provider]({
-    systemPrompt,
-    messages,
-    tools: aiTools,
+  // Create response with custom data streaming
+  return createDataStreamResponse({
+    execute: async (dataStream) => {
+      console.log('🎯 GenerateStreamText: Starting data stream execution')
+
+      // Tool call tracking
+      const allToolCalls: ToolCallMetadata[] = []
+
+      // Use streamText with tool call tracking
+      const result = streamText({
+        model: models[provider],
+        system: systemPrompt,
+        messages,
+        tools: aiTools,
+        maxSteps: 5,
+        onStepFinish: async ({
+          stepType,
+          toolCalls,
+          toolResults,
+          finishReason,
+          usage,
+        }) => {
+          console.log(`🎯 Step finished: ${stepType}`, {
+            toolCallsCount: toolCalls.length,
+            toolResultsCount: toolResults.length,
+            finishReason,
+            usage,
+          })
+
+          // Track tool calls and their results
+          if (toolCalls.length > 0) {
+            for (let i = 0; i < toolCalls.length; i++) {
+              const toolCall = toolCalls[i]
+              const toolResult = toolResults[i]
+
+              const metadata: ToolCallMetadata = {
+                id: toolCall.toolCallId,
+                name: toolCall.toolName,
+                arguments: toolCall.args,
+                result: toolResult?.result,
+                status: toolResult ? 'success' : 'pending',
+                timestamp: new Date(),
+                stepNumber: allToolCalls.length,
+              }
+
+              allToolCalls.push(metadata)
+
+              console.log(`🔧 Tool executed: ${toolCall.toolName}`, {
+                id: toolCall.toolCallId,
+                args: toolCall.args,
+                hasResult: !!toolResult,
+                resultPreview:
+                  typeof toolResult?.result === 'string'
+                    ? toolResult.result.substring(0, 100) + '...'
+                    : JSON.stringify(toolResult?.result || {}).substring(
+                        0,
+                        100
+                      ) + '...',
+              })
+
+              // Stream tool call information to frontend
+              dataStream.writeData({
+                type: 'tool-call',
+                toolCall: {
+                  id: metadata.id,
+                  name: metadata.name,
+                  arguments: metadata.arguments,
+                  result: metadata.result,
+                  status: metadata.status,
+                  timestamp: metadata.timestamp.toISOString(),
+                  stepNumber: metadata.stepNumber,
+                },
+              })
+            }
+          }
+        },
+        onFinish: async ({ toolCalls, toolResults }) => {
+          console.log('🏁 Generation finished with tool summary:', {
+            totalToolCalls: toolCalls.length,
+            totalToolResults: toolResults.length,
+            allTrackedCalls: allToolCalls.length,
+          })
+
+          // Ensure all tool calls are marked as completed
+          for (let i = 0; i < toolCalls.length; i++) {
+            const toolCall = toolCalls[i]
+            const toolResult = toolResults[i]
+
+            const existingCall = allToolCalls.find(
+              (tc) => tc.id === toolCall.toolCallId
+            )
+            if (existingCall && !existingCall.result) {
+              existingCall.result = toolResult?.result
+              existingCall.status = 'success'
+
+              // Stream final tool call status
+              dataStream.writeData({
+                type: 'tool-call-complete',
+                toolCall: {
+                  id: existingCall.id,
+                  name: existingCall.name,
+                  arguments: existingCall.arguments,
+                  result: existingCall.result,
+                  status: existingCall.status,
+                  timestamp: existingCall.timestamp.toISOString(),
+                  stepNumber: existingCall.stepNumber,
+                },
+              })
+            }
+          }
+
+          // Send final summary of all tool calls
+          dataStream.writeData({
+            type: 'tool-calls-summary',
+            totalCalls: allToolCalls.length,
+            toolCalls: allToolCalls.map((tc) => ({
+              id: tc.id,
+              name: tc.name,
+              arguments: tc.arguments,
+              result: tc.result,
+              status: tc.status,
+              timestamp: tc.timestamp.toISOString(),
+              stepNumber: tc.stepNumber,
+            })),
+          })
+        },
+      })
+
+      console.log(
+        `✅ GenerateStreamText: ${provider.toUpperCase()} streamText created`
+      )
+
+      // Merge the AI stream into our data stream
+      result.mergeIntoDataStream(dataStream)
+    },
+    onError: (error) => {
+      console.error('❌ GenerateStreamText: Data stream error:', error)
+      return error instanceof Error ? error.message : String(error)
+    },
   })
-
-  console.log(
-    `✅ GenerateStreamText: ${provider.toUpperCase()} generator called successfully`
-  )
-  return result
 }

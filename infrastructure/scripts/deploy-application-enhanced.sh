@@ -204,7 +204,7 @@ setup_infrastructure() {
 version: '3.8'
 services:
   postgres:
-    image: postgres:15
+    image: \${POSTGRES_PGVECTOR_IMAGE:-ghcr.io/facundofierro/postgres-pgvector:latest}
     deploy:
       replicas: 1
       placement:
