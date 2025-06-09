@@ -8,50 +8,20 @@ This directory contains scripts for building, optimizing, and deploying your Nex
 # 1. Set your container registry
 export CONTAINER_REGISTRY=ghcr.io/your-username
 
-# 2. Build optimized container
-./infrastructure/scripts/build-and-push.sh v1.0.0
-
-# 3. Deploy with enhanced features
-./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+# 2. Deploy application (building is handled by CI/CD)
+./infrastructure/scripts/deploy.sh v1.0.0
 ```
 
 ## 📄 Available Scripts
 
-### `build-and-push.sh`
+### `deploy.sh`
 
-Builds and pushes optimized Docker images with size analysis.
-
-**Usage:**
-
-```bash
-./infrastructure/scripts/build-and-push.sh [tag]
-
-# Options via environment variables:
-DOCKERFILE_VARIANT=optimized    # original | optimized | distroless
-CONTAINER_REGISTRY=ghcr.io/user # Required
-```
-
-**Examples:**
-
-```bash
-# Build optimized image (recommended)
-DOCKERFILE_VARIANT=optimized ./build-and-push.sh v1.0.0
-
-# Build ultra-minimal image
-DOCKERFILE_VARIANT=distroless ./build-and-push.sh v1.0.0
-
-# Build original image (for comparison)
-DOCKERFILE_VARIANT=original ./build-and-push.sh v1.0.0
-```
-
-### `deploy-application-enhanced.sh`
-
-Enhanced deployment script with selective service redeployment and automatic image size logging.
+Main deployment script with selective service redeployment and automatic pgvector extension installation.
 
 **Usage:**
 
 ```bash
-./infrastructure/scripts/deploy-application-enhanced.sh [tag]
+./infrastructure/scripts/deploy.sh [tag]
 
 # Environment variables:
 CONTAINER_REGISTRY=ghcr.io/user     # Required
@@ -75,50 +45,6 @@ FORCE_REDEPLOY_NEXTCLOUD=true      # Force redeploy only Nextcloud
 - ✅ Enhanced nginx config management
 - ✅ Automatic pgvector extension installation
 
-### `deploy-with-size-analysis.sh`
-
-Wrapper script for enhanced deployment with better UX.
-
-**Usage:**
-
-```bash
-./infrastructure/scripts/deploy-with-size-analysis.sh [tag]
-```
-
-**Examples:**
-
-```bash
-# Basic deployment
-export CONTAINER_REGISTRY=ghcr.io/your-username
-./deploy-with-size-analysis.sh v1.0.0
-
-# Verbose deployment
-VERBOSE_DEPLOY=true ./deploy-with-size-analysis.sh v1.0.0
-
-# Force redeploy
-FORCE_REDEPLOY=true ./deploy-with-size-analysis.sh v1.0.0
-```
-
-### `compare-containers.sh`
-
-Builds all container variants and compares their sizes.
-
-**Usage:**
-
-```bash
-./infrastructure/scripts/compare-containers.sh
-```
-
-**Output:**
-
-```
-VARIANT              SIZE       DESCRIPTION
---------------------  ---------- -----------------------------------
-Original             847MB      Standard Alpine + full node_modules
-Optimized            156MB      Alpine + standalone output
-Ultra-minimal        89MB       Distroless + standalone output
-```
-
 ### `install-pgvector.sh`
 
 Automatically installs the pgvector extension on all databases that need it.
@@ -138,18 +64,6 @@ Automatically installs the pgvector extension on all databases that need it.
 - ✅ Verification of successful installation
 
 **Note:** This script is automatically run during deployment when PostgreSQL becomes ready.
-
-### `redeploy-postgres-pgvector.sh`
-
-**⚠️ DESTRUCTIVE OPERATION** - Completely redeploys PostgreSQL with pgvector support by destroying all existing data.
-
-**Usage:**
-
-```bash
-./infrastructure/scripts/redeploy-postgres-pgvector.sh
-```
-
-**Warning:** This script will delete all PostgreSQL data. Only use if you need to migrate from a non-pgvector PostgreSQL to one with pgvector support.
 
 ## 📊 Image Size Analysis
 
@@ -207,7 +121,7 @@ docker login -u $DOCKER_USERNAME
 
 1. Check if `output: 'standalone'` is enabled in `next.config.mjs`
 2. Use `DOCKERFILE_VARIANT=optimized` or `distroless`
-3. Run `./compare-containers.sh` to see differences
+3. Use different image variants in your deployment
 
 ## 📚 Related Documentation
 
