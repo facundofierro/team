@@ -46,13 +46,13 @@ force_redeploy_nextcloud: false # Redeploy Nextcloud
 
 ```bash
 # Deploy with specific service redeployment
-FORCE_REDEPLOY_NGINX=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_NGINX=true ./infrastructure/scripts/deploy.sh v1.0.0
 
 # Deploy with multiple services
-FORCE_REDEPLOY_NGINX=true FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_NGINX=true FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy.sh v1.0.0
 
 # Deploy all services (equivalent to old FORCE_REDEPLOY=true)
-FORCE_REDEPLOY_ALL=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_ALL=true ./infrastructure/scripts/deploy.sh v1.0.0
 ```
 
 ## Service-Specific Considerations
@@ -165,10 +165,10 @@ The enhanced system is backward compatible:
 
 ```bash
 # Old way (still works with enhanced script)
-FORCE_REDEPLOY_ALL=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_ALL=true ./infrastructure/scripts/deploy.sh v1.0.0
 
 # New way (recommended - selective deployment)
-FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy.sh v1.0.0
 ```
 
 ## Troubleshooting
@@ -214,7 +214,7 @@ docker service rm teamhub_<service>
 For regular application updates:
 
 ```bash
-FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.1
+FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy.sh v1.0.1
 ```
 
 ### 🔧 Configuration Updates
@@ -222,7 +222,7 @@ FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy-application-enhanced
 For nginx config changes:
 
 ```bash
-FORCE_REDEPLOY_NGINX=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_NGINX=true ./infrastructure/scripts/deploy.sh v1.0.0
 ```
 
 ### 🛠️ Infrastructure Maintenance
@@ -231,7 +231,7 @@ For database updates (use with caution):
 
 ```bash
 # Backup first!
-FORCE_REDEPLOY_INFRASTRUCTURE=true ./infrastructure/scripts/deploy-application-enhanced.sh v1.0.0
+FORCE_REDEPLOY_INFRASTRUCTURE=true ./infrastructure/scripts/deploy.sh v1.0.0
 ```
 
 ### 📊 Monitoring
