@@ -105,6 +105,107 @@ async function checkPgvectorAvailability(
   }
 }
 
+// Fix existing vector tables with dimension issues
+async function fixVectorDimensionIssues(
+  pool: Pool,
+  orgDbName: string
+): Promise<void> {
+  try {
+    console.log(
+      `🔧 Checking and fixing vector dimension issues for ${orgDbName}`
+    )
+
+    // Check if memory table exists and has vector column without dimensions
+    const tableCheck = await pool.query(`
+      SELECT column_name, data_type, udt_name
+      FROM information_schema.columns
+      WHERE table_schema = 'memory'
+      AND table_name = 'memory'
+      AND column_name = 'embedding'
+    `)
+
+    if (tableCheck.rows.length > 0) {
+      const columnInfo = tableCheck.rows[0]
+      console.log(`📊 Found embedding column:`, columnInfo)
+
+      // Check if it's a vector type without dimensions
+      if (columnInfo.udt_name === 'vector') {
+        try {
+          // Try to create a vector index to test if dimensions are properly set
+          await pool.query(`
+            CREATE INDEX IF NOT EXISTS test_memory_embedding_idx
+            ON memory.memory USING ivfflat (embedding vector_cosine_ops)
+          `)
+          console.log(`✅ Vector column has proper dimensions in ${orgDbName}`)
+        } catch (error: any) {
+          if (error.message.includes('does not have dimensions')) {
+            console.log(`🔄 Fixing vector dimension issue in ${orgDbName}`)
+
+            // Drop the problematic column and recreate it with proper dimensions
+            await pool.query(
+              `ALTER TABLE memory.memory DROP COLUMN IF EXISTS embedding`
+            )
+            await pool.query(
+              `ALTER TABLE memory.memory ADD COLUMN embedding vector(1536)`
+            )
+
+            console.log(`✅ Fixed vector column dimensions in ${orgDbName}`)
+          } else {
+            console.warn(
+              `⚠️ Other vector index error in ${orgDbName}:`,
+              error.message
+            )
+          }
+        }
+      }
+    }
+
+    // Do the same for embeddings table
+    const embTableCheck = await pool.query(`
+      SELECT column_name, data_type, udt_name
+      FROM information_schema.columns
+      WHERE table_schema = 'embeddings'
+      AND table_name = 'embedding'
+      AND column_name = 'vector'
+    `)
+
+    if (embTableCheck.rows.length > 0) {
+      const columnInfo = embTableCheck.rows[0]
+
+      if (columnInfo.udt_name === 'vector') {
+        try {
+          await pool.query(`
+            CREATE INDEX IF NOT EXISTS test_vector_idx
+            ON embeddings.embedding USING ivfflat (vector vector_cosine_ops)
+          `)
+          console.log(
+            `✅ Embeddings vector column has proper dimensions in ${orgDbName}`
+          )
+        } catch (error: any) {
+          if (error.message.includes('does not have dimensions')) {
+            console.log(
+              `🔄 Fixing embeddings vector dimension issue in ${orgDbName}`
+            )
+
+            await pool.query(
+              `ALTER TABLE embeddings.embedding DROP COLUMN IF EXISTS vector`
+            )
+            await pool.query(
+              `ALTER TABLE embeddings.embedding ADD COLUMN vector vector(1536) NOT NULL`
+            )
+
+            console.log(
+              `✅ Fixed embeddings vector column dimensions in ${orgDbName}`
+            )
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`❌ Error fixing vector dimensions for ${orgDbName}:`, error)
+  }
+}
+
 // Function to ensure tables exist in organization databases
 export async function ensureOrgTablesExist(orgDbName: string) {
   const host = process.env.PG_HOST
@@ -127,6 +228,11 @@ export async function ensureOrgTablesExist(orgDbName: string) {
       pool,
       orgDbName
     )
+
+    // Fix any existing vector dimension issues
+    if (vectorExtensionAvailable) {
+      await fixVectorDimensionIssues(pool, orgDbName)
+    }
 
     if (vectorExtensionAvailable) {
       try {

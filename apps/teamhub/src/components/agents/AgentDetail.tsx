@@ -41,6 +41,12 @@ export function AgentDetail({
   const setSelectedAgent = useAgentStore((state) => state.setSelectedAgent)
   const [hasChanges, setHasChanges] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<Partial<Agent>>({})
+  const [selectedMemoryId, setSelectedMemoryId] = useState<string | undefined>(
+    undefined
+  )
+  const [conversationToLoad, setConversationToLoad] = useState<
+    string | undefined
+  >(undefined)
 
   // Update store when agent data arrives or changes
   useEffect(() => {
@@ -89,6 +95,14 @@ export function AgentDetail({
 
   const handleTabChange = (value: string) => {
     setActiveTab(value)
+  }
+
+  const handleOpenConversation = (conversationId: string) => {
+    console.log('🔄 Opening conversation:', conversationId)
+    // Switch to chat tab
+    setActiveTab('chat')
+    // Set conversation to load (ChatCard will pick this up)
+    setConversationToLoad(conversationId)
   }
 
   if (!selectedAgentId) {
@@ -156,7 +170,10 @@ export function AgentDetail({
               className="h-full m-0 rounded-xl"
               style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
-              <ChatCard />
+              <ChatCard
+                conversationToLoad={conversationToLoad}
+                onConversationLoaded={() => setConversationToLoad(undefined)}
+              />
             </TabsContent>
 
             <TabsContent
@@ -166,8 +183,9 @@ export function AgentDetail({
             >
               <MemoryCard
                 agentId={selectedAgent?.id || ''}
-                selectedMemoryId={undefined}
-                onMemorySelect={() => {}}
+                selectedMemoryId={selectedMemoryId}
+                onMemorySelect={setSelectedMemoryId}
+                onConversationOpen={handleOpenConversation}
               />
             </TabsContent>
 

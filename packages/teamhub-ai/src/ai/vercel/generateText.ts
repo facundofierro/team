@@ -61,19 +61,26 @@ export async function generateConversationTitle(
   firstMessage: string,
   provider?: AIProvider
 ): Promise<string> {
-  const systemPrompt = `You are an expert at creating concise, descriptive conversation titles.
-Generate a short, clear title (maximum 60 characters) that captures the main topic or intent of the conversation.
-The title should be professional, specific, and helpful for finding this conversation later.
-Do not use quotes, colons, or special characters. Return only the title text.`
+  const systemPrompt = `You are an expert at creating concise, descriptive memory titles.
+Generate a short, clear title (maximum 50 characters) that captures the main topic or deliverable of the conversation.
+Focus on the core subject, removing unnecessary words like "Requirements for", "Search for", "Discussion about", "Meeting about", "Chat about".
+The title should be direct, specific, and helpful for finding this memory later.
+Do not use quotes, colons, special characters, or conversation-related words.
+Return only the simplified title text.
 
-  const prompt = `Generate a conversation title for this message: "${firstMessage}"`
+Examples:
+- "Requirements for Russian BHX documentation" → "Russian BHX Documentation"
+- "Search for logistic companies in Saint Petersburg" → "Saint Petersburg Logistics Companies"
+- "Discussion about API integration best practices" → "API Integration Best Practices"`
+
+  const prompt = `Generate a concise memory title for this conversation starter: "${firstMessage}"`
 
   return generateOneShot({
     prompt,
     systemPrompt,
     provider,
     temperature: 0.3, // Lower temperature for more consistent titles
-    maxTokens: 20, // Short titles only
+    maxTokens: 15, // Very short titles only
   })
 }
 
@@ -86,18 +93,25 @@ export async function generateConversationBrief(
   keyTopics: string[]
   description: string
 }> {
-  const systemPrompt = `You are an expert at analyzing conversations and extracting key information.
-Analyze the conversation and provide:
-1. A concise summary (2-3 sentences) of what was discussed
-2. Key topics/entities mentioned (3-8 important keywords)
-3. A description of what information can be found in this conversation
+  const systemPrompt = `You are an expert at analyzing conversations and extracting valuable information for future reference.
 
-Return your response in JSON format:
-{
-  "summary": "Brief summary of the conversation",
-  "keyTopics": ["topic1", "topic2", "topic3"],
-  "description": "Description of what information this conversation contains"
-}`
+Generate 3 specific outputs:
+
+1. **description** (Overview): A 1-2 sentence description of what information/content this conversation contains. This helps users understand what they can find here when searching. Focus on WHAT is included, not what happened.
+
+2. **summary** (Valuable Content): Extract and organize all valuable, actionable information from this conversation. Remove conversation flow, dialog format, and process details. Focus on actual results, data, lists, links, and useful content that would be valuable for future reference. Present information directly as if it's a reference document. Use clear structure with formatting when appropriate.
+
+3. **keyTopics**: 3-8 important keywords/topics/entities mentioned.
+
+Rules for summary:
+- Include: Final results, deliverables, lists, data, links, specific information, key facts, actionable insights
+- Exclude: "The user asked...", "The assistant replied...", conversation flow, process descriptions, intermediate steps, thank you messages
+- Format: Direct information presentation, preserve structure (lists, formatting), no dialog format
+- Length: As long or short as needed to capture all valuable content
+
+IMPORTANT: Return ONLY valid JSON. No markdown code blocks or explanations.
+Return exactly this format:
+{"description": "What information this conversation contains", "summary": "All valuable content and results from the conversation", "keyTopics": ["topic1", "topic2", "topic3"]}`
 
   const conversationText = messages
     .map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`)
@@ -110,13 +124,34 @@ Return your response in JSON format:
     systemPrompt,
     provider,
     temperature: 0.4,
-    maxTokens: 300,
+    maxTokens: 800, // Increased to capture more valuable content
   })
 
   try {
-    return JSON.parse(result)
+    // Clean the result by removing any markdown code blocks or extra formatting
+    let cleanResult = result.trim()
+
+    // Remove markdown code blocks if present
+    if (cleanResult.startsWith('```json')) {
+      cleanResult = cleanResult.replace(/^```json\s*/, '')
+    }
+    if (cleanResult.startsWith('```')) {
+      cleanResult = cleanResult.replace(/^```\s*/, '')
+    }
+    if (cleanResult.endsWith('```')) {
+      cleanResult = cleanResult.replace(/\s*```$/, '')
+    }
+
+    // Try to find JSON object if there's extra text
+    const jsonMatch = cleanResult.match(/\{.*\}/s)
+    if (jsonMatch) {
+      cleanResult = jsonMatch[0]
+    }
+
+    return JSON.parse(cleanResult)
   } catch (error) {
     console.error('❌ Failed to parse conversation brief JSON:', error)
+    console.error('❌ Raw AI response:', result)
     // Fallback if JSON parsing fails
     return {
       summary: 'Conversation analysis completed',

@@ -21,6 +21,8 @@ import {
   ExternalLink,
   Code,
   Eye,
+  Search,
+  Globe,
 } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { cn } from '@/lib/utils'
@@ -43,8 +45,18 @@ import { MemoriesDialogContent } from './chatCard/MemoriesDialogContent'
 import { MemorySelectionBar } from './chatCard/MemorySelectionBar'
 import { ConversationHeader } from './chatCard/ConversationHeader'
 import { useConversationManager } from './chatCard/useConversationManager'
-import type { AgentToolPermissions, ConversationMemory } from '@teamhub/db'
-import ReactMarkdown from 'react-markdown'
+import { SearchResultCard } from './chatCard/SearchResultCard'
+import { ArgumentsDisplay } from './chatCard/ArgumentsDisplay'
+import { ToolCallDialog } from './chatCard/ToolCallDialog'
+import { ToolCallIndicator } from './chatCard/ToolCallIndicator'
+import { MessageContent } from './chatCard/MessageContent'
+import { parseToolError } from './chatCard/toolUtils'
+import type {
+  AgentToolPermissions,
+  ConversationMemory,
+  ConversationMessage,
+  ToolCall,
+} from '@teamhub/db'
 
 // Simple type for chat memory selection (temporary until full migration to DB types)
 type TestMemory = {
@@ -52,123 +64,17 @@ type TestMemory = {
   name: string
 }
 
-// Tool call interfaces
-interface ToolCall {
-  id: string
-  name: string
-  arguments: Record<string, any>
-  result?: any
-  status: 'pending' | 'success' | 'error'
-  timestamp: string
-  stepNumber: number
-}
-
 interface ToolCallMessage extends Message {
   toolCalls?: ToolCall[]
 }
 
-// Tool Call Dialog Component
-function ToolCallDialog({ toolCall }: { toolCall: ToolCall }) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-auto p-2 text-left justify-start"
-        >
-          <div className="flex items-center gap-2 w-full">
-            <div
-              className={cn(
-                'w-2 h-2 rounded-full flex-shrink-0',
-                toolCall.status === 'success'
-                  ? 'bg-green-500'
-                  : toolCall.status === 'error'
-                  ? 'bg-red-500'
-                  : 'bg-yellow-500 animate-pulse'
-              )}
-            />
-            <Wrench className="w-3 h-3 text-blue-600" />
-            <span className="text-xs text-blue-600 font-medium truncate">
-              {toolCall.name === 'searchYandex'
-                ? 'Yandex Search'
-                : toolCall.name}
-            </span>
-            <Eye className="w-3 h-3 text-blue-400 ml-auto" />
-          </div>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-blue-600" />
-            {toolCall.name === 'searchYandex' ? 'Yandex Search' : toolCall.name}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-semibold text-sm mb-2">Status</h4>
-            <div className="flex items-center gap-2">
-              <div
-                className={cn(
-                  'w-3 h-3 rounded-full',
-                  toolCall.status === 'success'
-                    ? 'bg-green-500'
-                    : toolCall.status === 'error'
-                    ? 'bg-red-500'
-                    : 'bg-yellow-500'
-                )}
-              />
-              <span className="text-sm capitalize">{toolCall.status}</span>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm mb-2">Timestamp</h4>
-            <p className="text-sm text-gray-600">
-              {new Date(toolCall.timestamp).toLocaleString()}
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm mb-2">Arguments</h4>
-            <pre className="text-xs bg-gray-100 p-3 rounded-lg overflow-x-auto">
-              {JSON.stringify(toolCall.arguments, null, 2)}
-            </pre>
-          </div>
-
-          {toolCall.result && (
-            <div>
-              <h4 className="font-semibold text-sm mb-2">Result</h4>
-              <pre className="text-xs bg-gray-100 p-3 rounded-lg overflow-x-auto max-h-60">
-                {typeof toolCall.result === 'string'
-                  ? toolCall.result
-                  : JSON.stringify(toolCall.result, null, 2)}
-              </pre>
-            </div>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-// Tool Call Indicator Component
-function ToolCallIndicator({ toolCalls }: { toolCalls: ToolCall[] }) {
-  if (!toolCalls || toolCalls.length === 0) return null
-
-  return (
-    <div className="mt-2 space-y-1">
-      {toolCalls.map((toolCall) => (
-        <div
-          key={toolCall.id}
-          className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-md"
-        >
-          <ToolCallDialog toolCall={toolCall} />
-        </div>
-      ))}
-    </div>
-  )
+type ChatCardProps = {
+  scheduled?: {
+    date: Date
+    description: string
+  }
+  conversationToLoad?: string
+  onConversationLoaded?: () => void
 }
 
 // Function to extract tool calls from message content (no longer used, kept for compatibility)
@@ -178,219 +84,11 @@ function extractToolCalls(message: Message): ToolCall[] {
   return []
 }
 
-type ChatCardProps = {
-  scheduled?: {
-    date: Date
-    description: string
-  }
-}
-
-// Component to format message content with markdown support
-function MessageContent({
-  message,
-  isUser,
-}: {
-  message: ToolCallMessage
-  isUser: boolean
-}) {
-  if (isUser) {
-    // For user messages, keep simple text formatting with URL detection
-    const urlRegex = /(https?:\/\/[^\s]+)/g
-    const parts = message.content.split(urlRegex)
-
-    return (
-      <div>
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-          {parts.map((part, index) => {
-            if (urlRegex.test(part)) {
-              return (
-                <a
-                  key={index}
-                  href={part}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 underline hover:no-underline transition-colors text-orange-700 hover:text-orange-800"
-                >
-                  {part}
-                  <ExternalLink className="w-3 h-3 inline" />
-                </a>
-              )
-            }
-            return part
-          })}
-        </p>
-        {/* Tool calls for user messages (if any) */}
-        <ToolCallIndicator toolCalls={message.toolCalls || []} />
-      </div>
-    )
-  }
-
-  // For AI messages, use full markdown rendering
-  return (
-    <div>
-      <div className="text-sm leading-relaxed text-gray-900">
-        <ReactMarkdown
-          components={{
-            // Custom link component
-            a: ({ href, children }) => (
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline hover:no-underline transition-colors"
-              >
-                {children}
-                <ExternalLink className="w-3 h-3 inline" />
-              </a>
-            ),
-            // Custom paragraph styling
-            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-            // Custom list styling
-            ul: ({ children }) => (
-              <ul className="list-disc list-inside mb-2 space-y-1">
-                {children}
-              </ul>
-            ),
-            ol: ({ children }) => (
-              <ol className="list-decimal list-inside mb-2 space-y-1">
-                {children}
-              </ol>
-            ),
-            li: ({ children }) => <li className="ml-2">{children}</li>,
-            // Custom bold text styling
-            strong: ({ children }) => (
-              <strong className="font-semibold text-gray-900">
-                {children}
-              </strong>
-            ),
-            // Custom italic text styling
-            em: ({ children }) => (
-              <em className="italic text-gray-800">{children}</em>
-            ),
-            // Custom code styling
-            code: ({ children }) => (
-              <code className="bg-gray-200 px-1 py-0.5 rounded text-xs font-mono">
-                {children}
-              </code>
-            ),
-            // Custom code block styling
-            pre: ({ children }) => (
-              <pre className="bg-gray-100 p-3 rounded-md overflow-x-auto mb-2">
-                {children}
-              </pre>
-            ),
-            // Custom heading styling
-            h1: ({ children }) => (
-              <h1 className="text-lg font-bold mb-2 text-gray-900">
-                {children}
-              </h1>
-            ),
-            h2: ({ children }) => (
-              <h2 className="text-base font-bold mb-2 text-gray-900">
-                {children}
-              </h2>
-            ),
-            h3: ({ children }) => (
-              <h3 className="text-sm font-bold mb-1 text-gray-900">
-                {children}
-              </h3>
-            ),
-          }}
-        >
-          {message.content}
-        </ReactMarkdown>
-      </div>
-      {/* Tool calls for AI messages */}
-      <ToolCallIndicator toolCalls={message.toolCalls || []} />
-    </div>
-  )
-}
-
-// Helper function to parse tool execution errors and extract user-friendly messages
-function parseToolError(toolCall: ToolCall): {
-  title: string
-  description: string
-  variant: 'destructive' | 'default'
-} {
-  const toolName =
-    toolCall.name === 'searchYandex' ? 'Yandex Search' : toolCall.name
-
-  // Get error content from either result or arguments
-  const errorContent = JSON.stringify(
-    toolCall.result || toolCall.arguments || {}
-  )
-
-  // Check if this is a token expiry error
-  if (
-    errorContent.includes('token has expired') ||
-    errorContent.includes('401 Unauthorized')
-  ) {
-    return {
-      title: `${toolName} - Authentication Error`,
-      description:
-        'The API token has expired and needs to be refreshed. Please contact your administrator.',
-      variant: 'destructive',
-    }
-  }
-
-  // Check for rate limit errors
-  if (errorContent.includes('rate limit') || errorContent.includes('429')) {
-    return {
-      title: `${toolName} - Rate Limit`,
-      description:
-        'API rate limit exceeded. Please try again in a few minutes.',
-      variant: 'destructive',
-    }
-  }
-
-  // Check for network errors
-  if (
-    errorContent.includes('network') ||
-    errorContent.includes('timeout') ||
-    errorContent.includes('ECONNREFUSED')
-  ) {
-    return {
-      title: `${toolName} - Network Error`,
-      description:
-        'Network connection failed. Please check your internet connection and try again.',
-      variant: 'destructive',
-    }
-  }
-
-  // Check for quota exceeded errors
-  if (errorContent.includes('quota') || errorContent.includes('exceeded')) {
-    return {
-      title: `${toolName} - Quota Exceeded`,
-      description:
-        'API quota has been exceeded. Please try again later or contact your administrator.',
-      variant: 'destructive',
-    }
-  }
-
-  // Check for permission errors
-  if (
-    errorContent.includes('403') ||
-    errorContent.includes('Forbidden') ||
-    errorContent.includes('permission')
-  ) {
-    return {
-      title: `${toolName} - Permission Error`,
-      description:
-        'Insufficient permissions to access this resource. Please contact your administrator.',
-      variant: 'destructive',
-    }
-  }
-
-  // Generic error fallback
-  return {
-    title: `${toolName} - Error`,
-    description:
-      'Tool execution failed. Please try again or contact support if the issue persists.',
-    variant: 'destructive',
-  }
-}
-
-export function ChatCard({ scheduled }: ChatCardProps) {
+export function ChatCard({
+  scheduled,
+  conversationToLoad,
+  onConversationLoaded,
+}: ChatCardProps) {
   const { toast } = useToast()
   const [isInstancesOpen, setIsInstancesOpen] = useState(true)
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
@@ -412,6 +110,8 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     startNewConversation,
     addMessageToConversation,
     completeCurrentConversation,
+    loadConversationHistory,
+    switchToConversation,
   } = useConversationManager({
     onConversationChange: (conversation) => {
       // Update local state when database conversation changes
@@ -438,6 +138,22 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     })
   }, [currentConversation])
 
+  // Handle conversation loading from memory card double-click
+  useEffect(() => {
+    if (conversationToLoad && switchToConversation) {
+      console.log('🔄 Loading conversation from memory:', conversationToLoad)
+      switchToConversation(conversationToLoad)
+        .then(() => {
+          console.log('✅ Conversation loaded successfully')
+          onConversationLoaded?.()
+        })
+        .catch((error) => {
+          console.error('❌ Failed to load conversation:', error)
+          onConversationLoaded?.() // Still call to clear the loading state
+        })
+    }
+  }, [conversationToLoad, switchToConversation, onConversationLoaded])
+
   // Get available tools count
   const agentToolPermissions =
     selectedAgent?.toolPermissions as AgentToolPermissions
@@ -452,6 +168,9 @@ export function ChatCard({ scheduled }: ChatCardProps) {
   const [toolCallMessages, setToolCallMessages] = useState<
     (Message & { toolCall?: ToolCall })[]
   >([])
+
+  // State to track tool calls that should be associated with the next assistant message
+  const [pendingToolCalls, setPendingToolCalls] = useState<ToolCall[]>([])
 
   const {
     messages,
@@ -477,13 +196,24 @@ export function ChatCard({ scheduled }: ChatCardProps) {
         })
       }
 
-      // Add AI response to database conversation
+      // Add AI response to database conversation with any associated tool calls
       if (currentConversation) {
         console.log(
           '📝 Adding AI response to conversation:',
-          currentConversation.id
+          currentConversation.id,
+          'with',
+          pendingToolCalls.length,
+          'tool calls'
         )
-        await addMessageToConversation('assistant', message.content, message.id)
+        await addMessageToConversation(
+          'assistant',
+          message.content,
+          message.id,
+          pendingToolCalls.length > 0 ? pendingToolCalls : undefined
+        )
+
+        // Clear pending tool calls after storing them
+        setPendingToolCalls([])
       } else {
         console.warn('⚠️ No current conversation to add AI response to')
       }
@@ -626,6 +356,16 @@ export function ChatCard({ scheduled }: ChatCardProps) {
               return [...prevToolMessages, toolCallMessage]
             })
 
+            // Add tool call to pending list to be stored with the next assistant message
+            setPendingToolCalls((prevPending) => {
+              // Check if this tool call is already pending
+              const exists = prevPending.some((tc) => tc.id === toolCallId)
+              if (exists) {
+                return prevPending
+              }
+              return [...prevPending, dataItem.toolCall]
+            })
+
             // Mark this tool call as processed
             setProcessedToolCallIds((prev) => new Set([...prev, toolCallId]))
           }
@@ -706,6 +446,73 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     }
   }, [data, processedToolCallIds, toast])
 
+  // Load conversation messages when conversation changes
+  useEffect(() => {
+    const loadConversationMessages = async () => {
+      if (currentConversation && currentConversation.content) {
+        console.log('📚 Loading conversation messages:', currentConversation.id)
+
+        // Convert ConversationMessage[] to Message[] format expected by useChat
+        const chatMessages: Message[] = []
+        const loadedToolCallMessages: (Message & { toolCall?: ToolCall })[] = []
+
+        currentConversation.content.forEach((msg) => {
+          // Add the main message
+          chatMessages.push({
+            id: msg.id,
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content,
+            createdAt: new Date(msg.timestamp),
+          })
+
+          // If this message has tool calls, create separate tool call messages
+          if (msg.toolCalls && msg.toolCalls.length > 0) {
+            msg.toolCalls.forEach((toolCall) => {
+              const toolCallMessage: Message & { toolCall?: ToolCall } = {
+                id: `tool-${toolCall.id}`,
+                role: 'system' as const,
+                content: `Tool execution: ${toolCall.name}`,
+                createdAt: new Date(new Date(msg.timestamp).getTime() - 1000), // 1 second earlier
+                toolCall,
+              }
+              loadedToolCallMessages.push(toolCallMessage)
+            })
+          }
+        })
+
+        // Set the messages in the chat
+        setMessages(chatMessages)
+
+        // Set the tool call messages
+        setToolCallMessages(loadedToolCallMessages)
+
+        // Update processed tool call IDs to prevent duplicates
+        const loadedToolCallIds = new Set(
+          loadedToolCallMessages
+            .map((msg) => msg.toolCall?.id)
+            .filter(Boolean) as string[]
+        )
+        setProcessedToolCallIds(loadedToolCallIds)
+
+        console.log(
+          '✅ Loaded',
+          chatMessages.length,
+          'messages and',
+          loadedToolCallMessages.length,
+          'tool calls from conversation'
+        )
+      } else if (!currentConversation) {
+        // No conversation - clear messages
+        setMessages([])
+        setToolCallMessages([])
+        setProcessedToolCallIds(new Set())
+        console.log('🗑️ Cleared messages - no active conversation')
+      }
+    }
+
+    loadConversationMessages()
+  }, [currentConversation, setMessages])
+
   // Enhanced new conversation handler
   const handleNewConversation = useCallback(async () => {
     // Complete current conversation if it exists
@@ -729,6 +536,7 @@ export function ChatCard({ scheduled }: ChatCardProps) {
     // Clear tool call tracking state
     setProcessedToolCallIds(new Set())
     setToolCallMessages([])
+    setPendingToolCalls([])
 
     // Note: New conversation will be created when the first message is sent
     // This is handled in the enhanced handleSubmit below
@@ -743,8 +551,10 @@ export function ChatCard({ scheduled }: ChatCardProps) {
 
       const userMessage = input.trim()
 
-      // If no current conversation exists, create immediate local state and database conversation
+      // If no current conversation exists, create database conversation FIRST
       if (!currentConversation && !localConversation && selectedAgent?.id) {
+        console.log('🆕 Creating new conversation for first message...')
+
         // Create immediate local conversation state for UI feedback
         const tempConversation = {
           id: `temp_${Date.now()}`,
@@ -757,20 +567,35 @@ export function ChatCard({ scheduled }: ChatCardProps) {
         }
         setLocalConversation(tempConversation)
 
-        // Create database conversation in background
         try {
+          // Create database conversation and wait for it to complete
           const newConversation = await startNewConversation(userMessage)
-          // Add the user message to the newly created conversation
           if (newConversation) {
-            await addMessageToConversation('user', userMessage)
+            console.log('✅ New conversation created:', newConversation.id)
+            // Add the user message to the newly created conversation
+            await addMessageToConversation(
+              'user',
+              userMessage,
+              `msg_user_${Date.now()}`, // Generate user message ID
+              undefined
+            )
+            console.log('✅ User message added to conversation')
+          } else {
+            console.error('❌ Failed to create new conversation')
           }
         } catch (error) {
           console.error('Failed to start new conversation:', error)
           // Continue with regular submit even if conversation creation fails
         }
       } else if (currentConversation) {
+        console.log('📝 Adding user message to existing conversation...')
         // Add user message to existing conversation
-        await addMessageToConversation('user', userMessage)
+        await addMessageToConversation(
+          'user',
+          userMessage,
+          `msg_user_${Date.now()}`, // Generate user message ID
+          undefined
+        )
         // Update local conversation message count immediately
         if (localConversation) {
           setLocalConversation({
@@ -787,6 +612,7 @@ export function ChatCard({ scheduled }: ChatCardProps) {
       }
 
       // Proceed with normal chat submission
+      console.log('🚀 Submitting message to AI...')
       handleSubmit(e)
     },
     [
@@ -960,7 +786,7 @@ export function ChatCard({ scheduled }: ChatCardProps) {
                       )}
                     >
                       <MessageContent
-                        message={{ ...message, toolCalls: [] }}
+                        message={message as ToolCallMessage}
                         isUser={message.role === 'user'}
                       />
                     </div>
