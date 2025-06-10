@@ -92,13 +92,21 @@ export function AgentDetail({
   }
 
   if (!selectedAgentId) {
-    return <div className="flex flex-col h-full p-6 bg-menu2"></div>
+    return (
+      <div
+        className="flex flex-col h-full p-6"
+        style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+      ></div>
+    )
   }
 
   // Show loading if we have an ID but no agent data
   if (selectedAgentId && !selectedAgent) {
     return (
-      <div className="flex flex-col h-full p-6 bg-menu2">
+      <div
+        className="flex flex-col h-full p-6"
+        style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+      >
         <Skeleton className="w-full mb-4 h-9" />
         <Skeleton className="h-[calc(100%-3rem)] w-full rounded-xl" />
       </div>
@@ -106,7 +114,10 @@ export function AgentDetail({
   }
 
   return (
-    <div className="flex flex-col h-full bg-menu2">
+    <div
+      className="flex flex-col h-full"
+      style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+    >
       <Tabs
         value={activeTab}
         defaultValue={defaultTab}
@@ -134,21 +145,24 @@ export function AgentDetail({
           <div className={hasChanges ? 'h-[calc(100%-4rem)]' : 'h-full'}>
             <TabsContent
               value="dashboard"
-              className="h-full m-0 bg-cardLight rounded-xl"
+              className="h-full m-0 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
               <DashboardCard />
             </TabsContent>
 
             <TabsContent
               value="chat"
-              className="h-full m-0 bg-cardLight rounded-xl"
+              className="h-full m-0 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
               <ChatCard />
             </TabsContent>
 
             <TabsContent
               value="memory"
-              className="h-full m-0 bg-cardLight rounded-xl"
+              className="h-full m-0 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
               <MemoryCard
                 agentId={selectedAgent?.id || ''}
@@ -159,7 +173,8 @@ export function AgentDetail({
 
             <TabsContent
               value="settings"
-              className="h-full m-0 bg-cardLight rounded-xl"
+              className="h-full m-0 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
               <SettingsCard
                 agent={selectedAgent || undefined}
@@ -170,7 +185,10 @@ export function AgentDetail({
           </div>
 
           {hasChanges && (
-            <div className="flex items-center justify-end h-16 gap-2 px-4 mt-4 bg-cardLight rounded-xl">
+            <div
+              className="flex items-center justify-end h-16 gap-2 px-4 mt-4 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
+            >
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
@@ -178,6 +196,7 @@ export function AgentDetail({
                 variant="default"
                 onClick={handleSave}
                 disabled={!selectedAgent}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
               >
                 Save changes
               </Button>

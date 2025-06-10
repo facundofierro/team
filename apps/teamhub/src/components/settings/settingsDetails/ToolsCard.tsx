@@ -442,19 +442,13 @@ function CurrentToolsList({
                       <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                         {tool.description || 'No description available'}
                       </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            tool.isActive
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                          }`}
-                        >
-                          {tool.isActive ? 'Active' : 'Inactive'}
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          • {tool.isActive ? 'Active' : 'Inactive'}
                         </span>
                         {tool.isManaged && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                            Managed
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            • Managed
                           </span>
                         )}
                       </div>

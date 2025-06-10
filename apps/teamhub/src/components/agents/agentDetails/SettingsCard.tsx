@@ -200,272 +200,275 @@ export function SettingsCard({
   }
 
   return (
-    <div className="h-full p-6 space-y-6">
-      {/* Basic Settings */}
-      <div className="grid gap-4">
-        <div className="space-y-4">
-          <div className="flex flex-row gap-4">
+    <Card className="h-full overflow-hidden bg-[#f8f9fa]">
+      <div className="p-6 space-y-6">
+        {/* Basic Settings */}
+        <div className="grid gap-4">
+          <div className="space-y-4">
+            <div className="flex flex-row gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Input
+                  id="role"
+                  value={formData.role}
+                  onChange={(e) => handleChange('role', e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="active"
+                    checked={formData.isActive}
+                    onCheckedChange={(checked) =>
+                      handleChange('isActive', checked)
+                    }
+                  />
+                  <Label htmlFor="active">Active</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="clone"
+                    checked={formData.doesClone}
+                    onCheckedChange={(checked) =>
+                      handleChange('doesClone', checked)
+                    }
+                  />
+                  <Label htmlFor="clone">Multiple Instances</Label>
+                </div>
+              </div>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
+              <Label htmlFor="systemPrompt">System Prompt</Label>
+              <Textarea
+                className="h-40"
+                id="systemPrompt"
+                value={formData.systemPrompt || ''}
+                onChange={(e) => handleChange('systemPrompt', e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Input
-                id="role"
-                value={formData.role}
-                onChange={(e) => handleChange('role', e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="active"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) =>
-                    handleChange('isActive', checked)
-                  }
-                />
-                <Label htmlFor="active">Active</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="clone"
-                  checked={formData.doesClone}
-                  onCheckedChange={(checked) =>
-                    handleChange('doesClone', checked)
-                  }
-                />
-                <Label htmlFor="clone">Multiple Instances</Label>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="systemPrompt">System Prompt</Label>
-            <Textarea
-              className="h-40"
-              id="systemPrompt"
-              value={formData.systemPrompt || ''}
-              onChange={(e) => handleChange('systemPrompt', e.target.value)}
-            />
           </div>
         </div>
-      </div>
 
-      {/* Tools, Policies, and Memory Rules */}
-      <div className="grid flex-1 grid-cols-3 gap-4">
-        {/* Tools Column */}
-        <div className="flex flex-col min-h-0">
-          <h3 className="mb-4 text-lg font-medium text-center shrink-0">
-            Tools
-          </h3>
-          <ScrollArea className="flex-1 min-h-0 border rounded-md">
-            <div className="p-4 space-y-4">
-              {/* Show assigned tools */}
-              {Array.from(selectedToolIds).map((toolId) => {
-                const tool = availableTools.find((t) => t.id === toolId)
-                const permission = toolPermissions[toolId]
+        {/* Tools, Policies, and Memory Rules */}
+        <div className="grid flex-1 grid-cols-3 gap-4">
+          {/* Tools Column */}
+          <div className="flex flex-col min-h-0">
+            <h3 className="mb-4 text-lg font-medium text-center shrink-0">
+              Tools
+            </h3>
+            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-background/50">
+              <div className="p-4 space-y-4">
+                {/* Show assigned tools */}
+                {Array.from(selectedToolIds).map((toolId) => {
+                  const tool = availableTools.find((t) => t.id === toolId)
+                  const permission = toolPermissions[toolId]
 
-                if (!tool) return null
+                  if (!tool) return null
 
-                return (
-                  <Card key={tool.id} className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{tool.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {tool.type}
-                          </p>
-                          {tool.description && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {tool.description}
+                  return (
+                    <Card key={tool.id} className="p-4 bg-background/80">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{tool.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {tool.type}
                             </p>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-500 hover:text-red-600"
-                          onClick={() => handleRemoveTool(tool.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-
-                      {permission && (
-                        <div className="pt-2 border-t space-y-2">
-                          <div className="space-y-1">
-                            <Label className="text-xs">
-                              Max Usage Per Day (0 = unlimited)
-                            </Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              value={permission.maxUsagePerDay || 0}
-                              onChange={(e) =>
-                                handleUpdateToolPermission(
-                                  tool.id,
-                                  'maxUsagePerDay',
-                                  parseInt(e.target.value) || 0
-                                )
-                              }
-                              className="h-8"
-                            />
+                            {tool.description && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {tool.description}
+                              </p>
+                            )}
                           </div>
-                          {permission.role !== undefined && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-500 hover:text-red-600"
+                            onClick={() => handleRemoveTool(tool.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        {permission && (
+                          <div className="pt-2 border-t space-y-2">
                             <div className="space-y-1">
-                              <Label className="text-xs">Role</Label>
+                              <Label className="text-xs">
+                                Max Usage Per Day (0 = unlimited)
+                              </Label>
                               <Input
-                                value={permission.role || ''}
+                                type="number"
+                                min="0"
+                                value={permission.maxUsagePerDay || 0}
                                 onChange={(e) =>
                                   handleUpdateToolPermission(
                                     tool.id,
-                                    'role',
-                                    e.target.value
+                                    'maxUsagePerDay',
+                                    parseInt(e.target.value) || 0
                                   )
                                 }
-                                placeholder="Optional role"
                                 className="h-8"
                               />
                             </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                )
-              })}
-
-              {/* Add Tool Button */}
-              <Card
-                className="flex items-center justify-center p-6 border-dashed cursor-pointer hover:border-primary"
-                onClick={() => setIsAddingTool(true)}
-              >
-                <div className="space-y-2 text-center">
-                  <Plus className="w-6 h-6 mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Add tool</p>
-                </div>
-              </Card>
-            </div>
-          </ScrollArea>
-        </div>
-
-        {/* Policies Column */}
-        <div className="flex flex-col min-h-0">
-          <h3 className="mb-4 text-lg font-medium text-center shrink-0">
-            Policies
-          </h3>
-          <ScrollArea className="flex-1 min-h-0 border rounded-md">
-            <div className="p-4 space-y-4">
-              {policies.map((policy) => (
-                <Card
-                  key={policy.targetAgentId + policy.messageType}
-                  className="p-4"
-                >
-                  <p className="font-medium">{policy.targetAgentId}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {policy.messageType}
-                  </p>
-                </Card>
-              ))}
-              <Card
-                className="flex items-center justify-center p-6 border-dashed cursor-pointer hover:border-primary"
-                onClick={handleAddPolicy}
-              >
-                <div className="space-y-2 text-center">
-                  <Plus className="w-6 h-6 mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Add new policy
-                  </p>
-                </div>
-              </Card>
-            </div>
-          </ScrollArea>
-        </div>
-
-        {/* Memory Rules Column */}
-        <div className="flex flex-col min-h-0">
-          <h3 className="mb-4 text-lg font-medium text-center shrink-0">
-            Memory Rules
-          </h3>
-          <ScrollArea className="flex-1 min-h-0 border rounded-md">
-            <div className="p-4 space-y-4">
-              {memoryRules.map((rule) => (
-                <Card key={rule.category} className="p-4">
-                  <p className="font-medium">{rule.messageType}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {rule.shouldStore}
-                  </p>
-                </Card>
-              ))}
-              <Card
-                className="flex items-center justify-center p-6 border-dashed cursor-pointer hover:border-primary"
-                onClick={handleAddMemoryRule}
-              >
-                <div className="space-y-2 text-center">
-                  <Plus className="w-6 h-6 mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Add new memory rule
-                  </p>
-                </div>
-              </Card>
-            </div>
-          </ScrollArea>
-        </div>
-      </div>
-
-      {/* Add Tool Sheet */}
-      <Sheet open={isAddingTool} onOpenChange={setIsAddingTool}>
-        <SheetContent className="sm:max-w-[400px] w-3/4">
-          <SheetHeader>
-            <SheetTitle>Add Tool to Agent</SheetTitle>
-          </SheetHeader>
-          <div className="grid gap-4 py-4">
-            <ScrollArea className="h-[400px] w-full">
-              <div className="space-y-2">
-                {availableTools.length === 0 ? (
-                  <div className="text-center py-6 text-sm text-muted-foreground">
-                    No tools available for this organization. Add tools in
-                    Settings first.
-                  </div>
-                ) : (
-                  availableTools
-                    .filter((tool) => !selectedToolIds.has(tool.id)) // Only show unassigned tools
-                    .map((tool) => (
-                      <button
-                        key={tool.id}
-                        onClick={() => handleAddTool(tool.id)}
-                        className="w-full text-left p-3 rounded-md border transition-colors hover:bg-muted"
-                      >
-                        <div className="font-medium">{tool.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {tool.type}
-                        </div>
-                        {tool.description && (
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {tool.description}
+                            {permission.role !== undefined && (
+                              <div className="space-y-1">
+                                <Label className="text-xs">Role</Label>
+                                <Input
+                                  value={permission.role || ''}
+                                  onChange={(e) =>
+                                    handleUpdateToolPermission(
+                                      tool.id,
+                                      'role',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="Optional role"
+                                  className="h-8"
+                                />
+                              </div>
+                            )}
                           </div>
                         )}
-                      </button>
-                    ))
-                )}
-                {availableTools.filter((tool) => !selectedToolIds.has(tool.id))
-                  .length === 0 &&
-                  availableTools.length > 0 && (
-                    <div className="text-center py-6 text-sm text-muted-foreground">
-                      All available tools have been added to this agent.
-                    </div>
-                  )}
+                      </div>
+                    </Card>
+                  )
+                })}
+
+                {/* Add Tool Button */}
+                <Card
+                  className="flex items-center justify-center p-6 border-dashed cursor-pointer hover:border-primary bg-background/80"
+                  onClick={() => setIsAddingTool(true)}
+                >
+                  <div className="space-y-2 text-center">
+                    <Plus className="w-6 h-6 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Add tool</p>
+                  </div>
+                </Card>
               </div>
             </ScrollArea>
           </div>
-        </SheetContent>
-      </Sheet>
-    </div>
+
+          {/* Policies Column */}
+          <div className="flex flex-col min-h-0">
+            <h3 className="mb-4 text-lg font-medium text-center shrink-0">
+              Policies
+            </h3>
+            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-background/50">
+              <div className="p-4 space-y-4">
+                {policies.map((policy) => (
+                  <Card
+                    key={policy.targetAgentId + policy.messageType}
+                    className="p-4 bg-background/80"
+                  >
+                    <p className="font-medium">{policy.targetAgentId}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {policy.messageType}
+                    </p>
+                  </Card>
+                ))}
+                <Card
+                  className="flex items-center justify-center p-6 border-dashed cursor-pointer hover:border-primary bg-background/80"
+                  onClick={handleAddPolicy}
+                >
+                  <div className="space-y-2 text-center">
+                    <Plus className="w-6 h-6 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Add new policy
+                    </p>
+                  </div>
+                </Card>
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Memory Rules Column */}
+          <div className="flex flex-col min-h-0">
+            <h3 className="mb-4 text-lg font-medium text-center shrink-0">
+              Memory Rules
+            </h3>
+            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-background/50">
+              <div className="p-4 space-y-4">
+                {memoryRules.map((rule) => (
+                  <Card key={rule.category} className="p-4 bg-background/80">
+                    <p className="font-medium">{rule.messageType}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {rule.shouldStore}
+                    </p>
+                  </Card>
+                ))}
+                <Card
+                  className="flex items-center justify-center p-6 border-dashed cursor-pointer hover:border-primary bg-background/80"
+                  onClick={handleAddMemoryRule}
+                >
+                  <div className="space-y-2 text-center">
+                    <Plus className="w-6 h-6 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Add new memory rule
+                    </p>
+                  </div>
+                </Card>
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+
+        {/* Add Tool Sheet */}
+        <Sheet open={isAddingTool} onOpenChange={setIsAddingTool}>
+          <SheetContent className="sm:max-w-[400px] w-3/4">
+            <SheetHeader>
+              <SheetTitle>Add Tool to Agent</SheetTitle>
+            </SheetHeader>
+            <div className="grid gap-4 py-4">
+              <ScrollArea className="h-[400px] w-full">
+                <div className="space-y-2">
+                  {availableTools.length === 0 ? (
+                    <div className="text-center py-6 text-sm text-muted-foreground">
+                      No tools available for this organization. Add tools in
+                      Settings first.
+                    </div>
+                  ) : (
+                    availableTools
+                      .filter((tool) => !selectedToolIds.has(tool.id)) // Only show unassigned tools
+                      .map((tool) => (
+                        <button
+                          key={tool.id}
+                          onClick={() => handleAddTool(tool.id)}
+                          className="w-full text-left p-3 rounded-md border transition-colors hover:bg-muted"
+                        >
+                          <div className="font-medium">{tool.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {tool.type}
+                          </div>
+                          {tool.description && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {tool.description}
+                            </div>
+                          )}
+                        </button>
+                      ))
+                  )}
+                  {availableTools.filter(
+                    (tool) => !selectedToolIds.has(tool.id)
+                  ).length === 0 &&
+                    availableTools.length > 0 && (
+                      <div className="text-center py-6 text-sm text-muted-foreground">
+                        All available tools have been added to this agent.
+                      </div>
+                    )}
+                </div>
+              </ScrollArea>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </Card>
   )
 }
