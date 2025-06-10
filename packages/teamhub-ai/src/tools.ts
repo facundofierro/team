@@ -18,6 +18,7 @@ import {
   agentDiscovery,
   AgentDiscoveryParameters,
 } from './tools/agentDiscovery'
+import { memorySearch, MemorySearchParameters } from './tools/memorySearch'
 import { tool } from 'ai'
 import { z } from 'zod'
 
@@ -29,6 +30,7 @@ const TOOLS = [
   searchYandexGen,
   agentToAgent,
   agentDiscovery,
+  memorySearch,
 ]
 
 export const getToolTypes = async () => {
