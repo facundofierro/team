@@ -24,7 +24,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import React from 'react'
+import * as React from 'react'
 
 type ToolCardProps = {
   tools: ToolWithTypes[]
@@ -259,8 +259,8 @@ function ToolConfigurationSheet({
   const handleCancel = () => {
     if (tool) {
       setName(tool.name)
-      setIsActive(tool.isActive)
-      setIsManaged(tool.isManaged)
+      setIsActive(tool.isActive ?? true)
+      setIsManaged(tool.isManaged ?? false)
       setConfiguration(tool.configuration)
     }
     onClose()
@@ -460,6 +460,7 @@ function CurrentToolsList({
                         size="icon"
                         className="h-6 w-6 text-gray-500 hover:text-gray-700"
                         title="Configure tool"
+                        onClick={() => onConfigureTool(tool)}
                       >
                         <Settings2 className="w-3 h-3" />
                       </Button>
@@ -492,6 +493,8 @@ export function ToolsCard({
   onSave,
   allSettings,
 }: ToolCardProps) {
+  const [configTool, setConfigTool] = useState<ToolWithTypes | null>(null)
+
   // Filter out tool types that are already added
   const availableToolTypes = useMemo(() => {
     const addedToolTypes = new Set(tools.map((tool) => tool.type))
@@ -588,7 +591,11 @@ export function ToolsCard({
     <div className="flex gap-6 h-full">
       {/* Left Panel - Current Tools (1/4 width) */}
       <div className="w-1/4 min-w-[280px]">
-        <CurrentToolsList tools={tools} onRemoveTool={handleRemoveTool} />
+        <CurrentToolsList
+          tools={tools}
+          onRemoveTool={handleRemoveTool}
+          onConfigureTool={setConfigTool}
+        />
       </div>
 
       {/* Right Panel - Available Tools Marketplace (3/4 width) */}

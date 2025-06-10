@@ -264,7 +264,7 @@ export function SettingsCard({
             <h3 className="mb-4 text-lg font-medium text-center shrink-0">
               Tools
             </h3>
-            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-background/50">
+            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-gray-50">
               <div className="p-4 space-y-4">
                 {/* Show assigned tools */}
                 {Array.from(selectedToolIds).map((toolId) => {
@@ -361,7 +361,7 @@ export function SettingsCard({
             <h3 className="mb-4 text-lg font-medium text-center shrink-0">
               Policies
             </h3>
-            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-background/50">
+            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-gray-50">
               <div className="p-4 space-y-4">
                 {policies.map((policy) => (
                   <Card
@@ -394,7 +394,7 @@ export function SettingsCard({
             <h3 className="mb-4 text-lg font-medium text-center shrink-0">
               Memory Rules
             </h3>
-            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-background/50">
+            <ScrollArea className="flex-1 min-h-0 border rounded-md bg-gray-50">
               <div className="p-4 space-y-4">
                 {memoryRules.map((rule) => (
                   <Card key={rule.category} className="p-4 bg-background/80">
