@@ -14,6 +14,10 @@ import {
   SearchDuckDuckGoParameters,
 } from './tools/searchDuckDuckGo'
 import { agentToAgent, A2AParameters } from './tools/agentToAgent'
+import {
+  agentDiscovery,
+  AgentDiscoveryParameters,
+} from './tools/agentDiscovery'
 import { tool } from 'ai'
 import { z } from 'zod'
 
@@ -24,6 +28,7 @@ const TOOLS = [
   searchYandexGrpc,
   searchYandexGen,
   agentToAgent,
+  agentDiscovery,
 ]
 
 export const getToolTypes = async () => {

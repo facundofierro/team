@@ -256,6 +256,57 @@ For broadcasting to multiple agents, send separate messages:
 }
 ```
 
+## Integration with Agent Discovery
+
+The A2A Communication system works seamlessly with the Agent Discovery tool to enable intelligent agent collaboration:
+
+### Discovery-First Workflow
+
+```typescript
+// Step 1: Discover suitable agents
+const discoveryResult = await useAgentDiscovery({
+  capabilities: ['database', 'performance'],
+  status: 'active',
+  includeMetadata: true,
+})
+
+// Step 2: Select the best agent
+const targetAgent = discoveryResult.agents.find(
+  (agent) => agent.toolsAvailable > 5 && agent.availability === 'available'
+)
+
+// Step 3: Communicate with the selected agent
+if (targetAgent) {
+  await useAgentToAgent({
+    targetAgentId: targetAgent.id,
+    messageType: 'task',
+    content:
+      'Database performance optimization needed for customer dashboard queries',
+    priority: 'high',
+    metadata: {
+      discoveredVia: 'agentDiscovery',
+      agentCapabilities: targetAgent.capabilities,
+      selectionCriteria: 'tools>5 AND available',
+    },
+  })
+}
+```
+
+### Smart Agent Selection
+
+```typescript
+// Find agents by role and select based on workload
+const analysts = await useAgentDiscovery({
+  role: 'analyst',
+  status: 'active',
+  includeMetadata: true,
+  sortBy: 'lastActive',
+})
+
+// Select the least recently active agent for load balancing
+const targetAgent = analysts.agents[0]
+```
+
 ## Technical Implementation
 
 ### Tool Configuration
