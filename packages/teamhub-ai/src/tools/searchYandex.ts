@@ -42,7 +42,7 @@ export const searchYandex: ToolTypeDefinition = {
     YANDEX_API_KEY: {
       type: 'string',
       description:
-        'The Yandex Cloud IAM Token (Bearer token for API v2 authentication)',
+        'The Yandex Cloud API Key (long-lived key for Search API authentication)',
     },
     YANDEX_USER_KEY: {
       type: 'string',
@@ -113,7 +113,7 @@ export const searchYandex: ToolTypeDefinition = {
     )
     console.log(
       '⚙️ Yandex Search Tool: Received configuration keys:',
-      Object.keys(configuration)
+      Object.entries(configuration)
     )
 
     const {
@@ -137,11 +137,11 @@ export const searchYandex: ToolTypeDefinition = {
       `🔍 Yandex Search Tool: Query="${query}", Results=${numResults}, Type=${searchType}`
     )
 
-    // Get API keys from configuration or environment variables
+    // Get API keys from environment variables first, then configuration
     const YANDEX_API_KEY =
-      configuration.YANDEX_API_KEY || process.env.YANDEX_API_KEY
+      process.env.YANDEX_API_KEY || configuration.YANDEX_API_KEY
     const YANDEX_USER_ID =
-      configuration.YANDEX_USER_KEY || process.env.YANDEX_USER_KEY
+      process.env.YANDEX_USER_KEY || configuration.YANDEX_USER_KEY
 
     console.log('🔑 Yandex Search Tool: API Key available:', !!YANDEX_API_KEY)
     console.log('🔑 Yandex Search Tool: User ID available:', !!YANDEX_USER_ID)
@@ -184,13 +184,13 @@ export const searchYandex: ToolTypeDefinition = {
       }
 
       // Test IAM token validity before making the search request
-      console.log('🧪 Yandex Search Tool: Testing IAM token validity...')
+      console.log('🧪 Yandex API_KEY: ', YANDEX_API_KEY.substring(0, 8) + '...')
       const tokenTestResponse = await fetch(
         'https://iam.api.cloud.yandex.net/iam/v1/tokens',
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${YANDEX_API_KEY}`,
+            Authorization: `Api-Key ${YANDEX_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -288,7 +288,7 @@ export const searchYandex: ToolTypeDefinition = {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${YANDEX_API_KEY}`,
+          Authorization: `Api-Key ${YANDEX_API_KEY}`,
           'Content-Type': 'application/json',
           Accept: 'application/json',
           'User-Agent':
