@@ -135,7 +135,7 @@ export async function ensureOrgTablesExist(orgDbName: string) {
             id text PRIMARY KEY,
             type text NOT NULL,
             reference_id text NOT NULL,
-            vector vector NOT NULL,
+            vector vector(1536) NOT NULL, -- Specify dimensions (1536 for OpenAI embeddings)
             version text NOT NULL,
             model text NOT NULL,
             dimension integer NOT NULL,
@@ -206,7 +206,7 @@ async function migrateMemoryTables(pool: Pool, orgDbName: string) {
         -- Semantic and structural data
         key_topics jsonb, -- Array of topics/entities
         tags jsonb, -- User or auto-generated tags
-        embedding vector, -- For semantic search (requires pgvector)
+        embedding vector(1536), -- For semantic search (requires pgvector, 1536 dimensions for OpenAI)
 
         -- Memory metadata and importance
         importance integer DEFAULT 1, -- 1-10 scale
