@@ -26,7 +26,7 @@ export function SettingsDetails({
   const [pendingChanges, setPendingChanges] = useState<
     Partial<OrganizationSettings>
   >({})
-  const [activeTab, setActiveTab] = useState('messageTypes')
+  const [activeTab, setActiveTab] = useState('tools')
 
   // Reset state when settings change
   useEffect(() => {
@@ -64,7 +64,10 @@ export function SettingsDetails({
 
   if (!settings) {
     return (
-      <div className="flex flex-col h-full p-6 bg-menu2">
+      <div
+        className="flex flex-col h-full p-6"
+        style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+      >
         <Skeleton className="w-full mb-4 h-9" />
         <Skeleton className="h-[calc(100%-3rem)] w-full rounded-xl" />
       </div>
@@ -72,7 +75,10 @@ export function SettingsDetails({
   }
 
   return (
-    <div className="flex flex-col h-full bg-menu2">
+    <div
+      className="flex flex-col h-full"
+      style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+    >
       <div className="flex-1 p-6 overflow-hidden">
         <div className={hasChanges ? 'h-[calc(100%-4rem)]' : 'h-full'}>
           <Tabs
