@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
-    "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-toast": "^1.2.13",
     "@shadcn/ui": "^0.0.4",
     "@types/lodash": "^4.17.4",
     "@types/node": "20.14.0",

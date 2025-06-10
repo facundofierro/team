@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useToast } from '@/hooks/use-toast'
 import {
   Send,
   ListTodo,
@@ -305,7 +306,92 @@ function MessageContent({
   )
 }
 
+// Helper function to parse tool execution errors and extract user-friendly messages
+function parseToolError(toolCall: ToolCall): {
+  title: string
+  description: string
+  variant: 'destructive' | 'default'
+} {
+  const toolName =
+    toolCall.name === 'searchYandex' ? 'Yandex Search' : toolCall.name
+
+  // Get error content from either result or arguments
+  const errorContent = JSON.stringify(
+    toolCall.result || toolCall.arguments || {}
+  )
+
+  // Check if this is a token expiry error
+  if (
+    errorContent.includes('token has expired') ||
+    errorContent.includes('401 Unauthorized')
+  ) {
+    return {
+      title: `${toolName} - Authentication Error`,
+      description:
+        'The API token has expired and needs to be refreshed. Please contact your administrator.',
+      variant: 'destructive',
+    }
+  }
+
+  // Check for rate limit errors
+  if (errorContent.includes('rate limit') || errorContent.includes('429')) {
+    return {
+      title: `${toolName} - Rate Limit`,
+      description:
+        'API rate limit exceeded. Please try again in a few minutes.',
+      variant: 'destructive',
+    }
+  }
+
+  // Check for network errors
+  if (
+    errorContent.includes('network') ||
+    errorContent.includes('timeout') ||
+    errorContent.includes('ECONNREFUSED')
+  ) {
+    return {
+      title: `${toolName} - Network Error`,
+      description:
+        'Network connection failed. Please check your internet connection and try again.',
+      variant: 'destructive',
+    }
+  }
+
+  // Check for quota exceeded errors
+  if (errorContent.includes('quota') || errorContent.includes('exceeded')) {
+    return {
+      title: `${toolName} - Quota Exceeded`,
+      description:
+        'API quota has been exceeded. Please try again later or contact your administrator.',
+      variant: 'destructive',
+    }
+  }
+
+  // Check for permission errors
+  if (
+    errorContent.includes('403') ||
+    errorContent.includes('Forbidden') ||
+    errorContent.includes('permission')
+  ) {
+    return {
+      title: `${toolName} - Permission Error`,
+      description:
+        'Insufficient permissions to access this resource. Please contact your administrator.',
+      variant: 'destructive',
+    }
+  }
+
+  // Generic error fallback
+  return {
+    title: `${toolName} - Error`,
+    description:
+      'Tool execution failed. Please try again or contact support if the issue persists.',
+    variant: 'destructive',
+  }
+}
+
 export function ChatCard({ scheduled }: ChatCardProps) {
+  const { toast } = useToast()
   const [isInstancesOpen, setIsInstancesOpen] = useState(true)
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
   const [selectedMemories, setSelectedMemories] = useState<TestMemory[]>([])
@@ -402,6 +488,78 @@ export function ChatCard({ scheduled }: ChatCardProps) {
         console.warn('⚠️ No current conversation to add AI response to')
       }
     },
+    onError: (error) => {
+      console.error('💥 Chat error:', error)
+
+      // Parse the error and show appropriate toast
+      let title = 'Chat Error'
+      let description =
+        'An error occurred while processing your message. Please try again.'
+
+      const errorMessage = error.message || error.toString()
+
+      if (
+        errorMessage.includes('AI_ToolExecutionError') ||
+        errorMessage.includes('Error executing tool')
+      ) {
+        // Extract tool name if possible
+        const toolNameMatch =
+          errorMessage.match(/tool (\w+):/i) ||
+          errorMessage.match(
+            /Error executing tool \w+-\w+-\w+-\w+-\w+: Failed to (\w+)/i
+          )
+
+        const toolName =
+          toolNameMatch && toolNameMatch[1] === 'searchYandex'
+            ? 'Yandex Search'
+            : toolNameMatch
+            ? toolNameMatch[1]
+            : 'Unknown Tool'
+
+        if (
+          errorMessage.includes('token has expired') ||
+          errorMessage.includes('401 Unauthorized')
+        ) {
+          title = `${toolName} - Authentication Error`
+          description =
+            'The API token has expired and needs to be refreshed. Please contact your administrator.'
+        } else if (
+          errorMessage.includes('rate limit') ||
+          errorMessage.includes('429')
+        ) {
+          title = `${toolName} - Rate Limit`
+          description =
+            'API rate limit exceeded. Please try again in a few minutes.'
+        } else if (
+          errorMessage.includes('network') ||
+          errorMessage.includes('timeout')
+        ) {
+          title = `${toolName} - Network Error`
+          description =
+            'Network connection failed. Please check your internet connection and try again.'
+        } else {
+          title = `${toolName} - Error`
+          description =
+            'Tool execution failed. Please try again or contact support if the issue persists.'
+        }
+      } else if (
+        errorMessage.includes('network') ||
+        errorMessage.includes('fetch')
+      ) {
+        title = 'Network Error'
+        description =
+          'Unable to connect to the server. Please check your internet connection and try again.'
+      } else if (errorMessage.includes('timeout')) {
+        title = 'Request Timeout'
+        description = 'The request took too long to complete. Please try again.'
+      }
+
+      toast({
+        title,
+        description,
+        variant: 'destructive',
+      })
+    },
     experimental_prepareRequestBody: ({ messages }) => {
       return {
         messages: messages.map((msg) => ({
@@ -436,6 +594,16 @@ export function ChatCard({ scheduled }: ChatCardProps) {
               continue
             }
 
+            // Check if this is an error tool call and show toast
+            if (dataItem.toolCall.status === 'error') {
+              const errorInfo = parseToolError(dataItem.toolCall)
+              toast({
+                title: errorInfo.title,
+                description: errorInfo.description,
+                variant: errorInfo.variant,
+              })
+            }
+
             // Create a new tool call message with the tool call data
             // Use a timestamp that ensures it appears before the assistant response
             const toolCallMessage: Message & { toolCall?: ToolCall } = {
@@ -461,10 +629,82 @@ export function ChatCard({ scheduled }: ChatCardProps) {
             // Mark this tool call as processed
             setProcessedToolCallIds((prev) => new Set([...prev, toolCallId]))
           }
+
+          // Handle tool execution errors that might come through different stream types
+          if (dataItem.type === 'error' && dataItem.error) {
+            // Check if this is a tool execution error
+            if (
+              dataItem.error.includes('AI_ToolExecutionError') ||
+              dataItem.error.includes('Error executing tool') ||
+              dataItem.error.includes('tool execution')
+            ) {
+              let toolName = 'Unknown Tool'
+              let errorMessage = dataItem.error
+
+              // Try to extract tool name and error details
+              const toolNameMatch = dataItem.error.match(/tool (\w+):/i)
+              if (toolNameMatch) {
+                toolName =
+                  toolNameMatch[1] === 'searchYandex'
+                    ? 'Yandex Search'
+                    : toolNameMatch[1]
+              }
+
+              // Parse specific error types from the error message
+              let title = `${toolName} - Error`
+              let description =
+                'Tool execution failed. Please try again or contact support if the issue persists.'
+
+              if (
+                errorMessage.includes('token has expired') ||
+                errorMessage.includes('401 Unauthorized')
+              ) {
+                title = `${toolName} - Authentication Error`
+                description =
+                  'The API token has expired and needs to be refreshed. Please contact your administrator.'
+              } else if (
+                errorMessage.includes('rate limit') ||
+                errorMessage.includes('429')
+              ) {
+                title = `${toolName} - Rate Limit`
+                description =
+                  'API rate limit exceeded. Please try again in a few minutes.'
+              } else if (
+                errorMessage.includes('network') ||
+                errorMessage.includes('timeout') ||
+                errorMessage.includes('ECONNREFUSED')
+              ) {
+                title = `${toolName} - Network Error`
+                description =
+                  'Network connection failed. Please check your internet connection and try again.'
+              } else if (
+                errorMessage.includes('quota') ||
+                errorMessage.includes('exceeded')
+              ) {
+                title = `${toolName} - Quota Exceeded`
+                description =
+                  'API quota has been exceeded. Please try again later or contact your administrator.'
+              } else if (
+                errorMessage.includes('403') ||
+                errorMessage.includes('Forbidden') ||
+                errorMessage.includes('permission')
+              ) {
+                title = `${toolName} - Permission Error`
+                description =
+                  'Insufficient permissions to access this resource. Please contact your administrator.'
+              }
+
+              toast({
+                title,
+                description,
+                variant: 'destructive',
+              })
+            }
+          }
         }
       }
     }
-  }, [data, processedToolCallIds])
+  }, [data, processedToolCallIds, toast])
 
   // Enhanced new conversation handler
   const handleNewConversation = useCallback(async () => {
