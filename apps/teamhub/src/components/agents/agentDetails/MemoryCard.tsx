@@ -10,6 +10,7 @@ import {
   FileText,
   Eye,
   ExternalLink,
+  Trash2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -57,6 +58,7 @@ export function MemoryCard({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [regenerating, setRegenerating] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const { currentOrganization } = useOrganizationStore()
 
   // Fetch memories from API
@@ -178,6 +180,68 @@ export function MemoryCard({
       )
     } finally {
       setRegenerating(false)
+    }
+  }
+
+  // Function to delete memory
+  const deleteMemory = async () => {
+    if (!selectedMemory || !currentOrganization?.id) {
+      console.error('Cannot delete: missing memory or organization')
+      return
+    }
+
+    // Confirm deletion
+    if (
+      !window.confirm(
+        `Are you sure you want to delete the memory "${selectedMemory.title}"? This action cannot be undone.`
+      )
+    ) {
+      return
+    }
+
+    setDeleting(true)
+    try {
+      console.log('🗑️ Starting memory deletion for:', selectedMemory.id)
+
+      const response = await fetch(
+        `/api/agents/${agentId}/memories/${selectedMemory.id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            organizationId: currentOrganization.id,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete memory')
+      }
+
+      console.log('✅ Memory deletion successful')
+
+      // Remove the memory from the local state
+      setMemories((prevMemories) =>
+        prevMemories.filter((mem) => mem.id !== selectedMemory.id)
+      )
+
+      // Clear selection if the deleted memory was selected
+      if (selectedMemoryId === selectedMemory.id) {
+        onMemorySelect('')
+      }
+
+      // Show success message
+      console.log('🎉 Memory deleted successfully!')
+    } catch (error) {
+      console.error('❌ Failed to delete memory:', error)
+      setError(
+        error instanceof Error ? error.message : 'Failed to delete memory'
+      )
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -481,7 +545,7 @@ export function MemoryCard({
                             <Badge
                               key={index}
                               variant="secondary"
-                              className="bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300"
+                              className="bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600"
                             >
                               {topic}
                             </Badge>
@@ -521,11 +585,8 @@ export function MemoryCard({
                         <h3 className="text-lg font-medium">
                           Conversation Brief
                         </h3>
-                        <Badge variant="outline">
-                          {selectedMemory.content.length} messages
-                        </Badge>
                       </div>
-                      <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <div className="bg-gray-100 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="space-y-3">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                             <div>
@@ -592,27 +653,53 @@ export function MemoryCard({
                     </div>
                   )}
 
-                {/* Regenerate button */}
-                {selectedMemory.type === 'conversation' && (
-                  <div className="pt-6">
+                {/* Action buttons */}
+                <div className="pt-6">
+                  <div className="flex gap-3">
+                    {selectedMemory.type === 'conversation' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={regenerateMemoryContent}
+                        disabled={regenerating || deleting}
+                      >
+                        {regenerating ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mr-2" />
+                            Regenerating...
+                          </>
+                        ) : (
+                          'Regenerate Overview & Content'
+                        )}
+                      </Button>
+                    )}
+
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full"
-                      onClick={regenerateMemoryContent}
-                      disabled={regenerating}
+                      className={`text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-800 ${
+                        selectedMemory.type === 'conversation'
+                          ? 'flex-1'
+                          : 'w-full'
+                      }`}
+                      onClick={deleteMemory}
+                      disabled={regenerating || deleting}
                     >
-                      {regenerating ? (
+                      {deleting ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mr-2" />
-                          Regenerating...
+                          <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin mr-2" />
+                          Deleting...
                         </>
                       ) : (
-                        'Regenerate Overview & Content'
+                        <>
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete Memory
+                        </>
                       )}
                     </Button>
                   </div>
-                )}
+                </div>
 
                 {/* Footer info */}
                 {selectedMemory.lastAccessedAt && (
