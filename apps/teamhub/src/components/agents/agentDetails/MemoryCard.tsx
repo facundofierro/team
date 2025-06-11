@@ -217,8 +217,17 @@ export function MemoryCard({
       )
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to delete memory')
+        let errorMessage = 'Failed to delete memory'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch (parseError) {
+          // If we can't parse the JSON, it might be an HTML error page
+          const errorText = await response.text()
+          console.error('Non-JSON error response:', errorText)
+          errorMessage = `Server error (${response.status}): ${response.statusText}`
+        }
+        throw new Error(errorMessage)
       }
 
       console.log('✅ Memory deletion successful')
