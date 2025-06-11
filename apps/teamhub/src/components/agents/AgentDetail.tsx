@@ -6,7 +6,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../components/ui/tabs'
-import { ChatCard } from './agentDetails/ChatCard'
+import { ChatCard } from '@/components/agents/agentDetails/ChatCard'
 import { DashboardCard } from './agentDetails/DashboardCard'
 import { SettingsCard } from './agentDetails/SettingsCard'
 import type { Agent, ToolWithTypes } from '@teamhub/db'

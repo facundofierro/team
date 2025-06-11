@@ -9,6 +9,7 @@ import {
   User,
   FileText,
   Eye,
+  ExternalLink,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import type { MemoryWithTypes, ConversationMessage } from '@teamhub/db'
+import ReactMarkdown from 'react-markdown'
 
 type MemoryCardProps = {
   agentId: string
@@ -54,6 +56,7 @@ export function MemoryCard({
   const [memories, setMemories] = useState<MemoryWithTypes[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [regenerating, setRegenerating] = useState(false)
   const { currentOrganization } = useOrganizationStore()
 
   // Fetch memories from API
@@ -123,6 +126,61 @@ export function MemoryCard({
 
   const selectedMemory = memories.find((m) => m.id === selectedMemoryId)
 
+  // Function to regenerate memory content
+  const regenerateMemoryContent = async () => {
+    if (!selectedMemory || !currentOrganization?.id) {
+      console.error('Cannot regenerate: missing memory or organization')
+      return
+    }
+
+    setRegenerating(true)
+    try {
+      console.log('🔄 Starting memory regeneration for:', selectedMemory.id)
+
+      const response = await fetch(
+        `/api/agents/${agentId}/memories/${selectedMemory.id}/regenerate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            organizationId: currentOrganization.id,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(
+          errorData.error || 'Failed to regenerate memory content'
+        )
+      }
+
+      const data = await response.json()
+      console.log('✅ Memory regeneration successful:', data)
+
+      // Update the local memories state with the updated memory
+      setMemories((prevMemories) =>
+        prevMemories.map((mem) =>
+          mem.id === selectedMemory.id ? data.memory : mem
+        )
+      )
+
+      // Show success message (you could add a toast notification here)
+      console.log('🎉 Memory content regenerated successfully!')
+    } catch (error) {
+      console.error('❌ Failed to regenerate memory content:', error)
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to regenerate memory content'
+      )
+    } finally {
+      setRegenerating(false)
+    }
+  }
+
   // Debug logging for memory selection
   useEffect(() => {
     console.log('MemoryCard: Selection state changed:', {
@@ -190,7 +248,7 @@ export function MemoryCard({
                   variant="ghost"
                   className={`w-full justify-start p-3 h-auto ${
                     selectedMemoryId === memory.id
-                      ? 'bg-purple-100 dark:bg-purple-900/30'
+                      ? 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700'
                       : ''
                   }`}
                   onClick={() => onMemorySelect(memory.id)}
@@ -205,12 +263,28 @@ export function MemoryCard({
                       {shortenMemoryTitle(memory.title)}
                     </span>
 
-                    {/* Search-friendly brief (description) - 2 lines max */}
-                    {memory.description && (
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    {/* Show legend for active conversations or description for others */}
+                    {memory.type === 'conversation' && memory.isActive ? (
+                      <div className="flex items-center gap-2 text-xs">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <MessageCircle className="w-3 h-3" />
+                          <span>
+                            {Array.isArray(memory.content)
+                              ? memory.content.length
+                              : 0}{' '}
+                            messages
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded-full">
+                          <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                          <span className="font-medium text-xs">Active</span>
+                        </div>
+                      </div>
+                    ) : memory.description ? (
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 h-8 w-full break-words">
                         {memory.description}
                       </p>
-                    )}
+                    ) : null}
                   </div>
                 </Button>
               ))
@@ -228,7 +302,7 @@ export function MemoryCard({
                 {/* Level 1: Memory Name (Header) */}
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
-                    <Brain className="w-6 h-6 text-purple-600 flex-shrink-0 mt-1" />
+                    <Brain className="w-6 h-6 text-orange-600 flex-shrink-0 mt-1" />
                     <div className="min-w-0 flex-1">
                       <h2 className="text-xl font-semibold leading-tight">
                         {selectedMemory.title}
@@ -269,16 +343,10 @@ export function MemoryCard({
 
                 {/* Level 2: Search-friendly Brief */}
                 {selectedMemory.description && (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4 text-blue-600" />
-                      <h3 className="text-lg font-medium">Overview</h3>
-                    </div>
-                    <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                      <p className="text-sm leading-relaxed text-blue-900 dark:text-blue-100">
-                        {selectedMemory.description}
-                      </p>
-                    </div>
+                  <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                    <p className="text-base leading-relaxed text-orange-900 dark:text-orange-100 font-['Tiempos_Text']">
+                      {selectedMemory.description}
+                    </p>
                   </div>
                 )}
 
@@ -286,27 +354,126 @@ export function MemoryCard({
                 {selectedMemory.summary && (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-green-600" />
-                      <h3 className="text-lg font-medium">Valuable Content</h3>
+                      <FileText className="w-4 h-4 text-orange-600" />
+                      <h3 className="text-lg font-medium">Summary</h3>
                       <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                         Key results & information
                       </span>
                     </div>
-                    <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                      <div className="text-sm leading-relaxed text-green-900 dark:text-green-100 whitespace-pre-wrap">
-                        {selectedMemory.summary}
-                      </div>
+                    <div className="text-base leading-relaxed text-gray-700 dark:text-gray-300">
+                      <ReactMarkdown
+                        components={{
+                          // Custom link component
+                          a: ({ href, children }) => (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline hover:no-underline transition-colors text-xs"
+                            >
+                              {children}
+                              <ExternalLink className="w-3 h-3 inline" />
+                            </a>
+                          ),
+                          // Custom paragraph styling
+                          p: ({ children }) => (
+                            <p className="mb-3 last:mb-0">{children}</p>
+                          ),
+                          // Custom list styling
+                          ul: ({ children }) => (
+                            <ul className="list-disc list-inside mb-3 space-y-1">
+                              {children}
+                            </ul>
+                          ),
+                          ol: ({ children }) => (
+                            <ol className="list-decimal list-inside mb-3 space-y-1">
+                              {children}
+                            </ol>
+                          ),
+                          li: ({ children }) => (
+                            <li className="ml-2">{children}</li>
+                          ),
+                          // Custom bold text styling
+                          strong: ({ children }) => (
+                            <strong className="font-semibold text-gray-800 dark:text-gray-200">
+                              {children}
+                            </strong>
+                          ),
+                          // Custom italic text styling
+                          em: ({ children }) => (
+                            <em className="italic text-gray-700 dark:text-gray-300">
+                              {children}
+                            </em>
+                          ),
+                          // Custom code styling
+                          code: ({ children }) => (
+                            <code className="bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono">
+                              {children}
+                            </code>
+                          ),
+                          // Custom code block styling
+                          pre: ({ children }) => (
+                            <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-x-auto mb-3">
+                              {children}
+                            </pre>
+                          ),
+                          // Custom heading styling
+                          h1: ({ children }) => (
+                            <h1 className="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">
+                              {children}
+                            </h1>
+                          ),
+                          h2: ({ children }) => (
+                            <h2 className="text-lg font-bold mb-2 text-gray-800 dark:text-gray-200">
+                              {children}
+                            </h2>
+                          ),
+                          h3: ({ children }) => (
+                            <h3 className="text-base font-bold mb-2 text-gray-800 dark:text-gray-200">
+                              {children}
+                            </h3>
+                          ),
+                          // Custom blockquote styling
+                          blockquote: ({ children }) => (
+                            <blockquote className="border-l-4 border-orange-300 pl-4 italic mb-3 text-gray-600 dark:text-gray-400">
+                              {children}
+                            </blockquote>
+                          ),
+                        }}
+                      >
+                        {(() => {
+                          if (!selectedMemory.summary) return ''
+
+                          // Convert plain text URLs to markdown links before processing
+                          const urlRegex = /(https?:\/\/[^\s\)]+)/g
+                          return selectedMemory.summary.replace(
+                            urlRegex,
+                            (url) => {
+                              // Only convert if it's not already a markdown link
+                              const beforeUrl =
+                                selectedMemory.summary!.substring(
+                                  0,
+                                  selectedMemory.summary!.indexOf(url)
+                                )
+                              if (beforeUrl.endsWith('](')) {
+                                return url // Already a markdown link
+                              }
+                              return `[${url}](${url})`
+                            }
+                          )
+                        })()}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 )}
 
                 {/* Key Topics and Tags */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-6">
                   {selectedMemory.keyTopics &&
                     selectedMemory.keyTopics.length > 0 && (
                       <div className="space-y-3">
                         <h4 className="text-sm font-medium flex items-center gap-2">
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4 text-orange-600" />
                           Key Topics
                         </h4>
                         <div className="flex flex-wrap gap-2">
@@ -314,7 +481,7 @@ export function MemoryCard({
                             <Badge
                               key={index}
                               variant="secondary"
-                              className="bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100"
+                              className="bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300"
                             >
                               {topic}
                             </Badge>
@@ -326,7 +493,7 @@ export function MemoryCard({
                   {selectedMemory.tags && selectedMemory.tags.length > 0 && (
                     <div className="space-y-3">
                       <h4 className="text-sm font-medium flex items-center gap-2">
-                        <MessageCircle className="w-4 h-4" />
+                        <MessageCircle className="w-4 h-4 text-orange-600" />
                         Tags
                       </h4>
                       <div className="flex flex-wrap gap-2">
@@ -334,7 +501,7 @@ export function MemoryCard({
                           <Badge
                             key={index}
                             variant="secondary"
-                            className="bg-green-100 dark:bg-green-900/30 text-green-900 dark:text-green-100"
+                            className="bg-gray-100 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300"
                           >
                             {tag}
                           </Badge>
@@ -350,7 +517,7 @@ export function MemoryCard({
                   selectedMemory.content.length > 0 && (
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <MessageCircle className="w-4 h-4 text-purple-600" />
+                        <MessageCircle className="w-4 h-4 text-orange-600" />
                         <h3 className="text-lg font-medium">
                           Conversation Brief
                         </h3>
@@ -358,22 +525,22 @@ export function MemoryCard({
                           {selectedMemory.content.length} messages
                         </Badge>
                       </div>
-                      <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                      <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div className="space-y-3">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                             <div>
-                              <span className="font-medium text-purple-900 dark:text-purple-100">
+                              <span className="font-medium text-gray-800 dark:text-gray-200">
                                 Messages:
                               </span>
-                              <span className="ml-2 text-purple-700 dark:text-purple-300">
+                              <span className="ml-2 text-gray-600 dark:text-gray-400">
                                 {selectedMemory.content.length}
                               </span>
                             </div>
                             <div>
-                              <span className="font-medium text-purple-900 dark:text-purple-100">
+                              <span className="font-medium text-gray-800 dark:text-gray-200">
                                 Participants:
                               </span>
-                              <span className="ml-2 text-purple-700 dark:text-purple-300">
+                              <span className="ml-2 text-gray-600 dark:text-gray-400">
                                 {
                                   new Set(
                                     (
@@ -384,10 +551,10 @@ export function MemoryCard({
                               </span>
                             </div>
                             <div>
-                              <span className="font-medium text-purple-900 dark:text-purple-100">
+                              <span className="font-medium text-gray-800 dark:text-gray-200">
                                 Duration:
                               </span>
-                              <span className="ml-2 text-purple-700 dark:text-purple-300">
+                              <span className="ml-2 text-gray-600 dark:text-gray-400">
                                 {(() => {
                                   const messages =
                                     selectedMemory.content as ConversationMessage[]
@@ -410,19 +577,42 @@ export function MemoryCard({
                           </div>
 
                           {selectedMemory.summary ? (
-                            <p className="text-sm text-purple-900 dark:text-purple-100 leading-relaxed">
-                              This conversation has been summarized above in the
-                              detailed summary section.
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                              The valuable content and results from this
+                              conversation are available above in the Summary
+                              section.
                             </p>
                           ) : (
-                            <p className="text-sm text-purple-700 dark:text-purple-300 italic">
-                              Conversation summary is being generated...
+                            <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                              Summary generation is being processed...
                             </p>
                           )}
                         </div>
                       </div>
                     </div>
                   )}
+
+                {/* Regenerate button */}
+                {selectedMemory.type === 'conversation' && (
+                  <div className="pt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={regenerateMemoryContent}
+                      disabled={regenerating}
+                    >
+                      {regenerating ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mr-2" />
+                          Regenerating...
+                        </>
+                      ) : (
+                        'Regenerate Overview & Content'
+                      )}
+                    </Button>
+                  </div>
+                )}
 
                 {/* Footer info */}
                 {selectedMemory.lastAccessedAt && (

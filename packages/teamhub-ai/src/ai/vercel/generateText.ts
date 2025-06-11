@@ -75,13 +75,16 @@ Examples:
 
   const prompt = `Generate a concise memory title for this conversation starter: "${firstMessage}"`
 
-  return generateOneShot({
+  const result = await generateOneShot({
     prompt,
     systemPrompt,
     provider,
     temperature: 0.3, // Lower temperature for more consistent titles
     maxTokens: 15, // Very short titles only
   })
+
+  // Clean the result by removing quotes and extra whitespace
+  return result.replace(/^["']|["']$/g, '').trim()
 }
 
 // Specialized function for conversation brief generation
@@ -159,4 +162,63 @@ Return exactly this format:
       description: 'Contains conversation data',
     }
   }
+}
+
+// Specialized function for generating description from summary
+export async function generateDescriptionFromSummary(
+  summary: string,
+  provider?: AIProvider
+): Promise<string> {
+  const systemPrompt = `You are an expert at creating concise descriptions from detailed content.
+Generate a 1-2 sentence description that explains what information can be found in the provided summary.
+This description will help users understand what they can find when searching through memories.
+Focus on WHAT content is included, not what process happened.
+Be specific about the type of information, data, or results contained.
+Do not use quotes or special characters. Return only the description text.
+
+Examples:
+- Summary about company list → "Contains contact details and services for 10 logistic companies in Saint Petersburg specializing in Argentina imports"
+- Summary about API documentation → "Includes technical specifications and implementation examples for REST API endpoints"
+- Summary about project requirements → "Provides detailed feature specifications and technical requirements for web application development"`
+
+  const prompt = `Generate a description for this summary content: "${summary}"`
+
+  return generateOneShot({
+    prompt,
+    systemPrompt,
+    provider,
+    temperature: 0.3,
+    maxTokens: 50, // Keep descriptions concise
+  })
+}
+
+// Specialized function for generating title from description
+export async function generateTitleFromDescription(
+  description: string,
+  provider?: AIProvider
+): Promise<string> {
+  const systemPrompt = `You are an expert at creating ultra-concise titles from descriptions.
+Generate a very short title (maximum 40 characters) that captures the core subject of the description.
+Remove all unnecessary words, articles, and descriptive language.
+Focus on the main topic or deliverable.
+Do not use quotes, colons, special characters, or descriptive phrases.
+Return only the essential subject matter.
+
+Examples:
+- "Contains contact details for logistic companies..." → "Saint Petersburg Logistics Companies"
+- "Includes API specifications and examples..." → "REST API Documentation"
+- "Provides project requirements for web app..." → "Web App Requirements"`
+
+  const prompt = `Generate a concise title for this description: "${description}"`
+
+  const result = await generateOneShot({
+    prompt,
+    systemPrompt,
+    provider,
+    temperature: 0.3,
+    maxTokens: 10, // Very short titles
+  })
+
+  // Clean the result by removing quotes and extra whitespace
+  return result.replace(/^["']|["']$/g, '').trim()
 }
