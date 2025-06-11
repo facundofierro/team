@@ -379,7 +379,7 @@ export function MemoryCard({
                       </div>
                     ) : memory.description ? (
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 h-8 w-full break-words">
-                        {memory.description}
+                        {memory.description.trim()}
                       </p>
                     ) : null}
                   </div>
