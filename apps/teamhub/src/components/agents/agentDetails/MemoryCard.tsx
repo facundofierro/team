@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import type { MemoryWithTypes, ConversationMessage } from '@teamhub/db'
-import ReactMarkdown from 'react-markdown'
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 
 type MemoryCardProps = {
   agentId: string
@@ -79,15 +79,12 @@ export function MemoryCard({
           window.location.origin
         )
         url.searchParams.set('organizationId', currentOrganization.id)
-        if (searchTerm.trim()) {
-          url.searchParams.set('search', searchTerm)
-        }
+        // Removed server-side search - we'll filter client-side for better performance
 
         console.log('MemoryCard: Fetching memories from:', url.toString())
         console.log('MemoryCard: Request params:', {
           agentId,
           organizationId: currentOrganization.id,
-          searchTerm: searchTerm || '(empty)',
         })
 
         const response = await fetch(url.toString())
@@ -117,14 +114,41 @@ export function MemoryCard({
     }
 
     fetchMemories()
-  }, [agentId, currentOrganization?.id, searchTerm])
+  }, [agentId, currentOrganization?.id])
 
-  // Filter and sort memories
+  // Filter and sort memories client-side
   const filteredAndSortedMemories = useMemo(() => {
-    // Memories are already filtered by search on the server
-    // Just sort by creation time (most recent first) since they come pre-sorted
-    return memories
-  }, [memories])
+    let filtered = memories
+
+    // Apply client-side search filter if search term exists
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim()
+
+      filtered = memories.filter((memory) => {
+        // Search in multiple fields (case-insensitive)
+        const searchableFields = [
+          memory.title || '',
+          memory.description || '',
+          memory.summary || '',
+          memory.category || '',
+          ...(memory.keyTopics || []),
+          ...(memory.tags || []),
+        ]
+
+        return searchableFields.some((field) =>
+          field.toLowerCase().includes(searchLower)
+        )
+      })
+    }
+
+    // Sort by creation time (most recent first)
+    return filtered.sort((a, b) => {
+      if (!a.createdAt && !b.createdAt) return 0
+      if (!a.createdAt) return 1
+      if (!b.createdAt) return -1
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+  }, [memories, searchTerm])
 
   const selectedMemory = memories.find((m) => m.id === selectedMemoryId)
 
@@ -433,134 +457,10 @@ export function MemoryCard({
                         Key results & information
                       </span>
                     </div>
-                    <div className="text-base leading-relaxed text-gray-700 dark:text-gray-300">
-                      <ReactMarkdown
-                        components={{
-                          // Custom link component
-                          a: ({ href, children }) => (
-                            <a
-                              href={href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 underline hover:no-underline transition-colors text-xs"
-                            >
-                              {children}
-                              <ExternalLink className="w-3 h-3 inline" />
-                            </a>
-                          ),
-                          // Custom paragraph styling
-                          p: ({ children }) => (
-                            <p className="mb-3 last:mb-0">{children}</p>
-                          ),
-                          // Custom list styling
-                          ul: ({ children }) => (
-                            <ul className="list-disc list-inside mb-3 space-y-1">
-                              {children}
-                            </ul>
-                          ),
-                          ol: ({ children }) => (
-                            <ol className="list-decimal list-inside mb-3 space-y-1">
-                              {children}
-                            </ol>
-                          ),
-                          li: ({ children }) => (
-                            <li className="ml-2">{children}</li>
-                          ),
-                          // Custom bold text styling
-                          strong: ({ children }) => (
-                            <strong className="font-semibold text-gray-800 dark:text-gray-200">
-                              {children}
-                            </strong>
-                          ),
-                          // Custom italic text styling
-                          em: ({ children }) => (
-                            <em className="italic text-gray-700 dark:text-gray-300">
-                              {children}
-                            </em>
-                          ),
-                          // Custom code styling
-                          code: ({ children }) => (
-                            <code className="bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono">
-                              {children}
-                            </code>
-                          ),
-                          // Custom code block styling
-                          pre: ({ children }) => (
-                            <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-x-auto mb-3">
-                              {children}
-                            </pre>
-                          ),
-                          // Custom heading styling
-                          h1: ({ children }) => (
-                            <h1 className="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">
-                              {children}
-                            </h1>
-                          ),
-                          h2: ({ children }) => (
-                            <h2 className="text-lg font-bold mb-2 text-gray-800 dark:text-gray-200">
-                              {children}
-                            </h2>
-                          ),
-                          h3: ({ children }) => (
-                            <h3 className="text-base font-bold mb-2 text-gray-800 dark:text-gray-200">
-                              {children}
-                            </h3>
-                          ),
-                          // Custom blockquote styling
-                          blockquote: ({ children }) => (
-                            <blockquote className="border-l-4 border-orange-300 pl-4 italic mb-3 text-gray-600 dark:text-gray-400">
-                              {children}
-                            </blockquote>
-                          ),
-                        }}
-                      >
-                        {(() => {
-                          if (!selectedMemory.summary) return ''
-
-                          let processedSummary = selectedMemory.summary
-
-                          // Safety check: if the summary looks like JSON, try to extract the actual content
-                          if (
-                            processedSummary.trim().startsWith('{') &&
-                            processedSummary.trim().endsWith('}')
-                          ) {
-                            try {
-                              const parsed = JSON.parse(processedSummary)
-                              // If it's a JSON object with summary field, extract it
-                              if (
-                                parsed.summary &&
-                                typeof parsed.summary === 'string'
-                              ) {
-                                processedSummary = parsed.summary
-                                console.warn(
-                                  '⚠️ Found JSON-formatted summary, extracted content:',
-                                  processedSummary.substring(0, 100)
-                                )
-                              }
-                            } catch (jsonError) {
-                              // If JSON parsing fails, use the original summary
-                              console.warn(
-                                '⚠️ Summary looks like JSON but failed to parse, using as-is'
-                              )
-                            }
-                          }
-
-                          // Convert plain text URLs to markdown links before processing
-                          const urlRegex = /(https?:\/\/[^\s\)]+)/g
-                          return processedSummary.replace(urlRegex, (url) => {
-                            // Only convert if it's not already a markdown link
-                            const beforeUrl = processedSummary.substring(
-                              0,
-                              processedSummary.indexOf(url)
-                            )
-                            if (beforeUrl.endsWith('](')) {
-                              return url // Already a markdown link
-                            }
-                            return `[${url}](${url})`
-                          })
-                        })()}
-                      </ReactMarkdown>
-                    </div>
+                    <MarkdownRenderer
+                      content={selectedMemory.summary || ''}
+                      variant="memory"
+                    />
                   </div>
                 )}
 

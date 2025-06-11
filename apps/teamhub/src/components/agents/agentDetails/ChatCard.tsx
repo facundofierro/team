@@ -93,7 +93,11 @@ export function ChatCard({
   const [isInstancesOpen, setIsInstancesOpen] = useState(true)
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
   const [selectedMemories, setSelectedMemories] = useState<TestMemory[]>([])
+  // Use a stable chat ID that doesn't change unless we want to reset the entire chat
   const [chatId, setChatId] = useState<string>(() => `chat_${Date.now()}`)
+
+  // Track if we're currently in an active chat to prevent message overwrites
+  const [isActiveChatting, setIsActiveChatting] = useState(false)
 
   // Local conversation state for immediate UI feedback
   const [localConversation, setLocalConversation] = useState<{
@@ -181,13 +185,17 @@ export function ChatCard({
     setMessages,
     data,
   } = useChat({
-    id: chatId, // Dynamic ID for resetting chat
+    id: chatId, // Stable ID that only changes for new conversations
     api: '/api/chat', // Real chat endpoint
     onFinish: async (message) => {
       console.log(
         '🤖 AI response finished:',
         message.content.substring(0, 50) + '...'
       )
+
+      // Clear the active chatting flag since the conversation turn is complete
+      setIsActiveChatting(false)
+
       // Update local conversation message count immediately
       if (localConversation) {
         setLocalConversation({
@@ -220,6 +228,9 @@ export function ChatCard({
     },
     onError: (error) => {
       console.error('💥 Chat error:', error)
+
+      // Clear the active chatting flag on error
+      setIsActiveChatting(false)
 
       // Parse the error and show appropriate toast
       let title = 'Chat Error'
@@ -446,7 +457,7 @@ export function ChatCard({
     }
   }, [data, processedToolCallIds, toast])
 
-  // Load conversation messages when conversation changes
+  // Load conversation messages when conversation changes - but only when switching conversations, not during normal chat
   useEffect(() => {
     const loadConversationMessages = async () => {
       if (currentConversation && currentConversation.content) {
@@ -480,38 +491,41 @@ export function ChatCard({
           }
         })
 
-        // Set the messages in the chat
-        setMessages(chatMessages)
+        // Only set messages if we're loading a different conversation or if current messages are empty
+        // This prevents overwriting messages during an active chat session
+        if (
+          (messages.length === 0 || conversationToLoad) &&
+          !isActiveChatting
+        ) {
+          console.log('🔄 Setting messages for conversation load')
+          setMessages(chatMessages)
 
-        // Set the tool call messages
-        setToolCallMessages(loadedToolCallMessages)
+          // Set the tool call messages
+          setToolCallMessages(loadedToolCallMessages)
 
-        // Update processed tool call IDs to prevent duplicates
-        const loadedToolCallIds = new Set(
-          loadedToolCallMessages
-            .map((msg) => msg.toolCall?.id)
-            .filter(Boolean) as string[]
-        )
-        setProcessedToolCallIds(loadedToolCallIds)
+          // Update processed tool call IDs to prevent duplicates
+          const loadedToolCallIds = new Set(
+            loadedToolCallMessages
+              .map((msg) => msg.toolCall?.id)
+              .filter(Boolean) as string[]
+          )
+          setProcessedToolCallIds(loadedToolCallIds)
 
-        console.log(
-          '✅ Loaded',
-          chatMessages.length,
-          'messages and',
-          loadedToolCallMessages.length,
-          'tool calls from conversation'
-        )
-      } else if (!currentConversation) {
-        // No conversation - clear messages
-        setMessages([])
-        setToolCallMessages([])
-        setProcessedToolCallIds(new Set())
-        console.log('🗑️ Cleared messages - no active conversation')
+          console.log(
+            '✅ Loaded',
+            chatMessages.length,
+            'messages and',
+            loadedToolCallMessages.length,
+            'tool calls from conversation'
+          )
+        } else {
+          console.log('🚫 Skipping message load - active chat in progress')
+        }
       }
     }
 
     loadConversationMessages()
-  }, [currentConversation, setMessages])
+  }, [currentConversation?.id, conversationToLoad, setMessages])
 
   // Enhanced new conversation handler
   const handleNewConversation = useCallback(async () => {
@@ -520,13 +534,16 @@ export function ChatCard({
       await completeCurrentConversation()
     }
 
-    // Clear UI messages immediately
+    // Clear the active chatting flag
+    setIsActiveChatting(false)
+
+    // Clear UI messages immediately - this is intentional for new conversation
     setMessages([])
 
     // Clear local conversation state
     setLocalConversation(null)
 
-    // Generate new chat ID to reset useChat state
+    // Generate new chat ID to reset useChat state only for new conversations
     const newChatId = `chat_${Date.now()}`
     setChatId(newChatId)
 
@@ -550,6 +567,9 @@ export function ChatCard({
       if (!input.trim() || isLoading) return
 
       const userMessage = input.trim()
+
+      // Mark that we're starting an active chat session
+      setIsActiveChatting(true)
 
       // If no current conversation exists, create database conversation FIRST
       if (!currentConversation && !localConversation && selectedAgent?.id) {
