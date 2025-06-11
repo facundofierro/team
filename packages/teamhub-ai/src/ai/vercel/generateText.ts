@@ -102,19 +102,20 @@ Generate 3 specific outputs:
 
 1. **description** (Overview): A 1-2 sentence description of what information/content this conversation contains. This helps users understand what they can find here when searching. Focus on WHAT is included, not what happened.
 
-2. **summary** (Valuable Content): Extract and organize all valuable, actionable information from this conversation. Remove conversation flow, dialog format, and process details. Focus on actual results, data, lists, links, and useful content that would be valuable for future reference. Present information directly as if it's a reference document. Use clear structure with formatting when appropriate.
+2. **summary** (Valuable Content): Extract and organize all valuable, actionable information from this conversation. Remove conversation flow, dialog format, and process details. Focus on actual results, data, lists, links, and useful content that would be valuable for future reference. Present information directly as if it's a reference document. Use clear markdown structure with formatting when appropriate (headers, lists, bold text, etc.).
 
 3. **keyTopics**: 3-8 important keywords/topics/entities mentioned.
 
 Rules for summary:
 - Include: Final results, deliverables, lists, data, links, specific information, key facts, actionable insights
 - Exclude: "The user asked...", "The assistant replied...", conversation flow, process descriptions, intermediate steps, thank you messages
-- Format: Direct information presentation, preserve structure (lists, formatting), no dialog format
+- Format: MARKDOWN TEXT with proper formatting (# headers, **bold**, - lists, etc.) - NOT JSON or escaped text
 - Length: As long or short as needed to capture all valuable content
 
 IMPORTANT: Return ONLY valid JSON. No markdown code blocks or explanations.
+The summary field must contain plain markdown text (not escaped or nested JSON).
 Return exactly this format:
-{"description": "What information this conversation contains", "summary": "All valuable content and results from the conversation", "keyTopics": ["topic1", "topic2", "topic3"]}`
+{"description": "What information this conversation contains", "summary": "# Markdown formatted content\n\n**Key points:**\n- Point 1\n- Point 2", "keyTopics": ["topic1", "topic2", "topic3"]}`
 
   const conversationText = messages
     .map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`)
@@ -129,6 +130,12 @@ Return exactly this format:
     temperature: 0.4,
     maxTokens: 800, // Increased to capture more valuable content
   })
+
+  // Debug logging to see what the AI is returning
+  console.log(
+    '🔍 AI Raw Response for conversation brief:',
+    result.substring(0, 200) + '...'
+  )
 
   try {
     // Clean the result by removing any markdown code blocks or extra formatting
@@ -151,11 +158,63 @@ Return exactly this format:
       cleanResult = jsonMatch[0]
     }
 
-    return JSON.parse(cleanResult)
+    // Parse the JSON
+    const parsed = JSON.parse(cleanResult)
+
+    // Validate that we have the expected structure
+    if (
+      !parsed.summary ||
+      !parsed.description ||
+      !Array.isArray(parsed.keyTopics)
+    ) {
+      throw new Error('Invalid JSON structure returned by AI')
+    }
+
+    // Ensure summary is a string and not nested JSON
+    if (typeof parsed.summary !== 'string') {
+      console.warn(
+        '⚠️ Summary is not a string, converting:',
+        typeof parsed.summary
+      )
+      parsed.summary = String(parsed.summary)
+    }
+
+    // Clean up any escaped content in the summary
+    parsed.summary = parsed.summary
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, '\\')
+
+    return parsed
   } catch (error) {
     console.error('❌ Failed to parse conversation brief JSON:', error)
     console.error('❌ Raw AI response:', result)
-    // Fallback if JSON parsing fails
+
+    // More robust fallback - try to extract content even if JSON parsing fails
+    try {
+      // Try to extract at least the summary content if it's visible
+      const summaryMatch = result.match(/"summary":\s*"([^"]+)"/s)
+      const descriptionMatch = result.match(/"description":\s*"([^"]+)"/s)
+      const topicsMatch = result.match(/"keyTopics":\s*\[(.*?)\]/s)
+
+      if (summaryMatch || descriptionMatch) {
+        return {
+          summary: summaryMatch
+            ? summaryMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"')
+            : 'Conversation analysis completed',
+          keyTopics: topicsMatch
+            ? topicsMatch[1].split(',').map((t) => t.trim().replace(/"/g, ''))
+            : ['general'],
+          description: descriptionMatch
+            ? descriptionMatch[1]
+            : 'Contains conversation data',
+        }
+      }
+    } catch (fallbackError) {
+      console.error('❌ Fallback parsing also failed:', fallbackError)
+    }
+
+    // Final fallback if all parsing fails
     return {
       summary: 'Conversation analysis completed',
       keyTopics: ['general'],

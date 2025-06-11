@@ -517,23 +517,47 @@ export function MemoryCard({
                         {(() => {
                           if (!selectedMemory.summary) return ''
 
+                          let processedSummary = selectedMemory.summary
+
+                          // Safety check: if the summary looks like JSON, try to extract the actual content
+                          if (
+                            processedSummary.trim().startsWith('{') &&
+                            processedSummary.trim().endsWith('}')
+                          ) {
+                            try {
+                              const parsed = JSON.parse(processedSummary)
+                              // If it's a JSON object with summary field, extract it
+                              if (
+                                parsed.summary &&
+                                typeof parsed.summary === 'string'
+                              ) {
+                                processedSummary = parsed.summary
+                                console.warn(
+                                  '⚠️ Found JSON-formatted summary, extracted content:',
+                                  processedSummary.substring(0, 100)
+                                )
+                              }
+                            } catch (jsonError) {
+                              // If JSON parsing fails, use the original summary
+                              console.warn(
+                                '⚠️ Summary looks like JSON but failed to parse, using as-is'
+                              )
+                            }
+                          }
+
                           // Convert plain text URLs to markdown links before processing
                           const urlRegex = /(https?:\/\/[^\s\)]+)/g
-                          return selectedMemory.summary.replace(
-                            urlRegex,
-                            (url) => {
-                              // Only convert if it's not already a markdown link
-                              const beforeUrl =
-                                selectedMemory.summary!.substring(
-                                  0,
-                                  selectedMemory.summary!.indexOf(url)
-                                )
-                              if (beforeUrl.endsWith('](')) {
-                                return url // Already a markdown link
-                              }
-                              return `[${url}](${url})`
+                          return processedSummary.replace(urlRegex, (url) => {
+                            // Only convert if it's not already a markdown link
+                            const beforeUrl = processedSummary.substring(
+                              0,
+                              processedSummary.indexOf(url)
+                            )
+                            if (beforeUrl.endsWith('](')) {
+                              return url // Already a markdown link
                             }
-                          )
+                            return `[${url}](${url})`
+                          })
                         })()}
                       </ReactMarkdown>
                     </div>
