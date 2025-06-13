@@ -193,3 +193,77 @@ We welcome contributions! Please see our contributing guidelines for more detail
 ## Support
 
 For support, please [contact information or link to issues]
+
+# AI Gateway
+
+## Overview
+
+AI Gateway is a universal, extensible API service designed to provide a unified interface for connecting to multiple AI providers and services. It supports a wide range of modalities (text, image, audio, multimodal) and tasks (generation, embedding, classification, detection, training, etc.), making it easy to integrate advanced AI capabilities into your applications.
+
+## Design & Architecture
+
+- **Modular Endpoint Structure:**
+
+  - Endpoints are organized by modality and task: `/api/{modality}/{task}` (e.g., `/api/text/generate`, `/api/image/detect`).
+  - This structure allows for easy expansion as new AI tasks and modalities emerge.
+
+- **Provider Abstraction:**
+
+  - Each endpoint accepts a `provider` parameter, allowing dynamic routing to the desired AI service.
+  - Providers can be direct (e.g., OpenAI, Deepseek, Fal) or meta-APIs (e.g., EdenAI) that aggregate multiple services.
+  - The project is designed to allow per-provider decisions: for each task, you can choose to connect directly or via a meta-API, depending on your needs and available keys.
+
+- **Security:**
+
+  - All endpoints are protected with API key authentication for secure server-to-server communication.
+
+- **Extensibility:**
+  - The folder structure supports future tasks such as training, detection, segmentation, OCR, and more for each modality.
+  - Adding a new provider or task is as simple as creating a new handler in the appropriate folder and updating the provider abstraction.
+
+## Example Folder Structure
+
+```
+src/app/api/
+  text/
+    generate/
+    embed/
+    train/
+  image/
+    generate/
+    classify/
+    detect/
+    segment/
+    ocr/
+    train/
+  audio/
+    generate/
+    transcribe/
+    train/
+  multimodal/
+    generate/
+    train/
+```
+
+## Supported Providers
+
+- **Direct:** OpenAI, Deepseek, Fal (with API keys)
+- **Meta-API:** EdenAI (for rapid access to many providers and tasks)
+- Additional providers can be added as needed.
+
+## How to Add a New Provider or Task
+
+1. Create a new folder under the appropriate modality/task.
+2. Implement the route handler, using the provider abstraction pattern.
+3. Add your API key(s) to the environment.
+4. Update documentation as needed.
+
+## Why This Design?
+
+- **Scalable:** Easily add new AI capabilities as the field evolves.
+- **Flexible:** Choose the best provider for each task, or use meta-APIs for breadth.
+- **Maintainable:** Clear separation of concerns and easy-to-navigate codebase.
+
+---
+
+For more details, see the code and comments in each endpoint folder.
