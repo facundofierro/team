@@ -1,7 +1,7 @@
 import {
   generateConversationTitle,
   generateConversationBrief,
-} from '../ai/vercel/generateText'
+} from './generateConversationBrief'
 import { generateConversationEmbedding } from '../ai/vercel/generateEmbedding'
 import { dbMemories, dbEmbeddings } from '@teamhub/db'
 import type { ConversationMessage } from '@teamhub/db'
