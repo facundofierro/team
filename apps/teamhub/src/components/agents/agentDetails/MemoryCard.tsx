@@ -315,9 +315,15 @@ export function MemoryCard({
   }
 
   return (
-    <div className="flex h-full gap-4 border rounded-lg bg-background">
+    <div
+      className="flex h-full gap-4 border rounded-lg bg-background"
+      style={{ width: '100%', maxWidth: '100%' }}
+    >
       {/* Left sidebar with memories list */}
-      <div className="w-80 border-r bg-card">
+      <div
+        className="w-80 border-r bg-card flex-shrink-0"
+        style={{ width: '320px', maxWidth: '320px' }}
+      >
         {/* Search input */}
         <div className="p-3 border-b">
           <div className="relative">
@@ -332,8 +338,14 @@ export function MemoryCard({
         </div>
 
         {/* Memories list */}
-        <ScrollArea className="h-full">
-          <div className="p-3 space-y-2">
+        <ScrollArea
+          className="h-full w-full"
+          style={{ width: '100%', maxWidth: '320px' }}
+        >
+          <div
+            className="p-3 space-y-2"
+            style={{ width: '100%', maxWidth: '312px' }}
+          >
             {filteredAndSortedMemories.length === 0 ? (
               <div className="text-sm text-muted-foreground text-center py-4">
                 No memories found
@@ -343,11 +355,12 @@ export function MemoryCard({
                 <Button
                   key={memory.id}
                   variant="ghost"
-                  className={`w-full justify-start p-3 h-auto ${
+                  className={`w-full justify-start p-3 h-auto overflow-hidden ${
                     selectedMemoryId === memory.id
                       ? 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700'
                       : ''
                   }`}
+                  style={{ width: '100%', maxWidth: '300px' }}
                   onClick={() => onMemorySelect(memory.id)}
                   onDoubleClick={() => {
                     if (memory.type === 'conversation' && onConversationOpen) {
@@ -355,7 +368,10 @@ export function MemoryCard({
                     }
                   }}
                 >
-                  <div className="flex flex-col items-start min-w-0 flex-1 space-y-2">
+                  <div
+                    className="flex flex-col items-start min-w-0 flex-1 space-y-2 overflow-hidden"
+                    style={{ width: '100%', maxWidth: '276px' }}
+                  >
                     <span className="text-sm font-medium leading-tight">
                       {shortenMemoryTitle(memory.title)}
                     </span>
@@ -378,8 +394,8 @@ export function MemoryCard({
                         </div>
                       </div>
                     ) : memory.description ? (
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 h-8 w-full break-words">
-                        {memory.description.trim()}
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 w-full break-words min-h-[2.5rem]">
+                        {memory.description.trim().replace(/\s+/g, ' ')}
                       </p>
                     ) : null}
                   </div>
@@ -391,9 +407,9 @@ export function MemoryCard({
       </div>
 
       {/* Right content area */}
-      <div className="flex-1 min-w-0 bg-card rounded-r-lg">
-        <ScrollArea className="h-full">
-          <div className="p-6">
+      <div className="flex-1 min-w-0 bg-card rounded-r-lg overflow-hidden">
+        <ScrollArea className="h-full w-full">
+          <div className="p-6 max-w-full">
             {selectedMemory ? (
               <div className="space-y-6">
                 {/* Level 1: Memory Name (Header) */}
