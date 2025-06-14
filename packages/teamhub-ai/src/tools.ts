@@ -19,6 +19,9 @@ import {
   AgentDiscoveryParameters,
 } from './tools/agentDiscovery'
 import { memorySearch, MemorySearchParameters } from './tools/memorySearch'
+import { webBrowser } from './tools/webBrowser'
+import { webBrowserSession } from './tools/webBrowserSession'
+
 import { tool } from 'ai'
 import { z } from 'zod'
 
@@ -31,6 +34,8 @@ const TOOLS = [
   agentToAgent,
   agentDiscovery,
   memorySearch,
+  webBrowser,
+  webBrowserSession,
 ]
 
 export const getToolTypes = async () => {
