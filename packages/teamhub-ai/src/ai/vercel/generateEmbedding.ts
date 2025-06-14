@@ -23,8 +23,21 @@ export async function generateEmbedding(
     })
 
     return embedding
-  } catch (error) {
+  } catch (error: any) {
     console.error(`❌ Embedding Generation Error (${provider}):`, error)
+
+    // Check for region restrictions
+    if (
+      error.statusCode === 403 &&
+      (error.responseBody?.includes('unsupported_country_region_territory') ||
+        error.message?.includes('Country, region, or territory not supported'))
+    ) {
+      console.warn(
+        '⚠️ OpenAI embeddings not available in this region. Disabling embedding generation.'
+      )
+      throw new Error('EMBEDDING_REGION_NOT_SUPPORTED')
+    }
+
     throw new Error(`Failed to generate embedding with ${provider}: ${error}`)
   }
 }
@@ -45,8 +58,21 @@ export async function generateEmbeddings(
     })
 
     return embeddings
-  } catch (error) {
+  } catch (error: any) {
     console.error(`❌ Embeddings Generation Error (${provider}):`, error)
+
+    // Check for region restrictions
+    if (
+      error.statusCode === 403 &&
+      (error.responseBody?.includes('unsupported_country_region_territory') ||
+        error.message?.includes('Country, region, or territory not supported'))
+    ) {
+      console.warn(
+        '⚠️ OpenAI embeddings not available in this region. Disabling embedding generation.'
+      )
+      throw new Error('EMBEDDING_REGION_NOT_SUPPORTED')
+    }
+
     throw new Error(`Failed to generate embeddings with ${provider}: ${error}`)
   }
 }

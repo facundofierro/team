@@ -239,13 +239,30 @@ type TaskMetadata = {
 
 ## Available Tools
 
-The library includes several built-in search tools:
+The library includes several built-in tools:
+
+### Search Tools
 
 - **Google Search** - Search using Google's search engine
 - **DuckDuckGo Search** - Privacy-focused search engine
 - **Yandex Search** - Russian search engine
 
+### Agent Communication Tools
+
+- **Agent-to-Agent Communication** - Send messages, tasks, and workflows to other agents
+- **Agent Discovery** - Find and discover other agents within the organization
+
+### Memory Tools
+
+- **Memory Search** - Search through an agent's memory for relevant information from previous conversations, facts, preferences, and stored knowledge
+
 These tools can be accessed via the `getToolTypes()` and `getToolHandler()` functions.
+
+For detailed documentation on individual tools, see:
+
+- [Memory Search Tool](../../../docs/MEMORY_SEARCH.md)
+- [Agent-to-Agent Communication](../../../docs/A2A_COMMUNICATION.md)
+- [Agent Discovery](../../../docs/AGENT_DISCOVERY.md)
 
 ## Dependencies
 

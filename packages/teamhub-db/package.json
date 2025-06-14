@@ -32,6 +32,7 @@
   "devDependencies": {
     "@types/node": "^20.14.0",
     "@types/uuid": "^9.0.7",
+    "auto-playwright": "^1.16.1",
     "dotenv": "^16.3.1",
     "drizzle-kit": "^0.20.6",
     "tsx": "^4.19.2",

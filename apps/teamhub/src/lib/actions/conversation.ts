@@ -4,6 +4,7 @@ import {
   dbMemories,
   type ConversationMemory,
   type ConversationMessage,
+  type ToolCall,
 } from '@teamhub/db'
 import {
   processConversationTitle,
@@ -83,7 +84,12 @@ export async function startNewConversation(
     )
 
     // Generate AI title in background and update
-    processConversationTitle(firstMessage, processingOptions)
+    const processingOptionsWithEmbeddings: ConversationProcessingOptions = {
+      ...processingOptions,
+      skipEmbeddings: true, // Disable embeddings for regions where OpenAI is not available
+    }
+
+    processConversationTitle(firstMessage, processingOptionsWithEmbeddings)
       .then(async (aiTitle) => {
         if (aiTitle && aiTitle !== conversationTitle) {
           await memoryFunctions.updateMemory(newConversation.id, {
@@ -111,7 +117,8 @@ export async function addMessageToConversation(
   role: 'user' | 'assistant',
   content: string,
   orgDatabaseName: string,
-  messageId?: string
+  messageId?: string,
+  toolCalls?: ToolCall[]
 ): Promise<ConversationMemory | null> {
   try {
     const memoryFunctions = await dbMemories(orgDatabaseName)
@@ -119,7 +126,8 @@ export async function addMessageToConversation(
       conversationId,
       role,
       content,
-      messageId
+      messageId,
+      toolCalls
     )
   } catch (error) {
     console.error('Failed to add message to conversation:', error)
@@ -155,6 +163,7 @@ export async function completeConversation(
       const processingOptions: ConversationProcessingOptions = {
         orgDatabaseName,
         aiProvider: 'deepseek',
+        skipEmbeddings: true, // Disable embeddings for regions where OpenAI is not available
       }
 
       processConversationBrief(

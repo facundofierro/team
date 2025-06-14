@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from '@teamhub/db'
+import { db, createUser } from '@teamhub/db'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
@@ -18,6 +18,24 @@ export async function createOrganization(
   if (!session.user) throw new Error('Unauthorized')
 
   try {
+    // Ensure the user exists in the database before creating an organization
+    if (session.user.id) {
+      try {
+        await createUser({
+          id: session.user.id,
+          name: session.user.name || session.user.email || 'Unknown User',
+          email: session.user.email || '',
+          image: session.user.image || null,
+        })
+      } catch (error: any) {
+        // Ignore if user already exists (unique constraint violation)
+        if (error?.code !== '23505') {
+          console.error('Error creating user:', error)
+          throw error
+        }
+      }
+    }
+
     const newOrg = await db.createOrganization({
       id: crypto.randomUUID(),
       name: name.trim(),

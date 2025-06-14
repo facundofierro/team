@@ -6,7 +6,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../components/ui/tabs'
-import { ChatCard } from './agentDetails/ChatCard'
+import { ChatCard } from '@/components/agents/agentDetails/ChatCard'
 import { DashboardCard } from './agentDetails/DashboardCard'
 import { SettingsCard } from './agentDetails/SettingsCard'
 import type { Agent, ToolWithTypes } from '@teamhub/db'
@@ -41,6 +41,12 @@ export function AgentDetail({
   const setSelectedAgent = useAgentStore((state) => state.setSelectedAgent)
   const [hasChanges, setHasChanges] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<Partial<Agent>>({})
+  const [selectedMemoryId, setSelectedMemoryId] = useState<string | undefined>(
+    undefined
+  )
+  const [conversationToLoad, setConversationToLoad] = useState<
+    string | undefined
+  >(undefined)
 
   // Update store when agent data arrives or changes
   useEffect(() => {
@@ -91,14 +97,30 @@ export function AgentDetail({
     setActiveTab(value)
   }
 
+  const handleOpenConversation = (conversationId: string) => {
+    console.log('🔄 Opening conversation:', conversationId)
+    // Switch to chat tab
+    setActiveTab('chat')
+    // Set conversation to load (ChatCard will pick this up)
+    setConversationToLoad(conversationId)
+  }
+
   if (!selectedAgentId) {
-    return <div className="flex flex-col h-full p-6 bg-menu2"></div>
+    return (
+      <div
+        className="flex flex-col h-full p-6"
+        style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+      ></div>
+    )
   }
 
   // Show loading if we have an ID but no agent data
   if (selectedAgentId && !selectedAgent) {
     return (
-      <div className="flex flex-col h-full p-6 bg-menu2">
+      <div
+        className="flex flex-col h-full p-6"
+        style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+      >
         <Skeleton className="w-full mb-4 h-9" />
         <Skeleton className="h-[calc(100%-3rem)] w-full rounded-xl" />
       </div>
@@ -106,7 +128,10 @@ export function AgentDetail({
   }
 
   return (
-    <div className="flex flex-col h-full bg-menu2">
+    <div
+      className="flex flex-col h-full"
+      style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+    >
       <Tabs
         value={activeTab}
         defaultValue={defaultTab}
@@ -134,32 +159,40 @@ export function AgentDetail({
           <div className={hasChanges ? 'h-[calc(100%-4rem)]' : 'h-full'}>
             <TabsContent
               value="dashboard"
-              className="h-full m-0 bg-cardLight rounded-xl"
+              className="h-full m-0 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
               <DashboardCard />
             </TabsContent>
 
             <TabsContent
               value="chat"
-              className="h-full m-0 bg-cardLight rounded-xl"
+              className="h-full m-0 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
-              <ChatCard />
+              <ChatCard
+                conversationToLoad={conversationToLoad}
+                onConversationLoaded={() => setConversationToLoad(undefined)}
+              />
             </TabsContent>
 
             <TabsContent
               value="memory"
-              className="h-full m-0 bg-cardLight rounded-xl"
+              className="h-full m-0 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
               <MemoryCard
                 agentId={selectedAgent?.id || ''}
-                selectedMemoryId={undefined}
-                onMemorySelect={() => {}}
+                selectedMemoryId={selectedMemoryId}
+                onMemorySelect={setSelectedMemoryId}
+                onConversationOpen={handleOpenConversation}
               />
             </TabsContent>
 
             <TabsContent
               value="settings"
-              className="h-full m-0 bg-cardLight rounded-xl"
+              className="h-full m-0 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
             >
               <SettingsCard
                 agent={selectedAgent || undefined}
@@ -170,7 +203,10 @@ export function AgentDetail({
           </div>
 
           {hasChanges && (
-            <div className="flex items-center justify-end h-16 gap-2 px-4 mt-4 bg-cardLight rounded-xl">
+            <div
+              className="flex items-center justify-end h-16 gap-2 px-4 mt-4 rounded-xl"
+              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
+            >
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
@@ -178,6 +214,7 @@ export function AgentDetail({
                 variant="default"
                 onClick={handleSave}
                 disabled={!selectedAgent}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
               >
                 Save changes
               </Button>

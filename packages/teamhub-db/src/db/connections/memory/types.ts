@@ -5,6 +5,17 @@ import { memory } from './schema'
 export type Memory = InferSelectModel<typeof memory>
 export type NewMemory = InferInsertModel<typeof memory>
 
+// Tool call structure for conversation messages
+export type ToolCall = {
+  id: string
+  name: string
+  arguments: Record<string, any>
+  result?: any
+  status: 'pending' | 'success' | 'error'
+  timestamp: string
+  stepNumber: number
+}
+
 // Content structure for different memory types
 export type ConversationMessage = {
   id: string
@@ -12,6 +23,7 @@ export type ConversationMessage = {
   content: string
   timestamp: string
   metadata?: Record<string, unknown>
+  toolCalls?: ToolCall[]
 }
 
 export type FactContent = {

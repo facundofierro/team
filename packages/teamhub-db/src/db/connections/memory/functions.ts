@@ -17,6 +17,7 @@ import type {
   CreateSkillMemory,
   MemoryContent,
   ConversationMessage,
+  ToolCall,
 } from './types'
 import * as schema from './schema'
 
@@ -191,7 +192,8 @@ export const getFunctions = (database: NodePgDatabase<typeof schema>) => {
       conversationId: string,
       role: 'user' | 'assistant',
       content: string,
-      messageId?: string
+      messageId?: string,
+      toolCalls?: ToolCall[]
     ): Promise<ConversationMemory | null> => {
       const conversation = await database
         .select(baseColumns)
@@ -210,6 +212,7 @@ export const getFunctions = (database: NodePgDatabase<typeof schema>) => {
         role,
         content,
         timestamp: new Date().toISOString(),
+        toolCalls,
       }
 
       const updatedMessages = [...currentMessages, newMessage]
