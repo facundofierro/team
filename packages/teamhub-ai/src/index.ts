@@ -17,13 +17,15 @@ export type {
 } from './functions/conversationProcessor'
 
 // AI generation functions
+export { generateOneShot } from './ai/vercel/generateText'
+
 export {
-  generateOneShot,
   generateConversationTitle,
   generateConversationBrief,
   generateDescriptionFromSummary,
   generateTitleFromDescription,
-} from './ai/vercel/generateText'
+} from './functions/generateConversationBrief'
+
 export {
   generateEmbedding,
   generateEmbeddings,

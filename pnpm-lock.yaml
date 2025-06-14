@@ -29,6 +29,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^1.3.22
         version: 1.3.22(zod@3.24.4)
+      '@team/ai-services':
+        specifier: workspace:*
+        version: link:../../packages/ai-services
       ai:
         specifier: ^4.3.15
         version: 4.3.15(react@19.1.0)(zod@3.24.4)
@@ -227,6 +230,25 @@ importers:
         specifier: ^1.0.0
         version: 1.1.0(tailwindcss@3.4.17)
 
+  packages/ai-services:
+    dependencies:
+      '@ai-sdk/deepseek':
+        specifier: ^0.2.14
+        version: 0.2.14(zod@3.24.4)
+      '@ai-sdk/openai':
+        specifier: ^1.3.22
+        version: 1.3.22(zod@3.24.4)
+      '@fal-ai/client':
+        specifier: ^1.5.0
+        version: 1.5.0
+      ai:
+        specifier: ^4.3.16
+        version: 4.3.16(react@19.1.0)(zod@3.24.4)
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.1
+        version: 24.0.1
+
   packages/teamhub-ai:
     dependencies:
       '@ai-sdk/deepseek':
@@ -327,8 +349,20 @@ packages:
     peerDependencies:
       zod: ^3.0.0
 
+  '@ai-sdk/deepseek@0.2.14':
+    resolution: {integrity: sha512-TISD1FzBWuQkHEHoVustoJILV33ZNgfYxeTkq1xU2vHEZuWTGZV7/IlXixyFsfqDCdVgrbLeIABk5FuCw7niLg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+
   '@ai-sdk/openai-compatible@0.1.17':
     resolution: {integrity: sha512-e60+yxQ29e8RlsTWBW4kLuQJMpVJzH5+cpOeUXLXU6M9wc8BOQCyYg4jYh2ldnfvYCKXYxb2kYeLW7L9fqhhMw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+
+  '@ai-sdk/openai-compatible@0.2.14':
+    resolution: {integrity: sha512-icjObfMCHKSIbywijaoLdZ1nSnuRnWgMEMLgwoxPJgxsUHMx0aVORnsLUid4SPtdhHI3X2masrt6iaEQLvOSFw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.0.0
@@ -1142,6 +1176,10 @@ packages:
     resolution: {integrity: sha512-4SaFZCNfJqvk/kenHpI8xvN42DMaoycy4PzKc5otHxRswww1kAt82OlBuwRVLofCACCTZEcla2Ydxv8scMXaTg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@fal-ai/client@1.5.0':
+    resolution: {integrity: sha512-e0WtcbSjbwKFCOwAex3lRDba1iMY42QAwLZuae7oc5xNav2+HdprE9QWYdsDS3nyr0GOttEpUgsBa/c/AKAguA==}
+    engines: {node: '>=18.0.0'}
+
   '@floating-ui/core@1.7.0':
     resolution: {integrity: sha512-FRdBLykrPPA6P76GGGqlex/e7fbe0F1ykgxHYNXQsH/iTEtjMj/f9bpY5oQqbjt5VgZvgz/uKXbGuROijh3VLA==}
 
@@ -1340,6 +1378,10 @@ packages:
   '@million/lint@1.0.14':
     resolution: {integrity: sha512-u6/kglVwZRu5+GMmtkNlGLqJVkgTl0TtM+hLa9rBg7pldx+5NG5bk45NvL37uZmAr2Xfa1C6qHb7GrFwfP372g==}
     hasBin: true
+
+  '@msgpack/msgpack@3.1.2':
+    resolution: {integrity: sha512-JEW4DEtBzfe8HvUYecLU9e6+XJnKDlUAIve8FvPzF3Kzs6Xo/KuZkZJsDH0wJXl/qEZbeeE7edxDNY3kMs39hQ==}
+    engines: {node: '>= 18'}
 
   '@napi-rs/nice-android-arm-eabi@1.0.1':
     resolution: {integrity: sha512-5qpvOu5IGwDo7MEKVqqyAxF90I6aLj4n07OzpARdgDRfz8UbBztTByBp0RC59r3J1Ij8uzYi6jI7r5Lws7nn6w==}
@@ -2501,6 +2543,9 @@ packages:
   '@types/node@20.14.0':
     resolution: {integrity: sha512-5cHBxFGJx6L4s56Bubp4fglrEpmyJypsqI6RgzMfBHWUJQGWAAi8cWcgetEbZXHYXo9C2Fa4EEds/uSyS4cxmA==}
 
+  '@types/node@24.0.1':
+    resolution: {integrity: sha512-MX4Zioh39chHlDJbKmEgydJDS3tspMP/lnQC67G3SWsTnb9NeYVWOjkxpOSy4oMfPs4StcWHwBrvUb4ybfnuaw==}
+
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
 
@@ -2819,6 +2864,16 @@ packages:
 
   ai@4.3.15:
     resolution: {integrity: sha512-TYKRzbWg6mx/pmTadlAEIhuQtzfHUV0BbLY72+zkovXwq/9xhcH24IlQmkyBpElK6/4ArS0dHdOOtR1jOPVwtg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      react: ^18 || ^19 || ^19.0.0-rc
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      react:
+        optional: true
+
+  ai@4.3.16:
+    resolution: {integrity: sha512-KUDwlThJ5tr2Vw0A1ZkbDKNME3wzWhuVfAOwIvFUzl1TPVDFAXDFTXio3p+jaKneB+dKNCvFFlolYmmgHttG1g==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ^19 || ^19.0.0-rc
@@ -3747,6 +3802,10 @@ packages:
   events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
+
+  eventsource-parser@1.1.2:
+    resolution: {integrity: sha512-v0eOBUbiaFojBu2s2NPBfYUoRR9GjcDNvCXVaqEf5vVfpIAh9f8RCo4vXTP8c63QRKCFwoLpMpTdPwwhEKVgzA==}
+    engines: {node: '>=14.18'}
 
   eventsource-parser@3.0.1:
     resolution: {integrity: sha512-VARTJ9CYeuQYb0pZEPbzi740OWFgpHe7AYJ2WFZVnUDUQp5Dk2yJUgF36YsZ81cOyxT0QxmXD2EQpapAouzWVA==}
@@ -5323,6 +5382,9 @@ packages:
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
+  robot3@0.4.1:
+    resolution: {integrity: sha512-hzjy826lrxzx8eRgv80idkf8ua1JAepRc9Efdtj03N3KNJuznQCPlyCJ7gnUmDFwZCLQjxy567mQVKmdv2BsXQ==}
+
   rollup@3.29.5:
     resolution: {integrity: sha512-GVsDdsbJzzy4S/v3dqWPJ7EfvZJfCHiDqe80IyrF59LYuP+e6U1LJoUqeuqRbwAWoMNoXivMNeNAOf5E22VA1w==}
     engines: {node: '>=14.18.0', npm: '>=8.0.0'}
@@ -5795,6 +5857,9 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
+  undici-types@7.8.0:
+    resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
+
   unified@11.0.5:
     resolution: {integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==}
 
@@ -6089,10 +6154,23 @@ snapshots:
       '@ai-sdk/provider-utils': 2.1.15(zod@3.24.4)
       zod: 3.24.4
 
+  '@ai-sdk/deepseek@0.2.14(zod@3.24.4)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 0.2.14(zod@3.24.4)
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.4)
+      zod: 3.24.4
+
   '@ai-sdk/openai-compatible@0.1.17(zod@3.24.4)':
     dependencies:
       '@ai-sdk/provider': 1.0.12
       '@ai-sdk/provider-utils': 2.1.15(zod@3.24.4)
+      zod: 3.24.4
+
+  '@ai-sdk/openai-compatible@0.2.14(zod@3.24.4)':
+    dependencies:
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.4)
       zod: 3.24.4
 
   '@ai-sdk/openai@1.3.22(zod@3.24.4)':
@@ -6718,6 +6796,12 @@ snapshots:
       '@eslint/core': 0.15.0
       levn: 0.4.1
 
+  '@fal-ai/client@1.5.0':
+    dependencies:
+      '@msgpack/msgpack': 3.1.2
+      eventsource-parser: 1.1.2
+      robot3: 0.4.1
+
   '@floating-ui/core@1.7.0':
     dependencies:
       '@floating-ui/utils': 0.2.9
@@ -6927,6 +7011,8 @@ snapshots:
       - rollup
       - supports-color
       - utf-8-validate
+
+  '@msgpack/msgpack@3.1.2': {}
 
   '@napi-rs/nice-android-arm-eabi@1.0.1':
     optional: true
@@ -8167,6 +8253,10 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
+  '@types/node@24.0.1':
+    dependencies:
+      undici-types: 7.8.0
+
   '@types/pg-pool@2.0.6':
     dependencies:
       '@types/pg': 8.15.1
@@ -8592,6 +8682,18 @@ snapshots:
       react: 18.3.1
 
   ai@4.3.15(react@19.1.0)(zod@3.24.4):
+    dependencies:
+      '@ai-sdk/provider': 1.1.3
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.4)
+      '@ai-sdk/react': 1.2.12(react@19.1.0)(zod@3.24.4)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.24.4)
+      '@opentelemetry/api': 1.9.0
+      jsondiffpatch: 0.6.0
+      zod: 3.24.4
+    optionalDependencies:
+      react: 19.1.0
+
+  ai@4.3.16(react@19.1.0)(zod@3.24.4):
     dependencies:
       '@ai-sdk/provider': 1.1.3
       '@ai-sdk/provider-utils': 2.2.8(zod@3.24.4)
@@ -9892,6 +9994,8 @@ snapshots:
       es5-ext: 0.10.64
 
   events@3.3.0: {}
+
+  eventsource-parser@1.1.2: {}
 
   eventsource-parser@3.0.1: {}
 
@@ -11613,6 +11717,8 @@ snapshots:
     dependencies:
       glob: 7.2.3
 
+  robot3@0.4.1: {}
+
   rollup@3.29.5:
     optionalDependencies:
       fsevents: 2.3.3
@@ -12063,7 +12169,7 @@ snapshots:
   terser@5.41.0:
     dependencies:
       '@jridgewell/source-map': 0.3.6
-      acorn: 8.14.1
+      acorn: 8.15.0
       commander: 2.20.3
       source-map-support: 0.5.21
 
@@ -12209,6 +12315,8 @@ snapshots:
       which-boxed-primitive: 1.1.1
 
   undici-types@5.26.5: {}
+
+  undici-types@7.8.0: {}
 
   unified@11.0.5:
     dependencies:
@@ -12396,7 +12504,7 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@webassemblyjs/wasm-edit': 1.14.1
       '@webassemblyjs/wasm-parser': 1.14.1
-      acorn: 8.14.1
+      acorn: 8.15.0
       browserslist: 4.25.0
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.18.1
