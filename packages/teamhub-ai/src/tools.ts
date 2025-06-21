@@ -19,8 +19,8 @@ import {
   AgentDiscoveryParameters,
 } from './tools/agentDiscovery'
 import { memorySearch, MemorySearchParameters } from './tools/memorySearch'
-import { webBrowser } from './tools/webBrowser'
-import { webBrowserSession } from './tools/webBrowserSession'
+// import { webBrowser } from './tools/webBrowser'
+// import { webBrowserSession } from './tools/webBrowserSession'
 
 import { tool } from 'ai'
 import { z } from 'zod'
@@ -34,9 +34,17 @@ const TOOLS = [
   agentToAgent,
   agentDiscovery,
   memorySearch,
-  webBrowser,
-  webBrowserSession,
+  // webBrowser,
+  // webBrowserSession,
 ]
+
+if (process.env.NODE_ENV !== 'test') {
+  const webBrowser = require('./tools/webBrowser').webBrowser
+  const webBrowserSession =
+    require('./tools/webBrowserSession').webBrowserSession
+  TOOLS.push(webBrowser)
+  TOOLS.push(webBrowserSession)
+}
 
 export const getToolTypes = async () => {
   const toolTypes = TOOLS.map(
