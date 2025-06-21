@@ -14,11 +14,11 @@
     "@ai-sdk/deepseek": "^0.1.8",
     "@ai-sdk/openai": "^1.1.9",
     "@teamhub/db": "workspace:*",
-    "auto-playwright": "^1.16.1",
     "ai": "^4.1.26",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "auto-playwright": "^1.16.1",
     "@types/node": "^20.14.0",
     "dotenv": "^16.3.1",
     "playwright": "^1.53.0",
