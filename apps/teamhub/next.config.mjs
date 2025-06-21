@@ -27,7 +27,7 @@ const nextConfig = {
   },
   webpack: (config, { isServer }) => {
     config.externals = config.externals || []
-    config.externals.push('pg-cloudflare')
+    config.externals.push('pg-cloudflare', 'chromium-bidi', 'electron')
 
     // Handle Node.js modules in client-side code
     if (!isServer) {
@@ -45,7 +45,22 @@ const nextConfig = {
       }
     }
 
+    if (isServer) {
+      config.externals.push('chromium-bidi', 'electron')
+    }
+
     return config
+  },
+  images: {
+    remotePatterns: [
+      // ... existing code ...
+    ],
+  },
+  experimental: {
+    clientTraceMetadata: [
+      // ... existing code ...
+      'x-vercel-id',
+    ],
   },
 }
 
