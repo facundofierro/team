@@ -3,6 +3,13 @@ import { generate } from '@team/ai-services'
 
 export async function POST(req: NextRequest) {
   try {
+    const authHeader = req.headers.get('authorization')
+    const token = authHeader?.split(' ')[1]
+
+    if (token !== process.env.AI_GATEWAY_API_KEY) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await req.json()
     const {
       provider,
