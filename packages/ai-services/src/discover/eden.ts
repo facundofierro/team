@@ -80,7 +80,7 @@ export const discover = async () => {
         model: `${item.provider.name}/${item.subfeature.name}`,
         feature: item.feature.name,
         subfeature: item.subfeature.name,
-        connection: PROVIDER_ID,
+        gateway: PROVIDER_ID,
         priority: Math.floor(Date.now() / 1000), // Using current time for priority
         availableModels: item.models.models,
         featureOptions: featureOptions,
@@ -127,7 +127,7 @@ export const discover = async () => {
           model: sql`excluded.model`,
           feature: sql`excluded.feature`,
           subfeature: sql`excluded.subfeature`,
-          connection: sql`excluded.connection`,
+          gateway: sql`excluded.gateway`,
           priority: sql`excluded.priority`,
           availableModels: sql`excluded.available_models`,
           featureOptions: sql`excluded.feature_options`,

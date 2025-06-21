@@ -78,7 +78,7 @@ export const discover = async () => {
       model: model.id,
       feature: feature,
       subfeature: subfeature,
-      connection: providerId,
+      gateway: providerId,
       // Deepseek API does not provide a creation date, so we use current time for priority
       priority: Math.floor(Date.now() / 1000),
       featureOptions: getFeatureOptions(feature),
@@ -102,7 +102,7 @@ export const discover = async () => {
           model: sql`excluded.model`,
           feature: sql`excluded.feature`,
           subfeature: sql`excluded.subfeature`,
-          connection: sql`excluded.connection`,
+          gateway: sql`excluded.gateway`,
           priority: sql`excluded.priority`,
           featureOptions: sql`excluded.feature_options`,
           availableModels: sql`excluded.available_models`,

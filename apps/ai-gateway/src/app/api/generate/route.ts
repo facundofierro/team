@@ -4,13 +4,23 @@ import { generate } from '@team/ai-services'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { provider, model, feature, featureOptions, input } = body
+    const {
+      provider,
+      model,
+      feature,
+      subfeature,
+      featureOptions,
+      input,
+      gateway,
+    } = body
 
     // Call the generate function
     const result = await generate({
       provider,
       model,
       feature,
+      subfeature,
+      gateway: provider,
       featureOptions,
       input,
     })
@@ -27,12 +37,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Handle embeddings (JSON array)
-    if (feature === 'embeddings') {
+    if (feature === 'text' && subfeature === 'embeddings') {
       return NextResponse.json(result)
     }
 
     // Handle images (Buffer or base64)
-    if (feature === 'text-to-image' && result?.image) {
+    if (feature === 'image' && subfeature === 'generation' && result?.image) {
       if (
         typeof result.image === 'object' &&
         result.image instanceof Uint8Array
@@ -52,7 +62,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Handle video (Buffer or base64)
-    if (feature === 'video-generation' && result?.video) {
+    if (
+      feature === 'video' &&
+      subfeature === 'generation_async' &&
+      result?.video
+    ) {
       if (
         typeof result.video === 'object' &&
         result.video instanceof Uint8Array

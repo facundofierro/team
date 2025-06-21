@@ -8,7 +8,7 @@ type GenerateInput = {
   feature: Feature
   subfeature: Subfeature
   provider: string
-  connection: string
+  gateway: string
   featureOptions: FeatureOptions
   model: string
   input: any
@@ -18,12 +18,12 @@ export async function generate({
   feature,
   subfeature,
   provider,
-  connection,
+  gateway,
   featureOptions,
   model,
   input,
 }: GenerateInput): Promise<any> {
-  switch (provider) {
+  switch (gateway) {
     case 'openai':
       return openaiProvider.generate({
         model,
