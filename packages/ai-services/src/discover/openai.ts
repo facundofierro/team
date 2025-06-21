@@ -35,6 +35,34 @@ const getDisplayName = (modelId: string): string => {
   )
 }
 
+const getGroupDisplayName = (
+  feature: Feature,
+  subfeature: Subfeature
+): string => {
+  switch (feature) {
+    case Feature.Llm:
+      return 'OpenAI Chat'
+    case Feature.Text:
+      if (subfeature === Subfeature.Embeddings) return 'OpenAI Embeddings'
+      return 'OpenAI Text'
+    case Feature.Audio:
+      if (subfeature === Subfeature.TextToSpeech) return 'OpenAI Text-to-Speech'
+      if (subfeature === Subfeature.SpeechToTextAsync)
+        return 'OpenAI Speech-to-Text'
+      return 'OpenAI Audio'
+    case Feature.Image:
+      return 'OpenAI Image Generation'
+    default:
+      // Fallback for any new/unhandled feature
+      const featureName = feature.charAt(0).toUpperCase() + feature.slice(1)
+      const subfeatureName = subfeature
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+      return `OpenAI ${featureName} ${subfeatureName}`
+  }
+}
+
 // Helper function to determine the feature of a model
 const getFeature = (
   modelId: string
@@ -77,10 +105,44 @@ export const discover = async () => {
   const modelsList = await openai.models.list()
   const providerId = 'openai'
 
+  // Group models by feature and subfeature
+  const groupedModels = new Map<string, OpenAI.Model[]>()
+  for (const model of modelsList.data) {
+    const { feature, subfeature } = getFeature(model.id)
+    const key = `${feature}:${subfeature}`
+    if (!groupedModels.has(key)) {
+      groupedModels.set(key, [])
+    }
+    groupedModels.get(key)!.push(model)
+  }
+
+  // Create a single model entry for each group
+  const modelsToUpsert = Array.from(groupedModels.values()).map((models) => {
+    // Sort by creation time to get the latest model, which will be the default
+    const sortedModels = models.sort((a, b) => b.created - a.created)
+    const latestModel = sortedModels[0]
+    const { feature, subfeature } = getFeature(latestModel.id)
+
+    return {
+      id: `${providerId}:${feature}:${subfeature}`,
+      displayName: getGroupDisplayName(feature, subfeature),
+      provider: providerId,
+      model: latestModel.id,
+      feature: feature,
+      subfeature: subfeature,
+      gateway: providerId,
+      priority: latestModel.created,
+      featureOptions: getFeatureOptions(feature),
+      availableModels: sortedModels.map((m) => m.id),
+    }
+  })
+
+  console.log('--- Discovered OpenAI Models to be upserted ---')
+  console.log(JSON.stringify(modelsToUpsert, null, 2))
+  console.log('-------------------------------------------')
+
   // Step 1: Get all model IDs from the provider
-  const providerModelIds = modelsList.data.map(
-    (model) => `${providerId}:${model.id}`
-  )
+  const providerModelIds = modelsToUpsert.map((model) => model.id)
 
   // Step 2: Get all model IDs from the database for this provider
   const dbModels = await db
@@ -103,27 +165,6 @@ export const discover = async () => {
       .delete(schema.models)
       .where(inArray(schema.models.id, modelsToDelete))
   }
-
-  // Step 5: Upsert current models
-  const modelsToUpsert = modelsList.data.map((model) => {
-    const { feature, subfeature } = getFeature(model.id)
-    return {
-      id: `${providerId}:${model.id}`,
-      displayName: getDisplayName(model.id),
-      provider: providerId,
-      model: model.id,
-      feature: feature,
-      subfeature: subfeature,
-      gateway: providerId,
-      priority: model.created,
-      featureOptions: getFeatureOptions(feature),
-      availableModels: [],
-    }
-  })
-
-  console.log('--- Discovered OpenAI Models to be upserted ---')
-  console.log(JSON.stringify(modelsToUpsert, null, 2))
-  console.log('-------------------------------------------')
 
   if (modelsToUpsert.length > 0) {
     await db

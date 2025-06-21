@@ -7,8 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "db:generate": "drizzle-kit generate:pg",
-    "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:migrate": "tsx src/db/migrate.ts"
   },
   "license": "MIT",
   "dependencies": {

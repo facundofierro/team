@@ -4,7 +4,7 @@ import { Feature, FeatureOptions } from '../modelRegistry'
 import { sql, inArray } from 'drizzle-orm'
 import axios from 'axios'
 
-const PROVIDER_ID = 'eden'
+const gateway = 'eden'
 
 interface EdenAiProviderSubfeature {
   provider: {
@@ -30,6 +30,7 @@ interface EdenAiProviderSubfeature {
   languages?: any[]
   description_title?: string | null
   description_content?: string
+  phase?: string
 }
 
 async function fetchProviderSubfeatures(): Promise<EdenAiProviderSubfeature[]> {
@@ -49,7 +50,7 @@ const getDisplayName = (
 export const discover = async () => {
   const providerSubfeatures = await fetchProviderSubfeatures()
 
-  const allModels = providerSubfeatures
+  const allModelsWithOriginal = providerSubfeatures
     .filter((item) => item.is_working)
     .map((item) => {
       const featureOptions: FeatureOptions = {
@@ -71,28 +72,73 @@ export const discover = async () => {
       )
 
       return {
-        id: `${PROVIDER_ID}:${item.provider.name}:${item.subfeature.name}`,
+        id: `${gateway}:${item.provider.name}:${item.feature.name}:${
+          item.subfeature.name
+        }${item.version ? `:${item.version}` : ''}${
+          item.phase ? `:${item.phase}` : ''
+        }`,
+        originalItem: item,
         displayName: getDisplayName(
           item.provider.fullname,
           item.subfeature.fullname
         ),
-        provider: PROVIDER_ID,
+        provider: gateway,
         model: `${item.provider.name}/${item.subfeature.name}`,
         feature: item.feature.name,
         subfeature: item.subfeature.name,
-        gateway: PROVIDER_ID,
+        gateway: gateway,
         priority: Math.floor(Date.now() / 1000), // Using current time for priority
         availableModels: item.models.models,
         featureOptions: featureOptions,
       }
     })
 
+  const modelsById = new Map<string, any[]>()
+  allModelsWithOriginal.forEach((model) => {
+    if (!modelsById.has(model.id)) {
+      modelsById.set(model.id, [])
+    }
+    modelsById.get(model.id)!.push(model)
+  })
+
+  const duplicates = Array.from(modelsById.entries()).filter(
+    ([, models]) => models.length > 1
+  )
+
+  if (duplicates.length > 0) {
+    console.log('--- Found Duplicate Eden AI Model IDs ---')
+    for (const [id, models] of duplicates) {
+      console.log(`\nDuplicate ID: "${id}" found for ${models.length} items:`)
+      console.log(
+        JSON.stringify(
+          models.map((m) => ({
+            id: m.id,
+            name: m.originalItem.name,
+            originalItem: m.originalItem,
+          })),
+          null,
+          2
+        )
+      )
+    }
+    console.log('-------------------------------------------')
+    console.error(
+      'Duplicates found. Aborting discovery to prevent database errors.'
+    )
+    return []
+  }
+
+  const allModels = allModelsWithOriginal.map((model) => {
+    const { originalItem, ...rest } = model
+    return rest
+  })
+
   const providerModelIds = allModels.map((model) => model.id)
 
   const dbModels = await db
     .select({ id: schema.models.id })
     .from(schema.models)
-    .where(sql`${schema.models.provider} = ${PROVIDER_ID}`)
+    .where(sql`${schema.models.provider} = ${gateway}`)
 
   const dbModelIds = dbModels.map((model) => model.id)
 

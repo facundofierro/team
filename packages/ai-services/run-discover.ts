@@ -2,25 +2,22 @@ import 'dotenv/config'
 import { discover } from './src/discover'
 import { connection } from './src/db'
 
-// Environment variables will be loaded via the -r flag in the pnpm command
-// dotenv.config({ path: '.env' })
-
 const run = async () => {
-  const provider = process.argv[2]
-  if (!provider) {
+  const gateway = process.argv[2]
+  if (!gateway) {
     console.error(
-      'Please provide a provider name as an argument (e.g., openai, fal, eden, deepseek).'
+      'Please provide a gateway name as an argument (e.g., openai, fal, eden, deepseek).'
     )
     process.exit(1)
   }
 
-  console.log(`Starting model discovery for ${provider}...`)
+  console.log(`Starting model discovery for ${gateway}...`)
   try {
-    await discover(provider)
-    console.log(`Model discovery for ${provider} finished successfully.`)
+    await discover(gateway)
+    console.log(`Model discovery for ${gateway} finished successfully.`)
   } catch (error) {
     console.error(
-      `An error occurred during model discovery for ${provider}:`,
+      `An error occurred during model discovery for ${gateway}:`,
       error
     )
     process.exit(1)

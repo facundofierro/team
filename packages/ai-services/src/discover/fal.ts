@@ -75,9 +75,37 @@ const falModels = [
 export const discover = async () => {
   const providerId = 'fal'
 
-  const providerModelIds = falModels.map(
-    (model) => `${providerId}:${model.modelId}`
-  )
+  const groupedModels = new Map<string, (typeof falModels)[number][]>()
+  for (const model of falModels) {
+    const key = `${model.feature}:${model.subfeature}`
+    if (!groupedModels.has(key)) {
+      groupedModels.set(key, [])
+    }
+    groupedModels.get(key)!.push(model)
+  }
+
+  const processedModels = []
+  for (const models of groupedModels.values()) {
+    const representativeModel = models[0]
+    processedModels.push({
+      id: `${providerId}:${representativeModel.feature}:${representativeModel.subfeature}`,
+      displayName: representativeModel.displayName,
+      provider: providerId,
+      model: representativeModel.modelId,
+      feature: representativeModel.feature,
+      subfeature: representativeModel.subfeature,
+      gateway: providerId,
+      priority: representativeModel.priority,
+      featureOptions: representativeModel.featureOptions,
+      availableModels: models.map((m) => ({
+        modelId: m.modelId,
+        displayName: m.displayName,
+        featureOptions: m.featureOptions,
+      })),
+    })
+  }
+
+  const providerModelIds = processedModels.map((model) => model.id)
 
   const dbModels = await db
     .select({ id: schema.models.id })
@@ -98,18 +126,7 @@ export const discover = async () => {
       .where(inArray(schema.models.id, modelsToDelete))
   }
 
-  const modelsToUpsert = falModels.map((model) => ({
-    id: `${providerId}:${model.modelId}`,
-    displayName: model.displayName,
-    provider: providerId,
-    model: model.modelId,
-    feature: model.feature,
-    subfeature: model.subfeature,
-    gateway: providerId,
-    priority: model.priority,
-    featureOptions: model.featureOptions,
-    availableModels: [],
-  }))
+  const modelsToUpsert = processedModels
 
   console.log('--- Discovered Fal Models to be upserted ---')
   console.log(JSON.stringify(modelsToUpsert, null, 2))

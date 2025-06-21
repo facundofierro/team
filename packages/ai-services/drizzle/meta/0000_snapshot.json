@@ -1,5 +1,5 @@
 {
-  "id": "754bf043-44a0-43df-9d87-363c342e041e",
+  "id": "cc5fea96-f959-4911-ae67-2e07e93b0853",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -38,11 +38,36 @@
           "primaryKey": false,
           "notNull": true
         },
-        "connection": {
-          "name": "connection",
+        "subfeature": {
+          "name": "subfeature",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true
+        },
+        "gateway": {
+          "name": "gateway",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "feature_options": {
+          "name": "feature_options",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "available_models": {
+          "name": "available_models",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "priority": {
+          "name": "priority",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         }
       },
       "indexes": {},
