@@ -1,4 +1,4 @@
-import { Feature, FeatureOptions } from '../modelRegistry'
+import { Feature, Subfeature, FeatureOptions } from '../modelRegistry'
 import { fal } from '@fal-ai/client'
 
 // Optionally configure API key from env
@@ -6,35 +6,45 @@ if (process.env.FAL_KEY) {
   fal.config({ credentials: process.env.FAL_KEY })
 }
 
+type GenerateInput = {
+  model: string
+  feature: Feature
+  subfeature: Subfeature
+  featureOptions: FeatureOptions
+  input: any
+}
+
 export async function generate({
   model,
   feature,
+  subfeature,
   featureOptions,
   input,
-}: {
-  model: string
-  feature: Feature
-  featureOptions: FeatureOptions
-  input: any
-}): Promise<any> {
-  if (feature === Feature.TextToImage) {
-    const result = await fal.subscribe(model, {
+}: GenerateInput): Promise<any> {
+  if (feature === Feature.Image && subfeature === Subfeature.Generation) {
+    const result: any = await fal.subscribe(model, {
       input,
     })
     // Return the first image URL
-    return result.data.images?.[0]?.url
+    return result.images?.[0]?.url
   }
-  if (feature === Feature.TextToSpeech) {
-    const result = await fal.subscribe(model, {
+  if (feature === Feature.Audio && subfeature === Subfeature.TextToSpeech) {
+    const result: any = await fal.subscribe(model, {
       input,
     })
-    return result.data.audio?.url
+    return result.audio?.url
   }
-  if (feature === Feature.VideoGeneration) {
-    const result = await fal.subscribe(model, {
+  if (
+    feature === Feature.Video &&
+    (subfeature === Subfeature.GenerationAsync ||
+      subfeature === Subfeature.QuestionAnswer)
+  ) {
+    const result: any = await fal.subscribe(model, {
       input,
     })
-    return result.data.video?.url
+    return result.video?.url
   }
-  throw new Error(`Feature '${feature}' not implemented yet for FAL`)
+  throw new Error(
+    `Feature '${feature}/${subfeature}' not implemented yet for FAL`
+  )
 }

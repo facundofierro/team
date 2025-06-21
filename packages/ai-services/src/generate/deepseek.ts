@@ -1,4 +1,4 @@
-import { Feature, FeatureOptions } from '../modelRegistry'
+import { Feature, Subfeature, FeatureOptions } from '../modelRegistry'
 import { generateText, streamText } from 'ai'
 import { createDeepSeek } from '@ai-sdk/deepseek'
 
@@ -7,18 +7,22 @@ const deepseekAI = createDeepSeek({
     typeof process !== 'undefined' ? process.env.DEEPSEEK_API_KEY ?? '' : '',
 })
 
+type GenerateInput = {
+  model: string
+  feature: Feature
+  subfeature: Subfeature
+  featureOptions: FeatureOptions
+  input: any
+}
+
 export async function generate({
   model,
   feature,
+  subfeature,
   featureOptions,
   input,
-}: {
-  model: string
-  feature: Feature
-  featureOptions: FeatureOptions
-  input: any
-}): Promise<any> {
-  if (feature === Feature.ChatAPI) {
+}: GenerateInput): Promise<any> {
+  if (feature === Feature.Llm && subfeature === Subfeature.Chat) {
     const {
       messages,
       systemPrompt = '',
@@ -47,5 +51,7 @@ export async function generate({
       return result.text
     }
   }
-  throw new Error(`Feature '${feature}' not implemented yet for DeepSeek`)
+  throw new Error(
+    `Feature '${feature}/${subfeature}' not implemented yet for DeepSeek`
+  )
 }

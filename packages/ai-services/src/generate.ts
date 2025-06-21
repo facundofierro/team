@@ -1,28 +1,58 @@
-import { ModelInfo, Feature, FeatureOptions } from './modelRegistry'
+import { ModelInfo, Feature, FeatureOptions, Subfeature } from './modelRegistry'
 import * as openaiProvider from './generate/openai'
 import * as deepseekProvider from './generate/deepseek'
 import * as falProvider from './generate/fal'
+import * as edenProvider from './generate/eden'
+
+type GenerateInput = {
+  feature: Feature
+  subfeature: Subfeature
+  provider: string
+  connection: string
+  featureOptions: FeatureOptions
+  model: string
+  input: any
+}
 
 export async function generate({
-  provider,
-  model,
   feature,
+  subfeature,
+  provider,
+  connection,
   featureOptions,
+  model,
   input,
-}: {
-  provider: string
-  model: string
-  feature: Feature
-  featureOptions: FeatureOptions
-  input: any
-}): Promise<any> {
+}: GenerateInput): Promise<any> {
   switch (provider) {
     case 'openai':
-      return openaiProvider.generate({ model, feature, featureOptions, input })
+      return openaiProvider.generate({
+        model,
+        feature,
+        subfeature,
+        featureOptions,
+        input,
+      })
     case 'deepseek':
       return deepseekProvider.generate({
         model,
         feature,
+        subfeature,
+        featureOptions,
+        input,
+      })
+    case 'fal':
+      return falProvider.generate({
+        model,
+        feature,
+        subfeature,
+        featureOptions,
+        input,
+      })
+    case 'eden':
+      return edenProvider.generate({
+        model,
+        feature,
+        subfeature,
         featureOptions,
         input,
       })

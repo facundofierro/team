@@ -1,4 +1,4 @@
-import { Feature, FeatureOptions } from '../modelRegistry'
+import { Feature, Subfeature, FeatureOptions } from '../modelRegistry'
 import { generateText, streamText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 
@@ -16,18 +16,22 @@ function getApiKey(): string {
   return apiKey
 }
 
+type GenerateInput = {
+  model: string
+  feature: Feature
+  subfeature: Subfeature
+  featureOptions: FeatureOptions
+  input: any
+}
+
 export async function generate({
   model,
   feature,
+  subfeature,
   featureOptions,
   input,
-}: {
-  model: string
-  feature: Feature
-  featureOptions: FeatureOptions
-  input: any
-}): Promise<any> {
-  if (feature === Feature.ChatAPI) {
+}: GenerateInput): Promise<any> {
+  if (feature === Feature.Llm && subfeature === Subfeature.Chat) {
     const {
       messages,
       systemPrompt = '',
@@ -59,7 +63,7 @@ export async function generate({
 
   const apiKey = getApiKey()
 
-  if (feature === Feature.Embeddings) {
+  if (feature === Feature.Text && subfeature === Subfeature.Embeddings) {
     const { text } = input
     const data = await openaiRequest('/embeddings', apiKey, {
       model,
@@ -68,7 +72,7 @@ export async function generate({
     return data.data
   }
 
-  if (feature === Feature.TextToImage) {
+  if (feature === Feature.Image && subfeature === Subfeature.Generation) {
     const { prompt, ...rest } = input
     const data = await openaiRequest('/images/generations', apiKey, {
       model,
@@ -78,7 +82,10 @@ export async function generate({
     return data.data[0]
   }
 
-  if (feature === Feature.SpeechToText) {
+  if (
+    feature === Feature.Audio &&
+    subfeature === Subfeature.SpeechToTextAsync
+  ) {
     const { audio, ...rest } = input
     const formData = new FormData()
     formData.append('file', new Blob([audio]), 'audio.wav')
@@ -98,7 +105,7 @@ export async function generate({
     return data.text
   }
 
-  if (feature === Feature.TextToSpeech) {
+  if (feature === Feature.Audio && subfeature === Subfeature.TextToSpeech) {
     const { text, voice, ...rest } = input
     const audioBuffer = await openaiRequest('/audio/speech', apiKey, {
       model,
@@ -109,7 +116,9 @@ export async function generate({
     return audioBuffer
   }
 
-  throw new Error(`Feature '${feature}' not implemented yet for OpenAI`)
+  throw new Error(
+    `Feature '${feature}/${subfeature}' not implemented yet for OpenAI`
+  )
 }
 
 async function openaiRequest(
