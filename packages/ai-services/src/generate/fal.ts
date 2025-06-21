@@ -18,15 +18,23 @@ export async function generate({
   input: any
 }): Promise<any> {
   if (feature === Feature.TextToImage) {
-    const { prompt, ...rest } = input
     const result = await fal.subscribe(model, {
-      input: {
-        prompt,
-        ...rest,
-      },
+      input,
     })
     // Return the first image URL
     return result.data.images?.[0]?.url
+  }
+  if (feature === Feature.TextToSpeech) {
+    const result = await fal.subscribe(model, {
+      input,
+    })
+    return result.data.audio?.url
+  }
+  if (feature === Feature.VideoGeneration) {
+    const result = await fal.subscribe(model, {
+      input,
+    })
+    return result.data.video?.url
   }
   throw new Error(`Feature '${feature}' not implemented yet for FAL`)
 }

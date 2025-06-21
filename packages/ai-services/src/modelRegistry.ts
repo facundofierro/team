@@ -1,6 +1,8 @@
-import { openaiModels } from './modelRegistry/openai'
+import { db } from './db'
+import * as schema from './db/schema'
 
 export enum Feature {
+  Unknown = 'unknown',
   Embeddings = 'embeddings',
   SpeechToText = 'speech-to-text',
   TextToSpeech = 'text-to-speech',
@@ -46,4 +48,18 @@ export interface ModelInfo {
   featureOptions?: Partial<Record<Feature, FeatureOptions>>
 }
 
-export const ModelRegistry: ModelInfo[] = [...openaiModels]
+export async function getModelRegistry(): Promise<ModelInfo[]> {
+  const modelsFromDb = await db.select().from(schema.models)
+
+  // The database stores a single feature, so we wrap it in an array.
+  // We can enhance this later if a model can have multiple features.
+  return modelsFromDb.map((model) => ({
+    id: model.id,
+    displayName: model.displayName,
+    provider: model.provider,
+    model: model.model,
+    features: [model.feature as Feature],
+    // featureOptions are not stored in the new schema, default to empty
+    featureOptions: {},
+  }))
+}

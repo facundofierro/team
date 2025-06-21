@@ -1,7 +1,7 @@
 import { ModelInfo, Feature, FeatureOptions } from './modelRegistry'
-import * as openaiProvider from './providers/openai'
-import * as deepseekProvider from './providers/deepseek'
-// If you see process type errors, ensure @types/node is installed in devDependencies
+import * as openaiProvider from './generate/openai'
+import * as deepseekProvider from './generate/deepseek'
+import * as falProvider from './generate/fal'
 
 export async function generate({
   provider,

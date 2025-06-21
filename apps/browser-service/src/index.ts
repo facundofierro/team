@@ -16,7 +16,7 @@ interface Session {
 const sessions: Record<string, Session> = {}
 
 // Start a new session
-app.post('/session', (req: Request, res: Response) => {
+app.post('/session', (req, res) => {
   chromium
     .launch({ headless: true })
     .then((browser) =>
@@ -66,7 +66,7 @@ app.delete('/session/:id', (req: Request, res: Response) => {
     })
 })
 
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (req, res) => {
   res.send('Browser Session Service is running!')
 })
 

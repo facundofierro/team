@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1750511907960,
+      "tag": "0000_workable_loners",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1750513467323,
+      "tag": "0001_chilly_shadow_king",
+      "breakpoints": true
+    }
+  ]
+}
