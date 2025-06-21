@@ -1,7 +1,7 @@
 import OpenAI from 'openai'
 import { db } from '../db'
 import * as schema from '../db/schema'
-import { Feature } from '../modelRegistry'
+import { Feature, Subfeature } from '../modelRegistry'
 import { sql, eq, and, inArray } from 'drizzle-orm'
 
 // Helper function to generate display names based on the user's example
@@ -36,23 +36,34 @@ const getDisplayName = (modelId: string): string => {
 }
 
 // Helper function to determine the feature of a model
-const getFeature = (modelId: string): Feature => {
-  if (modelId.startsWith('gpt-')) return Feature.ChatAPI
-  if (/^o\d/.test(modelId)) return Feature.ChatAPI
-  if (modelId.startsWith('text-embedding')) return Feature.Embeddings
-  if (modelId.startsWith('tts')) return Feature.TextToSpeech
-  if (modelId.startsWith('whisper')) return Feature.SpeechToText
-  if (modelId.startsWith('dall-e') || modelId.includes('image'))
-    return Feature.TextToImage
-  return Feature.Unknown // A sensible default
+const getFeature = (
+  modelId: string
+): { feature: Feature; subfeature: Subfeature } => {
+  if (modelId.startsWith('gpt-') || /^o\\d/.test(modelId)) {
+    return { feature: Feature.Llm, subfeature: Subfeature.Chat }
+  }
+  if (modelId.startsWith('text-embedding')) {
+    return { feature: Feature.Text, subfeature: Subfeature.Embeddings }
+  }
+  if (modelId.startsWith('tts')) {
+    return { feature: Feature.Audio, subfeature: Subfeature.TextToSpeech }
+  }
+  if (modelId.startsWith('whisper')) {
+    return { feature: Feature.Audio, subfeature: Subfeature.SpeechToTextAsync }
+  }
+  if (modelId.startsWith('dall-e') || modelId.includes('image')) {
+    return { feature: Feature.Image, subfeature: Subfeature.Generation }
+  }
+  // This is a placeholder, we might need a more specific subfeature for unknown
+  return { feature: Feature.Text, subfeature: Subfeature.Chat }
 }
 
 // Helper function to determine feature options based on our knowledge
 const getFeatureOptions = (feature: Feature) => {
   switch (feature) {
-    case Feature.ChatAPI:
+    case Feature.Llm:
       return { streaming: true, json: true }
-    case Feature.TextToSpeech:
+    case Feature.Audio:
       return { streaming: true }
     default:
       return {}
@@ -95,16 +106,18 @@ export const discover = async () => {
 
   // Step 5: Upsert current models
   const modelsToUpsert = modelsList.data.map((model) => {
-    const feature = getFeature(model.id)
+    const { feature, subfeature } = getFeature(model.id)
     return {
       id: `${providerId}:${model.id}`,
       displayName: getDisplayName(model.id),
       provider: providerId,
       model: model.id,
       feature: feature,
+      subfeature: subfeature,
       connection: providerId,
       priority: model.created,
       featureOptions: getFeatureOptions(feature),
+      availableModels: [],
     }
   })
 
@@ -123,9 +136,11 @@ export const discover = async () => {
           provider: sql`excluded.provider`,
           model: sql`excluded.model`,
           feature: sql`excluded.feature`,
+          subfeature: sql`excluded.subfeature`,
           connection: sql`excluded.connection`,
           priority: sql`excluded.priority`,
           featureOptions: sql`excluded.feature_options`,
+          availableModels: sql`excluded.available_models`,
         },
       })
     console.log(`Upserted ${modelsToUpsert.length} models into the database.`)
