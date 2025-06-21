@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
-import type { ConversationMemory, ConversationMessage } from '@teamhub/db'
+import { useOrganizationStore } from '@/stores/organizationStore'
+import type {
+  ConversationMemory,
+  ConversationMessage,
+  ToolCall,
+} from '@teamhub/db'
 import {
   getActiveConversation,
   getRecentConversations,
@@ -28,17 +33,18 @@ export function useConversationManager({
     Conversation[]
   >([])
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
+  const { currentOrganization } = useOrganizationStore()
 
-  // TODO: Get the actual organization database name from context/auth
-  const orgDatabaseName = 'teamhub'
+  // Get the actual organization database name from the current organization
+  const orgDatabaseName = currentOrganization?.databaseName || 'teamhub'
 
-  // Load active conversation when agent changes
+  // Load active conversation when agent or organization changes
   useEffect(() => {
-    if (!selectedAgent?.id) return
+    if (!selectedAgent?.id || !currentOrganization?.databaseName) return
 
     loadActiveConversation()
     loadRecentConversations()
-  }, [selectedAgent?.id])
+  }, [selectedAgent?.id, currentOrganization?.databaseName])
 
   // Server action wrappers
   const loadActiveConversation = async () => {
@@ -98,7 +104,12 @@ export function useConversationManager({
   )
 
   const addMessageToConversationAction = useCallback(
-    async (role: 'user' | 'assistant', content: string, messageId?: string) => {
+    async (
+      role: 'user' | 'assistant',
+      content: string,
+      messageId?: string,
+      toolCalls?: ToolCall[]
+    ) => {
       if (!currentConversation) return null
 
       try {
@@ -107,7 +118,8 @@ export function useConversationManager({
           role,
           content,
           orgDatabaseName,
-          messageId
+          messageId,
+          toolCalls
         )
 
         if (updatedConversation) {

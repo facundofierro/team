@@ -295,12 +295,47 @@ deploy_full_stack() {
     rm -f ./docker-stack-temp.yml
 
     echo "⏳ Waiting for services to be ready..."
-    sleep 30
+    sleep 60
 }
 
 # Wait for services with selective monitoring
 wait_for_services() {
     echo -e "${BLUE}⏳ Waiting for services to be ready...${NC}"
+
+    # Check infrastructure services first (if being deployed)
+    if [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] || ! check_service_status "teamhub_postgres" "PostgreSQL" >/dev/null 2>&1; then
+        echo -e "${BLUE}⏳ Waiting for PostgreSQL service...${NC}"
+        for i in {1..30}; do
+            if docker service ls --filter name=teamhub_postgres --format "{{.Replicas}}" | grep -q "1/1"; then
+                echo -e "${GREEN}✅ PostgreSQL service is ready${NC}"
+                break
+            fi
+            if [ $i -eq 30 ]; then
+                echo -e "${RED}❌ PostgreSQL service failed to start after 30 attempts${NC}"
+                docker service logs teamhub_postgres --tail 20 || true
+            else
+                echo "Waiting for PostgreSQL service... (attempt $i/30)"
+                sleep 15
+            fi
+        done
+    fi
+
+    if [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] || ! check_service_status "teamhub_redis" "Redis" >/dev/null 2>&1; then
+        echo -e "${BLUE}⏳ Waiting for Redis service...${NC}"
+        for i in {1..15}; do
+            if docker service ls --filter name=teamhub_redis --format "{{.Replicas}}" | grep -q "1/1"; then
+                echo -e "${GREEN}✅ Redis service is ready${NC}"
+                break
+            fi
+            if [ $i -eq 15 ]; then
+                echo -e "${RED}❌ Redis service failed to start after 15 attempts${NC}"
+                docker service logs teamhub_redis --tail 20 || true
+            else
+                echo "Waiting for Redis service... (attempt $i/15)"
+                sleep 10
+            fi
+        done
+    fi
 
     # Check teamhub service first (if being deployed)
     if [ "$FORCE_REDEPLOY_TEAMHUB" = "true" ] || ! check_service_status "teamhub_teamhub" "TeamHub" >/dev/null 2>&1; then

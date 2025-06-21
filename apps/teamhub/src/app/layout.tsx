@@ -7,6 +7,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { db, NewOrganization } from '@teamhub/db'
 import { NavigationEvents } from '@/components/layout/NavigationEvents'
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -40,6 +41,7 @@ export default async function RootLayout({
             <NavigationEvents />
           </main>
         </div>
+        <Toaster />
       </body>
     </html>
   )

@@ -66,7 +66,10 @@ export default async function AgentsPage({ searchParams }: PageProps) {
   const availableTools = organizationSettings.tools
 
   return (
-    <div className="flex h-screen bg-background">
+    <div
+      className="flex h-screen"
+      style={{ backgroundColor: 'rgb(237, 234, 224)' }}
+    >
       <div className="border-r w-60">
         <AgentsList
           agents={agents}
@@ -75,7 +78,7 @@ export default async function AgentsPage({ searchParams }: PageProps) {
           organizationId={organizationId}
         />
       </div>
-      <div className="flex-1 h-full bg-background">
+      <div className="flex-1 h-full">
         <AgentDetail
           defaultTab={tab}
           agent={selectedAgent}

@@ -98,7 +98,7 @@ function AgentTreeItem({
           }`}
           onClick={() => onClick(agent.id)}
           style={{
-            paddingLeft: agent.children.length === 0 ? '0.5rem' : '0.5rem',
+            paddingLeft: agent.children.length === 0 ? '1rem' : '1rem',
           }}
         >
           {agent.name}
@@ -163,7 +163,7 @@ export function AgentsList({
   const agentTree = buildAgentTree(agents)
 
   return (
-    <div className="flex flex-col h-full text-white bg-menu2">
+    <div className="flex flex-col h-full text-white bg-neutral-600">
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-2">
           {agentTree.map((agent) => (

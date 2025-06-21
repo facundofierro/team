@@ -1,7 +1,7 @@
 import {
   generateConversationTitle,
   generateConversationBrief,
-} from '../ai/vercel/generateText'
+} from './generateConversationBrief'
 import { generateConversationEmbedding } from '../ai/vercel/generateEmbedding'
 import { dbMemories, dbEmbeddings } from '@teamhub/db'
 import type { ConversationMessage } from '@teamhub/db'
@@ -10,6 +10,7 @@ export type ConversationProcessingOptions = {
   orgDatabaseName: string
   aiProvider?: 'deepseek' | 'openai'
   embeddingProvider?: 'openai'
+  skipEmbeddings?: boolean
 }
 
 export type ProcessedConversationData = {
@@ -63,7 +64,6 @@ export async function processConversationBrief(
 
     // Initialize database connections
     const memoryFunctions = await dbMemories(options.orgDatabaseName)
-    const embeddingFunctions = await dbEmbeddings(options.orgDatabaseName)
 
     // Generate AI brief
     const conversationMessages = messages.map((msg) => ({
@@ -77,16 +77,37 @@ export async function processConversationBrief(
     )
     console.log('✅ Generated conversation brief:', briefData)
 
-    // Generate embedding
-    const embedding = await generateConversationEmbedding(
-      conversationMessages,
-      undefined, // We'll use the title from the conversation
-      briefData.summary
-    )
-    console.log(
-      '✅ Generated conversation embedding, dimension:',
-      embedding.length
-    )
+    // Try to generate embedding (optional - gracefully handle failures)
+    let embedding: number[] | undefined
+
+    if (options.skipEmbeddings) {
+      console.log(
+        'ℹ️ Skipping embedding generation - disabled in configuration'
+      )
+      embedding = undefined
+    } else {
+      try {
+        embedding = await generateConversationEmbedding(
+          conversationMessages,
+          undefined, // We'll use the title from the conversation
+          briefData.summary
+        )
+        console.log(
+          '✅ Generated conversation embedding, dimension:',
+          embedding.length
+        )
+      } catch (error: any) {
+        if (error.message === 'EMBEDDING_REGION_NOT_SUPPORTED') {
+          console.warn(
+            '⚠️ Skipping embedding generation - not available in this region'
+          )
+          embedding = undefined
+        } else {
+          console.error('❌ Failed to generate embedding:', error)
+          embedding = undefined
+        }
+      }
+    }
 
     // Update the conversation in the memory database
     await memoryFunctions.updateConversationBrief(
@@ -96,21 +117,31 @@ export async function processConversationBrief(
       briefData.keyTopics
     )
 
-    // Store the embedding in the embeddings database
-    await embeddingFunctions.createEmbedding({
-      id: `conv_emb_${conversationId}`,
-      type: 'conversation',
-      referenceId: conversationId,
-      vector: embedding,
-      version: '1.0',
-      model: 'text-embedding-3-small',
-      dimension: embedding.length,
-      metadata: {
-        messageCount: messages.length,
-        keyTopics: briefData.keyTopics,
-        processedAt: new Date().toISOString(),
-      },
-    })
+    // Store the embedding only if it was successfully generated
+    if (embedding && embedding.length > 0) {
+      try {
+        const embeddingFunctions = await dbEmbeddings(options.orgDatabaseName)
+        await embeddingFunctions.createEmbedding({
+          id: `conv_emb_${conversationId}`,
+          type: 'conversation',
+          referenceId: conversationId,
+          vector: embedding,
+          version: '1.0',
+          model: 'text-embedding-3-small',
+          dimension: embedding.length,
+          metadata: {
+            messageCount: messages.length,
+            keyTopics: briefData.keyTopics,
+            processedAt: new Date().toISOString(),
+          },
+        })
+        console.log('✅ Stored conversation embedding successfully')
+      } catch (embError) {
+        console.warn('⚠️ Failed to store embedding, but continuing:', embError)
+      }
+    } else {
+      console.log('ℹ️ No embedding to store - continuing without embedding')
+    }
 
     console.log('✅ Conversation processing completed for:', conversationId)
 

@@ -121,6 +121,24 @@ services:
     networks:
       - teamhub_network
 
+  browser-service:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/browser-service:latest
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+    environment:
+      - NODE_ENV=production
+    ports:
+      - '4000:4000'
+    networks:
+      - teamhub_network
+
 configs:
   nginx_config:
     external: true
