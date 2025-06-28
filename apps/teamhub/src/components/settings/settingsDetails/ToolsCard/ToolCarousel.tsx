@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+// import { Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ToolType } from '@teamhub/db'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -54,7 +54,7 @@ export function ToolCarousel({ toolTypes, onAddTool }: ToolCarouselProps) {
                 onClick={prevTool}
                 disabled={toolTypes.length <= 1}
               >
-                <ChevronLeft className="w-4 h-4" />
+                {/* <ChevronLeft className="w-4 h-4" /> */}
               </Button>
               <Button
                 variant="ghost"
@@ -62,7 +62,7 @@ export function ToolCarousel({ toolTypes, onAddTool }: ToolCarouselProps) {
                 onClick={nextTool}
                 disabled={toolTypes.length <= 1}
               >
-                <ChevronRight className="w-4 h-4" />
+                {/* <ChevronRight className="w-4 h-4" /> */}
               </Button>
             </div>
           </div>
@@ -95,7 +95,7 @@ export function ToolCarousel({ toolTypes, onAddTool }: ToolCarouselProps) {
             onClick={() => onAddTool(currentTool)}
             className="ml-4 bg-orange-600 hover:bg-orange-700 text-white"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            {/* <Plus className="w-4 h-4 mr-2" /> */}
             Add Tool
           </Button>
         </div>

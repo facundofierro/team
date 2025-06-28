@@ -1,7 +1,7 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+// import { Plus } from 'lucide-react'
 import { ToolType } from '@teamhub/db'
 import { Badge } from '@/components/ui/badge'
 
@@ -47,7 +47,7 @@ export function AvailableToolsGrid({
               className="w-full bg-orange-600 hover:bg-orange-700 text-white"
               size="sm"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              {/* <Plus className="w-4 h-4 mr-2" /> */}
               Add
             </Button>
           </CardContent>

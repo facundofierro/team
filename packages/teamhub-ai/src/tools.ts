@@ -40,10 +40,9 @@ const TOOLS = [
 
 if (process.env.NODE_ENV !== 'test') {
   const webBrowser = require('./tools/webBrowser').webBrowser
-  const webBrowserSession =
-    require('./tools/webBrowserSession').webBrowserSession
+  // const webBrowserSession = require('./tools/webBrowserSession').webBrowserSession
   TOOLS.push(webBrowser)
-  TOOLS.push(webBrowserSession)
+  // TOOLS.push(webBrowserSession)
 }
 
 export const getToolTypes = async () => {

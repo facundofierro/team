@@ -1,7 +1,7 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2, Settings2 } from 'lucide-react'
+// import { Trash2, Settings2 } from 'lucide-react'
 import { ToolWithTypes } from '@teamhub/db'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -102,7 +102,7 @@ export function CurrentToolsList({
                         title="Configure tool"
                         onClick={() => onConfigureTool(tool)}
                       >
-                        <Settings2 className="w-3 h-3" />
+                        {/* <Settings2 className="w-3 h-3" /> */}
                       </Button>
                       <Button
                         variant="ghost"
@@ -111,7 +111,7 @@ export function CurrentToolsList({
                         title="Remove tool"
                         onClick={() => onRemoveTool(tool.id)}
                       >
-                        <Trash2 className="w-3 h-3" />
+                        {/* <Trash2 className="w-3 h-3" /> */}
                       </Button>
                     </div>
                   </div>
