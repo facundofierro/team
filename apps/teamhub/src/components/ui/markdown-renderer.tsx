@@ -114,27 +114,16 @@ export function MarkdownRenderer({
           ),
           // Custom list styling
           ul: ({ children }) => (
-            <ul
-              className={cn('list-disc list-inside space-y-1', config.spacing)}
-            >
+            <ul className={cn('list-disc pl-5 space-y-1', config.spacing)}>
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol
-              className={cn(
-                'list-decimal list-inside space-y-1',
-                config.spacing
-              )}
-            >
+            <ol className={cn('list-decimal pl-5 space-y-1', config.spacing)}>
               {children}
             </ol>
           ),
-          li: ({ children }) => (
-            <li className="ml-2">
-              <div className="inline">{children}</div>
-            </li>
-          ),
+          li: ({ children }) => <li className="text-left">{children}</li>,
           // Custom bold text styling
           strong: ({ children }) => (
             <strong className={cn('font-semibold', config.strongColors)}>
