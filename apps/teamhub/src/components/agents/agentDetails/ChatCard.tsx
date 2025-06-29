@@ -457,11 +457,18 @@ export function ChatCard({
     }
   }, [data, processedToolCallIds, toast])
 
-  // Load conversation messages only when explicitly switching to a conversation via conversationToLoad
+  // Load conversation messages when switching to a conversation or when conversation is first loaded
   useEffect(() => {
     const loadConversationMessages = async () => {
-      if (conversationToLoad && currentConversation && currentConversation.content) {
-        console.log('📚 Loading conversation messages for switch:', currentConversation.id)
+      // Don't load messages if we're actively chatting to prevent overwriting in-progress conversations
+      if (isActiveChatting) {
+        console.log('⏸️ Skipping message loading - active chat in progress')
+        return
+      }
+
+      // Load messages if we have a conversation with content
+      if (currentConversation && currentConversation.content) {
+        console.log('📚 Loading conversation messages:', currentConversation.id)
 
         // Convert ConversationMessage[] to Message[] format expected by useChat
         const chatMessages: Message[] = []
@@ -491,7 +498,7 @@ export function ChatCard({
           }
         })
 
-        console.log('🔄 Setting messages for conversation switch')
+        console.log('🔄 Setting messages for conversation load')
         setMessages(chatMessages)
         setToolCallMessages(loadedToolCallMessages)
 
@@ -508,13 +515,13 @@ export function ChatCard({
           chatMessages.length,
           'messages and',
           loadedToolCallMessages.length,
-          'tool calls from conversation switch'
+          'tool calls from conversation'
         )
       }
     }
 
     loadConversationMessages()
-  }, [conversationToLoad, currentConversation?.content, setMessages])
+  }, [currentConversation?.id, isActiveChatting, setMessages])
 
   // Enhanced new conversation handler
   const handleNewConversation = useCallback(async () => {
