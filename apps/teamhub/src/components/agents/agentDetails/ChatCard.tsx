@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { useAgentStore } from '@/stores/agentStore'
 import { ConversationHeader } from './chatCard/ConversationHeader'
@@ -86,32 +86,17 @@ export function ChatCard({
           isActive: conversation.isActive || false,
         })
       }
-      console.log('🔄 Conversation state changed:', conversation)
     },
   })
-
-  // Debug conversation state changes
-  useEffect(() => {
-    console.log('📊 Current conversation state:', {
-      hasConversation: !!currentConversation,
-      conversationId: currentConversation?.id,
-      title: currentConversation?.title,
-      messageCount: currentConversation?.messageCount,
-      isActive: currentConversation?.isActive,
-    })
-  }, [currentConversation])
 
   // Handle conversation loading from memory card double-click
   useEffect(() => {
     if (conversationToLoad && switchToConversation) {
-      console.log('🔄 Loading conversation from memory:', conversationToLoad)
       switchToConversation(conversationToLoad)
         .then(() => {
-          console.log('✅ Conversation loaded successfully')
           onConversationLoaded?.()
         })
         .catch((error) => {
-          console.error('❌ Failed to load conversation:', error)
           onConversationLoaded?.() // Still call to clear the loading state
         })
     }
@@ -134,6 +119,8 @@ export function ChatCard({
 
   // State to track tool calls that should be associated with the next assistant message
   const [pendingToolCalls, setPendingToolCalls] = useState<ToolCall[]>([])
+  // Ref to ensure onFinish always sees current tool calls (avoid stale closure)
+  const pendingToolCallsRef = useRef<ToolCall[]>([])
 
   const {
     messages,
@@ -147,11 +134,6 @@ export function ChatCard({
     id: chatId, // Stable ID that only changes for new conversations
     api: '/api/chat', // Real chat endpoint
     onFinish: async (message) => {
-      console.log(
-        '🤖 AI response finished:',
-        message.content.substring(0, 50) + '...'
-      )
-
       // Clear the active chatting flag since the conversation turn is complete
       setIsActiveChatting(false)
 
@@ -165,22 +147,21 @@ export function ChatCard({
 
       // Add AI response to database conversation with any associated tool calls
       if (currentConversation) {
-        console.log(
-          '📝 Adding AI response to conversation:',
-          currentConversation.id,
-          'with',
-          pendingToolCalls.length,
-          'tool calls'
-        )
+        // Use ref to get current tool calls (avoiding stale closure)
+        const currentToolCalls = pendingToolCallsRef.current
+        const toolCallsToStore =
+          currentToolCalls.length > 0 ? currentToolCalls : undefined
+
         await addMessageToConversation(
           'assistant',
           message.content,
           message.id,
-          pendingToolCalls.length > 0 ? pendingToolCalls : undefined
+          toolCallsToStore
         )
 
         // Clear pending tool calls after storing them
         setPendingToolCalls([])
+        pendingToolCallsRef.current = []
       } else {
         console.warn('⚠️ No current conversation to add AI response to')
       }
@@ -333,7 +314,10 @@ export function ChatCard({
               if (exists) {
                 return prevPending
               }
-              return [...prevPending, dataItem.toolCall]
+              const newPending = [...prevPending, dataItem.toolCall]
+              // Keep ref in sync with state
+              pendingToolCallsRef.current = newPending
+              return newPending
             })
 
             // Mark this tool call as processed
@@ -421,14 +405,11 @@ export function ChatCard({
     const loadConversationMessages = async () => {
       // Don't load messages if we're actively chatting to prevent overwriting in-progress conversations
       if (isActiveChatting) {
-        console.log('⏸️ Skipping message loading - active chat in progress')
         return
       }
 
       // Load messages if we have a conversation with content
       if (currentConversation && currentConversation.content) {
-        console.log('📚 Loading conversation messages:', currentConversation.id)
-
         // Convert ConversationMessage[] to Message[] format expected by useChat
         const chatMessages: Message[] = []
         const loadedToolCallMessages: (Message & { toolCall?: ToolCall })[] = []
@@ -457,7 +438,6 @@ export function ChatCard({
           }
         })
 
-        console.log('🔄 Setting messages for conversation load')
         setMessages(chatMessages)
         setToolCallMessages(loadedToolCallMessages)
 
@@ -468,14 +448,6 @@ export function ChatCard({
             .filter(Boolean) as string[]
         )
         setProcessedToolCallIds(loadedToolCallIds)
-
-        console.log(
-          '✅ Loaded',
-          chatMessages.length,
-          'messages and',
-          loadedToolCallMessages.length,
-          'tool calls from conversation'
-        )
       }
     }
 
@@ -509,6 +481,7 @@ export function ChatCard({
     setProcessedToolCallIds(new Set())
     setToolCallMessages([])
     setPendingToolCalls([])
+    pendingToolCallsRef.current = []
 
     // Note: New conversation will be created when the first message is sent
     // This is handled in the enhanced handleSubmit below
@@ -528,8 +501,6 @@ export function ChatCard({
 
       // If no current conversation exists, create database conversation FIRST
       if (!currentConversation && !localConversation && selectedAgent?.id) {
-        console.log('🆕 Creating new conversation for first message...')
-
         // Create immediate local conversation state for UI feedback
         const tempConversation = {
           id: `temp_${Date.now()}`,
@@ -546,7 +517,6 @@ export function ChatCard({
           // Create database conversation and wait for it to complete
           const newConversation = await startNewConversation(userMessage)
           if (newConversation) {
-            console.log('✅ New conversation created:', newConversation.id)
             // Add the user message to the newly created conversation
             await addMessageToConversation(
               'user',
@@ -554,7 +524,6 @@ export function ChatCard({
               `msg_user_${Date.now()}`, // Generate user message ID
               undefined
             )
-            console.log('✅ User message added to conversation')
           } else {
             console.error('❌ Failed to create new conversation')
           }
@@ -563,7 +532,6 @@ export function ChatCard({
           // Continue with regular submit even if conversation creation fails
         }
       } else if (currentConversation) {
-        console.log('📝 Adding user message to existing conversation...')
         // Add user message to existing conversation
         await addMessageToConversation(
           'user',
@@ -587,7 +555,6 @@ export function ChatCard({
       }
 
       // Proceed with normal chat submission
-      console.log('🚀 Submitting message to AI...')
       handleSubmit(e)
     },
     [

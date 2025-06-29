@@ -205,6 +205,7 @@ export const getFunctions = (database: NodePgDatabase<typeof schema>) => {
 
       const currentMessages =
         (conversation[0].content as ConversationMessage[]) || []
+
       const newMessage: ConversationMessage = {
         id:
           messageId ||
