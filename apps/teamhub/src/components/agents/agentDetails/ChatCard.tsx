@@ -1,62 +1,21 @@
 'use client'
 
 import { useChat, Message } from '@ai-sdk/react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
-import {
-  Send,
-  ListTodo,
-  Calendar,
-  ChevronRight,
-  ChevronLeft,
-  Brain,
-  Plus,
-  X,
-  Trash2,
-  MoreHorizontal,
-  Wrench,
-  ExternalLink,
-  Code,
-  Eye,
-  Search,
-  Globe,
-} from 'lucide-react'
-import { useState, useEffect, useCallback } from 'react'
+import { ChevronRight, ChevronLeft } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { cn } from '@/lib/utils'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
 import { useAgentStore } from '@/stores/agentStore'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { MemoriesDialogContent } from './chatCard/MemoriesDialogContent'
-import { MemorySelectionBar } from './chatCard/MemorySelectionBar'
 import { ConversationHeader } from './chatCard/ConversationHeader'
 import { useConversationManager } from './chatCard/useConversationManager'
-import { SearchResultCard } from './chatCard/SearchResultCard'
-import { ArgumentsDisplay } from './chatCard/ArgumentsDisplay'
-import { ToolCallDialog } from './chatCard/ToolCallDialog'
-import { ToolCallIndicator } from './chatCard/ToolCallIndicator'
-import { MessageContent } from './chatCard/MessageContent'
 import { parseToolError } from './chatCard/toolUtils'
-import type {
-  AgentToolPermissions,
-  ConversationMemory,
-  ConversationMessage,
-  ToolCall,
-} from '@teamhub/db'
+import { ScheduledInfoBar } from './chatCard/ScheduledInfoBar'
+import { ConversationArea } from './chatCard/ConversationArea'
+import { MessageInputArea } from './chatCard/MessageInputArea'
+import type { AgentToolPermissions, ToolCall } from '@teamhub/db'
 
 // Simple type for chat memory selection (temporary until full migration to DB types)
 type TestMemory = {
@@ -127,32 +86,17 @@ export function ChatCard({
           isActive: conversation.isActive || false,
         })
       }
-      console.log('🔄 Conversation state changed:', conversation)
     },
   })
-
-  // Debug conversation state changes
-  useEffect(() => {
-    console.log('📊 Current conversation state:', {
-      hasConversation: !!currentConversation,
-      conversationId: currentConversation?.id,
-      title: currentConversation?.title,
-      messageCount: currentConversation?.messageCount,
-      isActive: currentConversation?.isActive,
-    })
-  }, [currentConversation])
 
   // Handle conversation loading from memory card double-click
   useEffect(() => {
     if (conversationToLoad && switchToConversation) {
-      console.log('🔄 Loading conversation from memory:', conversationToLoad)
       switchToConversation(conversationToLoad)
         .then(() => {
-          console.log('✅ Conversation loaded successfully')
           onConversationLoaded?.()
         })
         .catch((error) => {
-          console.error('❌ Failed to load conversation:', error)
           onConversationLoaded?.() // Still call to clear the loading state
         })
     }
@@ -175,6 +119,8 @@ export function ChatCard({
 
   // State to track tool calls that should be associated with the next assistant message
   const [pendingToolCalls, setPendingToolCalls] = useState<ToolCall[]>([])
+  // Ref to ensure onFinish always sees current tool calls (avoid stale closure)
+  const pendingToolCallsRef = useRef<ToolCall[]>([])
 
   const {
     messages,
@@ -188,11 +134,6 @@ export function ChatCard({
     id: chatId, // Stable ID that only changes for new conversations
     api: '/api/chat', // Real chat endpoint
     onFinish: async (message) => {
-      console.log(
-        '🤖 AI response finished:',
-        message.content.substring(0, 50) + '...'
-      )
-
       // Clear the active chatting flag since the conversation turn is complete
       setIsActiveChatting(false)
 
@@ -206,22 +147,21 @@ export function ChatCard({
 
       // Add AI response to database conversation with any associated tool calls
       if (currentConversation) {
-        console.log(
-          '📝 Adding AI response to conversation:',
-          currentConversation.id,
-          'with',
-          pendingToolCalls.length,
-          'tool calls'
-        )
+        // Use ref to get current tool calls (avoiding stale closure)
+        const currentToolCalls = pendingToolCallsRef.current
+        const toolCallsToStore =
+          currentToolCalls.length > 0 ? currentToolCalls : undefined
+
         await addMessageToConversation(
           'assistant',
           message.content,
           message.id,
-          pendingToolCalls.length > 0 ? pendingToolCalls : undefined
+          toolCallsToStore
         )
 
         // Clear pending tool calls after storing them
         setPendingToolCalls([])
+        pendingToolCallsRef.current = []
       } else {
         console.warn('⚠️ No current conversation to add AI response to')
       }
@@ -374,7 +314,10 @@ export function ChatCard({
               if (exists) {
                 return prevPending
               }
-              return [...prevPending, dataItem.toolCall]
+              const newPending = [...prevPending, dataItem.toolCall]
+              // Keep ref in sync with state
+              pendingToolCallsRef.current = newPending
+              return newPending
             })
 
             // Mark this tool call as processed
@@ -462,14 +405,11 @@ export function ChatCard({
     const loadConversationMessages = async () => {
       // Don't load messages if we're actively chatting to prevent overwriting in-progress conversations
       if (isActiveChatting) {
-        console.log('⏸️ Skipping message loading - active chat in progress')
         return
       }
 
       // Load messages if we have a conversation with content
       if (currentConversation && currentConversation.content) {
-        console.log('📚 Loading conversation messages:', currentConversation.id)
-
         // Convert ConversationMessage[] to Message[] format expected by useChat
         const chatMessages: Message[] = []
         const loadedToolCallMessages: (Message & { toolCall?: ToolCall })[] = []
@@ -498,7 +438,6 @@ export function ChatCard({
           }
         })
 
-        console.log('🔄 Setting messages for conversation load')
         setMessages(chatMessages)
         setToolCallMessages(loadedToolCallMessages)
 
@@ -509,14 +448,6 @@ export function ChatCard({
             .filter(Boolean) as string[]
         )
         setProcessedToolCallIds(loadedToolCallIds)
-
-        console.log(
-          '✅ Loaded',
-          chatMessages.length,
-          'messages and',
-          loadedToolCallMessages.length,
-          'tool calls from conversation'
-        )
       }
     }
 
@@ -550,6 +481,7 @@ export function ChatCard({
     setProcessedToolCallIds(new Set())
     setToolCallMessages([])
     setPendingToolCalls([])
+    pendingToolCallsRef.current = []
 
     // Note: New conversation will be created when the first message is sent
     // This is handled in the enhanced handleSubmit below
@@ -569,8 +501,6 @@ export function ChatCard({
 
       // If no current conversation exists, create database conversation FIRST
       if (!currentConversation && !localConversation && selectedAgent?.id) {
-        console.log('🆕 Creating new conversation for first message...')
-
         // Create immediate local conversation state for UI feedback
         const tempConversation = {
           id: `temp_${Date.now()}`,
@@ -587,7 +517,6 @@ export function ChatCard({
           // Create database conversation and wait for it to complete
           const newConversation = await startNewConversation(userMessage)
           if (newConversation) {
-            console.log('✅ New conversation created:', newConversation.id)
             // Add the user message to the newly created conversation
             await addMessageToConversation(
               'user',
@@ -595,7 +524,6 @@ export function ChatCard({
               `msg_user_${Date.now()}`, // Generate user message ID
               undefined
             )
-            console.log('✅ User message added to conversation')
           } else {
             console.error('❌ Failed to create new conversation')
           }
@@ -604,7 +532,6 @@ export function ChatCard({
           // Continue with regular submit even if conversation creation fails
         }
       } else if (currentConversation) {
-        console.log('📝 Adding user message to existing conversation...')
         // Add user message to existing conversation
         await addMessageToConversation(
           'user',
@@ -628,7 +555,6 @@ export function ChatCard({
       }
 
       // Proceed with normal chat submission
-      console.log('🚀 Submitting message to AI...')
       handleSubmit(e)
     },
     [
@@ -710,28 +636,7 @@ export function ChatCard({
       {/* Main Chat Area */}
       <div className="flex flex-col flex-1 min-w-0 bg-[#f8f9fa]">
         {/* Scheduled Information Bar */}
-        {scheduled && (
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex items-center justify-start w-full gap-2 h-14 hover:bg-accent flex-shrink-0"
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Scheduled task - Click to view details</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Scheduled Task Details</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4">
-                <p>Date: {scheduled.date.toLocaleString()}</p>
-                <p>Description: {scheduled.description}</p>
-              </div>
-            </SheetContent>
-          </Sheet>
-        )}
+        {scheduled && <ScheduledInfoBar scheduled={scheduled} />}
 
         {/* Conversation Header */}
         <ConversationHeader
@@ -741,177 +646,26 @@ export function ChatCard({
         />
 
         {/* Chat Messages Area */}
-        <ScrollArea className="flex-1 px-4 min-h-0">
-          <div className="py-4 space-y-4">
-            {(() => {
-              // Combine and sort all messages with proper ordering logic
-              const allMessages = [...messages, ...toolCallMessages].sort(
-                (a, b) => {
-                  const timeA = a.createdAt
-                    ? new Date(a.createdAt).getTime()
-                    : 0
-                  const timeB = b.createdAt
-                    ? new Date(b.createdAt).getTime()
-                    : 0
-
-                  // If timestamps are very close (within 2 seconds), enforce logical order
-                  if (Math.abs(timeA - timeB) < 2000) {
-                    // Tool calls (system messages) should come before assistant responses
-                    if (a.role === 'system' && b.role === 'assistant') return -1
-                    if (a.role === 'assistant' && b.role === 'system') return 1
-                    // User messages should come before everything else
-                    if (
-                      a.role === 'user' &&
-                      (b.role === 'system' || b.role === 'assistant')
-                    )
-                      return -1
-                    if (
-                      (a.role === 'system' || a.role === 'assistant') &&
-                      b.role === 'user'
-                    )
-                      return 1
-                  }
-
-                  return timeA - timeB
-                }
-              )
-
-              return allMessages.map(
-                (message: Message & { toolCall?: ToolCall }) => {
-                  // Check if this is a tool call message
-                  if (message.role === 'system' && message.toolCall) {
-                    return (
-                      <div
-                        key={message.id}
-                        className="p-4 rounded-lg max-w-[80%] break-words bg-blue-50 border border-blue-200"
-                      >
-                        <ToolCallIndicator toolCalls={[message.toolCall]} />
-                      </div>
-                    )
-                  }
-
-                  // Regular message rendering
-                  return (
-                    <div
-                      key={message.id}
-                      className={cn(
-                        'p-4 rounded-lg max-w-[80%] break-words',
-                        message.role === 'user'
-                          ? 'bg-gray-100/60 ml-auto text-orange-600 font-medium'
-                          : 'bg-gray-100/40 text-gray-900'
-                      )}
-                    >
-                      <MessageContent
-                        message={message as ToolCallMessage}
-                        isUser={message.role === 'user'}
-                      />
-                    </div>
-                  )
-                }
-              )
-            })()}
-            {isLoading && (
-              <div className="bg-gray-100/40 text-gray-900 p-4 rounded-lg max-w-[80%]">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-4 h-4 animate-pulse text-orange-500" />
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+        <ConversationArea
+          messages={messages}
+          toolCallMessages={toolCallMessages}
+          isLoading={isLoading}
+        />
 
         {/* Message Input Area */}
-        <div className="flex-shrink-0 border-t bg-white">
-          <form
-            onSubmit={handleEnhancedSubmit}
-            className="flex flex-col gap-2 p-4"
-          >
-            <MemorySelectionBar
-              selectedMemories={selectedMemories}
-              onAddMemory={handleAddMemory}
-              onRemoveMemory={handleRemoveMemory}
-              onClearAllMemories={handleClearAllMemories}
-              hasInstances={selectedAgent?.doesClone ?? false}
-              instancesCollapsed={!isInstancesOpen}
-            />
-
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Type your message..."
-                value={input}
-                onChange={handleInputChange}
-                className="flex-1 h-36 resize-none"
-                rows={1}
-                disabled={isLoading || isCreatingConversation}
-              />
-
-              <div className="flex flex-col justify-around w-24 flex-shrink-0">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      type="button"
-                      className="w-full text-xs"
-                    >
-                      New Task
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Create task for agent</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-4">
-                      {/* Task creation form would go here */}
-                    </div>
-                  </SheetContent>
-                </Sheet>
-
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      type="button"
-                      className="w-full text-xs"
-                    >
-                      Message
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Send new message to agent</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-4">
-                      {/* Task creation form would go here */}
-                    </div>
-                  </SheetContent>
-                </Sheet>
-
-                <Button
-                  variant="default"
-                  className="w-full bg-orange-500 hover:bg-orange-600"
-                  size="icon"
-                  type="submit"
-                  disabled={isLoading || isCreatingConversation}
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </form>
-        </div>
+        <MessageInputArea
+          input={input}
+          handleInputChange={handleInputChange}
+          handleSubmit={handleEnhancedSubmit}
+          isLoading={isLoading}
+          isCreatingConversation={isCreatingConversation}
+          selectedMemories={selectedMemories}
+          onAddMemory={handleAddMemory}
+          onRemoveMemory={handleRemoveMemory}
+          onClearAllMemories={handleClearAllMemories}
+          hasInstances={selectedAgent?.doesClone ?? false}
+          instancesCollapsed={!isInstancesOpen}
+        />
       </div>
     </Card>
   )
