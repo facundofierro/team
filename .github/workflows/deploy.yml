@@ -120,17 +120,18 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push Browser Service Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/browser-service/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/browser-service:latest
-            ghcr.io/${{ github.repository_owner }}/browser-service:${{ needs.prepare-tag.outputs.tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # DISABLED: Browser Service Docker image build
+      # - name: Build and push Browser Service Docker image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/browser-service/Dockerfile
+      #     push: true
+      #     tags: |
+      #       ghcr.io/${{ github.repository_owner }}/browser-service:latest
+      #       ghcr.io/${{ github.repository_owner }}/browser-service:${{ needs.prepare-tag.outputs.tag }}
+      #     cache-from: type=gha
+      #     cache-to: type=gha,mode=max
 
   deploy:
     runs-on: self-hosted
