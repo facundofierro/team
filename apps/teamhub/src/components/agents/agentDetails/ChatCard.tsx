@@ -1,62 +1,21 @@
 'use client'
 
 import { useChat, Message } from '@ai-sdk/react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
-import {
-  Send,
-  ListTodo,
-  Calendar,
-  ChevronRight,
-  ChevronLeft,
-  Brain,
-  Plus,
-  X,
-  Trash2,
-  MoreHorizontal,
-  Wrench,
-  ExternalLink,
-  Code,
-  Eye,
-  Search,
-  Globe,
-} from 'lucide-react'
+import { ChevronRight, ChevronLeft } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { cn } from '@/lib/utils'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
 import { useAgentStore } from '@/stores/agentStore'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { MemoriesDialogContent } from './chatCard/MemoriesDialogContent'
-import { MemorySelectionBar } from './chatCard/MemorySelectionBar'
 import { ConversationHeader } from './chatCard/ConversationHeader'
 import { useConversationManager } from './chatCard/useConversationManager'
-import { SearchResultCard } from './chatCard/SearchResultCard'
-import { ArgumentsDisplay } from './chatCard/ArgumentsDisplay'
-import { ToolCallDialog } from './chatCard/ToolCallDialog'
-import { ToolCallIndicator } from './chatCard/ToolCallIndicator'
-import { MessageContent } from './chatCard/MessageContent'
 import { parseToolError } from './chatCard/toolUtils'
-import type {
-  AgentToolPermissions,
-  ConversationMemory,
-  ConversationMessage,
-  ToolCall,
-} from '@teamhub/db'
+import { ScheduledInfoBar } from './chatCard/ScheduledInfoBar'
+import { ConversationArea } from './chatCard/ConversationArea'
+import { MessageInputArea } from './chatCard/MessageInputArea'
+import type { AgentToolPermissions, ToolCall } from '@teamhub/db'
 
 // Simple type for chat memory selection (temporary until full migration to DB types)
 type TestMemory = {
@@ -710,28 +669,7 @@ export function ChatCard({
       {/* Main Chat Area */}
       <div className="flex flex-col flex-1 min-w-0 bg-[#f8f9fa]">
         {/* Scheduled Information Bar */}
-        {scheduled && (
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex items-center justify-start w-full gap-2 h-14 hover:bg-accent flex-shrink-0"
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Scheduled task - Click to view details</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Scheduled Task Details</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4">
-                <p>Date: {scheduled.date.toLocaleString()}</p>
-                <p>Description: {scheduled.description}</p>
-              </div>
-            </SheetContent>
-          </Sheet>
-        )}
+        {scheduled && <ScheduledInfoBar scheduled={scheduled} />}
 
         {/* Conversation Header */}
         <ConversationHeader
@@ -741,177 +679,26 @@ export function ChatCard({
         />
 
         {/* Chat Messages Area */}
-        <ScrollArea className="flex-1 px-4 min-h-0">
-          <div className="py-4 space-y-4">
-            {(() => {
-              // Combine and sort all messages with proper ordering logic
-              const allMessages = [...messages, ...toolCallMessages].sort(
-                (a, b) => {
-                  const timeA = a.createdAt
-                    ? new Date(a.createdAt).getTime()
-                    : 0
-                  const timeB = b.createdAt
-                    ? new Date(b.createdAt).getTime()
-                    : 0
-
-                  // If timestamps are very close (within 2 seconds), enforce logical order
-                  if (Math.abs(timeA - timeB) < 2000) {
-                    // Tool calls (system messages) should come before assistant responses
-                    if (a.role === 'system' && b.role === 'assistant') return -1
-                    if (a.role === 'assistant' && b.role === 'system') return 1
-                    // User messages should come before everything else
-                    if (
-                      a.role === 'user' &&
-                      (b.role === 'system' || b.role === 'assistant')
-                    )
-                      return -1
-                    if (
-                      (a.role === 'system' || a.role === 'assistant') &&
-                      b.role === 'user'
-                    )
-                      return 1
-                  }
-
-                  return timeA - timeB
-                }
-              )
-
-              return allMessages.map(
-                (message: Message & { toolCall?: ToolCall }) => {
-                  // Check if this is a tool call message
-                  if (message.role === 'system' && message.toolCall) {
-                    return (
-                      <div
-                        key={message.id}
-                        className="p-4 rounded-lg max-w-[80%] break-words bg-blue-50 border border-blue-200"
-                      >
-                        <ToolCallIndicator toolCalls={[message.toolCall]} />
-                      </div>
-                    )
-                  }
-
-                  // Regular message rendering
-                  return (
-                    <div
-                      key={message.id}
-                      className={cn(
-                        'p-4 rounded-lg max-w-[80%] break-words',
-                        message.role === 'user'
-                          ? 'bg-gray-100/60 ml-auto text-orange-600 font-medium'
-                          : 'bg-gray-100/40 text-gray-900'
-                      )}
-                    >
-                      <MessageContent
-                        message={message as ToolCallMessage}
-                        isUser={message.role === 'user'}
-                      />
-                    </div>
-                  )
-                }
-              )
-            })()}
-            {isLoading && (
-              <div className="bg-gray-100/40 text-gray-900 p-4 rounded-lg max-w-[80%]">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-4 h-4 animate-pulse text-orange-500" />
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+        <ConversationArea
+          messages={messages}
+          toolCallMessages={toolCallMessages}
+          isLoading={isLoading}
+        />
 
         {/* Message Input Area */}
-        <div className="flex-shrink-0 border-t bg-white">
-          <form
-            onSubmit={handleEnhancedSubmit}
-            className="flex flex-col gap-2 p-4"
-          >
-            <MemorySelectionBar
-              selectedMemories={selectedMemories}
-              onAddMemory={handleAddMemory}
-              onRemoveMemory={handleRemoveMemory}
-              onClearAllMemories={handleClearAllMemories}
-              hasInstances={selectedAgent?.doesClone ?? false}
-              instancesCollapsed={!isInstancesOpen}
-            />
-
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Type your message..."
-                value={input}
-                onChange={handleInputChange}
-                className="flex-1 h-36 resize-none"
-                rows={1}
-                disabled={isLoading || isCreatingConversation}
-              />
-
-              <div className="flex flex-col justify-around w-24 flex-shrink-0">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      type="button"
-                      className="w-full text-xs"
-                    >
-                      New Task
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Create task for agent</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-4">
-                      {/* Task creation form would go here */}
-                    </div>
-                  </SheetContent>
-                </Sheet>
-
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      type="button"
-                      className="w-full text-xs"
-                    >
-                      Message
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Send new message to agent</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-4">
-                      {/* Task creation form would go here */}
-                    </div>
-                  </SheetContent>
-                </Sheet>
-
-                <Button
-                  variant="default"
-                  className="w-full bg-orange-500 hover:bg-orange-600"
-                  size="icon"
-                  type="submit"
-                  disabled={isLoading || isCreatingConversation}
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </form>
-        </div>
+        <MessageInputArea
+          input={input}
+          handleInputChange={handleInputChange}
+          handleSubmit={handleEnhancedSubmit}
+          isLoading={isLoading}
+          isCreatingConversation={isCreatingConversation}
+          selectedMemories={selectedMemories}
+          onAddMemory={handleAddMemory}
+          onRemoveMemory={handleRemoveMemory}
+          onClearAllMemories={handleClearAllMemories}
+          hasInstances={selectedAgent?.doesClone ?? false}
+          instancesCollapsed={!isInstancesOpen}
+        />
       </div>
     </Card>
   )
