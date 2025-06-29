@@ -12,7 +12,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { agentId, memoryId } = await params
+    const resolvedParams = await params
+    const agentId = String(resolvedParams.agentId)
+    const memoryId = String(resolvedParams.memoryId)
     const body = await request.json()
     const { organizationId } = body
 

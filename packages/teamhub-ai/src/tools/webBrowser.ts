@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { chromium, Browser, Page } from 'playwright'
-import { auto } from 'auto-playwright/dist/auto'
 import type { ToolTypeDefinition } from '../tools'
+
+// webBrowser tool disabled due to Playwright build issues
 
 export const WebBrowserParameters = z.object({
   tasks: z
@@ -57,42 +57,10 @@ export const webBrowser: ToolTypeDefinition = {
   parametersSchema: WebBrowserParameters,
   resultSchema: WebBrowserResult,
   handler: async (params: unknown, configuration: Record<string, string>) => {
-    const { tasks, credentials, headless } = WebBrowserParameters.parse(params)
-    const openaiApiKey =
-      configuration.OPENAI_API_KEY || process.env.OPENAI_API_KEY
-    if (!openaiApiKey) {
-      throw new Error(
-        'OPENAI_API_KEY is required in configuration or environment'
-      )
-    }
-    const browser: Browser = await chromium.launch({ headless })
-    const page: Page = await browser.newPage()
-    const results: WebBrowserResult['results'] = []
-    try {
-      // Optionally, handle login if credentials are provided
-      if (credentials?.username && credentials?.password) {
-        // You can add a login step here if needed, or let the user specify it in tasks
-      }
-      for (const task of tasks) {
-        try {
-          const output = await auto(
-            task,
-            { page: page as any },
-            { openaiApiKey }
-          )
-          results.push({ task, success: true, output })
-        } catch (error: any) {
-          results.push({
-            task,
-            success: false,
-            error: error?.message || String(error),
-          })
-        }
-      }
-    } finally {
-      await browser.close()
-    }
-    return { results }
+    // WebBrowser tool is temporarily disabled due to Playwright build issues
+    throw new Error(
+      'WebBrowser tool is temporarily disabled due to build compatibility issues. Please use alternative methods for web automation.'
+    )
   },
 }
 

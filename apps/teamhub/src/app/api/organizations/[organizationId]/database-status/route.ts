@@ -12,7 +12,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { organizationId } = await params
+    const resolvedParams = await params
+    const organizationId = String(resolvedParams.organizationId)
 
     // Get organization info to verify ownership
     const organizations = await db.getOrganizations(session.user.id)

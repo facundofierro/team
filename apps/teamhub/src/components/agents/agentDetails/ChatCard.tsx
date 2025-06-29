@@ -521,7 +521,7 @@ export function ChatCard({
     }
 
     loadConversationMessages()
-  }, [currentConversation?.id, isActiveChatting, setMessages])
+  }, [currentConversation, isActiveChatting, setMessages])
 
   // Enhanced new conversation handler
   const handleNewConversation = useCallback(async () => {

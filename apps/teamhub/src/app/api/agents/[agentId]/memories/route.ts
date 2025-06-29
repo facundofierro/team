@@ -12,7 +12,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { agentId } = await params
+    const resolvedParams = await params
+    const agentId = String(resolvedParams.agentId)
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
     const search = searchParams.get('search')
