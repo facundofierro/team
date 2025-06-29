@@ -38,12 +38,13 @@ const TOOLS = [
   // webBrowserSession,
 ]
 
-if (process.env.NODE_ENV !== 'test') {
-  const webBrowser = require('./tools/webBrowser').webBrowser
-  // const webBrowserSession = require('./tools/webBrowserSession').webBrowserSession
-  TOOLS.push(webBrowser)
-  // TOOLS.push(webBrowserSession)
-}
+// Playwright tools temporarily disabled due to build issues
+// if (process.env.NODE_ENV !== 'test') {
+//   const webBrowser = require('./tools/webBrowser').webBrowser
+//   const webBrowserSession = require('./tools/webBrowserSession').webBrowserSession
+//   TOOLS.push(webBrowser)
+//   TOOLS.push(webBrowserSession)
+// }
 
 export const getToolTypes = async () => {
   const toolTypes = TOOLS.map(

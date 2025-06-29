@@ -20,7 +20,9 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { agentId, memoryId } = await params
+    const resolvedParams = await params
+    const agentId = String(resolvedParams.agentId)
+    const memoryId = String(resolvedParams.memoryId)
     const { organizationId } = await request.json()
 
     if (!organizationId) {
