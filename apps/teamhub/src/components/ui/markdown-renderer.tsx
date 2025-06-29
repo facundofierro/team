@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { cn } from '@/lib/utils'
 
 interface MarkdownRendererProps {
@@ -90,6 +91,7 @@ export function MarkdownRenderer({
   return (
     <div className={cn('leading-relaxed', config.textColors, className)}>
       <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
         components={{
           // Custom link component
           a: ({ href, children }) => (
@@ -128,7 +130,11 @@ export function MarkdownRenderer({
               {children}
             </ol>
           ),
-          li: ({ children }) => <li className="ml-2">{children}</li>,
+          li: ({ children }) => (
+            <li className="ml-2">
+              <div className="inline">{children}</div>
+            </li>
+          ),
           // Custom bold text styling
           strong: ({ children }) => (
             <strong className={cn('font-semibold', config.strongColors)}>
@@ -191,6 +197,35 @@ export function MarkdownRenderer({
             >
               {children}
             </blockquote>
+          ),
+          // Custom table styling
+          table: ({ children }) => (
+            <div className={cn('overflow-x-auto', config.spacing)}>
+              <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
+                {children}
+              </table>
+            </div>
+          ),
+          thead: ({ children }) => (
+            <thead className="bg-gray-50 dark:bg-gray-800">{children}</thead>
+          ),
+          tbody: ({ children }) => (
+            <tbody className="bg-white dark:bg-gray-900">{children}</tbody>
+          ),
+          tr: ({ children }) => (
+            <tr className="border-b border-gray-200 dark:border-gray-700">
+              {children}
+            </tr>
+          ),
+          th: ({ children }) => (
+            <th className="px-4 py-2 text-left font-semibold text-gray-900 dark:text-gray-100 border-r border-gray-300 dark:border-gray-600 last:border-r-0">
+              {children}
+            </th>
+          ),
+          td: ({ children }) => (
+            <td className="px-4 py-2 text-gray-700 dark:text-gray-300 border-r border-gray-300 dark:border-gray-600 last:border-r-0">
+              {children}
+            </td>
           ),
         }}
       >
