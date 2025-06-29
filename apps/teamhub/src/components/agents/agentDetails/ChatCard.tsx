@@ -457,11 +457,11 @@ export function ChatCard({
     }
   }, [data, processedToolCallIds, toast])
 
-  // Load conversation messages when conversation changes - but only when switching conversations, not during normal chat
+  // Load conversation messages only when explicitly switching to a conversation via conversationToLoad
   useEffect(() => {
     const loadConversationMessages = async () => {
-      if (currentConversation && currentConversation.content) {
-        console.log('📚 Loading conversation messages:', currentConversation.id)
+      if (conversationToLoad && currentConversation && currentConversation.content) {
+        console.log('📚 Loading conversation messages for switch:', currentConversation.id)
 
         // Convert ConversationMessage[] to Message[] format expected by useChat
         const chatMessages: Message[] = []
@@ -491,41 +491,30 @@ export function ChatCard({
           }
         })
 
-        // Only set messages if we're loading a different conversation or if current messages are empty
-        // This prevents overwriting messages during an active chat session
-        if (
-          (messages.length === 0 || conversationToLoad) &&
-          !isActiveChatting
-        ) {
-          console.log('🔄 Setting messages for conversation load')
-          setMessages(chatMessages)
+        console.log('🔄 Setting messages for conversation switch')
+        setMessages(chatMessages)
+        setToolCallMessages(loadedToolCallMessages)
 
-          // Set the tool call messages
-          setToolCallMessages(loadedToolCallMessages)
+        // Update processed tool call IDs to prevent duplicates
+        const loadedToolCallIds = new Set(
+          loadedToolCallMessages
+            .map((msg) => msg.toolCall?.id)
+            .filter(Boolean) as string[]
+        )
+        setProcessedToolCallIds(loadedToolCallIds)
 
-          // Update processed tool call IDs to prevent duplicates
-          const loadedToolCallIds = new Set(
-            loadedToolCallMessages
-              .map((msg) => msg.toolCall?.id)
-              .filter(Boolean) as string[]
-          )
-          setProcessedToolCallIds(loadedToolCallIds)
-
-          console.log(
-            '✅ Loaded',
-            chatMessages.length,
-            'messages and',
-            loadedToolCallMessages.length,
-            'tool calls from conversation'
-          )
-        } else {
-          console.log('🚫 Skipping message load - active chat in progress')
-        }
+        console.log(
+          '✅ Loaded',
+          chatMessages.length,
+          'messages and',
+          loadedToolCallMessages.length,
+          'tool calls from conversation switch'
+        )
       }
     }
 
     loadConversationMessages()
-  }, [currentConversation?.id, conversationToLoad, setMessages])
+  }, [conversationToLoad, currentConversation?.content, setMessages])
 
   // Enhanced new conversation handler
   const handleNewConversation = useCallback(async () => {
