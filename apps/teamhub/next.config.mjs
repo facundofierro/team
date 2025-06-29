@@ -29,6 +29,16 @@ const nextConfig = {
     config.externals = config.externals || []
     config.externals.push('pg-cloudflare', 'chromium-bidi', 'electron')
 
+    config.module.rules.push({
+      test: /\.ttf$/,
+      use: ['url-loader'],
+    })
+
+    config.module.rules.push({
+      test: /\.html$/,
+      use: ['null-loader'],
+    })
+
     // Handle Node.js modules in client-side code
     if (!isServer) {
       config.resolve.fallback = {
