@@ -200,46 +200,19 @@ export function MCPDiscoveryDialog({
     }
   }
 
-  const getSourceIcon = (sources: string[]) => {
-    if (sources.includes('github')) return '🐙'
-    if (sources.includes('npm')) return '📦'
-    return '📚'
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-6xl w-[90vw] h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
           <DialogTitle className="text-xl">Browse MCP Registry</DialogTitle>
-          <div className="space-y-2">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Discover Model Context Protocol servers from multiple sources
-            </p>
-            <div className="text-xs bg-blue-50 dark:bg-blue-950 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="font-medium text-blue-800 dark:text-blue-200 mb-1">
-                💡 About MCP Servers:
-              </div>
-              <div className="text-blue-700 dark:text-blue-300 space-y-1">
-                <div>
-                  • <strong>📦 Local Install</strong> - Download & run on your
-                  machine (recommended for security)
-                </div>
-                <div>
-                  • <strong>🏠 Local Server</strong> - Run locally after
-                  installation (secure & private)
-                </div>
-                <div>
-                  • <strong>🌐 Remote Server</strong> - External services
-                  (consider privacy implications)
-                </div>
-              </div>
-            </div>
-          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+            Discover Model Context Protocol servers from multiple sources
+          </p>
         </DialogHeader>
 
-        <div className="flex-1 flex flex-col space-y-4">
+        <div className="flex-1 flex flex-col min-h-0 px-6">
           {/* Search and Filters */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 py-4 border-b">
             <div className="flex-1">
               <Input
                 placeholder="Search MCPs by name, description, or tags..."
@@ -251,7 +224,7 @@ export function MCPDiscoveryDialog({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border rounded-md bg-background"
+              className="px-3 py-2 border rounded-md bg-background min-w-[140px]"
             >
               {categories.map((cat) => (
                 <option key={cat.value} value={cat.value}>
@@ -261,22 +234,8 @@ export function MCPDiscoveryDialog({
             </select>
           </div>
 
-          {/* Sources Info */}
-          {searchedSources.length > 0 && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <span>Sources:</span>
-              {searchedSources.map((source) => (
-                <Badge key={source} variant="outline" className="text-xs">
-                  {source === 'registry' && '📚 Registry'}
-                  {source === 'github' && '🐙 GitHub'}
-                  {source === 'npm' && '📦 NPM'}
-                </Badge>
-              ))}
-            </div>
-          )}
-
           {/* Results */}
-          <div className="flex-1">
+          <div className="flex-1 min-h-0 py-4">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -288,7 +247,7 @@ export function MCPDiscoveryDialog({
               </div>
             ) : (
               <ScrollArea className="h-full">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 pb-4">
                   {mcpServers.map((mcp, index) => (
                     <Card
                       key={`${mcp.name}-${index}`}
@@ -322,9 +281,6 @@ export function MCPDiscoveryDialog({
                           {mcp.description}
                         </p>
                         <div className="space-y-2">
-                          <div className="text-xs text-blue-600 dark:text-blue-400 font-mono">
-                            {mcp.url}
-                          </div>
                           <div className="text-xs text-gray-500 flex items-center gap-2">
                             <span>
                               by {mcp.author} • v{mcp.version}
@@ -389,7 +345,7 @@ export function MCPDiscoveryDialog({
           </div>
 
           {/* Results Summary */}
-          <div className="text-sm text-gray-600 dark:text-gray-400 text-center py-2 border-t">
+          <div className="text-sm text-gray-600 dark:text-gray-400 text-center py-3 border-t bg-gray-50 dark:bg-gray-800/50 -mx-6 px-6">
             Showing {mcpServers.length} of {totalFound} MCP servers
             {searchQuery && ` matching "${searchQuery}"`}
             {selectedCategory !== 'all' && ` in ${selectedCategory}`}
