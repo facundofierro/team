@@ -12,13 +12,84 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { MCPDiscoveryService, type MCPServerListing } from '@teamhub/ai'
+
+// Local types to avoid importing server-side code
+type MCPServerListing = {
+  name: string
+  description: string
+  url: string
+  category: string
+  author: string
+  version?: string
+  stars?: number
+  lastUpdated?: string
+  documentation?: string
+  examples?: Array<{
+    name: string
+    description: string
+    url?: string
+  }>
+  installInstructions?: string
+  requirements?: string[]
+  tags?: string[]
+}
+
+type MCPDiscoveryResult = {
+  success: boolean
+  query?: string
+  totalFound: number
+  servers: MCPServerListing[]
+  sources: string[]
+  message: string
+}
 
 interface MCPDiscoveryDialogProps {
   isOpen: boolean
   onClose: () => void
   onSelectMCP: (mcp: MCPServerListing) => void
 }
+
+// Fallback popular MCPs to avoid importing server-side code
+const FALLBACK_POPULAR_MCPS: MCPServerListing[] = [
+  {
+    name: 'File System MCP',
+    description:
+      'Access and manipulate files and directories on the local filesystem',
+    url: 'https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem',
+    category: 'development',
+    author: 'Anthropic',
+    version: '1.0.0',
+    stars: 1200,
+    installInstructions: 'npx @modelcontextprotocol/server-filesystem',
+    requirements: ['Node.js 16+'],
+    tags: ['filesystem', 'files', 'directories', 'local'],
+  },
+  {
+    name: 'GitHub MCP',
+    description:
+      'Interact with GitHub repositories, issues, pull requests, and more',
+    url: 'https://github.com/modelcontextprotocol/servers/tree/main/src/github',
+    category: 'development',
+    author: 'Anthropic',
+    version: '1.0.0',
+    stars: 950,
+    installInstructions: 'npx @modelcontextprotocol/server-github',
+    requirements: ['GitHub personal access token'],
+    tags: ['github', 'git', 'repository', 'development'],
+  },
+  {
+    name: 'Web Search MCP',
+    description: 'Search the web using various search engines and APIs',
+    url: 'https://github.com/modelcontextprotocol/servers/tree/main/src/web-search',
+    category: 'productivity',
+    author: 'Anthropic',
+    version: '1.0.0',
+    stars: 800,
+    installInstructions: 'npx @modelcontextprotocol/server-web-search',
+    requirements: ['API keys for search engines'],
+    tags: ['web', 'search', 'research', 'internet'],
+  },
+]
 
 export function MCPDiscoveryDialog({
   isOpen,
@@ -50,6 +121,15 @@ export function MCPDiscoveryDialog({
     return () => clearTimeout(timeoutId)
   }, [searchQuery, selectedCategory, isOpen])
 
+  const getFilteredFallbackMCPs = () => {
+    if (selectedCategory === 'all') {
+      return FALLBACK_POPULAR_MCPS
+    }
+    return FALLBACK_POPULAR_MCPS.filter(
+      (mcp) => mcp.category === selectedCategory
+    )
+  }
+
   const loadMCPs = async () => {
     setIsLoading(true)
     try {
@@ -66,7 +146,7 @@ export function MCPDiscoveryDialog({
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const result = await response.json()
+      const result: MCPDiscoveryResult = await response.json()
 
       if (result.success) {
         setMcpServers(result.servers)
@@ -75,23 +155,17 @@ export function MCPDiscoveryDialog({
       } else {
         console.error('MCP discovery failed:', result.message)
         // Fallback to popular MCPs
-        setMcpServers(
-          MCPDiscoveryService.getPopularMCPs(
-            selectedCategory === 'all' ? undefined : selectedCategory
-          )
-        )
-        setTotalFound(mcpServers.length)
+        const fallbackMCPs = getFilteredFallbackMCPs()
+        setMcpServers(fallbackMCPs)
+        setTotalFound(fallbackMCPs.length)
         setSearchedSources(['registry'])
       }
     } catch (error) {
       console.error('Error loading MCPs:', error)
       // Fallback to popular MCPs
-      setMcpServers(
-        MCPDiscoveryService.getPopularMCPs(
-          selectedCategory === 'all' ? undefined : selectedCategory
-        )
-      )
-      setTotalFound(mcpServers.length)
+      const fallbackMCPs = getFilteredFallbackMCPs()
+      setMcpServers(fallbackMCPs)
+      setTotalFound(fallbackMCPs.length)
       setSearchedSources(['registry'])
     } finally {
       setIsLoading(false)
