@@ -101,11 +101,7 @@ export function SettingsDetails({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent
-              value="tools"
-              className="h-[calc(100%-3rem)]"
-              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
-            >
+            <TabsContent value="tools" className="h-[calc(100%-3rem)]">
               <ToolsCard
                 tools={settings.tools}
                 toolTypes={settings.toolTypes}

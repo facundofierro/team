@@ -34,4 +34,12 @@ export {
 
 export { getToolTypes, getToolHandler, getAISDKTool } from './tools'
 
+// MCP Discovery Service
+export {
+  MCPDiscoveryService,
+  type MCPDiscoveryParameters,
+  type MCPServerListing,
+  type MCPDiscoveryResult,
+} from './services/mcpDiscovery'
+
 export type { MemoryStoreRule, CronConfig, TaskMetadata } from './types'
