@@ -34,4 +34,30 @@ export {
 
 export { getToolTypes, getToolHandler, getAISDKTool } from './tools'
 
+// MCP Discovery Service
+export {
+  MCPDiscoveryService,
+  type MCPDiscoveryParameters,
+  type MCPServerListing,
+  type MCPDiscoveryResult,
+} from './services/mcpDiscovery'
+
+// MCP Container Manager
+export {
+  MCPContainerManager,
+  type MCPContainerConfig,
+  type MCPInstallRequest,
+  type MCPStatus,
+  type ContainerInfo,
+} from './services/mcpContainerManager'
+
+// MCP Resource Monitor
+export {
+  MCPResourceMonitor,
+  type ResourceUsage,
+  type ResourceLimits,
+  type ResourceAlert,
+  type OrganizationResourceSummary,
+} from './services/mcpResourceMonitor'
+
 export type { MemoryStoreRule, CronConfig, TaskMetadata } from './types'

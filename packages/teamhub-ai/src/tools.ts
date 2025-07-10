@@ -19,6 +19,7 @@ import {
   AgentDiscoveryParameters,
 } from './tools/agentDiscovery'
 import { memorySearch, MemorySearchParameters } from './tools/memorySearch'
+import { mcpConnector, MCPConnectorParameters } from './tools/mcpConnector'
 // import { webBrowser } from './tools/webBrowser'
 // import { webBrowserSession } from './tools/webBrowserSession'
 
@@ -34,6 +35,7 @@ const TOOLS = [
   agentToAgent,
   agentDiscovery,
   memorySearch,
+  mcpConnector,
   // webBrowser,
   // webBrowserSession,
 ]
