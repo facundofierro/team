@@ -38,16 +38,8 @@ export function useConversationManager({
   // Get the actual organization database name from the current organization
   const orgDatabaseName = currentOrganization?.databaseName || 'teamhub'
 
-  // Load active conversation when agent or organization changes
-  useEffect(() => {
-    if (!selectedAgent?.id || !currentOrganization?.databaseName) return
-
-    loadActiveConversation()
-    loadRecentConversations()
-  }, [selectedAgent?.id, currentOrganization?.databaseName])
-
   // Server action wrappers
-  const loadActiveConversation = async () => {
+  const loadActiveConversation = useCallback(async () => {
     if (!selectedAgent?.id) return
 
     try {
@@ -60,9 +52,9 @@ export function useConversationManager({
     } catch (error) {
       console.error('Failed to load active conversation:', error)
     }
-  }
+  }, [selectedAgent?.id, orgDatabaseName, onConversationChange])
 
-  const loadRecentConversations = async () => {
+  const loadRecentConversations = useCallback(async () => {
     if (!selectedAgent?.id) return
 
     try {
@@ -75,7 +67,20 @@ export function useConversationManager({
     } catch (error) {
       console.error('Failed to load recent conversations:', error)
     }
-  }
+  }, [selectedAgent?.id, orgDatabaseName])
+
+  // Load active conversation when agent or organization changes
+  useEffect(() => {
+    if (!selectedAgent?.id || !currentOrganization?.databaseName) return
+
+    loadActiveConversation()
+    loadRecentConversations()
+  }, [
+    selectedAgent?.id,
+    currentOrganization?.databaseName,
+    loadActiveConversation,
+    loadRecentConversations,
+  ])
 
   const startNewConversationAction = useCallback(
     async (firstMessage: string) => {
@@ -100,7 +105,12 @@ export function useConversationManager({
         setIsCreatingConversation(false)
       }
     },
-    [selectedAgent?.id, isCreatingConversation, onConversationChange]
+    [
+      selectedAgent?.id,
+      isCreatingConversation,
+      onConversationChange,
+      orgDatabaseName,
+    ]
   )
 
   const addMessageToConversationAction = useCallback(
@@ -133,7 +143,7 @@ export function useConversationManager({
         return null
       }
     },
-    [currentConversation, onConversationChange]
+    [currentConversation, onConversationChange, orgDatabaseName]
   )
 
   const completeCurrentConversation = useCallback(async () => {
@@ -149,7 +159,7 @@ export function useConversationManager({
     } catch (error) {
       console.error('Failed to complete conversation:', error)
     }
-  }, [currentConversation, onConversationChange])
+  }, [currentConversation, onConversationChange, orgDatabaseName])
 
   const switchToConversationAction = useCallback(
     async (conversationId: string) => {
@@ -173,7 +183,12 @@ export function useConversationManager({
         console.error('Failed to switch conversation:', error)
       }
     },
-    [currentConversation, onConversationChange]
+    [
+      currentConversation,
+      onConversationChange,
+      completeCurrentConversation,
+      orgDatabaseName,
+    ]
   )
 
   const loadConversationHistoryAction = useCallback(
@@ -185,7 +200,7 @@ export function useConversationManager({
         return null
       }
     },
-    []
+    [orgDatabaseName]
   )
 
   return {

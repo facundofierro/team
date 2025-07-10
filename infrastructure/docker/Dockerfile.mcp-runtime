@@ -1,0 +1,48 @@
+# MCP Runtime Container
+# Isolated environment for running Model Context Protocol servers
+
+FROM node:18-alpine
+
+# Install dependencies for common MCP servers
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    git \
+    curl \
+    bash \
+    jq \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S mcp && \
+    adduser -S mcp -u 1001 -G mcp
+
+# Set up working directories
+WORKDIR /mcp
+RUN mkdir -p /mcp/servers /mcp/data /mcp/logs && \
+    chown -R mcp:mcp /mcp
+
+# Install global tools for MCP management
+RUN npm install -g npm@latest
+
+# Copy MCP management scripts
+COPY scripts/mcp-install.sh /usr/local/bin/mcp-install
+COPY scripts/mcp-start.sh /usr/local/bin/mcp-start
+COPY scripts/mcp-stop.sh /usr/local/bin/mcp-stop
+RUN chmod +x /usr/local/bin/mcp-*
+
+# Switch to non-root user
+USER mcp
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV MCP_DATA_DIR=/mcp/data
+ENV MCP_SERVERS_DIR=/mcp/servers
+ENV MCP_LOGS_DIR=/mcp/logs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Default command
+CMD ["tail", "-f", "/dev/null"]

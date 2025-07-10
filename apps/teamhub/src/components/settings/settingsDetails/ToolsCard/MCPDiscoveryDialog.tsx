@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useOrganizationStore } from '@/stores/organizationStore'
 
 // Local types to avoid importing server-side code
 type MCPServerListing = {
@@ -103,34 +104,16 @@ export function MCPDiscoveryDialog({
   const [totalFound, setTotalFound] = useState(0)
   const [searchedSources, setSearchedSources] = useState<string[]>([])
 
-  // Load initial popular MCPs
-  useEffect(() => {
-    if (isOpen) {
-      loadMCPs()
-    }
-  }, [isOpen])
-
-  // Debounced search
-  useEffect(() => {
-    if (!isOpen) return
-
-    const timeoutId = setTimeout(() => {
-      loadMCPs()
-    }, 500)
-
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery, selectedCategory, isOpen])
-
-  const getFilteredFallbackMCPs = () => {
+  const getFilteredFallbackMCPs = useCallback(() => {
     if (selectedCategory === 'all') {
       return FALLBACK_POPULAR_MCPS
     }
     return FALLBACK_POPULAR_MCPS.filter(
       (mcp) => mcp.category === selectedCategory
     )
-  }
+  }, [selectedCategory])
 
-  const loadMCPs = async () => {
+  const loadMCPs = useCallback(async () => {
     setIsLoading(true)
     try {
       const searchParams = new URLSearchParams({
@@ -170,7 +153,25 @@ export function MCPDiscoveryDialog({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [searchQuery, selectedCategory, getFilteredFallbackMCPs])
+
+  // Load initial popular MCPs
+  useEffect(() => {
+    if (isOpen) {
+      loadMCPs()
+    }
+  }, [isOpen, loadMCPs])
+
+  // Debounced search
+  useEffect(() => {
+    if (!isOpen) return
+
+    const timeoutId = setTimeout(() => {
+      loadMCPs()
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery, selectedCategory, isOpen, loadMCPs])
 
   const categories = [
     { value: 'all', label: 'All Categories' },
@@ -180,9 +181,75 @@ export function MCPDiscoveryDialog({
     { value: 'productivity', label: 'Productivity' },
   ]
 
+  const [installingMCP, setInstallingMCP] = useState<string | null>(null)
+  const [installationStatus, setInstallationStatus] = useState<
+    Record<string, 'success' | 'error' | 'installing'>
+  >({})
+
+  // Get current organization from store
+  const { currentOrganization } = useOrganizationStore()
+
   const handleSelectMCP = (mcp: MCPServerListing) => {
     onSelectMCP(mcp)
     onClose()
+  }
+
+  const handleInstallMCP = async (
+    mcp: MCPServerListing,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation() // Prevent triggering the card click
+
+    const mcpName = mcp.name.toLowerCase().replace(/[^a-z0-9-]/g, '-')
+    setInstallingMCP(mcpName)
+    setInstallationStatus((prev) => ({ ...prev, [mcpName]: 'installing' }))
+
+    try {
+      // Get organization ID from store
+      const organizationId = currentOrganization?.id
+      if (!organizationId) {
+        throw new Error('No organization selected')
+      }
+
+      const response = await fetch(
+        `/api/organizations/${organizationId}/mcps/install`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: mcpName,
+            source: mcp.installInstructions || mcp.url,
+            configuration: {
+              // Add any default configuration based on MCP type
+              ...(mcp.requirements?.includes(
+                'GitHub personal access token'
+              ) && {
+                GITHUB_TOKEN: '', // User will need to configure this
+              }),
+              ...(mcp.requirements?.includes('API keys for search engines') && {
+                SEARCH_API_KEY: '', // User will need to configure this
+              }),
+            },
+          }),
+        }
+      )
+
+      const result = await response.json()
+
+      if (result.success) {
+        setInstallationStatus((prev) => ({ ...prev, [mcpName]: 'success' }))
+        console.log(`✅ MCP "${mcp.name}" installed successfully`)
+      } else {
+        throw new Error(result.message || 'Installation failed')
+      }
+    } catch (error) {
+      console.error(`❌ Failed to install MCP "${mcp.name}":`, error)
+      setInstallationStatus((prev) => ({ ...prev, [mcpName]: 'error' }))
+    } finally {
+      setInstallingMCP(null)
+    }
   }
 
   const getCategoryIcon = (category: string) => {
@@ -248,97 +315,154 @@ export function MCPDiscoveryDialog({
             ) : (
               <ScrollArea className="h-full">
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 pb-4">
-                  {mcpServers.map((mcp, index) => (
-                    <Card
-                      key={`${mcp.name}-${index}`}
-                      className="hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => handleSelectMCP(mcp)}
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">
-                              {getCategoryIcon(mcp.category)}
-                            </span>
-                            <CardTitle className="text-base">
-                              {mcp.name}
-                            </CardTitle>
-                          </div>
-                          <div className="flex gap-1">
-                            <Badge variant="secondary" className="text-xs">
-                              {mcp.category}
-                            </Badge>
-                            {mcp.stars && mcp.stars > 0 && (
-                              <Badge variant="outline" className="text-xs">
-                                ⭐ {mcp.stars}
+                  {mcpServers.map((mcp, index) => {
+                    const mcpName = mcp.name
+                      .toLowerCase()
+                      .replace(/[^a-z0-9-]/g, '-')
+                    const installStatus = installationStatus[mcpName]
+                    const isInstalling = installingMCP === mcpName
+
+                    return (
+                      <Card
+                        key={`${mcp.name}-${index}`}
+                        className="hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleSelectMCP(mcp)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">
+                                {getCategoryIcon(mcp.category)}
+                              </span>
+                              <CardTitle className="text-base">
+                                {mcp.name}
+                              </CardTitle>
+                            </div>
+                            <div className="flex gap-1">
+                              <Badge variant="secondary" className="text-xs">
+                                {mcp.category}
                               </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
-                          {mcp.description}
-                        </p>
-                        <div className="space-y-2">
-                          <div className="text-xs text-gray-500 flex items-center gap-2">
-                            <span>
-                              by {mcp.author} • v{mcp.version}
-                            </span>
-                            {mcp.tags?.includes('github') && <span>🐙</span>}
-                            {mcp.tags?.includes('npm') && <span>📦</span>}
-                          </div>
-                          {mcp.requirements && mcp.requirements.length > 0 && (
-                            <div className="text-xs text-amber-600">
-                              Requires: {mcp.requirements.join(', ')}
+                              {mcp.stars && mcp.stars > 0 && (
+                                <Badge variant="outline" className="text-xs">
+                                  ⭐ {mcp.stars}
+                                </Badge>
+                              )}
+                              {installStatus === 'success' && (
+                                <Badge
+                                  variant="default"
+                                  className="text-xs bg-green-600"
+                                >
+                                  ✅ Installed
+                                </Badge>
+                              )}
+                              {installStatus === 'error' && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
+                                  ❌ Failed
+                                </Badge>
+                              )}
                             </div>
-                          )}
-                          {/* Installation Type Indicator */}
-                          <div className="text-xs flex items-center gap-1">
-                            {mcp.url.includes('github.com') ||
-                            mcp.url.includes('npmjs.com') ? (
-                              <>
-                                <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                  📦 Local Install
-                                </span>
-                                <span className="text-gray-500">
-                                  • Runs on your machine
-                                </span>
-                              </>
-                            ) : mcp.url.includes('localhost') ? (
-                              <>
-                                <span className="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                  🏠 Local Server
-                                </span>
-                                <span className="text-gray-500">
-                                  • Install & run locally
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="inline-flex items-center px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                  🌐 Remote Server
-                                </span>
-                                <span className="text-gray-500">
-                                  • External service
-                                </span>
-                              </>
-                            )}
                           </div>
-                          {mcp.installInstructions && (
-                            <div className="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded border">
-                              <div className="font-medium mb-1">
-                                Installation:
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                            {mcp.description}
+                          </p>
+                          <div className="space-y-2">
+                            <div className="text-xs text-gray-500 flex items-center gap-2">
+                              <span>
+                                by {mcp.author} • v{mcp.version}
+                              </span>
+                              {mcp.tags?.includes('github') && <span>🐙</span>}
+                              {mcp.tags?.includes('npm') && <span>📦</span>}
+                            </div>
+                            {mcp.requirements &&
+                              mcp.requirements.length > 0 && (
+                                <div className="text-xs text-amber-600">
+                                  Requires: {mcp.requirements.join(', ')}
+                                </div>
+                              )}
+                            {/* Installation Type Indicator */}
+                            <div className="text-xs flex items-center gap-1">
+                              {mcp.url.includes('github.com') ||
+                              mcp.url.includes('npmjs.com') ? (
+                                <>
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    📦 Local Install
+                                  </span>
+                                  <span className="text-gray-500">
+                                    • Runs on your machine
+                                  </span>
+                                </>
+                              ) : mcp.url.includes('localhost') ? (
+                                <>
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                    🏠 Local Server
+                                  </span>
+                                  <span className="text-gray-500">
+                                    • Install & run locally
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                    🌐 Remote Server
+                                  </span>
+                                  <span className="text-gray-500">
+                                    • External service
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                            {mcp.installInstructions && (
+                              <div className="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded border">
+                                <div className="font-medium mb-1">
+                                  Installation:
+                                </div>
+                                <code className="text-gray-700 dark:text-gray-300">
+                                  {mcp.installInstructions}
+                                </code>
                               </div>
-                              <code className="text-gray-700 dark:text-gray-300">
-                                {mcp.installInstructions}
-                              </code>
+                            )}
+
+                            {/* Install Button */}
+                            <div className="mt-3 pt-3 border-t">
+                              {installStatus === 'success' ? (
+                                <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                  ✅ MCP installed successfully!
+                                </div>
+                              ) : installStatus === 'error' ? (
+                                <div className="text-xs text-red-600 dark:text-red-400">
+                                  ❌ Installation failed. Click to retry.
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={(e) => handleInstallMCP(mcp, e)}
+                                  disabled={isInstalling}
+                                  className={`w-full px-3 py-2 text-xs font-medium rounded-md transition-colors ${
+                                    isInstalling
+                                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                      : 'bg-orange-600 hover:bg-orange-700 text-white'
+                                  }`}
+                                >
+                                  {isInstalling ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                      <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                                      Installing...
+                                    </div>
+                                  ) : (
+                                    '🔧 Install MCP'
+                                  )}
+                                </button>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
               </ScrollArea>
             )}
