@@ -78,8 +78,8 @@ export function useConversationManager({
   }, [
     selectedAgent?.id,
     currentOrganization?.databaseName,
-    loadActiveConversation,
-    loadRecentConversations,
+    // Removed loadActiveConversation and loadRecentConversations from dependencies
+    // to prevent infinite loop - these functions are stable and don't need to be in deps
   ])
 
   const startNewConversationAction = useCallback(
@@ -150,7 +150,16 @@ export function useConversationManager({
     if (!currentConversation) return
 
     try {
-      await completeConversation(currentConversation.id, orgDatabaseName)
+      // Only generate brief if conversation has meaningful content (more than 2 messages)
+      const shouldGenerateBrief = Boolean(
+        currentConversation.messageCount && currentConversation.messageCount > 2
+      )
+
+      await completeConversation(
+        currentConversation.id,
+        orgDatabaseName,
+        shouldGenerateBrief
+      )
 
       // Add to recent conversations and clear current
       setRecentConversations((prev) => [currentConversation, ...prev])

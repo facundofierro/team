@@ -15,7 +15,11 @@ import { parseToolError } from './chatCard/toolUtils'
 import { ScheduledInfoBar } from './chatCard/ScheduledInfoBar'
 import { ConversationArea } from './chatCard/ConversationArea'
 import { MessageInputArea } from './chatCard/MessageInputArea'
-import type { AgentToolPermissions, ToolCall } from '@teamhub/db'
+import type {
+  AgentToolPermissions,
+  ToolCall,
+  ConversationMemory,
+} from '@teamhub/db'
 
 // Simple type for chat memory selection (temporary until full migration to DB types)
 type TestMemory = {
@@ -76,17 +80,20 @@ export function ChatCard({
     loadConversationHistory,
     switchToConversation,
   } = useConversationManager({
-    onConversationChange: (conversation) => {
-      // Update local state when database conversation changes
-      if (conversation) {
-        setLocalConversation({
-          id: conversation.id,
-          title: conversation.title,
-          messageCount: conversation.messageCount || 0,
-          isActive: conversation.isActive || false,
-        })
-      }
-    },
+    onConversationChange: useCallback(
+      (conversation: ConversationMemory | null) => {
+        // Update local state when database conversation changes
+        if (conversation) {
+          setLocalConversation({
+            id: conversation.id,
+            title: conversation.title,
+            messageCount: conversation.messageCount || 0,
+            isActive: conversation.isActive || false,
+          })
+        }
+      },
+      []
+    ), // Empty dependency array since setLocalConversation is stable
   })
 
   // Handle conversation loading from memory card double-click

@@ -301,8 +301,9 @@ Rules for summary:
 
 IMPORTANT: Return ONLY valid JSON. No markdown code blocks or explanations.
 The summary field must contain plain markdown text (not escaped or nested JSON).
+Escape all quotes in the summary field with backslashes.
 Return exactly this format:
-{"description": "What information this conversation contains", "summary": "# Markdown formatted content\n\n**Key points:**\n- Point 1\n- Point 2", "keyTopics": ["topic1", "topic2", "topic3"]}`
+{"description": "What information this conversation contains", "summary": "# Markdown formatted content\\n\\n**Key points:**\\n- Point 1\\n- Point 2", "keyTopics": ["topic1", "topic2", "topic3"]}`
 
   const conversationText = messages
     .map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`)
@@ -315,7 +316,7 @@ Return exactly this format:
     systemPrompt,
     provider,
     temperature: 0.4,
-    maxTokens: 800, // Increased to capture more valuable content
+    maxTokens: 1200, // Increased to capture more content and reduce truncation
   })
 
   // Debug logging to see what the AI is returning
@@ -344,6 +345,25 @@ Return exactly this format:
     if (jsonMatch) {
       cleanResult = jsonMatch[0]
     }
+
+    // Fix common JSON issues before parsing
+    cleanResult = cleanResult
+      // Fix unescaped quotes in strings (but not in property names)
+      .replace(
+        /"(summary|description)"\s*:\s*"([^"]*)"([^"]*)"([^"]*)"/,
+        (match, prop, start, middle, end) => {
+          return `"${prop}": "${start}\\"${middle}\\"${end}"`
+        }
+      )
+      // Fix unescaped newlines
+      .replace(/"\s*\n\s*([^"]*)\s*\n\s*"/g, (match, content) => {
+        return `"${content.replace(/\n/g, '\\n')}"`
+      })
+      // Fix trailing commas
+      .replace(/,\s*}/g, '}')
+      .replace(/,\s*]/g, ']')
+
+    console.log('🔧 Cleaned JSON:', cleanResult.substring(0, 200) + '...')
 
     // Parse the JSON
     const parsed = JSON.parse(cleanResult)
@@ -379,9 +399,11 @@ Return exactly this format:
 
     // More robust fallback - try to extract content even if JSON parsing fails
     try {
-      // Try to extract at least the summary content if it's visible
-      const summaryMatch = result.match(/"summary":\s*"([^"]+)"/s)
-      const descriptionMatch = result.match(/"description":\s*"([^"]+)"/s)
+      // Try to extract content using more flexible patterns
+      const summaryMatch = result.match(/"summary":\s*"((?:[^"\\]|\\.)*)"/s)
+      const descriptionMatch = result.match(
+        /"description":\s*"((?:[^"\\]|\\.)*)"/s
+      )
       const topicsMatch = result.match(/"keyTopics":\s*\[(.*?)\]/s)
 
       if (summaryMatch || descriptionMatch) {
@@ -393,8 +415,22 @@ Return exactly this format:
             ? topicsMatch[1].split(',').map((t) => t.trim().replace(/"/g, ''))
             : ['general'],
           description: descriptionMatch
-            ? descriptionMatch[1]
+            ? descriptionMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"')
             : 'Contains conversation data',
+        }
+      }
+
+      // Try alternative approach - look for any content between quotes
+      const contentBlocks = result.match(/"([^"]*(?:\\"[^"]*)*)"/g)
+      if (contentBlocks && contentBlocks.length >= 2) {
+        const cleanBlocks = contentBlocks.map((block) =>
+          block.slice(1, -1).replace(/\\"/g, '"').replace(/\\n/g, '\n')
+        )
+
+        return {
+          summary: cleanBlocks[1] || 'Conversation analysis completed',
+          keyTopics: ['general'],
+          description: cleanBlocks[0] || 'Contains conversation data',
         }
       }
     } catch (fallbackError) {
