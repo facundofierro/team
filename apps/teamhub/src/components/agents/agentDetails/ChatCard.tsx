@@ -93,7 +93,7 @@ export function ChatCard({
         }
       },
       []
-    ), // Empty dependency array since setLocalConversation is stable
+    ), // Simple callback, message loading will be handled after useChat
   })
 
   // Handle conversation loading from memory card double-click
@@ -129,6 +129,7 @@ export function ChatCard({
   // Ref to ensure onFinish always sees current tool calls (avoid stale closure)
   const pendingToolCallsRef = useRef<ToolCall[]>([])
 
+  // Enhanced useChat with tool execution integration
   const {
     messages,
     input,
@@ -407,59 +408,71 @@ export function ChatCard({
     }
   }, [data, processedToolCallIds, toast])
 
-  // Load conversation messages when switching to a conversation or when conversation is first loaded
+  // Safe message loading - only when explicitly switching conversations
   useEffect(() => {
-    const loadConversationMessages = async () => {
-      // Don't load messages if we're actively chatting to prevent overwriting in-progress conversations
-      if (isActiveChatting) {
-        return
-      }
+    // Only load if we have a conversation with content and we're not actively chatting
+    if (
+      currentConversation?.content &&
+      !isActiveChatting &&
+      messages.length === 0
+    ) {
+      console.log(
+        '📨 Loading messages for conversation:',
+        currentConversation.id
+      )
 
-      // Load messages if we have a conversation with content
-      if (currentConversation && currentConversation.content) {
-        // Convert ConversationMessage[] to Message[] format expected by useChat
-        const chatMessages: Message[] = []
-        const loadedToolCallMessages: (Message & { toolCall?: ToolCall })[] = []
+      // Convert ConversationMessage[] to Message[] format expected by useChat
+      const chatMessages: Message[] = []
+      const loadedToolCallMessages: (Message & { toolCall?: ToolCall })[] = []
 
-        currentConversation.content.forEach((msg) => {
-          // Add the main message
-          chatMessages.push({
-            id: msg.id,
-            role: msg.role as 'user' | 'assistant',
-            content: msg.content,
-            createdAt: new Date(msg.timestamp),
-          })
-
-          // If this message has tool calls, create separate tool call messages
-          if (msg.toolCalls && msg.toolCalls.length > 0) {
-            msg.toolCalls.forEach((toolCall) => {
-              const toolCallMessage: Message & { toolCall?: ToolCall } = {
-                id: `tool-${toolCall.id}`,
-                role: 'system' as const,
-                content: `Tool execution: ${toolCall.name}`,
-                createdAt: new Date(new Date(msg.timestamp).getTime() - 1000), // 1 second earlier
-                toolCall,
-              }
-              loadedToolCallMessages.push(toolCallMessage)
-            })
-          }
+      currentConversation.content.forEach((msg) => {
+        // Add the main message
+        chatMessages.push({
+          id: msg.id,
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+          createdAt: new Date(msg.timestamp),
         })
 
-        setMessages(chatMessages)
-        setToolCallMessages(loadedToolCallMessages)
+        // If this message has tool calls, create separate tool call messages
+        if (msg.toolCalls && msg.toolCalls.length > 0) {
+          msg.toolCalls.forEach((toolCall) => {
+            const toolCallMessage: Message & { toolCall?: ToolCall } = {
+              id: `tool-${toolCall.id}`,
+              role: 'system' as const,
+              content: `Tool execution: ${toolCall.name}`,
+              createdAt: new Date(new Date(msg.timestamp).getTime() - 1000), // 1 second earlier
+              toolCall,
+            }
+            loadedToolCallMessages.push(toolCallMessage)
+          })
+        }
+      })
 
-        // Update processed tool call IDs to prevent duplicates
-        const loadedToolCallIds = new Set(
-          loadedToolCallMessages
-            .map((msg) => msg.toolCall?.id)
-            .filter(Boolean) as string[]
-        )
-        setProcessedToolCallIds(loadedToolCallIds)
-      }
+      setMessages(chatMessages)
+      setToolCallMessages(loadedToolCallMessages)
+
+      // Update processed tool call IDs to prevent duplicates
+      const loadedToolCallIds = new Set(
+        loadedToolCallMessages
+          .map((msg) => msg.toolCall?.id)
+          .filter(Boolean) as string[]
+      )
+      setProcessedToolCallIds(loadedToolCallIds)
+
+      console.log(
+        '✅ Loaded',
+        chatMessages.length,
+        'messages from conversation'
+      )
     }
-
-    loadConversationMessages()
-  }, [currentConversation, isActiveChatting, setMessages])
+  }, [
+    currentConversation?.id, // Only react to conversation ID changes
+    currentConversation?.content, // And content availability
+    isActiveChatting, // Don't load during active chat
+    messages.length, // Only load when we have no messages
+    setMessages,
+  ])
 
   // Enhanced new conversation handler
   const handleNewConversation = useCallback(async () => {
