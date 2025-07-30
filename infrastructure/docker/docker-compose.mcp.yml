@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # Template service for MCP containers
+  # This will be dynamically generated per organization
+  mcp-template:
+    image: teamhub-mcp-runtime:latest
+    container_name: 'teamhub-mcp-${ORGANIZATION_ID}'
+    restart: unless-stopped
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: '${MCP_MEMORY_LIMIT:-1G}'
+          cpus: '${MCP_CPU_LIMIT:-0.5}'
+        reservations:
+          memory: '${MCP_MEMORY_RESERVATION:-256M}'
+          cpus: '${MCP_CPU_RESERVATION:-0.1}'
+
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: false # MCPs need to write logs and data
+    user: '1001:1001' # Non-root mcp user
+
+    # Environment variables
+    environment:
+      - ORGANIZATION_ID=${ORGANIZATION_ID}
+      - MCP_MEMORY_LIMIT=${MCP_MEMORY_LIMIT:-1G}
+      - MCP_CPU_LIMIT=${MCP_CPU_LIMIT:-0.5}
+      - TEAMHUB_API_BASE=${TEAMHUB_API_BASE:-http://host.docker.internal:3000}
+      - NODE_ENV=production
+
+    # Volumes for persistence
+    volumes:
+      - mcp-data-${ORGANIZATION_ID}:/mcp/data
+      - mcp-logs-${ORGANIZATION_ID}:/mcp/logs
+      # Servers directory is inside container (not persisted)
+
+    # Network isolation
+    networks:
+      - mcp-isolated
+
+    # Health check
+    healthcheck:
+      test:
+        ['CMD', 'curl', '-f', 'http://localhost:8080/health', '||', 'exit', '1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Prevent access to host Docker socket
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE # Only for binding to ports
+
+# Network for MCP isolation
+networks:
+  mcp-isolated:
+    driver: bridge
+    internal: false # Allow internet access for downloading MCPs
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volume definitions (created dynamically per organization)
+volumes:
+  mcp-data-template:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MCP_DATA_PATH}/template
+
+  mcp-logs-template:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MCP_LOGS_PATH}/template

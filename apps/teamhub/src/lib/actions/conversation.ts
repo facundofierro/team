@@ -140,7 +140,8 @@ export async function addMessageToConversation(
  */
 export async function completeConversation(
   conversationId: string,
-  orgDatabaseName: string
+  orgDatabaseName: string,
+  shouldGenerateBrief: boolean = false
 ): Promise<void> {
   try {
     const memoryFunctions = await dbMemories(orgDatabaseName)
@@ -154,8 +155,9 @@ export async function completeConversation(
     // Mark conversation as complete
     await memoryFunctions.completeConversation(conversationId)
 
-    // Trigger AI brief generation in background if conversation has messages
+    // Only trigger AI brief generation if explicitly requested AND conversation has messages
     if (
+      shouldGenerateBrief &&
       conversation.content &&
       Array.isArray(conversation.content) &&
       conversation.content.length > 1
@@ -177,6 +179,8 @@ export async function completeConversation(
         .catch((error) => {
           console.error('❌ Failed to generate conversation brief:', error)
         })
+    } else {
+      console.log('ℹ️ Conversation completed without brief generation')
     }
   } catch (error) {
     console.error('Failed to complete conversation:', error)

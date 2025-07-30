@@ -27,6 +27,7 @@ interface ToolCallMetadata {
 
 export async function generateStreamText(params: {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>
+  summary?: string
   agentId: string
   systemPrompt?: string
   memories: MemoryWithTypes[]
@@ -36,6 +37,7 @@ export async function generateStreamText(params: {
   const {
     provider = 'deepseek',
     systemPrompt = '',
+    summary,
     memories,
     messages: inputMessages,
     tools = [],
@@ -50,6 +52,7 @@ export async function generateStreamText(params: {
   )
   console.log('🤖 GenerateStreamText: Memories count:', memories.length)
   console.log('🤖 GenerateStreamText: Tools count:', tools.length)
+  console.log('🤖 GenerateStreamText: Has summary:', !!summary)
 
   // Validate messages parameter
   if (
@@ -119,16 +122,34 @@ export async function generateStreamText(params: {
     memoryMessages.length
   )
 
-  // Convert input messages to Vercel format and combine with memory messages
+  // Convert input messages to Vercel format
   const conversationMessages: VercelMessage[] = inputMessages.map((msg) => ({
     id: crypto.randomUUID(),
     role: msg.role,
     content: msg.content.trim() || 'Hello', // Ensure we always have content
   }))
 
-  const messages: VercelMessage[] = [...memoryMessages, ...conversationMessages]
+  // Add summary message if available (before memory messages for context)
+  const summaryMessages: VercelMessage[] = summary
+    ? [
+        {
+          id: crypto.randomUUID(),
+          role: 'system' as const,
+          content: `Previous conversation summary: ${summary}`,
+        },
+      ]
+    : []
+
+  const messages: VercelMessage[] = [
+    ...summaryMessages,
+    ...memoryMessages,
+    ...conversationMessages,
+  ]
 
   console.log('📨 GenerateStreamText: Total messages count:', messages.length)
+  if (summary) {
+    console.log('📋 GenerateStreamText: Summary included in context')
+  }
 
   // Convert agent tools to AI SDK tools format
   const aiTools: Record<string, any> = {}

@@ -63,7 +63,7 @@ export function AgentDetail({
     if (urlTab) {
       setActiveTab(urlTab)
     }
-  }, []) // Empty dependency array - only run once
+  }, [searchParams, setActiveTab])
 
   const handleChange = async (changes: Partial<Agent>) => {
     // Include all previous pending changes when updating

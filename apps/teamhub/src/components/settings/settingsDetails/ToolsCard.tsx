@@ -8,6 +8,7 @@ import { ToolCarousel } from './ToolsCard/ToolCarousel'
 import { AvailableToolsGrid } from './ToolsCard/AvailableToolsGrid'
 import { ToolConfigurationSheet } from './ToolsCard/ToolConfigurationSheet'
 import { CurrentToolsList } from './ToolsCard/CurrentToolsList'
+import { MCPToolsSection } from './ToolsCard/MCPToolsSection'
 
 type ToolCardProps = {
   tools: ToolWithTypes[]
@@ -174,7 +175,7 @@ export function ToolsCard({
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full">
               <div className="space-y-6 pr-4">
-                {/* Featured Tool Carousel */}
+                {/* Featured Tool Carousel - First */}
                 {availableToolTypes.length > 0 && (
                   <div>
                     <ToolCarousel
@@ -183,6 +184,15 @@ export function ToolsCard({
                     />
                   </div>
                 )}
+
+                {/* MCP Tools Section - Second */}
+                <MCPToolsSection
+                  tools={tools}
+                  toolTypes={toolTypes}
+                  onAddTool={handleAddTool}
+                  onConfigureTool={setConfigTool}
+                  onRemoveTool={handleRemoveTool}
+                />
 
                 {/* All Available Tools Grid */}
                 <div className="pb-6">
