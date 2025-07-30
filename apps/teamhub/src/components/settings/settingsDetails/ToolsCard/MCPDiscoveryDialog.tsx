@@ -330,11 +330,11 @@ export function MCPDiscoveryDialog({
                       >
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <span className="text-lg flex-shrink-0">
                                 {getCategoryIcon(mcp.category)}
                               </span>
-                              <CardTitle className="text-base">
+                              <CardTitle className="text-base break-words hyphens-auto min-w-0">
                                 {mcp.name}
                               </CardTitle>
                             </div>
