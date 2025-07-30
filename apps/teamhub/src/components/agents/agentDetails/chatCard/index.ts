@@ -1,6 +1,7 @@
 export { ScheduledInfoBar } from './ScheduledInfoBar'
 export { ConversationArea } from './ConversationArea'
 export { MessageInputArea } from './MessageInputArea'
+export { MessagePagination } from './MessagePagination'
 export { ConversationHeader } from './ConversationHeader'
 export { MemorySelectionBar } from './MemorySelectionBar'
 export { MemoriesDialogContent } from './MemoriesDialogContent'

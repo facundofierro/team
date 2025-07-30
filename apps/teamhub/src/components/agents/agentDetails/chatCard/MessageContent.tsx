@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react'
 import { Message } from '@ai-sdk/react'
+import { memo } from 'react'
 import type { ToolCall } from '@teamhub/db'
 import { ToolCallIndicator } from './ToolCallIndicator'
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
@@ -13,45 +14,62 @@ interface MessageContentProps {
   isUser: boolean
 }
 
-export function MessageContent({ message, isUser }: MessageContentProps) {
-  if (isUser) {
-    // For user messages, keep simple text formatting with URL detection
-    const urlRegex = /(https?:\/\/[^\s]+)/g
-    const parts = message.content.split(urlRegex)
+export const MessageContent = memo(
+  function MessageContent({ message, isUser }: MessageContentProps) {
+    if (isUser) {
+      // For user messages, keep simple text formatting with URL detection
+      const urlRegex = /(https?:\/\/[^\s]+)/g
+      const parts = message.content.split(urlRegex)
 
+      return (
+        <div>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            {parts.map((part, index) => {
+              if (urlRegex.test(part)) {
+                return (
+                  <a
+                    key={index}
+                    href={part}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 underline hover:no-underline transition-colors text-orange-700 hover:text-orange-800"
+                  >
+                    {part}
+                    <ExternalLink className="w-3 h-3 inline" />
+                  </a>
+                )
+              }
+              return part
+            })}
+          </p>
+          {/* Tool calls for user messages (if any) */}
+          <ToolCallIndicator toolCalls={message.toolCalls || []} />
+        </div>
+      )
+    }
+
+    // For AI messages, use full markdown rendering
     return (
       <div>
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-          {parts.map((part, index) => {
-            if (urlRegex.test(part)) {
-              return (
-                <a
-                  key={index}
-                  href={part}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 underline hover:no-underline transition-colors text-orange-700 hover:text-orange-800"
-                >
-                  {part}
-                  <ExternalLink className="w-3 h-3 inline" />
-                </a>
-              )
-            }
-            return part
-          })}
-        </p>
-        {/* Tool calls for user messages (if any) */}
+        <MarkdownRenderer content={message.content} variant="chat" />
+        {/* Tool calls for AI messages */}
         <ToolCallIndicator toolCalls={message.toolCalls || []} />
       </div>
     )
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function to prevent unnecessary re-renders
+    return (
+      // Compare basic properties
+      prevProps.message.id === nextProps.message.id &&
+      prevProps.message.content === nextProps.message.content &&
+      prevProps.message.role === nextProps.message.role &&
+      prevProps.isUser === nextProps.isUser &&
+      // Compare tool calls array (if present)
+      JSON.stringify(prevProps.message.toolCalls || []) ===
+        JSON.stringify(nextProps.message.toolCalls || [])
+    )
   }
+)
 
-  // For AI messages, use full markdown rendering
-  return (
-    <div>
-      <MarkdownRenderer content={message.content} variant="chat" />
-      {/* Tool calls for AI messages */}
-      <ToolCallIndicator toolCalls={message.toolCalls || []} />
-    </div>
-  )
-}
+MessageContent.displayName = 'MessageContent'
