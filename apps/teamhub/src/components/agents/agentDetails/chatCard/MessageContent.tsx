@@ -6,7 +6,8 @@ import { ToolCallIndicator } from './ToolCallIndicator'
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 
 interface ToolCallMessage extends Message {
-  toolCalls?: ToolCall[]
+  toolCall?: ToolCall // This should be singular, not plural
+  toolCalls?: ToolCall[] // Keep both for compatibility
 }
 
 interface MessageContentProps {
@@ -47,8 +48,12 @@ export const MessageContent = memo(
               return part
             })}
           </p>
-          {/* Tool calls for user messages (if any) */}
-          <ToolCallIndicator toolCalls={message.toolCalls || []} />
+          {/* Tool calls for user messages - handle both singular and plural */}
+          <ToolCallIndicator
+            toolCalls={
+              message.toolCalls || (message.toolCall ? [message.toolCall] : [])
+            }
+          />
         </div>
       )
     }
@@ -61,8 +66,12 @@ export const MessageContent = memo(
           variant="chat"
           isStreaming={isStreaming}
         />
-        {/* Tool calls for AI messages */}
-        <ToolCallIndicator toolCalls={message.toolCalls || []} />
+        {/* Tool calls for AI messages - handle both singular and plural */}
+        <ToolCallIndicator
+          toolCalls={
+            message.toolCalls || (message.toolCall ? [message.toolCall] : [])
+          }
+        />
       </div>
     )
   },
@@ -75,9 +84,15 @@ export const MessageContent = memo(
       prevProps.message.role === nextProps.message.role &&
       prevProps.isUser === nextProps.isUser &&
       prevProps.isStreaming === nextProps.isStreaming &&
-      // Compare tool calls array (if present)
-      JSON.stringify(prevProps.message.toolCalls || []) ===
-        JSON.stringify(nextProps.message.toolCalls || [])
+      // Compare tool calls array (handle both singular and plural)
+      JSON.stringify(
+        prevProps.message.toolCalls ||
+          (prevProps.message.toolCall ? [prevProps.message.toolCall] : [])
+      ) ===
+        JSON.stringify(
+          nextProps.message.toolCalls ||
+            (nextProps.message.toolCall ? [nextProps.message.toolCall] : [])
+        )
     )
   }
 )

@@ -497,6 +497,18 @@ export const ConversationArea = memo(function ConversationArea({
               🧠 Memory: {memoryStats.inDOMMessages}/{memoryStats.totalMessages}{' '}
               in DOM ({memoryStats.memoryUsage})
             </div>
+            <div>
+              🔧 Tool calls: {toolCallMessages.length} tool messages received
+              from ChatCard
+            </div>
+            <div>
+              🔧 System messages with toolCall:{' '}
+              {
+                visibleMessages.filter(
+                  (msg) => msg.role === 'system' && (msg as any).toolCall
+                ).length
+              }
+            </div>
             <div className="flex gap-2 mt-1">
               {isStreamingMode && (
                 <span className="bg-orange-100 px-1 rounded">

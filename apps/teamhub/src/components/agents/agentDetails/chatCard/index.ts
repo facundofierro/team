@@ -18,3 +18,11 @@ export { SearchResultCard } from './SearchResultCard'
 export { ArgumentsDisplay } from './ArgumentsDisplay'
 export { useConversationManager } from './useConversationManager'
 export { parseToolError } from './toolUtils'
+
+// Export custom hooks
+export {
+  useToolCallProcessor,
+  useMemorySelection,
+  useChatState,
+  useMessageSubmission,
+} from './hooks'
