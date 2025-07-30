@@ -12,13 +12,18 @@ interface ToolCallMessage extends Message {
 interface MessageContentProps {
   message: ToolCallMessage
   isUser: boolean
+  isStreaming?: boolean
 }
 
 export const MessageContent = memo(
-  function MessageContent({ message, isUser }: MessageContentProps) {
+  function MessageContent({
+    message,
+    isUser,
+    isStreaming = false,
+  }: MessageContentProps) {
     if (isUser) {
       // For user messages, keep simple text formatting with URL detection
-      const urlRegex = /(https?:\/\/[^\s]+)/g
+      const urlRegex = /(https?:\/\/[^\s\)]+)/g
       const parts = message.content.split(urlRegex)
 
       return (
@@ -48,10 +53,14 @@ export const MessageContent = memo(
       )
     }
 
-    // For AI messages, use full markdown rendering
+    // For AI messages, use optimized markdown rendering with streaming support
     return (
       <div>
-        <MarkdownRenderer content={message.content} variant="chat" />
+        <MarkdownRenderer
+          content={message.content}
+          variant="chat"
+          isStreaming={isStreaming}
+        />
         {/* Tool calls for AI messages */}
         <ToolCallIndicator toolCalls={message.toolCalls || []} />
       </div>
@@ -65,6 +74,7 @@ export const MessageContent = memo(
       prevProps.message.content === nextProps.message.content &&
       prevProps.message.role === nextProps.message.role &&
       prevProps.isUser === nextProps.isUser &&
+      prevProps.isStreaming === nextProps.isStreaming &&
       // Compare tool calls array (if present)
       JSON.stringify(prevProps.message.toolCalls || []) ===
         JSON.stringify(nextProps.message.toolCalls || [])

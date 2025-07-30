@@ -8,6 +8,12 @@ Each task is documented in its own file with the following naming convention: `{
 
 ### Current Tasks
 
+0. **[Chat Context Optimization](./0-chat-context-optimization.md)** - _Planned_
+
+   - **Priority**: High
+   - **Effort**: 2-3 weeks
+   - Intelligent message limiting and conversation summarization for cost optimization
+
 1. **[MCP Tools Integration](./1-mcp-tools.md)** - _In Development_
 
    - **Priority**: High
@@ -74,6 +80,7 @@ graph TD
 
 ### Phase 1: Core Infrastructure (Weeks 1-6)
 
+- **Task 0**: Chat Context Optimization
 - ✅ **Task 1**: MCP Tools Integration (In Progress)
 - **Task 2**: CRON Capabilities for Agents
 - **Task 3**: LLM Selection in Chat
