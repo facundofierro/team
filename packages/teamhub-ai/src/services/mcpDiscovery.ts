@@ -464,33 +464,76 @@ export class MCPDiscoveryService {
     searchQuery?: string
   ): Promise<MCPServerListing[]> {
     try {
-      const query = searchQuery
-        ? `${searchQuery} mcp model context protocol`
-        : 'mcp model context protocol'
-      const response = await fetch(
-        `https://registry.npmjs.org/-/v1/search?q=${encodeURIComponent(
-          query
-        )}&size=20`,
-        {
-          headers: {
-            'User-Agent': 'TeamHub-MCP-Discovery/1.0',
-          },
-        }
-      )
+      // Multiple search strategies to find relevant packages
+      const searchQueries = searchQuery
+        ? [
+            `${searchQuery} mcp`,
+            `${searchQuery} model context protocol`,
+            `${searchQuery} server tool`,
+            searchQuery,
+          ]
+        : [
+            'mcp server',
+            'model context protocol',
+            '@modelcontextprotocol',
+            'mcp tool',
+            'context protocol server',
+          ]
 
-      if (!response.ok) {
-        console.warn('NPM search failed:', response.statusText)
-        return []
+      let allPackages: any[] = []
+
+      for (const query of searchQueries) {
+        const response = await fetch(
+          `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(
+            query
+          )}&size=10`,
+          {
+            headers: {
+              'User-Agent': 'TeamHub-MCP-Discovery/1.0',
+            },
+          }
+        )
+
+        if (!response.ok) {
+          console.warn(`NPM search failed for "${query}":`, response.statusText)
+          continue
+        }
+
+        const data = await response.json()
+        const packages = Array.isArray(data.objects) ? data.objects : []
+
+        // Filter packages that might be relevant to MCP
+        const relevantPackages = packages.filter((pkg: any) => {
+          const text = `${pkg.package.name} ${
+            pkg.package.description || ''
+          }`.toLowerCase()
+          return (
+            text.includes('mcp') ||
+            text.includes('model context protocol') ||
+            text.includes('server') ||
+            text.includes('tool') ||
+            text.includes('client') ||
+            pkg.package.name.startsWith('@modelcontextprotocol')
+          )
+        })
+
+        allPackages.push(...relevantPackages)
       }
 
-      const data = await response.json()
-      const packages = Array.isArray(data.objects) ? data.objects : []
+      // Remove duplicates based on package name
+      const uniquePackages = allPackages.filter(
+        (pkg, index, self) =>
+          index === self.findIndex((p) => p.package.name === pkg.package.name)
+      )
 
-      return packages.map((pkg: any) => ({
+      return uniquePackages.map((pkg: any) => ({
         name: pkg.package.name,
         description: pkg.package.description || 'No description available',
         url: `https://www.npmjs.com/package/${pkg.package.name}`,
-        category: 'development', // Default category for npm packages
+        category: this.categorizeNpmPackage(
+          pkg.package.name,
+          pkg.package.description
+        ),
         author: pkg.package.author?.name || 'Unknown',
         version: pkg.package.version,
         stars: pkg.package.github_stars || 0,
@@ -506,5 +549,50 @@ export class MCPDiscoveryService {
       console.warn('NPM search error:', error)
       return []
     }
+  }
+
+  /**
+   * Categorize npm package based on name and description
+   */
+  private static categorizeNpmPackage(
+    name: string,
+    description: string
+  ): string {
+    const text = `${name} ${description || ''}`.toLowerCase()
+
+    if (
+      text.includes('database') ||
+      text.includes('sql') ||
+      text.includes('postgres') ||
+      text.includes('mysql')
+    ) {
+      return 'data'
+    }
+    if (
+      text.includes('slack') ||
+      text.includes('email') ||
+      text.includes('chat') ||
+      text.includes('message')
+    ) {
+      return 'communication'
+    }
+    if (
+      text.includes('search') ||
+      text.includes('web') ||
+      text.includes('browser') ||
+      text.includes('productivity')
+    ) {
+      return 'productivity'
+    }
+    if (
+      text.includes('github') ||
+      text.includes('git') ||
+      text.includes('code') ||
+      text.includes('dev')
+    ) {
+      return 'development'
+    }
+
+    return 'development' // Default category
   }
 }

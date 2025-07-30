@@ -470,9 +470,31 @@ export function MCPDiscoveryDialog({
 
           {/* Results Summary */}
           <div className="text-sm text-gray-600 dark:text-gray-400 text-center py-3 border-t bg-gray-50 dark:bg-gray-800/50 -mx-6 px-6">
-            Showing {mcpServers.length} of {totalFound} MCP servers
-            {searchQuery && ` matching "${searchQuery}"`}
-            {selectedCategory !== 'all' && ` in ${selectedCategory}`}
+            <div>
+              Showing {mcpServers.length} of {totalFound} MCP servers
+              {searchQuery && ` matching "${searchQuery}"`}
+              {selectedCategory !== 'all' && ` in ${selectedCategory}`}
+            </div>
+            {searchedSources.length > 0 && (
+              <div className="mt-1 text-xs flex items-center justify-center gap-2">
+                <span>Sources:</span>
+                {searchedSources.map((source) => (
+                  <span
+                    key={source}
+                    className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+                  >
+                    {source === 'registry' && '📋 Built-in'}
+                    {source === 'github' && '🐙 GitHub'}
+                    {source === 'npm' && '📦 npm'}
+                  </span>
+                ))}
+                {!searchedSources.includes('github') && (
+                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs">
+                    🔑 GitHub requires token
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>
