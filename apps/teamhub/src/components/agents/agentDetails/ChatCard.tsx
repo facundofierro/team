@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { useChat, Message } from '@ai-sdk/react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -20,6 +19,10 @@ import {
   useChatState,
   useMessageSubmission,
 } from './chatCard/hooks'
+import {
+  buildOptimizedContext,
+  formatOptimizationInfo,
+} from '@/lib/utils/contextOptimizer'
 import type { AgentToolPermissions, ConversationMemory } from '@teamhub/db'
 
 type ChatCardProps = {
@@ -118,11 +121,29 @@ export function ChatCard({
     onFinish: undefined, // Will be set by tool call processor
     onError: undefined, // Will be set by tool call processor
     experimental_prepareRequestBody: ({ messages }) => {
-      return {
-        messages: messages.map((msg) => ({
-          role: msg.role,
+      // Build optimized context using context optimizer
+      // Filter messages to only include user and assistant roles
+      const filteredMessages = messages
+        .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
+        .map((msg) => ({
+          role: msg.role as 'user' | 'assistant',
           content: msg.content,
-        })),
+        }))
+
+      const optimizedContext = buildOptimizedContext(
+        filteredMessages,
+        currentConversation
+      )
+
+      // Log optimization info for debugging
+      console.log(
+        '💬 ChatCard: Context optimization:',
+        formatOptimizationInfo(optimizedContext)
+      )
+
+      return {
+        messages: optimizedContext.messages,
+        summary: optimizedContext.summary,
         agentId: selectedAgent?.id,
         agentCloneId: undefined, // Add this when implementing instance selection
         memoryRules: [], // Add your memory rules here

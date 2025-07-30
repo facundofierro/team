@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     console.log('✅ Chat API: Organization found:', organizations[0].id)
 
-    const { messages, agentId, agentCloneId, memoryRules, storeRule } =
+    const { messages, summary, agentId, agentCloneId, memoryRules, storeRule } =
       await req.json()
 
     console.log('📋 Chat API: Request data:', {
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
       agentCloneId,
       hasMemoryRules: !!memoryRules,
       hasStoreRule: !!storeRule,
+      hasSummary: !!summary,
     })
 
     // Validate required parameters
@@ -132,6 +133,7 @@ export async function POST(req: NextRequest) {
     return sendChat({
       databaseName: organizations[0].databaseName,
       messages,
+      summary,
       agentId,
       agentCloneId,
       memoryRules,

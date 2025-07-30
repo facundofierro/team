@@ -18,6 +18,7 @@ const generateUUID = () => {
 export async function sendChat(params: {
   databaseName: string
   messages: Array<{ role: 'user' | 'assistant'; content: string }>
+  summary?: string
   agentId: string
   agentCloneId?: string
   memoryRules?: AgentMemoryRule[]
@@ -27,6 +28,7 @@ export async function sendChat(params: {
   const {
     databaseName,
     messages,
+    summary,
     agentId,
     agentCloneId,
     memoryRules,
@@ -49,6 +51,7 @@ export async function sendChat(params: {
 
     const streamPromise = generateStreamText({
       messages,
+      summary,
       agentId,
       systemPrompt: agent.systemPrompt || '',
       memories,
