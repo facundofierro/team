@@ -171,7 +171,7 @@ export type AppRouter = typeof appRouter
 
 ```typescript
 // client/components/UserList.tsx
-import { useReactive } from '@drizzle/reactive'
+import { useReactive } from '@drizzle/reactive/client'
 
 function UserList({ companyId }: { companyId: string }) {
   // ✅ Uses the function name automatically: 'users.getAll'
@@ -310,6 +310,22 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 // Alternatively, you can create your own revalidateFn with createTrpcRevalidateFn
 // and pass it to ReactiveProvider if you need custom behavior.
 ```
+
+### 4.1 Client Storage & Revalidation Details
+
+- The hook composes cache keys as `name::JSON(input)`.
+- LocalStorage is sharded per query to avoid large single entries:
+  - Index per organization: `reactive_registry_<orgId>` stores metadata (last revalidated, last server change, connection status).
+  - Per-query entry key: `@drizzle/reactive:entry:<orgId>:<hash>` stores `{ name, input, queryKey, data }`.
+- On initial render, cached data (if present) is shown immediately; background revalidation respects a minimum time window to avoid thrashing on quick navigations/refreshes.
+- Errors during revalidation do not overwrite existing cache (no-write-on-error), keeping previously known-good data.
+- Real-time invalidation uses SSE with client acknowledgments and retry; no heartbeats are sent.
+
+### 4.2 Multi-tenant Tips (Optional)
+
+- Resolve tenant databases via a main database lookup (e.g., `organization.databaseName`), not by using IDs directly as database names.
+- Read paths should not create databases; handle missing DB (`3D000`) by propagating the error or returning empty based on product policy.
+- Provisioning (create DB/schemas) belongs to explicit setup flows.
 
 ## 🎯 Key Benefits Over Manual Approach
 

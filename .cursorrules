@@ -70,6 +70,21 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 
 ## @drizzle/reactive Integration Guidelines
 
+### Client/Server imports
+
+- Server-only code must import from `@drizzle/reactive/server`.
+- Client-only code must import from `@drizzle/reactive/client`.
+- Do not mix client modules on the server or vice versa.
+
+### App provider usage (global)
+
+- Provide reactive context once at the app root using `TrpcReactiveProvider`.
+- Inputs:
+  - `organizationId` (URL/store/session)
+  - `relations` from `@teamhub/db/reactive-config` (client-safe)
+  - `trpcClient` via `createTRPCProxyClient` + `httpBatchLink('/api/trpc')`
+- Do not add per-page providers.
+
 ### Core Reactive Patterns
 
 Always use `defineReactiveFunction` for database operations:
@@ -150,6 +165,29 @@ export const getAgents = defineReactiveFunction({
 
 const router = createReactiveRouter({ db }).addQuery(getAgents)
 ```
+
+### Multi-tenant DB rules (TeamHub specific)
+
+- Resolve tenant DB via main DB: look up `organization.databaseName` by `organizationId`.
+- Never use `organizationId` as a database name.
+- Read paths must not create databases. If DB missing (3D000), either:
+  - propagate the error so client keeps cache intact, or
+  - return empty for read-only endpoints by product decision (avoid caching as fresh).
+- Provisioning (create DB/schemas) belongs in explicit setup flows, not reactive handlers.
+
+### LocalStorage caching (client)
+
+- Storage is sharded per query:
+  - Index per-org key: `reactive_registry_<orgId>` stores only metadata.
+  - Per-query entry key: `@drizzle/reactive:entry:<orgId>:<hash>` stores `{ name, input, queryKey, data }`.
+- Do not write cache on errors.
+
+### UI layout when adding tabs with scroll
+
+- Parent flex containers must include `min-h-0`.
+- Tabs wrapper: `className="flex h-full flex-col min-h-0"`.
+- TabsContent: `className="flex-1 min-h-0 overflow-hidden p-0"`.
+- Inner ScrollArea: `className="flex-1 min-h-0 ..."`.
 
 ## Code Style & Quality
 
