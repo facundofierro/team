@@ -9,10 +9,11 @@ export async function sendInfo(params: {
   agentId: string
   agentCloneId?: string
   fromAgentId?: string
+  organizationId: string // Add required organizationId
   memoryRules?: AgentMemoryRule[]
   storeRule?: MemoryStoreRule
 }) {
-  const { infoType, content, metadata, agentId, agentCloneId, fromAgentId } =
+  const { infoType, content, metadata, agentId, agentCloneId, fromAgentId, organizationId } =
     params
 
   const message = await createMessage.execute(
@@ -23,6 +24,7 @@ export async function sendInfo(params: {
       toAgentCloneId: agentCloneId,
       type: 'info',
       content,
+      organizationId,
       metadata,
       status: 'pending',
     },

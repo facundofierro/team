@@ -79,11 +79,13 @@ export async function sendChat(params: {
 
           await createMessage.execute(
             {
+              id: generateUUID(), // Generate unique ID for the message
               fromAgentId: null,
               toAgentId: agentId,
               content: latestUserMessage,
-              messageTypeId: messageTypeId,
+              type: messageTypeId, // Use 'type' instead of 'messageTypeId' to match schema
               organizationId: agent.organizationId || '', // We need organizationId
+              status: 'pending', // Add required status field
               metadata: {},
             },
             reactiveDb

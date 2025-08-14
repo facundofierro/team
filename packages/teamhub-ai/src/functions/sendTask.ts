@@ -8,6 +8,7 @@ export async function sendTask(params: {
   agentId: string
   agentCloneId?: string
   fromAgentId?: string
+  organizationId: string // Add required organizationId
   memoryRules?: AgentMemoryRule[]
   storeRule?: MemoryStoreRule
   tools?: AgentToolPermission[]
@@ -19,6 +20,7 @@ export async function sendTask(params: {
     agentId,
     agentCloneId,
     fromAgentId,
+    organizationId,
     storeRule,
     cron,
   } = params
@@ -31,6 +33,7 @@ export async function sendTask(params: {
       toAgentCloneId: agentCloneId,
       type: 'task',
       content: taskId,
+      organizationId,
       metadata,
       status: 'pending',
     },
@@ -41,6 +44,7 @@ export async function sendTask(params: {
     await createCron.execute(
       {
         id: crypto.randomUUID(),
+        organizationId,
         messageId: message.id,
         schedule: cron.schedule,
         isActive: true,

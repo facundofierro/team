@@ -34,23 +34,38 @@ import { eq, asc, inArray, or, and } from 'drizzle-orm'
 export const createMessage = defineReactiveFunction({
   name: 'messages.create',
   input: z.object({
-    fromAgentId: z.string().optional(),
-    toAgentId: z.string().optional(),
-    fromUserId: z.string().optional(),
-    toUserId: z.string().optional(),
-    content: z.string(),
-    messageTypeId: z.string(),
+    id: z.string(), // Required primary key
+    fromAgentId: z.string().nullable().optional(),
+    toAgentId: z.string().nullable().optional(),
+    toAgentCloneId: z.string().nullable().optional(),
+    type: z.string(), // This matches the database schema
+    content: z.string().nullable().optional(),
     organizationId: z.string(),
-    conversationId: z.string().optional(),
+    status: z.string().default('pending'), // Required field with default
     metadata: z.record(z.string(), z.unknown()).optional(),
   }) as any,
   dependencies: ['message'],
   handler: async (input, db) => {
-    const [message] = await (db as any).db
-      .insert(messages)
-      .values(input)
-      .returning()
-    return message
+    console.log('[createMessage] Input:', input)
+    console.log('[createMessage] DB structure:', typeof db, Object.keys(db || {}))
+    
+    try {
+      // Access the actual Drizzle database instance
+      const drizzleDb = db.db
+      console.log('[createMessage] Drizzle DB:', typeof drizzleDb, Object.keys(drizzleDb || {}))
+      
+      const result = await drizzleDb
+        .insert(messages)
+        .values(input)
+        .returning()
+        
+      console.log('[createMessage] Result:', result)
+      const [message] = result
+      return message
+    } catch (error) {
+      console.error('[createMessage] Database error:', error)
+      throw error
+    }
   },
 })
 
@@ -511,13 +526,13 @@ export const updateMessage = defineReactiveFunction({
 export const createCron = defineReactiveFunction({
   name: 'cron.create',
   input: z.object({
-    name: z.string(),
-    description: z.string().optional(),
-    schedule: z.string(),
-    command: z.string(),
+    id: z.string(),
     organizationId: z.string(),
+    messageId: z.string().optional(),
+    schedule: z.string(),
     isActive: z.boolean().optional(),
-    metadata: z.record(z.string(), z.unknown()).optional(),
+    lastRun: z.date().optional(),
+    nextRun: z.date().optional(),
   }) as any,
   dependencies: ['cron'],
   handler: async (input, db) => {
