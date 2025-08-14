@@ -181,6 +181,7 @@ export class ReactiveClientManager {
           `[ReactiveClient] Revalidation failed for ${queryKey}:`,
           error
         )
+        // Do not overwrite cache on error; keep existing data intact
         throw error
       }
     }

@@ -104,7 +104,10 @@ export function useReactive<T = any>(
 
         // Check ReactiveStorage cache first (immediate display)
         const cached = clientManager.getCachedData(effectiveKey)
-        console.log(`🔍 [useReactive] Checking cache for ${effectiveKey}:`, cached)
+        console.log(
+          `🔍 [useReactive] Checking cache for ${effectiveKey}:`,
+          cached
+        )
 
         if (cached) {
           try {
@@ -186,6 +189,7 @@ export function useReactive<T = any>(
         setIsLoading(false)
         isInitialMount.current = false
       } catch (err) {
+        // On error, don't register cache; surface error and keep prior cache visible
         setError(err as Error)
         setIsLoading(false)
         isInitialMount.current = false
@@ -200,7 +204,7 @@ export function useReactive<T = any>(
       setIsLoading(true)
       setError(null)
 
-    console.log(`[useReactive] Manual refetch for ${effectiveKey}`)
+      console.log(`[useReactive] Manual refetch for ${effectiveKey}`)
 
       // Trigger manual revalidation
       await clientManager.revalidateQuery(effectiveKey)

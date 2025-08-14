@@ -1,7 +1,9 @@
 import { defineReactiveFunction } from '@drizzle/reactive/server'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
-import { agents, messages } from '../../schema'
+import { agents, messages, organization } from '../../schema'
+import { getFunctions as getMemoryFunctions } from '../../connections/memory/functions'
+import { getOrgDb } from '../../functions/utils/database'
 import type { Agent, NewAgent } from '../../types'
 
 // Schema for agent creation
@@ -145,5 +147,45 @@ export const getAgentMessages = defineReactiveFunction({
       .orderBy(messages.createdAt)
 
     return result
+  },
+})
+
+// Get memories for an agent (reactive wrapper around legacy memory functions)
+export const getAgentMemories = defineReactiveFunction({
+  name: 'agents.memory.getAll',
+  input: z.object({
+    agentId: z.string(),
+    organizationId: z.string(),
+  }) as any,
+  dependencies: ['memory'],
+  handler: async (input, db) => {
+    // Resolve tenant DB and reuse memory functions; auto-create DB if missing
+    try {
+      // Resolve organization's database name from main DB
+      const orgRow = await db.db
+        .select({ databaseName: organization.databaseName })
+        .from(organization)
+        .where(eq(organization.id, input.organizationId))
+        .limit(1)
+
+      if (!orgRow[0]?.databaseName) {
+        console.warn(
+          `⚠️ agents.memory.getAll: organization ${input.organizationId} not found or missing databaseName`
+        )
+        return []
+      }
+
+      const orgDb = await getOrgDb(orgRow[0].databaseName)
+      const memoryFns = getMemoryFunctions(orgDb as any)
+      return await memoryFns.getAgentMemories(input.agentId)
+    } catch (error: any) {
+      if (error?.code === '3D000') {
+        // Org DB not initialized -> propagate so client doesn't cache empty results
+        console.warn(
+          `⚠️ agents.memory.getAll: org DB ${input.organizationId} missing; propagating error`
+        )
+      }
+      throw error
+    }
   },
 })

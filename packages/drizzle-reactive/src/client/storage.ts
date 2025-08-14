@@ -7,15 +7,37 @@ import type { QueryRegistry, HookState } from '../core/types'
 
 export class ReactiveStorage {
   private storageKey = '@drizzle/reactive:registry'
+  private indexKey: string
   private activeHooks = new Map<string, HookState>()
   private sessionId: string
   private organizationId: string
 
   constructor(organizationId: string) {
     this.organizationId = organizationId
+    this.indexKey = this.getIndexKey(organizationId)
     this.sessionId = this.generateSessionId()
     this.initializeRegistry()
     this.cleanupExpiredEntries()
+  }
+
+  /** Derive the per-org index key */
+  private getIndexKey(orgId: string) {
+    return `reactive_registry_${orgId}`
+  }
+
+  /** Derive per-query entry key */
+  private getEntryKey(orgId: string, queryKey: string) {
+    return `@drizzle/reactive:entry:${orgId}:${this.hash(queryKey)}`
+  }
+
+  /** Simple 32-bit hash for stable short keys */
+  private hash(input: string): string {
+    let h = 2166136261 >>> 0
+    for (let i = 0; i < input.length; i++) {
+      h ^= input.charCodeAt(i)
+      h = Math.imul(h, 16777619)
+    }
+    return (h >>> 0).toString(36)
   }
 
   /**
@@ -48,7 +70,10 @@ export class ReactiveStorage {
    */
   getRegistry(): QueryRegistry | null {
     try {
-      const stored = localStorage.getItem(this.storageKey)
+      // Prefer per-org index; fallback to legacy single-key registry for migration
+      const stored =
+        localStorage.getItem(this.indexKey) ||
+        localStorage.getItem(this.storageKey)
       if (!stored) return null
 
       const registry = JSON.parse(stored) as QueryRegistry
@@ -64,13 +89,13 @@ export class ReactiveStorage {
    */
   private saveRegistry(registry: QueryRegistry): void {
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(registry))
+      localStorage.setItem(this.indexKey, JSON.stringify(registry))
     } catch (error) {
       console.warn('[ReactiveStorage] Failed to save registry:', error)
       // Handle localStorage quota exceeded
       this.cleanupOldEntries()
       try {
-        localStorage.setItem(this.storageKey, JSON.stringify(registry))
+        localStorage.setItem(this.indexKey, JSON.stringify(registry))
       } catch (retryError) {
         console.error(
           '[ReactiveStorage] Failed to save registry after cleanup:',
@@ -107,13 +132,33 @@ export class ReactiveStorage {
       !existingQuery ||
       JSON.stringify(existingQuery.data) !== JSON.stringify(data)
 
+    // Write data to a separate entry to avoid huge single-key payloads
+    try {
+      const entryKey = this.getEntryKey(this.organizationId, queryKey)
+      // Derive human-friendly fields for debugging in localStorage
+      const [name, inputJson] = queryKey.split('::')
+      const input = inputJson
+        ? (() => {
+            try {
+              return JSON.parse(inputJson)
+            } catch {
+              return undefined
+            }
+          })()
+        : undefined
+      const entryPayload = JSON.stringify({ name, input, queryKey, data })
+      localStorage.setItem(entryKey, entryPayload)
+    } catch (e) {
+      console.warn('[ReactiveStorage] Failed to write entry for', queryKey, e)
+    }
+
+    // Store only metadata in the index
     registry.queries[queryKey] = {
       lastRevalidated: now,
       // Only update lastServerChange if data actually changed
       lastServerChange: dataChanged
         ? now
         : existingQuery?.lastServerChange || now,
-      data,
     }
 
     // Update session sync time
@@ -215,8 +260,21 @@ export class ReactiveStorage {
       timestamp: Date.now(),
     })
 
+    // Read data from its own entry key
+    let data: any = undefined
+    try {
+      const entryKey = this.getEntryKey(this.organizationId, queryKey)
+      const raw = localStorage.getItem(entryKey)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        data = parsed?.data
+      }
+    } catch (e) {
+      console.warn('[ReactiveStorage] Failed to read entry for', queryKey, e)
+    }
+
     return {
-      data: queryData.data,
+      data,
       isStale,
       lastRevalidated: queryData.lastRevalidated,
     }
@@ -403,7 +461,15 @@ export class ReactiveStorage {
    */
   clearRegistry(): void {
     try {
-      localStorage.removeItem(this.storageKey)
+      // Remove index and all known entries for this org
+      const registry = this.getRegistry()
+      if (registry) {
+        Object.keys(registry.queries).forEach((queryKey) => {
+          const entryKey = this.getEntryKey(this.organizationId, queryKey)
+          localStorage.removeItem(entryKey)
+        })
+      }
+      localStorage.removeItem(this.indexKey)
     } catch (error) {
       console.warn('[ReactiveStorage] Failed to clear registry:', error)
     }

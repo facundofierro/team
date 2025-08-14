@@ -517,7 +517,16 @@ export async function createOrgDatabaseAndSchemas(orgDbName: string) {
         ? `CREATE DATABASE "${orgDbName}" WITH TEMPLATE template_pgvector`
         : `CREATE DATABASE "${orgDbName}"`
 
-    await client.query(createDbQuery)
+    try {
+      await client.query(createDbQuery)
+    } catch (e: any) {
+      // Some Postgres setups emit 23505 (unique violation) instead of 42P04 here
+      if (e?.code === '42P04' || e?.code === '23505') {
+        console.log(`Database ${orgDbName} already exists (code ${e.code}).`)
+      } else {
+        throw e
+      }
+    }
 
     if (templateResult.rows.length > 0) {
       console.log(
@@ -529,8 +538,7 @@ export async function createOrgDatabaseAndSchemas(orgDbName: string) {
       )
     }
   } catch (err: any) {
-    if (err.code === '42P04') {
-      // 42P04 is 'duplicate_database'
+    if (err.code === '42P04' || err.code === '23505') {
       console.log(`Database ${orgDbName} already exists.`)
     } else {
       throw err

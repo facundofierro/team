@@ -18,6 +18,7 @@ function createAppRouter() {
       .addMutation(agentFunctions.updateAgent) // -> agents.update
       .addMutation(agentFunctions.deleteAgent) // -> agents.delete
       .addQuery(agentFunctions.getAgentMessages) // -> agents.messages.getAll
+      .addQuery(agentFunctions.getAgentMemories) // -> agents.memory.getAll
 
       // Organization procedures
       .addQuery(organizationFunctions.getOrganizations) // -> organizations.getAll
