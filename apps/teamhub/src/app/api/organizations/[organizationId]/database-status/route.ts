@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { db } from '@teamhub/db'
+import { getOrganizations, reactiveDb } from '@teamhub/db'
 
 export async function GET(
   request: NextRequest,
@@ -16,7 +16,10 @@ export async function GET(
     const organizationId = String(resolvedParams.organizationId)
 
     // Get organization info to verify ownership
-    const organizations = await db.getOrganizations(session.user.id)
+    const organizations = await getOrganizations.execute(
+      { userId: session.user.id },
+      reactiveDb
+    )
     const organization = organizations.find((org) => org.id === organizationId)
 
     if (!organization) {

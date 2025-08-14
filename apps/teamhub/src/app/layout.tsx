@@ -24,7 +24,10 @@ export default async function RootLayout({
 }) {
   const session = await auth()
 
-  const organizations = await getOrganizations.execute({ userId: session?.user?.id! }, reactiveDb)
+  const organizations = await getOrganizations.execute(
+    { userId: session?.user?.id! },
+    reactiveDb
+  )
 
   // Redirect to sign-in if not authenticated
   if (!session) {

@@ -1,4 +1,4 @@
-import { ToolTypeWithTypes, db } from '@teamhub/db'
+import { ToolTypeWithTypes, verifyToolUsage, reactiveDb } from '@teamhub/db'
 import { searchGoogle, SearchGoogleParameters } from './tools/searchGoogle'
 import { searchYandex, SearchYandexParameters } from './tools/searchYandex'
 import {
@@ -120,7 +120,10 @@ export const getAISDKTool = async (toolRecord: any) => {
 
       try {
         console.log('⏱️ Tool Executor: Verifying tool usage...')
-        const isAllowed = await db.verifyToolUsage(toolRecord.type)
+        const isAllowed = await verifyToolUsage.execute(
+          { toolTypeId: toolRecord.type },
+          reactiveDb
+        )
         if (!isAllowed) {
           console.error(
             '❌ Tool Executor: Tool usage limit exceeded for type:',

@@ -1,5 +1,5 @@
 import { auth } from '@/auth'
-import { db } from '@teamhub/db'
+import { getOrganizations, reactiveDb } from '@teamhub/db'
 import { redirect } from 'next/navigation'
 
 /**
@@ -37,8 +37,11 @@ export async function getValidatedOrganizationId(
   }
 
   // Get user's organizations and validate access
-  const organizations = await db.getOrganizations(user.id)
-  const hasAccess = organizations.some((org) => org.id === organizationId)
+  const organizations = await getOrganizations.execute(
+    { userId: user.id },
+    reactiveDb
+  )
+  const hasAccess = organizations.some((org: any) => org.id === organizationId)
 
   if (!hasAccess) {
     console.error(
@@ -58,8 +61,8 @@ export async function validateOrganizationAccess(
   organizationId: string
 ): Promise<boolean> {
   try {
-    const organizations = await db.getOrganizations(userId)
-    return organizations.some((org) => org.id === organizationId)
+    const organizations = await getOrganizations.execute({ userId }, reactiveDb)
+    return organizations.some((org: any) => org.id === organizationId)
   } catch (error) {
     console.error('❌ Error validating organization access:', error)
     return false

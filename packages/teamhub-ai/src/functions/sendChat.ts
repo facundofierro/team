@@ -1,4 +1,10 @@
-import { db, dbMemories, createMessage, reactiveDb } from '@teamhub/db'
+import {
+  db,
+  dbMemories,
+  createMessage,
+  getAgent,
+  reactiveDb,
+} from '@teamhub/db'
 import type { AgentMemoryRule, AgentToolPermission } from '@teamhub/db'
 import type { MemoryStoreRule } from '../types'
 import { generateStreamText } from '../ai/vercel/generateStreamText'

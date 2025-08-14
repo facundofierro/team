@@ -1,6 +1,6 @@
 import { ToolTypeDefinition } from '../tools'
 import { z } from 'zod'
-import { db } from '@teamhub/db'
+import { getAgents, reactiveDb } from '@teamhub/db'
 
 export type AgentDiscoveryParameters = {
   searchQuery?: string
@@ -194,7 +194,10 @@ export const agentDiscovery: ToolTypeDefinition = {
       // For demo purposes, we'll need to get the organization ID from context
 
       // Get all agents - in production this should be organization-scoped
-      const allAgents = await db.getAgents('') // This needs organization context
+      const allAgents = await getAgents.execute(
+        { organizationId: '' },
+        reactiveDb
+      ) // This needs organization context
 
       console.log(
         `📊 Discovery Tool: Found ${allAgents.length} total agents in organization`

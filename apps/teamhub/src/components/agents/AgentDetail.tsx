@@ -78,7 +78,11 @@ export function AgentDetail({
   // Update store when agent data arrives or changes
   useEffect(() => {
     if (agent) {
-      console.log('🔄 [AgentDetail] Setting selected agent in store:', agent.id, agent.name)
+      console.log(
+        '🔄 [AgentDetail] Setting selected agent in store:',
+        agent.id,
+        agent.name
+      )
       setSelectedAgent(agent)
       setHasChanges(false)
       setPendingChanges({})

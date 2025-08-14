@@ -1,6 +1,10 @@
 'use server'
 
-import { db, createUser } from '@teamhub/db'
+import {
+  createOrganization as createOrganizationFn,
+  getOrganizations,
+  reactiveDb,
+} from '@teamhub/db'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
@@ -18,35 +22,20 @@ export async function createOrganization(
   if (!session.user) throw new Error('Unauthorized')
 
   try {
-    // Ensure the user exists in the database before creating an organization
-    if (session.user.id) {
-      try {
-        await createUser({
-          id: session.user.id,
-          name: session.user.name || session.user.email || 'Unknown User',
-          email: session.user.email || '',
-          image: session.user.image || null,
-        })
-      } catch (error: any) {
-        // Ignore if user already exists (unique constraint violation)
-        if (error?.code !== '23505') {
-          console.error('Error creating user:', error)
-          throw error
-        }
-      }
-    }
-
-    const newOrg = await db.createOrganization({
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      databaseName: name
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '_'),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      userId: session.user.id,
-    })
+    const newOrg = await createOrganizationFn.execute(
+      {
+        id: crypto.randomUUID(),
+        name: name.trim(),
+        databaseName: name
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '_'),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: session.user.id,
+      },
+      reactiveDb
+    )
 
     // Create new URLSearchParams from the string
     const searchParams = new URLSearchParams(currentSearchParams)
@@ -74,7 +63,10 @@ export async function ensureOrganizationDatabaseSetup(organizationId: string) {
 
   try {
     // Get organization info
-    const organizations = await db.getOrganizations(session.user.id)
+    const organizations = await getOrganizations.execute(
+      { userId: session.user.id },
+      reactiveDb
+    )
     const organization = organizations.find((org) => org.id === organizationId)
 
     if (!organization) {

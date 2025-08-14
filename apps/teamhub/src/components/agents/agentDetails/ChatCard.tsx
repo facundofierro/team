@@ -40,10 +40,14 @@ export function ChatCard({
   onConversationLoaded,
 }: ChatCardProps) {
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
-  
+
   // Debug: Log the selected agent state
   useEffect(() => {
-    console.log('💬 [ChatCard] selectedAgent from store:', selectedAgent?.id, selectedAgent?.name)
+    console.log(
+      '💬 [ChatCard] selectedAgent from store:',
+      selectedAgent?.id,
+      selectedAgent?.name
+    )
   }, [selectedAgent])
 
   // Custom hooks for different concerns
@@ -128,7 +132,9 @@ export function ChatCard({
     experimental_prepareRequestBody: ({ messages }) => {
       // Guard: Ensure we have an agent before preparing the request
       if (!selectedAgent?.id) {
-        console.error('💬 [ChatCard] No agent selected, cannot prepare request body')
+        console.error(
+          '💬 [ChatCard] No agent selected, cannot prepare request body'
+        )
         throw new Error('No agent selected')
       }
       // Build optimized context using context optimizer
@@ -152,8 +158,13 @@ export function ChatCard({
       )
 
       // Debug: Log the agent ID being sent
-      console.log('💬 [ChatCard] Preparing request body with agentId:', selectedAgent?.id, 'selectedAgent:', selectedAgent?.name)
-      
+      console.log(
+        '💬 [ChatCard] Preparing request body with agentId:',
+        selectedAgent?.id,
+        'selectedAgent:',
+        selectedAgent?.name
+      )
+
       return {
         messages: optimizedContext.messages,
         summary: optimizedContext.summary,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbMemories, db } from '@teamhub/db'
+import { dbMemories, getOrganizations, reactiveDb } from '@teamhub/db'
 import { auth } from '@/auth'
 
 export async function GET(
@@ -29,7 +29,10 @@ export async function GET(
     }
 
     // Get organization info to resolve the actual database name
-    const organizations = await db.getOrganizations(session.user.id)
+    const organizations = await getOrganizations.execute(
+      { userId: session.user.id },
+      reactiveDb
+    )
     const organization = organizations.find((org) => org.id === organizationId)
 
     if (!organization) {

@@ -1,6 +1,12 @@
 import { ToolTypeDefinition } from '../tools'
 import { z } from 'zod'
-import { db } from '@teamhub/db'
+import {
+  getAgent,
+  createCron,
+  createMessage,
+  updateMessage,
+  reactiveDb,
+} from '@teamhub/db'
 
 export type A2AParameters = {
   targetAgentId: string
@@ -169,7 +175,10 @@ export const agentToAgent: ToolTypeDefinition = {
 
     try {
       // First, verify the target agent exists and is active
-      const targetAgent = await db.getAgent(targetAgentId)
+      const targetAgent = await getAgent.execute(
+        { id: targetAgentId },
+        reactiveDb
+      )
       if (!targetAgent) {
         throw new Error(`Target agent with ID ${targetAgentId} not found`)
       }
@@ -206,34 +215,40 @@ export const agentToAgent: ToolTypeDefinition = {
         console.log(`⏰ A2A Tool: Scheduling message for ${scheduledFor}`)
 
         // Create a cron job for scheduled delivery
-        const cronJob = await db.createCron({
-          id: `a2a_cron_${messageId}`,
-          organizationId: targetAgent.organizationId!,
-          messageId: messageId,
-          schedule: `${scheduledFor.getMinutes()} ${scheduledFor.getHours()} ${scheduledFor.getDate()} ${
-            scheduledFor.getMonth() + 1
-          } *`,
-          isActive: true,
-          nextRun: scheduledFor,
-        })
+        const cronJob = await createCron.execute(
+          {
+            id: `a2a_cron_${messageId}`,
+            organizationId: targetAgent.organizationId!,
+            messageId: messageId,
+            schedule: `${scheduledFor.getMinutes()} ${scheduledFor.getHours()} ${scheduledFor.getDate()} ${
+              scheduledFor.getMonth() + 1
+            } *`,
+            isActive: true,
+            nextRun: scheduledFor,
+          },
+          reactiveDb
+        )
 
         // Create the message with pending status
-        await db.createMessage({
-          id: messageId,
-          organizationId: targetAgent.organizationId!,
-          fromAgentId: null, // Will be filled when executed
-          toAgentId: targetAgentId,
-          type: `a2a_${messageType}`,
-          content: content,
-          metadata: {
-            ...metadata,
-            priority,
-            originalMessageType: messageType,
-            isA2AMessage: true,
-            scheduledFor: scheduledFor.toISOString(),
+        await createMessage.execute(
+          {
+            id: messageId,
+            organizationId: targetAgent.organizationId!,
+            fromAgentId: null, // Will be filled when executed
+            toAgentId: targetAgentId,
+            type: `a2a_${messageType}`,
+            content: content,
+            metadata: {
+              ...metadata,
+              priority,
+              originalMessageType: messageType,
+              isA2AMessage: true,
+              scheduledFor: scheduledFor.toISOString(),
+            },
+            status: 'scheduled',
           },
-          status: 'scheduled',
-        })
+          reactiveDb
+        )
 
         return {
           success: true,
@@ -257,22 +272,25 @@ export const agentToAgent: ToolTypeDefinition = {
       )
 
       // Create the message record
-      const message = await db.createMessage({
-        id: messageId,
-        organizationId: targetAgent.organizationId!,
-        fromAgentId: null, // The current agent context will be determined by the conversation
-        toAgentId: targetAgentId,
-        type: `a2a_${messageType}`,
-        content: content,
-        metadata: {
-          ...metadata,
-          priority,
-          originalMessageType: messageType,
-          isA2AMessage: true,
-          deliveredAt: new Date().toISOString(),
+      const message = await createMessage.execute(
+        {
+          id: messageId,
+          organizationId: targetAgent.organizationId!,
+          fromAgentId: null, // The current agent context will be determined by the conversation
+          toAgentId: targetAgentId,
+          type: `a2a_${messageType}`,
+          content: content,
+          metadata: {
+            ...metadata,
+            priority,
+            originalMessageType: messageType,
+            isA2AMessage: true,
+            deliveredAt: new Date().toISOString(),
+          },
+          status: 'delivered',
         },
-        status: 'delivered',
-      })
+        reactiveDb
+      )
 
       // Create or get the organization's database name for memory functions
       const orgDatabaseName = targetAgent.organizationId || 'teamhub' // fallback
@@ -357,12 +375,18 @@ Please review and respond to this request.`
         // Update the message with conversation reference
         const currentMetadata =
           (message.metadata as Record<string, unknown>) || {}
-        await db.updateMessage(messageId, {
-          metadata: {
-            ...currentMetadata,
-            conversationId,
+        await updateMessage.execute(
+          {
+            id: messageId,
+            data: {
+              metadata: {
+                ...currentMetadata,
+                conversationId,
+              },
+            },
           },
-        })
+          reactiveDb
+        )
       } else {
         // For other message types (response, notification, status_update), just log them
         console.log(
