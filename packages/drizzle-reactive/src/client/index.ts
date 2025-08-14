@@ -1,0 +1,45 @@
+/**
+ * Client-side reactive database features
+ */
+
+// Storage and session management
+export { ReactiveStorage, createReactiveStorage } from './storage'
+export {
+  SessionRecoveryManager,
+  createSessionRecoveryManager,
+  type SessionGapInfo,
+  type RecoveryPlan,
+} from './session'
+
+// Client manager
+export {
+  ReactiveClientManager,
+  createReactiveClient,
+  type ReactiveManagerOptions,
+} from './manager'
+
+// React hooks
+export {
+  useReactive,
+  useReactivePriorities,
+  useReactiveStats,
+  useReactiveRefresh,
+  useReactiveInvalidation,
+  useSmartRevalidation,
+  useRevalidationStats,
+  initializeReactiveClient,
+  type UseReactiveResult,
+} from './hooks'
+
+// Smart revalidation
+export {
+  SmartRevalidationEngine,
+  createSmartRevalidationEngine,
+  type RevalidationStrategy,
+  type RevalidationOptions,
+  type RevalidationResult,
+} from './revalidation'
+
+// Provider and types
+export { ReactiveProvider } from './provider'
+export type { UseReactiveResult as ClientUseReactiveResult } from './types'

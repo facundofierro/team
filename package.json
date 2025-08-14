@@ -8,6 +8,7 @@
     "build:ai-gateway": "turbo run build --filter=ai-gateway...",
     "build:teamhub": "turbo run build --filter=teamhub...",
     "build:teamhub:prod": "NODE_ENV=production turbo run build --filter=teamhub...",
+    "build:drizzle-reactive": "turbo run build --filter=@drizzle/reactive...",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e --filter=teamhub...",
     "test:e2e:ui": "turbo run test:e2e:ui --filter=teamhub...",
