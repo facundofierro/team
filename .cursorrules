@@ -1,29 +1,35 @@
 # TeamHub Cursor Rules
 
 ## Project Overview
+
 TeamHub is an enterprise AI agent management platform built with Next.js 14, TypeScript, and a modern monorepo structure. It provides multi-tenant environments for organizations to create, manage, and orchestrate AI agents at scale.
 
 ## Architecture Guidelines
 
 ### Monorepo Structure
+
 - Use `pnpm` for package management across the monorepo
 - Follow the established folder structure: `apps/`, `packages/`, `infrastructure/`, `docs/`
 - Each package should have clear responsibilities and minimal dependencies
 - Use Turbo for build orchestration and caching
 
 ### Applications
+
 - **teamhub**: Main Next.js application (UI + API)
 - **ai-gateway**: AI provider abstraction service
 - **browser-service**: Automated browser control (currently disabled due to Playwright build issues)
 
 ### Packages
+
 - **teamhub-ai**: AI functions, tools, and agent communication
 - **teamhub-db**: Database schemas, ORM functions, and data access
 - **ai-services**: Multi-provider AI service abstractions
+- **drizzle-reactive**: Reactive database library for zero-config real-time features
 
 ## Technology Stack Conventions
 
 ### Frontend (Next.js 14)
+
 - Use App Router exclusively (no Pages Router)
 - Prefer Server Components when possible, use Client Components only when necessary
 - Always mark Client Components with `'use client'` directive
@@ -31,6 +37,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Follow shadcn/ui component patterns and naming conventions
 
 ### UI/UX Standards
+
 - Use shadcn/ui components exclusively for consistency
 - Follow the established color scheme: `bg-menu`, `bg-menu2`, `bg-background`, etc.
 - Implement responsive design with mobile-first approach
@@ -38,28 +45,116 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Maintain accessibility standards (ARIA labels, keyboard navigation)
 
 ### State Management
+
 - Use Zustand for client-side state management
 - Keep stores focused and minimal (agentStore, organizationStore, navigationStore)
 - Avoid prop drilling - use stores for shared state
 - Server state should be managed separately from client state
 
 ### Database & ORM
+
 - Use Drizzle ORM exclusively for database operations
+- **NEW: Use @drizzle/reactive for all database functions**
 - All database functions should be in `packages/teamhub-db`
 - Follow type-safe query patterns
 - Use transactions for multi-table operations
 - Implement proper error handling and validation
 
 ### AI Integration
+
 - All AI provider interactions should go through `packages/ai-services`
 - Support multiple providers: OpenAI, DeepSeek, Fal, Eden AI
 - Implement streaming responses where possible
 - Handle region restrictions gracefully (especially for OpenAI embeddings)
 - Use the established tool framework for new integrations
 
+## @drizzle/reactive Integration Guidelines
+
+### Core Reactive Patterns
+
+Always use `defineReactiveFunction` for database operations:
+
+```typescript
+// ✅ CORRECT: Reactive function with explicit name
+export const getAgents = defineReactiveFunction({
+  name: 'agents.getAll', // Used for cache keys AND tRPC procedures
+  input: z.object({
+    organizationId: z.string(),
+    limit: z.number().optional().default(50),
+  }),
+  dependencies: ['agent'], // Tables this function reads from
+  handler: async (input, db) => {
+    return db.agents.findMany({
+      where: { organizationId: input.organizationId },
+      limit: input.limit,
+    })
+  },
+})
+
+// ✅ CORRECT: Server-side execution
+const agents = await getAgents.execute({ organizationId: 'org-123' }, db)
+
+// ✅ CORRECT: tRPC integration
+const router = createReactiveRouter({ db }).addQuery(getAgents) // Creates 'agents.getAll' procedure automatically
+
+// ✅ CORRECT: Client usage
+const { data: agents, isStale } = useReactive('agents.getAll', {
+  organizationId,
+})
+```
+
+### TeamHub Relations Configuration
+
+```typescript
+const teamhubReactiveConfig = {
+  relations: {
+    // When agent changes, invalidate these queries
+    agent: ['message.fromAgentId', 'memory.agentId', 'organization.id'],
+
+    // When organization changes, invalidate these queries
+    organization: ['agent.organizationId', 'tool.organizationId'],
+
+    // When message changes, invalidate these queries
+    message: ['agent.fromAgentId', 'agent.toAgentId'],
+
+    // When memory changes, invalidate these queries
+    memory: ['agent.agentId'],
+
+    // When tool changes, invalidate these queries
+    tool: ['organization.id'],
+  },
+}
+```
+
+### Migration from Legacy Patterns
+
+```typescript
+// ❌ OLD: Manual tRPC procedures
+export const agentsRouter = t.router({
+  getAll: t.procedure
+    .input(z.object({ organizationId: z.string() }))
+    .query(async ({ input }) => {
+      return db.agents.findMany({ where: input })
+    }),
+})
+
+// ✅ NEW: Reactive function + auto-generated tRPC
+export const getAgents = defineReactiveFunction({
+  name: 'agents.getAll',
+  input: z.object({ organizationId: z.string() }),
+  dependencies: ['agent'],
+  handler: async (input, db) => {
+    return db.agents.findMany({ where: input })
+  },
+})
+
+const router = createReactiveRouter({ db }).addQuery(getAgents)
+```
+
 ## Code Style & Quality
 
 ### TypeScript
+
 - Enable strict mode and all strict checks
 - Use proper type definitions - avoid `any`
 - Prefer interfaces over types for object shapes
@@ -67,6 +162,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Export types alongside implementations
 
 ### File Organization
+
 - Use kebab-case for file names
 - Group related components in directories
 - Index files should re-export main components
@@ -74,13 +170,16 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Use meaningful, descriptive names
 
 ### Naming Conventions
+
 - Components: PascalCase (e.g., `AgentDetail`, `ChatCard`)
 - Functions: camelCase (e.g., `sendChat`, `getAgents`)
+- Reactive Functions: camelCase with hierarchical names (e.g., `agents.getAll`, `agents.memory.getRecent`)
 - Constants: SCREAMING_SNAKE_CASE (e.g., `API_ENDPOINTS`)
 - Files: kebab-case (e.g., `agent-detail.tsx`, `chat-card.tsx`)
 - Database entities: camelCase in code, snake_case in database
 
 ### Error Handling
+
 - Always handle errors gracefully
 - Use try-catch blocks for async operations
 - Provide meaningful error messages to users
@@ -90,6 +189,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 ## Component Guidelines
 
 ### React Components
+
 - Use functional components exclusively
 - Implement proper loading and error states
 - Use React.memo() for expensive computations
@@ -97,6 +197,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Keep components under 200 lines when possible
 
 ### Props & Types
+
 - Define explicit prop interfaces
 - Use optional props with default values
 - Implement prop validation with TypeScript
@@ -104,7 +205,9 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Avoid passing entire objects when specific props will do
 
 ### Hooks
+
 - Use built-in hooks appropriately
+- **NEW: Use `useReactive` instead of manual React Query**
 - Create custom hooks for reusable logic
 - Keep hooks focused and testable
 - Follow hooks rules (always call at top level)
@@ -113,20 +216,25 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 ## API & Server Actions
 
 ### Server Actions
-- Use Server Actions for mutations (create, update, delete)
-- Implement proper validation using Zod or similar
+
+- **NEW: Use reactive functions for mutations**
+- Implement proper validation using Zod
 - Handle authentication and authorization
 - Return typed responses
 - Use revalidatePath/revalidateTag appropriately
 
 ### API Routes
+
 - Use API routes for external integrations
+- **NEW: Use reactive functions for internal data operations**
 - Implement proper error handling and status codes
 - Use middleware for authentication
 - Document API endpoints
 - Follow RESTful conventions where applicable
 
 ### Database Operations
+
+- **NEW: All database operations should use defineReactiveFunction**
 - Use organization-scoped queries for multi-tenancy
 - Implement proper pagination for large datasets
 - Use database transactions for consistency
@@ -136,6 +244,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 ## Security Guidelines
 
 ### Authentication & Authorization
+
 - Use NextAuth.js for authentication
 - Implement proper session management
 - Check permissions on all protected routes
@@ -143,6 +252,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Use environment variables for secrets
 
 ### Data Protection
+
 - Implement organization-level data isolation
 - Validate all input data
 - Sanitize user-generated content
@@ -150,6 +260,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Implement rate limiting where appropriate
 
 ### Environment Variables
+
 - Use `.env.local` for development
 - Never commit secrets to version control
 - Use GitHub Secrets for production
@@ -159,6 +270,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 ## AI & Tools Development
 
 ### Tool Creation
+
 - Implement the `ToolTypeDefinition` interface
 - Use Zod schemas for parameter validation
 - Include proper error handling and timeouts
@@ -166,6 +278,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Document tool capabilities and limitations
 
 ### AI Provider Integration
+
 - Follow the established provider abstraction pattern
 - Implement both generation and discovery functions
 - Handle provider-specific errors gracefully
@@ -173,61 +286,28 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Test with multiple providers
 
 ### Memory Management
+
+- **NEW: Use reactive functions for memory operations**
 - Use semantic search with pgvector when possible
 - Implement proper memory categorization
 - Handle embedding generation failures gracefully
 - Respect retention policies and cleanup old data
 - Optimize memory retrieval performance
 
-## Testing Guidelines
-
-### End-to-End Testing
-- Use Playwright for E2E tests
-- Test critical user flows
-- Include authentication in test setup
-- Use page object models for maintainability
-- Run tests in CI/CD pipeline
-
-### Unit Testing
-- Test complex business logic
-- Mock external dependencies
-- Use descriptive test names
-- Keep tests focused and isolated
-- Maintain good test coverage
-
-## Deployment & Infrastructure
-
-### Docker
-- Use multi-stage builds for optimization
-- Prefer distroless images for security
-- Minimize image size (target < 200MB)
-- Use proper health checks
-- Handle graceful shutdowns
-
-### Environment Management
-- Use Docker Swarm for orchestration
-- Implement selective service redeployment
-- Use secrets management for sensitive data
-- Monitor service health
-- Implement proper logging
-
-### CI/CD
-- Use GitHub Actions for automation
-- Run tests before deployment
-- Build and push to GitHub Container Registry
-- Implement automated rollbacks
-- Monitor deployment success
-
 ## Performance Guidelines
 
 ### Frontend Performance
+
 - Use React.memo() for expensive components
+- **NEW: Leverage reactive caching automatically**
 - Implement proper loading states
 - Optimize images and assets
 - Use code splitting where appropriate
 - Monitor bundle size
 
 ### Database Performance
+
+- **NEW: Reactive functions provide automatic caching**
 - Use indexes appropriately
 - Implement query optimization
 - Use connection pooling
@@ -235,83 +315,77 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Implement proper caching strategies
 
 ### Caching
-- Use Redis for application caching
-- Implement proper cache invalidation
+
+- **NEW: @drizzle/reactive handles caching automatically**
+- Use Redis for application caching when needed
+- Implement proper cache invalidation via relations config
 - Cache expensive computations
 - Use browser caching for static assets
 - Monitor cache hit rates
 
-## Documentation Standards
+## Common TeamHub Patterns
 
-### Code Documentation
-- Use JSDoc for complex functions
-- Document API endpoints thoroughly
-- Keep README files up to date
-- Include examples in documentation
-- Document breaking changes
+### Agent Operations
 
-### Architecture Documentation
-- Keep architecture diagrams current
-- Document deployment procedures
-- Maintain troubleshooting guides
-- Document environment setup
-- Include performance considerations
-
-## Common Patterns
-
-### Database Queries
 ```typescript
-// Use organization-scoped queries
-const agents = await db.getAgents(organizationId)
+// Get agents with statistics
+export const getAgentsWithStats = defineReactiveFunction({
+  name: 'agents.getWithStats',
+  input: z.object({ organizationId: z.string() }),
+  dependencies: ['agent', 'message', 'memory'],
+  handler: async (input, db) => {
+    // Complex query with joins
+  },
+})
 
-// Use transactions for multiple operations
-await db.transaction(async (tx) => {
-  await tx.insert(agents).values(newAgent)
-  await tx.insert(agentPermissions).values(permissions)
+// Update agent
+export const updateAgent = defineReactiveFunction({
+  name: 'agents.update',
+  input: z.object({ id: z.string(), data: agentUpdateSchema }),
+  dependencies: ['agent'],
+  handler: async (input, db) => {
+    return db.agents.update({
+      where: { id: input.id },
+      data: input.data,
+    })
+  },
 })
 ```
 
-### Error Handling
+### Memory Operations
+
 ```typescript
-try {
-  const result = await riskOperation()
-  return { success: true, data: result }
-} catch (error) {
-  console.error('Operation failed:', error)
-  return { success: false, error: 'Operation failed' }
-}
+export const getAgentMemories = defineReactiveFunction({
+  name: 'agents.memory.getAll',
+  input: z.object({ agentId: z.string(), limit: z.number().optional() }),
+  dependencies: ['memory', 'agent'],
+  handler: async (input, db) => {
+    return db.memory.findMany({
+      where: { agentId: input.agentId },
+      limit: input.limit,
+      orderBy: { createdAt: 'desc' },
+    })
+  },
+})
 ```
 
-### Component Structure
-```typescript
-interface ComponentProps {
-  required: string
-  optional?: boolean
-}
+### Organization Operations
 
-export function Component({ required, optional = false }: ComponentProps) {
-  // Implementation
-}
-```
-
-### Tool Implementation
 ```typescript
-export const myTool: ToolTypeDefinition = {
-  id: 'myTool',
-  type: 'myTool',
-  description: 'Tool description',
-  parametersSchema: z.object({
-    param: z.string().describe('Parameter description')
-  }),
-  handler: async (params, configuration) => {
-    // Tool logic
-  }
-}
+export const getOrganizationOverview = defineReactiveFunction({
+  name: 'organizations.getOverview',
+  input: z.object({ organizationId: z.string() }),
+  dependencies: ['organization', 'agent', 'message', 'memory', 'tool'],
+  handler: async (input, db) => {
+    // Comprehensive overview query
+  },
+})
 ```
 
 ## Debugging & Troubleshooting
 
 ### Logging
+
 - Use structured logging with context
 - Include operation IDs for tracing
 - Log errors with stack traces
@@ -319,17 +393,33 @@ export const myTool: ToolTypeDefinition = {
 - Include timing information
 
 ### Development Tools
+
 - Use React DevTools for component debugging
 - Use Drizzle Studio for database inspection
+- **NEW: Monitor reactive cache hits/misses in console**
 - Use browser DevTools for performance profiling
 - Use TypeScript strict mode for better error detection
 - Use ESLint and Prettier for code quality
 
 ### Common Issues
+
+- **NEW: Check reactive function dependencies if data seems stale**
+- **NEW: Verify relations config covers all table relationships**
 - Playwright build issues: Browser service currently disabled
-- OpenAI embedding region restrictions: Implement fallbacks
 - Database connection issues: Check environment variables
 - Authentication issues: Verify ALLOWED_EMAILS configuration
 - Memory issues: Monitor conversation memory growth
 
-Remember: This is an enterprise platform - prioritize security, performance, and maintainability in all decisions.
+## AI Assistant Guidance
+
+When helping with TeamHub development:
+
+1. **Always suggest @drizzle/reactive patterns** for database operations
+2. **Check existing relations config** when adding new reactive functions
+3. **Suggest appropriate function names** following hierarchical conventions
+4. **Analyze function dependencies** based on actual table usage
+5. **Recommend cache invalidation strategies** based on data relationships
+6. **Help migrate legacy patterns** to reactive functions
+7. **Suggest performance optimizations** using reactive features
+
+Remember: TeamHub is an enterprise platform - prioritize security, performance, maintainability, and now **reactive real-time features** in all decisions.

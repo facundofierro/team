@@ -1,9 +1,9 @@
 /**
  * Verify that the @drizzle/reactive package matches the specification
- * 
+ *
  * This script checks all the key features mentioned in the spec:
  * - defineReactiveFunction API
- * - tRPC integration 
+ * - tRPC integration
  * - Simple session gap detection
  * - SSE real-time transport
  * - Zero-config usage
@@ -15,19 +15,19 @@ console.log('🔍 VERIFYING @drizzle/reactive PACKAGE AGAINST SPECIFICATION\n')
 const {
   // Core API
   defineReactiveFunction,
-  
+
   // tRPC integration
   createReactiveRouter,
-  
+
   // Client-side
   createReactiveClientManager,
   SimpleSessionManager,
   revalidateOnPageLoad,
-  
+
   // SSE transport
   createSSEStream,
   broadcastInvalidation,
-  
+
   // Types
   ReactiveConfig,
 } = require('./dist/index.js')
@@ -39,7 +39,7 @@ const mockDb = {
   query: async (sql, params) => {
     console.log(`[MockDB] ${sql.replace(/\s+/g, ' ').trim()}`)
     return [{ id: '1', name: 'Test', data: 'mock' }]
-  }
+  },
 }
 
 async function verifySpecification() {
@@ -55,20 +55,23 @@ async function verifySpecification() {
   // ========================================
   // Test 1: defineReactiveFunction API (as per spec)
   // ========================================
-  
+
   console.log('📝 Test 1: defineReactiveFunction API')
-  
+
   try {
     const getUsers = defineReactiveFunction({
-      name: 'users.getAll',  // ✅ Names for cache keys and tRPC
+      name: 'users.getAll', // ✅ Names for cache keys and tRPC
       input: z.object({
-        companyId: z.string(),  // ✅ Generic, not hardcoded organizationId
+        companyId: z.string(), // ✅ Generic, not hardcoded organizationId
         limit: z.number().optional(),
       }),
-      dependencies: ['user'],  // ✅ Explicit dependencies
-      handler: async (input, db) => {  // ✅ Clean signature (input, db)
-        return db.query('SELECT * FROM users WHERE company_id = $1', [input.companyId])
-      }
+      dependencies: ['user'], // ✅ Explicit dependencies
+      handler: async (input, db) => {
+        // ✅ Clean signature (input, db)
+        return db.query('SELECT * FROM users WHERE company_id = $1', [
+          input.companyId,
+        ])
+      },
     })
 
     // Test standalone execution (server-side)
@@ -77,7 +80,11 @@ async function verifySpecification() {
 
     // Test metadata
     const metadata = getUsers.getMetadata()
-    console.log(`✅ Metadata: ${metadata.name}, deps: [${metadata.dependencies.join(', ')}]`)
+    console.log(
+      `✅ Metadata: ${metadata.name}, deps: [${metadata.dependencies.join(
+        ', '
+      )}]`
+    )
 
     // Test cache key
     const cacheKey = getUsers.getCacheKey({ companyId: 'test', limit: 10 })
@@ -91,31 +98,35 @@ async function verifySpecification() {
   // ========================================
   // Test 2: tRPC Integration (as per spec)
   // ========================================
-  
+
   console.log('\n🔌 Test 2: tRPC Integration')
-  
+
   try {
     const getUsersFunction = defineReactiveFunction({
       name: 'users.getAll',
       input: z.object({ companyId: z.string() }),
       dependencies: ['user'],
-      handler: async (input, db) => db.query('SELECT * FROM users', [])
+      handler: async (input, db) => db.query('SELECT * FROM users', []),
     })
 
     const createUserFunction = defineReactiveFunction({
       name: 'users.create',
       input: z.object({ name: z.string(), email: z.string() }),
       dependencies: ['user'],
-      handler: async (input, db) => db.query('INSERT INTO users', [])
+      handler: async (input, db) => db.query('INSERT INTO users', []),
     })
 
     // Create reactive router
     const router = createReactiveRouter({ db: mockDb })
-      .addQuery(getUsersFunction)      // ✅ Uses function name automatically
-      .addMutation(createUserFunction)  // ✅ Uses function name automatically
+      .addQuery(getUsersFunction) // ✅ Uses function name automatically
+      .addMutation(createUserFunction) // ✅ Uses function name automatically
 
     const builtRouter = router.build()
-    console.log(`✅ tRPC router built with procedures: ${router.getProcedureNames().join(', ')}`)
+    console.log(
+      `✅ tRPC router built with procedures: ${router
+        .getProcedureNames()
+        .join(', ')}`
+    )
 
     // Test tRPC handler
     const trpcHandler = getUsersFunction.getTrpcHandler(mockDb)
@@ -130,15 +141,17 @@ async function verifySpecification() {
   // ========================================
   // Test 3: Simple Session Gap Detection (as per spec)
   // ========================================
-  
+
   console.log('\n⏰ Test 3: Simple Session Gap Detection')
-  
+
   try {
     const sessionManager = new SimpleSessionManager('test-org')
 
     // Test basic session info (as per QueryRegistry spec)
     const registry = sessionManager.getQueryRegistry()
-    console.log(`✅ QueryRegistry structure: organizationId: ${registry.organizationId}`)
+    console.log(
+      `✅ QueryRegistry structure: organizationId: ${registry.organizationId}`
+    )
     console.log(`✅ Session info: startTime, lastSync, realtimeConnected`)
 
     // Test gap detection
@@ -165,9 +178,9 @@ async function verifySpecification() {
   // ========================================
   // Test 4: SSE Transport (as per spec)
   // ========================================
-  
+
   console.log('\n📡 Test 4: SSE Real-time Transport')
-  
+
   try {
     // Test SSE stream creation
     const sseStream = createSSEStream('test-org')
@@ -179,7 +192,7 @@ async function verifySpecification() {
       table: 'users',
       organizationId: 'test-org',
       affectedQueries: ['users.getAll'],
-      timestamp: Date.now()
+      timestamp: Date.now(),
     })
     console.log(`✅ SSE invalidation broadcast completed`)
 
@@ -191,26 +204,26 @@ async function verifySpecification() {
   // ========================================
   // Test 5: Zero-Config Usage (as per spec)
   // ========================================
-  
+
   console.log('\n🎯 Test 5: Zero-Config Usage')
-  
+
   try {
     // Minimal config (only relations needed, as per spec)
     const config = {
       relations: {
         user: ['post.userId'],
         post: ['user.id'],
-      }
+      },
     }
 
     const clientManager = createReactiveClientManager({
       organizationId: 'test-org',
       config: config,
-      onRevalidate: async (queryKey) => ({ data: 'revalidated' })
+      onRevalidate: async (queryKey) => ({ data: 'revalidated' }),
     })
 
     console.log(`✅ Client manager created with minimal config`)
-    
+
     const sessionInfo = clientManager.getSessionInfo()
     console.log(`✅ Session info: ${Object.keys(sessionInfo).join(', ')}`)
 
@@ -222,15 +235,15 @@ async function verifySpecification() {
   // ========================================
   // Test 6: Naming Feature (our improvement)
   // ========================================
-  
+
   console.log('\n🏷️ Test 6: Naming Feature')
-  
+
   try {
     const namedFunction = defineReactiveFunction({
-      name: 'users.profile.getDetailed',  // ✅ Nested naming
+      name: 'users.profile.getDetailed', // ✅ Nested naming
       input: z.object({ userId: z.string() }),
       dependencies: ['user', 'profile'],
-      handler: async (input, db) => db.query('SELECT * FROM users', [])
+      handler: async (input, db) => db.query('SELECT * FROM users', []),
     })
 
     // Test cache key includes name
@@ -239,8 +252,7 @@ async function verifySpecification() {
     console.log(`✅ Cache key includes function name: ${includesName}`)
 
     // Test tRPC automatic naming
-    const router = createReactiveRouter({ db: mockDb })
-      .addQuery(namedFunction)  // Uses name automatically
+    const router = createReactiveRouter({ db: mockDb }).addQuery(namedFunction) // Uses name automatically
 
     const procedureNames = router.getProcedureNames()
     const hasCorrectName = procedureNames.includes('users.profile.getDetailed')
@@ -254,11 +266,14 @@ async function verifySpecification() {
   // ========================================
   // Summary
   // ========================================
-  
+
   console.log('\n🎉 VERIFICATION RESULTS:')
-  
+
   const testResults = [
-    { name: 'defineReactiveFunction API', passed: results.defineReactiveFunctionAPI },
+    {
+      name: 'defineReactiveFunction API',
+      passed: results.defineReactiveFunctionAPI,
+    },
     { name: 'tRPC Integration', passed: results.trpcIntegration },
     { name: 'Simple Session Gaps', passed: results.simpleSessionGaps },
     { name: 'SSE Transport', passed: results.sseTransport },
@@ -266,11 +281,11 @@ async function verifySpecification() {
     { name: 'Naming Feature', passed: results.namingFeature },
   ]
 
-  testResults.forEach(test => {
+  testResults.forEach((test) => {
     console.log(`${test.passed ? '✅' : '❌'} ${test.name}`)
   })
 
-  const passedCount = testResults.filter(t => t.passed).length
+  const passedCount = testResults.filter((t) => t.passed).length
   const totalCount = testResults.length
 
   console.log(`\n📊 Overall: ${passedCount}/${totalCount} tests passed`)
@@ -284,13 +299,15 @@ async function verifySpecification() {
   // ========================================
   // Spec Compliance Check
   // ========================================
-  
+
   console.log('\n📋 SPECIFICATION COMPLIANCE:')
   console.log('✅ Zero configuration, maximum intelligence')
   console.log('✅ Reactive everywhere with no boilerplate')
   console.log('✅ Generic (no hardcoded organizationId)')
   console.log('✅ Functions work standalone AND via tRPC')
-  console.log('✅ Simple session gap detection (localStorage + smart revalidation)')
+  console.log(
+    '✅ Simple session gap detection (localStorage + smart revalidation)'
+  )
   console.log('✅ SSE for real-time cache invalidation')
   console.log('✅ Function names for cache keys and tRPC procedures')
   console.log('✅ Type-safe with Zod validation')
@@ -300,11 +317,11 @@ async function verifySpecification() {
 
 // Run verification
 verifySpecification()
-  .then(results => {
+  .then((results) => {
     const success = Object.values(results).every(Boolean)
     process.exit(success ? 0 : 1)
   })
-  .catch(error => {
+  .catch((error) => {
     console.error('❌ Verification failed:', error)
     process.exit(1)
   })
