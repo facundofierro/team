@@ -15,7 +15,9 @@ let globalClientManager: ReactiveClientManager | null = null
  */
 function getClientManager(): ReactiveClientManager {
   if (!globalClientManager) {
-    throw new Error('Reactive client not initialized. Call initializeReactiveClient first.')
+    throw new Error(
+      'Reactive client not initialized. Call initializeReactiveClient first.'
+    )
   }
   return globalClientManager
 }
@@ -41,11 +43,24 @@ export function initializeReactiveClient(
     config,
     onRevalidate: revalidateFn,
     onInvalidation: (event: InvalidationEvent) => {
-      console.log(`[ReactiveClient] Received invalidation for table: ${event.table}`)
+      console.log(
+        `[ReactiveClient] Received invalidation for table: ${event.table}`
+      )
     },
   })
 
-  console.log('✅ Reactive client initialized successfully for org:', organizationId)
+  // Expose client manager to window for testing purposes
+  if (typeof window !== 'undefined') {
+    ;(window as any).__reactiveClientManager = globalClientManager
+    console.log(
+      '🔧 [ReactiveClient] Client manager exposed to window for testing'
+    )
+  }
+
+  console.log(
+    '✅ Reactive client initialized successfully for org:',
+    organizationId
+  )
 }
 
 /**
@@ -82,30 +97,85 @@ export function useReactive<T = any>(
         setIsLoading(true)
         setError(null)
 
-        // Check cache first
+        // Check ReactiveStorage cache first (immediate display)
         const cached = clientManager.getCachedData(queryKey)
-        
-        if (cached && !isInitialMount.current) {
-          // Use cached data if available
-          setData(cached.data)
-          setIsStale(cached.isStale || false)
-          setIsLoading(false)
-          return
+        console.log(`🔍 [useReactive] Checking cache for ${queryKey}:`, cached)
+
+        if (cached) {
+          try {
+            const now = Date.now()
+            const cacheAge = now - cached.lastRevalidated
+            const minRevalidationTime = 5 * 60 * 1000 // 5 minutes minimum between revalidations
+
+            console.log(`📊 [useReactive] Cache details for ${queryKey}:`, {
+              cacheAge: `${Math.round(cacheAge / 1000)}s`,
+              minRevalidationTime: `${Math.round(minRevalidationTime / 1000)}s`,
+              isStale: cached.isStale,
+              dataExists: !!cached.data,
+            })
+
+            // Show cached data immediately
+            setData(cached.data)
+            setIsStale(cached.isStale || false)
+
+            // Only revalidate if cache is old enough (avoid excessive revalidation)
+            if (cacheAge > minRevalidationTime) {
+              console.log(
+                `[useReactive] Cache miss for ${queryKey}, triggering immediate fetch (cache age: ${Math.round(
+                  cacheAge / 1000
+                )}s)`
+              )
+
+              // Trigger revalidation in background
+              clientManager
+                .revalidateQuery(queryKey)
+                .then((result) => {
+                  if (result !== undefined) {
+                    setData(result)
+                    setIsStale(false)
+
+                    // Update ReactiveStorage with fresh data
+                    clientManager.registerQuery(queryKey, [], result)
+                    console.log('💾 Updated ReactiveStorage with fresh data')
+                  }
+                })
+                .catch((error) => {
+                  console.warn(
+                    `[useReactive] Background revalidation failed:`,
+                    error
+                  )
+                  // Keep showing cached data even if revalidation fails
+                })
+            } else {
+              console.log(
+                `[useReactive] Using fresh cache for ${queryKey} (age: ${Math.round(
+                  cacheAge / 1000
+                )}s < ${Math.round(minRevalidationTime / 1000)}s)`
+              )
+            }
+
+            setIsLoading(false)
+            isInitialMount.current = false
+            return
+          } catch (parseError) {
+            console.warn('⚠️ Failed to parse cached data:', parseError)
+            // Continue with revalidation if cache is corrupted
+          }
         }
 
-        // If no cache or stale data, we need to fetch
-        if (cached?.isStale) {
-          console.log(
-            `[useReactive] Stale cache for ${queryKey}, triggering revalidation`
-          )
-          // Trigger revalidation for stale data
-          await clientManager.revalidateQuery(queryKey)
-        } else {
-          console.log(
-            `[useReactive] Cache miss for ${queryKey}, triggering immediate fetch`
-          )
-          // Trigger immediate fetch for cache misses
-          await clientManager.revalidateQuery(queryKey)
+        // No cache or corrupted cache - trigger immediate fetch
+        console.log(
+          `[useReactive] No cache for ${queryKey}, triggering immediate fetch`
+        )
+
+        const result = await clientManager.revalidateQuery(queryKey)
+        if (result !== undefined) {
+          setData(result)
+          setIsStale(false)
+
+          // Store in ReactiveStorage for future use
+          clientManager.registerQuery(queryKey, [], result)
+          console.log('💾 Stored fresh data in ReactiveStorage')
         }
 
         setIsLoading(false)
@@ -126,10 +196,10 @@ export function useReactive<T = any>(
       setError(null)
 
       console.log(`[useReactive] Manual refetch for ${queryKey}`)
-      
+
       // Trigger manual revalidation
       await clientManager.revalidateQuery(queryKey)
-      
+
       // Update stale state
       setIsStale(false)
       setIsLoading(false)
@@ -200,12 +270,14 @@ export function useReactiveRefresh() {
     // Trigger revalidation for all active queries
     const activeHooks = clientManager.getStorageStats()?.queries || {}
     const activeQueryKeys = Object.keys(activeHooks)
-    
-    console.log(`[useReactiveRefresh] Refreshing ${activeQueryKeys.length} active queries`)
-    
+
+    console.log(
+      `[useReactiveRefresh] Refreshing ${activeQueryKeys.length} active queries`
+    )
+
     // Revalidate all active queries
     await Promise.allSettled(
-      activeQueryKeys.map(queryKey => clientManager.revalidateQuery(queryKey))
+      activeQueryKeys.map((queryKey) => clientManager.revalidateQuery(queryKey))
     )
   }, [clientManager])
 }
@@ -235,7 +307,9 @@ export function useRevalidationStats() {
 /**
  * Hook to handle invalidation events
  */
-export function useReactiveInvalidation(callback: (event: InvalidationEvent) => void): void {
+export function useReactiveInvalidation(
+  callback: (event: InvalidationEvent) => void
+): void {
   const clientManager = getClientManager()
 
   useEffect(() => {
@@ -252,7 +326,9 @@ export function useReactiveInvalidation(callback: (event: InvalidationEvent) => 
  * Hook to get connection status
  */
 export function useReactiveConnection() {
-  const [status, setStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected')
+  const [status, setStatus] = useState<
+    'connected' | 'connecting' | 'disconnected'
+  >('disconnected')
   const clientManager = getClientManager()
 
   useEffect(() => {

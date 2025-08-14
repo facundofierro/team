@@ -93,9 +93,26 @@ export class ReactiveStorage {
     if (!registry) return
 
     const now = Date.now()
+    const existingQuery = registry.queries[queryKey]
+
+    console.log(`💾 [ReactiveStorage] Registering query: ${queryKey}`, {
+      hasExistingData: !!existingQuery,
+      existingLastServerChange: existingQuery?.lastServerChange,
+      newDataExists: !!data,
+      timestamp: now,
+    })
+
+    // Check if data actually changed
+    const dataChanged =
+      !existingQuery ||
+      JSON.stringify(existingQuery.data) !== JSON.stringify(data)
+
     registry.queries[queryKey] = {
       lastRevalidated: now,
-      lastServerChange: now,
+      // Only update lastServerChange if data actually changed
+      lastServerChange: dataChanged
+        ? now
+        : existingQuery?.lastServerChange || now,
       data,
     }
 
@@ -103,6 +120,10 @@ export class ReactiveStorage {
     registry.session.lastSync = now
 
     this.saveRegistry(registry)
+    console.log(`✅ [ReactiveStorage] Query registered: ${queryKey}`, {
+      dataChanged,
+      isStale: false, // Fresh data is never stale
+    })
   }
 
   /**
@@ -116,6 +137,24 @@ export class ReactiveStorage {
       // Keep the data but mark as needing revalidation
       registry.queries[queryKey].lastServerChange = Date.now()
       this.saveRegistry(registry)
+      console.log(`🔄 [ReactiveStorage] Query marked as stale: ${queryKey}`)
+    }
+  }
+
+  /**
+   * Mark a query as stale for testing (simulates server-side changes)
+   */
+  markQueryStaleForTesting(queryKey: string): void {
+    const registry = this.getRegistry()
+    if (!registry) return
+
+    if (registry.queries[queryKey]) {
+      // Simulate a server-side change by setting lastServerChange to future
+      registry.queries[queryKey].lastServerChange = Date.now() + 1000 // 1 second in future
+      this.saveRegistry(registry)
+      console.log(
+        `🧪 [ReactiveStorage] Query marked as stale for testing: ${queryKey}`
+      )
     }
   }
 
@@ -168,6 +207,13 @@ export class ReactiveStorage {
     const isStale =
       queryData.lastServerChange !== undefined &&
       queryData.lastServerChange > queryData.lastRevalidated
+
+    console.log(`🔍 [ReactiveStorage] Getting cached data for: ${queryKey}`, {
+      isStale,
+      lastRevalidated: queryData.lastRevalidated,
+      lastServerChange: queryData.lastServerChange,
+      timestamp: Date.now(),
+    })
 
     return {
       data: queryData.data,

@@ -38,12 +38,13 @@ export function ReactiveProvider({
   }
 
   // Default revalidation function that returns mock data
+  // The ReactiveStorage system handles persistence automatically
   const defaultRevalidateFn = async (queryKey: string) => {
     console.log('🔄 Default revalidating query:', queryKey)
 
     // Return mock data based on query key
     if (queryKey.includes('agents.getAll')) {
-      return [
+      const mockData = [
         {
           id: '1',
           name: 'Test Agent 1',
@@ -61,6 +62,14 @@ export function ReactiveProvider({
           createdAt: new Date().toISOString(),
         },
       ]
+
+      // Note: ReactiveStorage will automatically persist this data
+      // No need for manual localStorage handling
+      console.log(
+        '💾 Mock data generated, ReactiveStorage will persist automatically'
+      )
+
+      return mockData
     }
 
     return []
@@ -104,11 +113,15 @@ export function ReactiveProvider({
         React.createElement(
           'div',
           { className: 'text-center' },
+          React.createElement('div', {
+            className:
+              'animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4',
+          }),
           React.createElement(
-            'div',
-            { className: 'animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4' }
-          ),
-          React.createElement('p', { className: 'text-gray-600' }, 'Initializing reactive client...')
+            'p',
+            { className: 'text-gray-600' },
+            'Initializing reactive client...'
+          )
         )
       )
     )

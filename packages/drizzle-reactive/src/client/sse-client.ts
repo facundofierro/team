@@ -266,7 +266,7 @@ export class SSEClient {
    */
   getConnectionState(): 'connecting' | 'open' | 'closed' {
     if (!this.eventSource) return 'closed'
-    
+
     switch (this.eventSource.readyState) {
       case EventSource.CONNECTING:
         return 'connecting'

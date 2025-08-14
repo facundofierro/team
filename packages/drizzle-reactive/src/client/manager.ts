@@ -66,6 +66,13 @@ export class ReactiveClientManager {
   }
 
   /**
+   * Get organization ID
+   */
+  get currentOrganizationId(): string {
+    return this.organizationId
+  }
+
+  /**
    * Register a query execution
    */
   registerQuery(
@@ -329,6 +336,13 @@ export class ReactiveClientManager {
    */
   getRevalidationStats() {
     return this.revalidationEngine.getRevalidationStats()
+  }
+
+  /**
+   * Mark a query as stale for testing purposes
+   */
+  markQueryStaleForTesting(queryKey: string): void {
+    this.storage.markQueryStaleForTesting(queryKey)
   }
 
   /**
