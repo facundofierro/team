@@ -1,84 +1,80 @@
 /**
- * Client-side SSE handler for real-time invalidation events
- * Handles automatic reconnection and event acknowledgment
+ * Client-side SSE client for real-time cache invalidation
+ * NO HEARTBEATS - relies on event acknowledgments and connection health
  */
 
 import type { InvalidationEvent } from '../core/types'
 
 export interface SSEClientOptions {
-  organizationId: string
-  endpoint?: string
+  url: string
+  onInvalidation: (event: InvalidationEvent) => void
+  onError: (error: Error) => void
+  onReconnect?: () => void
   maxReconnectAttempts?: number
   reconnectDelay?: number
-  heartbeatTimeout?: number
-  onInvalidation?: (event: InvalidationEvent) => void
-  onConnectionChange?: (connected: boolean) => void
-  onError?: (error: Error) => void
+  // Removed heartbeatTimeout - no heartbeats needed
 }
 
 export interface SSEClientStats {
-  connected: boolean
   connectionAttempts: number
-  lastEventTime: number
+  successfulConnections: number
+  failedConnections: number
+  reconnectAttempts: number
   eventsReceived: number
   eventsAcknowledged: number
-  reconnectAttempts: number
+  lastEventTime: number
+  connectionStartTime?: number
+  totalUptime: number
 }
 
+/**
+ * SSE Client for real-time cache invalidation
+ * Uses event acknowledgments instead of heartbeats for reliability
+ */
 export class SSEClient {
   private eventSource: EventSource | null = null
-  private options: Required<SSEClientOptions>
-  private stats: SSEClientStats
   private reconnectTimer: NodeJS.Timeout | null = null
-  private heartbeatTimer: NodeJS.Timeout | null = null
   private isIntentionallyClosed = false
+  private stats: SSEClientStats
+  private options: Required<SSEClientOptions>
 
   constructor(options: SSEClientOptions) {
     this.options = {
-      endpoint: '/api/events',
-      maxReconnectAttempts: 10,
-      reconnectDelay: 2000,
-      heartbeatTimeout: 90000, // 90 seconds
-      onInvalidation: () => {},
-      onConnectionChange: () => {},
-      onError: () => {},
+      maxReconnectAttempts: 5,
+      reconnectDelay: 1000,
+      onReconnect: () => {},
       ...options,
     }
 
     this.stats = {
-      connected: false,
       connectionAttempts: 0,
-      lastEventTime: 0,
+      successfulConnections: 0,
+      failedConnections: 0,
+      reconnectAttempts: 0,
       eventsReceived: 0,
       eventsAcknowledged: 0,
-      reconnectAttempts: 0,
+      lastEventTime: 0,
+      totalUptime: 0,
     }
   }
 
   /**
-   * Connect to the SSE stream
+   * Connect to SSE stream
    */
   connect(): void {
     if (this.eventSource) {
       this.disconnect()
     }
 
-    this.isIntentionallyClosed = false
     this.stats.connectionAttempts++
-
-    const url = `${this.options.endpoint}?organizationId=${this.options.organizationId}`
+    this.stats.connectionStartTime = Date.now()
 
     try {
-      console.log(`[SSEClient] Connecting to ${url}`)
-
-      this.eventSource = new EventSource(url)
+      this.eventSource = new EventSource(this.options.url)
 
       this.eventSource.onopen = () => {
+        this.stats.successfulConnections++
         console.log('[SSEClient] Connection opened')
-        this.stats.connected = true
-        this.stats.reconnectAttempts = 0
-        this.options.onConnectionChange(true)
-        this.startHeartbeatMonitor()
       }
 
       this.eventSource.onmessage = (event) => {
@@ -86,51 +82,36 @@ export class SSEClient {
       }
 
       this.eventSource.onerror = (error) => {
+        this.stats.failedConnections++
         console.warn('[SSEClient] Connection error:', error)
-        this.stats.connected = false
-        this.options.onConnectionChange(false)
-        this.stopHeartbeatMonitor()
-
-        if (!this.isIntentionallyClosed) {
-          this.scheduleReconnect()
-        }
+        this.handleConnectionError()
       }
     } catch (error) {
-      console.error('[SSEClient] Failed to create EventSource:', error)
-      this.options.onError(error as Error)
-      this.scheduleReconnect()
+      this.stats.failedConnections++
+      console.error('[SSEClient] Failed to create connection:', error)
+      this.handleConnectionError()
     }
   }
 
   /**
-   * Disconnect from the SSE stream
+   * Disconnect from SSE stream
    */
   disconnect(): void {
     this.isIntentionallyClosed = true
     this.clearReconnectTimer()
-    this.stopHeartbeatMonitor()
 
     if (this.eventSource) {
-      console.log('[SSEClient] Disconnecting')
       this.eventSource.close()
       this.eventSource = null
-      this.stats.connected = false
-      this.options.onConnectionChange(false)
     }
-  }
 
-  /**
-   * Get connection statistics
-   */
-  getStats(): SSEClientStats {
-    return { ...this.stats }
-  }
+    // Update uptime stats
+    if (this.stats.connectionStartTime) {
+      this.stats.totalUptime += Date.now() - this.stats.connectionStartTime
+      this.stats.connectionStartTime = undefined
+    }
 
-  /**
-   * Check if client is connected
-   */
-  isConnected(): boolean {
-    return this.stats.connected
+    console.log('[SSEClient] Connection closed')
   }
 
   /**
@@ -148,10 +129,7 @@ export class SSEClient {
           console.log('[SSEClient] Connection confirmed')
           break
 
-        case 'heartbeat':
-          console.log('[SSEClient] Heartbeat received')
-          this.resetHeartbeatTimer()
-          break
+        // Removed heartbeat case - no heartbeats sent by server
 
         case 'invalidation':
           console.log(
@@ -241,6 +219,25 @@ export class SSEClient {
   }
 
   /**
+   * Handle connection errors and schedule reconnection
+   */
+  private handleConnectionError(): void {
+    if (this.eventSource) {
+      this.eventSource.close()
+      this.eventSource = null
+    }
+
+    // Update uptime stats
+    if (this.stats.connectionStartTime) {
+      this.stats.totalUptime += Date.now() - this.stats.connectionStartTime
+      this.stats.connectionStartTime = undefined
+    }
+
+    // Schedule reconnection
+    this.scheduleReconnect()
+  }
+
+  /**
    * Clear reconnection timer
    */
   private clearReconnectTimer(): void {
@@ -251,43 +248,34 @@ export class SSEClient {
   }
 
   /**
-   * Start heartbeat monitoring
+   * Get connection statistics
    */
-  private startHeartbeatMonitor(): void {
-    this.stopHeartbeatMonitor()
-    this.resetHeartbeatTimer()
+  getStats(): SSEClientStats {
+    return { ...this.stats }
   }
 
   /**
-   * Reset heartbeat timer
+   * Check if currently connected
    */
-  private resetHeartbeatTimer(): void {
-    this.stopHeartbeatMonitor()
-
-    this.heartbeatTimer = setTimeout(() => {
-      console.warn('[SSEClient] Heartbeat timeout, connection may be stale')
-
-      // Don't automatically disconnect on heartbeat timeout
-      // Let the browser's EventSource handle reconnection
-      this.stats.connected = false
-      this.options.onConnectionChange(false)
-    }, this.options.heartbeatTimeout)
+  isConnected(): boolean {
+    return this.eventSource?.readyState === EventSource.OPEN
   }
 
   /**
-   * Stop heartbeat monitoring
+   * Get connection state
    */
-  private stopHeartbeatMonitor(): void {
-    if (this.heartbeatTimer) {
-      clearTimeout(this.heartbeatTimer)
-      this.heartbeatTimer = null
+  getConnectionState(): 'connecting' | 'open' | 'closed' {
+    if (!this.eventSource) return 'closed'
+    
+    switch (this.eventSource.readyState) {
+      case EventSource.CONNECTING:
+        return 'connecting'
+      case EventSource.OPEN:
+        return 'open'
+      case EventSource.CLOSED:
+        return 'closed'
+      default:
+        return 'closed'
     }
   }
-}
-
-/**
- * Create SSE client for an organization
- */
-export function createSSEClient(options: SSEClientOptions): SSEClient {
-  return new SSEClient(options)
 }

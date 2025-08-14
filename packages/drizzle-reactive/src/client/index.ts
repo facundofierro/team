@@ -27,10 +27,9 @@ export {
   useReactiveStats,
   useReactiveRefresh,
   useReactiveInvalidation,
-  useSmartRevalidation,
   useRevalidationStats,
+  useReactiveConnection,
   initializeReactiveClient,
-  type UseReactiveResult,
 } from './hooks'
 
 // Smart revalidation
@@ -44,4 +43,3 @@ export {
 
 // Provider and types
 export { ReactiveProvider } from './provider'
-export type { UseReactiveResult as ClientUseReactiveResult } from './types'

@@ -34,8 +34,10 @@ export type { ReactiveConfig, ReactiveDb } from './core/types'
 export { createReactiveRouter, ReactiveRouter } from './trpc/router'
 export type { ReactiveRouterInstance, BuiltReactiveRouter } from './trpc/types'
 
-// Client-side exports
-export * from './client/index'
+// Client-side exports - commented out to avoid server-side issues
+// Use @drizzle/reactive/client for client-side imports
+// export { ReactiveProvider } from './client/provider'
+// export { useReactive } from './client/hooks'
 
 // Configuration exports
 export type {

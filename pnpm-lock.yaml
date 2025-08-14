@@ -106,6 +106,9 @@ importers:
       '@auth/core':
         specifier: ^0.34.2
         version: 0.34.2
+      '@drizzle/reactive':
+        specifier: workspace:*
+        version: link:../../packages/drizzle-reactive
       '@radix-ui/react-avatar':
         specifier: ^1.0.4
         version: 1.1.9(@types/react-dom@18.3.7(@types/react@18.2.55))(@types/react@18.2.55)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -153,13 +156,13 @@ importers:
         version: link:../../packages/teamhub-db
       '@trpc/client':
         specifier: ^10.45.2
-        version: 10.45.2(@trpc/server@11.4.4(typescript@5.8.3))
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/react-query':
         specifier: ^10.45.2
-        version: 10.45.2(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@trpc/client@10.45.2(@trpc/server@11.4.4(typescript@5.8.3)))(@trpc/server@11.4.4(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 10.45.2(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@trpc/server':
-        specifier: ^11.4.4
-        version: 11.4.4(typescript@5.8.3)
+        specifier: ^10.45.2
+        version: 10.45.2
       ai:
         specifier: ^4.1.26
         version: 4.3.15(react@18.3.1)(zod@4.0.17)
@@ -3048,11 +3051,6 @@ packages:
 
   '@trpc/server@10.45.2':
     resolution: {integrity: sha512-wOrSThNNE4HUnuhJG6PfDRp4L2009KDVxsd+2VYH8ro6o/7/jwYZ8Uu5j+VaW+mOmc8EHerHzGcdbGNQSAUPgg==}
-
-  '@trpc/server@11.4.4':
-    resolution: {integrity: sha512-VkJb2xnb4rCynuwlCvgPBh5aM+Dco6fBBIo6lWAdJJRYVwtyE5bxNZBgUvRRz/cFSEAy0vmzLxF7aABDJfK5Rg==}
-    peerDependencies:
-      typescript: '>=5.7.2'
 
   '@tsconfig/svelte@1.0.13':
     resolution: {integrity: sha512-5lYJP45Xllo4yE/RUBccBT32eBlRDbqN8r1/MIvQbKxW3aFqaYPCNgm8D5V20X4ShHcwvYWNlKg3liDh1MlBoA==}
@@ -11034,15 +11032,11 @@ snapshots:
     dependencies:
       '@trpc/server': 10.45.2
 
-  '@trpc/client@10.45.2(@trpc/server@11.4.4(typescript@5.8.3))':
-    dependencies:
-      '@trpc/server': 11.4.4(typescript@5.8.3)
-
-  '@trpc/react-query@10.45.2(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@trpc/client@10.45.2(@trpc/server@11.4.4(typescript@5.8.3)))(@trpc/server@11.4.4(typescript@5.8.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@trpc/react-query@10.45.2(@tanstack/react-query@4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@tanstack/react-query': 4.36.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@trpc/client': 10.45.2(@trpc/server@11.4.4(typescript@5.8.3))
-      '@trpc/server': 11.4.4(typescript@5.8.3)
+      '@trpc/client': 10.45.2(@trpc/server@10.45.2)
+      '@trpc/server': 10.45.2
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
@@ -11055,10 +11049,6 @@ snapshots:
       react-dom: 19.1.0(react@18.3.1)
 
   '@trpc/server@10.45.2': {}
-
-  '@trpc/server@11.4.4(typescript@5.8.3)':
-    dependencies:
-      typescript: 5.8.3
 
   '@tsconfig/svelte@1.0.13': {}
 

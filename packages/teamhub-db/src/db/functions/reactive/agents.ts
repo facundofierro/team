@@ -1,4 +1,4 @@
-import { defineReactiveFunction } from '@drizzle/reactive'
+import { defineReactiveFunction } from '@drizzle/reactive/server'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { agents, messages } from '../../schema'

@@ -1,86 +1,81 @@
 /**
- * React hooks for reactive database queries
+ * React hooks for @drizzle/reactive
+ * Provides reactive data access with automatic caching and real-time updates
  */
 
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { ReactiveClientManager } from './manager'
-import type { ReactiveConfig } from '../core/types'
-import type { RevalidationOptions } from './revalidation'
-
-export interface UseReactiveResult<T> {
-  data: T | undefined
-  isLoading: boolean
-  isStale: boolean
-  error: Error | null
-  refetch: () => Promise<void>
-}
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { ReactiveClientManager, createReactiveClientManager } from './manager'
+import type { ReactiveConfig, InvalidationEvent } from '../core/types'
 
 // Global client manager instance
 let globalClientManager: ReactiveClientManager | null = null
 
 /**
- * Initialize the reactive client manager
+ * Get or create the global client manager
+ */
+function getClientManager(): ReactiveClientManager {
+  if (!globalClientManager) {
+    throw new Error('Reactive client not initialized. Call initializeReactiveClient first.')
+  }
+  return globalClientManager
+}
+
+/**
+ * Initialize the reactive client
+ * Call this once at app startup
  */
 export function initializeReactiveClient(
   organizationId: string,
   config: ReactiveConfig,
   revalidateFn: (queryKey: string) => Promise<any>
 ): void {
+  console.log('🚀 Initializing reactive client for org:', organizationId)
+
   if (globalClientManager) {
+    console.log('⚠️ Client already initialized, cleaning up previous instance')
     globalClientManager.cleanup()
   }
 
-  globalClientManager = new ReactiveClientManager({
+  globalClientManager = createReactiveClientManager({
     organizationId,
     config,
     onRevalidate: revalidateFn,
+    onInvalidation: (event: InvalidationEvent) => {
+      console.log(`[ReactiveClient] Received invalidation for table: ${event.table}`)
+    },
   })
+
+  console.log('✅ Reactive client initialized successfully for org:', organizationId)
 }
 
 /**
- * Get the global client manager
+ * Main hook for reactive data access
+ * Automatically handles caching, real-time updates, and revalidation
  */
-function getClientManager(): ReactiveClientManager {
-  if (!globalClientManager) {
-    throw new Error(
-      '@drizzle/reactive: Client not initialized. Call initializeReactiveClient first.'
-    )
-  }
-  return globalClientManager
-}
-
-/**
- * Zero-configuration reactive hook
- */
-export function useReactive<T>(
-  operation: string,
-  input?: any,
-  dependencies: string[] = []
-): UseReactiveResult<T> {
+export function useReactive<T = any>(
+  queryKey: string,
+  input?: any
+): {
+  data: T | undefined
+  isLoading: boolean
+  isStale: boolean
+  error: Error | null
+  refetch: () => void
+} {
   const [data, setData] = useState<T | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(true)
   const [isStale, setIsStale] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-
   const clientManager = getClientManager()
-  const queryKey = `${operation}:${JSON.stringify(input || {})}`
-  const cleanupRef = useRef<(() => void) | null>(null)
+  const isInitialMount = useRef(true)
 
-  // Register this hook as active for priority revalidation
+  // Register this hook as active
   useEffect(() => {
-    cleanupRef.current = clientManager.registerActiveHook(
-      queryKey,
-      dependencies
-    )
+    const cleanup = clientManager.registerActiveHook(queryKey, [])
+    return cleanup
+  }, [queryKey, clientManager])
 
-    return () => {
-      if (cleanupRef.current) {
-        cleanupRef.current()
-      }
-    }
-  }, [queryKey, dependencies.join(','), clientManager])
-
-  // Load initial data from cache or trigger fetch
+  // Load data on mount and when queryKey changes
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -89,35 +84,36 @@ export function useReactive<T>(
 
         // Check cache first
         const cached = clientManager.getCachedData(queryKey)
-        if (cached) {
+        
+        if (cached && !isInitialMount.current) {
+          // Use cached data if available
           setData(cached.data)
-          setIsStale(cached.isStale)
+          setIsStale(cached.isStale || false)
           setIsLoading(false)
-
-          // If cached data is stale, we still show it but mark as stale
-          if (!cached.isStale) {
-            return // Fresh cached data, we're done
-          }
+          return
         }
 
         // If no cache or stale data, we need to fetch
-        // Queue for smart revalidation with appropriate priority
         if (cached?.isStale) {
           console.log(
-            `[useReactive] Stale cache for ${queryKey}, queuing revalidation`
+            `[useReactive] Stale cache for ${queryKey}, triggering revalidation`
           )
-          clientManager.queueRevalidation(queryKey, 10) // High priority for active hooks
+          // Trigger revalidation for stale data
+          await clientManager.revalidateQuery(queryKey)
         } else {
           console.log(
-            `[useReactive] Cache miss for ${queryKey}, queuing immediate revalidation`
+            `[useReactive] Cache miss for ${queryKey}, triggering immediate fetch`
           )
-          clientManager.queueRevalidation(queryKey, 20) // Highest priority for cache misses
+          // Trigger immediate fetch for cache misses
+          await clientManager.revalidateQuery(queryKey)
         }
 
         setIsLoading(false)
+        isInitialMount.current = false
       } catch (err) {
         setError(err as Error)
         setIsLoading(false)
+        isInitialMount.current = false
       }
     }
 
@@ -129,17 +125,19 @@ export function useReactive<T>(
       setIsLoading(true)
       setError(null)
 
-      // Force refetch logic would go here
       console.log(`[useReactive] Manual refetch for ${queryKey}`)
-
-      // Simulate successful refetch
+      
+      // Trigger manual revalidation
+      await clientManager.revalidateQuery(queryKey)
+      
+      // Update stale state
       setIsStale(false)
       setIsLoading(false)
     } catch (err) {
       setError(err as Error)
       setIsLoading(false)
     }
-  }, [queryKey])
+  }, [queryKey, clientManager])
 
   return {
     data,
@@ -199,42 +197,17 @@ export function useReactiveRefresh() {
   const clientManager = getClientManager()
 
   return useCallback(async () => {
-    await clientManager.forceRefresh()
+    // Trigger revalidation for all active queries
+    const activeHooks = clientManager.getStorageStats()?.queries || {}
+    const activeQueryKeys = Object.keys(activeHooks)
+    
+    console.log(`[useReactiveRefresh] Refreshing ${activeQueryKeys.length} active queries`)
+    
+    // Revalidate all active queries
+    await Promise.allSettled(
+      activeQueryKeys.map(queryKey => clientManager.revalidateQuery(queryKey))
+    )
   }, [clientManager])
-}
-
-/**
- * Hook for smart revalidation with priority options
- */
-export function useSmartRevalidation() {
-  const clientManager = getClientManager()
-
-  const smartRevalidate = useCallback(
-    async (queries: string[], options?: RevalidationOptions) => {
-      return await clientManager.smartRevalidate(queries, options)
-    },
-    [clientManager]
-  )
-
-  const queueRevalidation = useCallback(
-    (queryKey: string, priority: number = 0) => {
-      clientManager.queueRevalidation(queryKey, priority)
-    },
-    [clientManager]
-  )
-
-  const processQueue = useCallback(
-    async (options?: RevalidationOptions) => {
-      await clientManager.processRevalidationQueue(options)
-    },
-    [clientManager]
-  )
-
-  return {
-    smartRevalidate,
-    queueRevalidation,
-    processQueue,
-  }
 }
 
 /**
@@ -246,8 +219,8 @@ export function useRevalidationStats() {
 
   useEffect(() => {
     const updateStats = () => {
-      const sessionStats = clientManager.getSessionStats()
-      setStats(sessionStats.revalidation)
+      const revalidationStats = clientManager.getRevalidationStats()
+      setStats(revalidationStats)
     }
 
     updateStats()
@@ -262,7 +235,7 @@ export function useRevalidationStats() {
 /**
  * Hook to handle invalidation events
  */
-export function useReactiveInvalidation(callback: (event: any) => void): void {
+export function useReactiveInvalidation(callback: (event: InvalidationEvent) => void): void {
   const clientManager = getClientManager()
 
   useEffect(() => {
@@ -273,4 +246,31 @@ export function useReactiveInvalidation(callback: (event: any) => void): void {
       console.log('[useReactiveInvalidation] Cleaning up invalidation listener')
     }
   }, [callback, clientManager])
+}
+
+/**
+ * Hook to get connection status
+ */
+export function useReactiveConnection() {
+  const [status, setStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected')
+  const clientManager = getClientManager()
+
+  useEffect(() => {
+    const updateStatus = () => {
+      setStatus(clientManager.getConnectionStatus())
+    }
+
+    updateStatus()
+    const interval = setInterval(updateStatus, 1000)
+
+    return () => clearInterval(interval)
+  }, [clientManager])
+
+  return {
+    status,
+    isConnected: status === 'connected',
+    isConnecting: status === 'connecting',
+    isDisconnected: status === 'disconnected',
+    reconnect: () => clientManager.reconnectSSE(),
+  }
 }

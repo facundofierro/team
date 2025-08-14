@@ -8,7 +8,7 @@ import type { InvalidationEvent } from './types'
 export interface SSEConnection {
   organizationId: string
   controller: ReadableStreamDefaultController
-  lastHeartbeat: number
+  lastActivity: number // Changed from lastHeartbeat to lastActivity
   isActive: boolean
 }
 
@@ -24,15 +24,16 @@ export interface PendingEvent {
 
 /**
  * SSE Manager for reliable real-time communication
+ * NO HEARTBEATS - uses event acknowledgments and connection monitoring instead
  */
 export class SSEManager {
   private connections = new Map<string, Set<SSEConnection>>()
   private pendingEvents = new Map<string, PendingEvent>()
   private retrySchedule = [2000, 5000, 10000] // 2s, 5s, 10s
-  private heartbeatInterval: NodeJS.Timeout | null = null
+  private connectionMonitorInterval: NodeJS.Timeout | null = null
 
   constructor() {
-    this.startHeartbeatMonitor()
+    this.startConnectionMonitor()
   }
 
   /**
@@ -46,7 +47,7 @@ export class SSEManager {
         const connection: SSEConnection = {
           organizationId,
           controller,
-          lastHeartbeat: Date.now(),
+          lastActivity: Date.now(), // Track last activity instead of heartbeat
           isActive: true,
         }
 
@@ -127,6 +128,8 @@ export class SSEManager {
         if (connection.isActive) {
           try {
             this.sendEvent(connection.controller, event)
+            // Update last activity when we successfully send an event
+            connection.lastActivity = Date.now()
             successCount++
           } catch (error) {
             console.warn(`[SSE] Failed to send to connection:`, error)
@@ -268,6 +271,8 @@ export class SSEManager {
                   ...currentEvent.data,
                   retry: currentEvent.retryCount,
                 })
+                // Update last activity on successful retry
+                connection.lastActivity = Date.now()
               } catch (error) {
                 connection.isActive = false
               }
@@ -286,18 +291,20 @@ export class SSEManager {
   }
 
   /**
-   * Start heartbeat monitoring to clean up dead connections
+   * Monitor connections for health without sending heartbeats
+   * Uses activity tracking and error detection instead of periodic messages
    */
-  private startHeartbeatMonitor(): void {
-    this.heartbeatInterval = setInterval(() => {
+  private startConnectionMonitor(): void {
+    this.connectionMonitorInterval = setInterval(() => {
       const now = Date.now()
-      const maxAge = 60000 // 60 seconds
+      const maxInactivity = 120000 // 2 minutes of inactivity
 
       for (const [orgId, connections] of this.connections) {
         for (const connection of connections) {
-          if (connection.isActive && now - connection.lastHeartbeat > maxAge) {
+          // Mark connections as inactive if they haven't had activity in 2 minutes
+          if (connection.isActive && now - connection.lastActivity > maxInactivity) {
             console.log(
-              `[SSE] Marking stale connection as inactive for org: ${orgId}`
+              `[SSE] Marking inactive connection as closed for org: ${orgId}`
             )
             connection.isActive = false
           }
@@ -315,23 +322,15 @@ export class SSEManager {
         }
       }
 
-      // Send heartbeat to active connections
-      for (const [orgId, connections] of this.connections) {
-        for (const connection of connections) {
-          if (connection.isActive) {
-            try {
-              this.sendEvent(connection.controller, {
-                type: 'heartbeat',
-                timestamp: now,
-              })
-              connection.lastHeartbeat = now
-            } catch (error) {
-              connection.isActive = false
-            }
-          }
+      // Clean up old pending events (older than 5 minutes)
+      const maxEventAge = 300000 // 5 minutes
+      for (const [eventId, event] of this.pendingEvents) {
+        if (now - event.timestamp > maxEventAge) {
+          console.log(`[SSE] Cleaning up old pending event: ${eventId}`)
+          this.pendingEvents.delete(eventId)
         }
       }
-    }, 30000) // Every 30 seconds
+    }, 60000) // Check every minute instead of every 30 seconds
   }
 
   /**
@@ -345,8 +344,8 @@ export class SSEManager {
    * Cleanup resources
    */
   cleanup(): void {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval)
+    if (this.connectionMonitorInterval) {
+      clearInterval(this.connectionMonitorInterval)
     }
 
     // Close all connections

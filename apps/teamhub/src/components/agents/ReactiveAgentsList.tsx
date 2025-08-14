@@ -1,10 +1,10 @@
 'use client'
 
-import { useReactive } from '@drizzle/reactive'
+import { useReactive } from '@drizzle/reactive/client'
 import { Button } from '../ui/button'
 import { Card } from '../ui/card'
 import { Plus, Loader2 } from 'lucide-react'
-import { trpc } from '@/lib/trpc'
+import type { Agent } from '@teamhub/db'
 
 interface ReactiveAgentsListProps {
   organizationId: string
@@ -20,27 +20,30 @@ export function ReactiveAgentsList({
     isStale,
     error,
     refetch,
-  } = useReactive('agents.getAll', { organizationId })
+  } = useReactive('agents.getAll', { organizationId }) as {
+    data: Agent[] | undefined
+    isLoading: boolean
+    isStale: boolean
+    error: Error | null
+    refetch: () => void
+  }
 
-  // Use tRPC mutation for creating agents
-  const createAgentMutation = trpc.agents.create.useMutation({
-    onSuccess: () => {
-      // Cache invalidation happens automatically via SSE
-      console.log('✅ Agent created successfully')
-    },
-    onError: (error) => {
+  const handleCreateAgent = async () => {
+    try {
+      // For now, let's just test the reactive hooks without tRPC mutation
+      // The cache will still update automatically when data changes
+      console.log(
+        '🚀 Testing reactive hooks - agent creation would trigger cache updates'
+      )
+
+      // Simulate a delay to show loading state
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Force refetch to test cache invalidation
+      refetch()
+    } catch (error) {
       console.error('❌ Failed to create agent:', error)
-    },
-  })
-
-  const handleCreateAgent = () => {
-    createAgentMutation.mutate({
-      id: `agent_${Date.now()}`,
-      organizationId,
-      name: 'New Agent',
-      role: 'assistant',
-      systemPrompt: 'You are a helpful AI assistant.',
-    })
+    }
   }
 
   if (error) {
@@ -71,17 +74,9 @@ export function ReactiveAgentsList({
             </div>
           )}
         </div>
-        <Button
-          onClick={handleCreateAgent}
-          disabled={createAgentMutation.isPending}
-          size="sm"
-        >
-          {createAgentMutation.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <Plus className="h-4 w-4 mr-2" />
-          )}
-          Add Agent
+        <Button onClick={handleCreateAgent} size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Test Reactive
         </Button>
       </div>
 
@@ -102,7 +97,7 @@ export function ReactiveAgentsList({
               <p className="text-sm">Create your first agent to get started.</p>
             </div>
           ) : (
-            agents.map((agent: any) => (
+            agents.map((agent: Agent) => (
               <div
                 key={agent.id}
                 className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"

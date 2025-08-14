@@ -1,4 +1,4 @@
-import { acknowledgeEvent } from '@drizzle/reactive'
+import { acknowledgeEvent } from '@drizzle/reactive/server'
 import { auth } from '@/auth'
 
 export async function POST(request: Request) {

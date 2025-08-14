@@ -14,7 +14,7 @@ import {
   createSmartRevalidationEngine,
   type RevalidationOptions,
 } from './revalidation'
-import { SSEClient, createSSEClient, type SSEClientOptions } from './sse-client'
+import { SSEClient, type SSEClientOptions } from './sse-client'
 import type { ReactiveConfig, InvalidationEvent } from '../core/types'
 
 export interface ReactiveManagerOptions {
@@ -99,121 +99,86 @@ export class ReactiveClientManager {
   /**
    * Handle invalidation event from server
    */
-  async handleInvalidation(event: InvalidationEvent): Promise<void> {
+  private handleInvalidation(event: InvalidationEvent): void {
     console.log(
-      `[ReactiveClient] Received invalidation for table: ${event.table}`
+      `[ReactiveClient] Handling invalidation for table: ${event.table}`
     )
 
-    // Notify listeners first
+    // Notify external handler if provided
     if (this.onInvalidation) {
       this.onInvalidation(event)
     }
 
-    // Use smart revalidation engine for intelligent query revalidation
+    // Mark affected queries as invalidated in session manager
+    const affectedQueries = this.findAffectedQueries(event.table)
+    affectedQueries.forEach((queryKey) => {
+      this.sessionManager.markQueryInvalidated(queryKey)
+    })
+
+    // Trigger revalidation for affected queries
     if (this.onRevalidate) {
-      await this.revalidationEngine.smartInvalidateAndRevalidate(
-        event.table,
-        this.onRevalidate,
-        {
-          maxConcurrent: 3,
-          priorityFirst: true,
-          backgroundDelay: 1000,
-        }
+      affectedQueries.forEach((queryKey) => {
+        this.revalidateQuery(queryKey)
+      })
+    }
+  }
+
+  /**
+   * Find queries affected by table changes
+   */
+  private findAffectedQueries(table: string): string[] {
+    const registry = this.storage.getRegistry()
+    if (!registry) return []
+
+    const relatedTables = this.config.relations[table] || []
+    const tablesToCheck = [table, ...relatedTables]
+
+    return Object.keys(registry.queries).filter((queryKey) => {
+      // Simple heuristic: check if query key contains table name
+      return tablesToCheck.some((tableName) =>
+        queryKey.toLowerCase().includes(tableName.toLowerCase())
       )
-    } else {
-      // Fallback to storage invalidation only
-      this.storage.invalidateByTable(event.table, this.config.relations)
-    }
+    })
   }
 
   /**
-   * Handle real-time connection status changes
+   * Handle connection status changes
    */
-  handleConnectionStatus(connected: boolean): void {
+  private handleConnectionStatus(connected: boolean): void {
     console.log(`[ReactiveClient] Real-time connection: ${connected}`)
-    this.storage.updateRealtimeStatus(connected)
 
-    // If reconnected after being offline, check for session gap
-    if (connected) {
-      this.handleReconnection()
+    // Update session manager with connection status
+    const registry = this.storage.getRegistry()
+    if (registry) {
+      registry.session.realtimeConnected = connected
+      this.storage['saveRegistry'](registry)
     }
   }
 
   /**
-   * Get current session statistics
+   * Revalidate a specific query
    */
-  getSessionStats() {
-    return {
-      storage: this.storage.exportRegistry(),
-      recovery: this.sessionManager.getSessionStats(),
-      activeHooks: this.storage.getActiveHooks().length,
-      revalidation: this.revalidationEngine.getRevalidationStats(),
-    }
-  }
+  async revalidateQuery(queryKey: string): Promise<any> {
+    if (this.onRevalidate) {
+      try {
+        const result = await this.onRevalidate(queryKey)
 
-  /**
-   * Smart revalidation with priority handling
-   */
-  async smartRevalidate(
-    queries: string[],
-    options?: RevalidationOptions
-  ): Promise<any> {
-    if (!this.onRevalidate) {
-      console.warn('[ReactiveClient] No revalidate function provided')
-      return
-    }
+        // Update cache with fresh data
+        if (result !== undefined) {
+          this.storage.registerQuery(queryKey, [], result)
+        }
 
-    const strategy = this.revalidationEngine.createRevalidationStrategy(
-      queries,
-      options
-    )
-
-    return await this.revalidationEngine.executeRevalidationStrategy(
-      strategy,
-      this.onRevalidate,
-      options
-    )
-  }
-
-  /**
-   * Queue a query for revalidation with priority
-   */
-  queueRevalidation(queryKey: string, priority: number = 0): void {
-    this.revalidationEngine.queueRevalidation(queryKey, priority)
-  }
-
-  /**
-   * Process the revalidation queue
-   */
-  async processRevalidationQueue(options?: RevalidationOptions): Promise<void> {
-    if (!this.onRevalidate) {
-      console.warn('[ReactiveClient] No revalidate function provided')
-      return
+        return result
+      } catch (error) {
+        console.error(
+          `[ReactiveClient] Revalidation failed for ${queryKey}:`,
+          error
+        )
+        throw error
+      }
     }
 
-    await this.revalidationEngine.processRevalidationQueue(
-      this.onRevalidate,
-      options
-    )
-  }
-
-  /**
-   * Force manual refresh of all active queries
-   */
-  async forceRefresh(): Promise<void> {
-    console.log('[ReactiveClient] Force refresh initiated')
-    await this.checkInitialSession()
-  }
-
-  /**
-   * Clean up resources
-   */
-  cleanup(): void {
-    this.removeEventListeners()
-
-    if (this.sseClient) {
-      this.sseClient.disconnect()
-    }
+    return undefined
   }
 
   /**
@@ -224,11 +189,14 @@ export class ReactiveClientManager {
   ): void {
     console.log('[ReactiveClient] Initializing SSE connection')
 
-    this.sseClient = createSSEClient({
-      organizationId: this.organizationId,
-      onInvalidation: (event) => this.handleInvalidation(event),
-      onConnectionChange: (connected) => this.handleConnectionStatus(connected),
-      onError: (error) => {
+    // Build SSE URL with organization ID
+    const sseUrl = `/api/events?organizationId=${this.organizationId}`
+
+    this.sseClient = new SSEClient({
+      url: sseUrl,
+      onInvalidation: (event: InvalidationEvent) =>
+        this.handleInvalidation(event),
+      onError: (error: Error) => {
         console.error('[ReactiveClient] SSE error:', error)
       },
       ...sseOptions,
@@ -320,74 +288,69 @@ export class ReactiveClientManager {
   }
 
   /**
-   * Handle real-time reconnection
+   * Get current connection status
    */
-  private async handleReconnection(): Promise<void> {
-    // Update connection status
-    this.sessionManager.setRealtimeConnected(true)
-    this.sessionManager.updateLastSync()
-
-    // Small delay to allow SSE to establish, then check for stale data
-    setTimeout(async () => {
-      await this.checkInitialSession()
-    }, 1000)
+  getConnectionStatus(): 'connected' | 'connecting' | 'disconnected' {
+    if (!this.sseClient) return 'disconnected'
+    const state = this.sseClient.getConnectionState()
+    return state === 'open'
+      ? 'connected'
+      : state === 'connecting'
+      ? 'connecting'
+      : 'disconnected'
   }
 
   /**
-   * Revalidate active queries (high priority)
+   * Check if real-time is enabled and connected
    */
-  private async revalidateActiveQueries(): Promise<void> {
-    const priorityQueries = this.storage.getPriorityQueries()
-
-    if (priorityQueries.length === 0) {
-      console.log('[ReactiveClient] No active queries to revalidate')
-      return
-    }
-
-    console.log(
-      `[ReactiveClient] Revalidating ${priorityQueries.length} active queries`
-    )
-
-    // Revalidate in parallel for active queries
-    await Promise.allSettled(
-      priorityQueries.map((queryKey) => this.revalidateQuery(queryKey))
+  isRealtimeEnabled(): boolean {
+    return (
+      this.config.realtime?.enabled !== false &&
+      this.sseClient?.isConnected() === true
     )
   }
 
   /**
-   * Revalidate a specific query
+   * Get storage statistics
    */
-  private async revalidateQuery(queryKey: string): Promise<any> {
-    if (this.onRevalidate) {
-      try {
-        const result = await this.onRevalidate(queryKey)
-        console.log(`[ReactiveClient] Revalidated query: ${queryKey}`)
-        return result
-      } catch (error) {
-        console.warn(
-          `[ReactiveClient] Failed to revalidate query ${queryKey}:`,
-          error
-        )
-        throw error
-      }
-    } else {
-      console.warn(
-        '[ReactiveClient] No revalidate function provided, skipping:',
-        queryKey
-      )
-    }
+  getStorageStats() {
+    return this.storage.exportRegistry()
   }
 
   /**
-   * Get session information and statistics (simple approach)
+   * Get session statistics
    */
-  getSessionInfo() {
+  getSessionStats() {
     return this.sessionManager.getSessionStats()
+  }
+
+  /**
+   * Get revalidation statistics
+   */
+  getRevalidationStats() {
+    return this.revalidationEngine.getRevalidationStats()
+  }
+
+  /**
+   * Cleanup resources
+   */
+  cleanup(): void {
+    // Remove event listeners
+    this.removeEventListeners()
+
+    // Disconnect SSE
+    if (this.sseClient) {
+      this.sseClient.disconnect()
+      this.sseClient = null
+    }
+
+    // Clear storage
+    this.storage.clearRegistry()
   }
 }
 
 /**
- * Create a reactive client manager
+ * Create reactive client manager
  */
 export function createReactiveClientManager(
   options: ReactiveManagerOptions

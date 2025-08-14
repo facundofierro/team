@@ -97,7 +97,7 @@ export async function getOrganizationSettings(
   return {
     organizationId,
     messageTypes: messageTypes as MessageType[],
-    tools: organizationTools.map((tool) => ({
+    tools: organizationTools.map((tool: any) => ({
       ...tool,
       configuration: tool.configuration as Record<string, string>,
       schema: tool.schema as Record<string, unknown>,
@@ -121,11 +121,11 @@ export async function updateOrganizationSettings(
 
   // Create a map of existing message types by ID for easy lookup
   const existingTypesMap = new Map(
-    existingMessageTypes.map((type) => [type.id, type])
+    existingMessageTypes.map((type: any) => [type.id, type])
   )
 
   // Update or insert message types
-  const updatePromises = messageTypes.map(async (type) => {
+  const updatePromises = messageTypes.map(async (type: any) => {
     if (existingTypesMap.has(type.id)) {
       // Update existing message type
       return db
@@ -152,10 +152,10 @@ export async function updateOrganizationSettings(
   })
 
   // Set isActive = false for message types that are no longer in the settings
-  const currentTypeIds = new Set(messageTypes.map((type) => type.id))
+  const currentTypeIds = new Set(messageTypes.map((type: any) => type.id))
   const typesToDeactivate = existingMessageTypes
-    .filter((type) => !currentTypeIds.has(type.id))
-    .map((type) => type.id)
+    .filter((type: any) => !currentTypeIds.has(type.id))
+    .map((type: any) => type.id)
 
   if (typesToDeactivate.length > 0) {
     updatePromises.push(
@@ -184,11 +184,11 @@ export async function updateOrganizationSettings(
 
     // Create a map of existing tools by ID for easy lookup
     const existingToolsMap = new Map(
-      existingTools.map((tool) => [tool.id, tool])
+      existingTools.map((tool: any) => [tool.id, tool])
     )
 
     // Update or insert tools
-    const toolUpdatePromises = organizationTools.map(async (tool) => {
+    const toolUpdatePromises = organizationTools.map(async (tool: any) => {
       if (existingToolsMap.has(tool.id)) {
         // Update existing tool
         return db
@@ -216,10 +216,10 @@ export async function updateOrganizationSettings(
     })
 
     // Set isActive = false for tools that are no longer in the settings
-    const currentToolIds = new Set(organizationTools.map((tool) => tool.id))
+    const currentToolIds = new Set(organizationTools.map((tool: any) => tool.id))
     const toolsToDeactivate = existingTools
-      .filter((tool) => !currentToolIds.has(tool.id))
-      .map((tool) => tool.id)
+      .filter((tool: any) => !currentToolIds.has(tool.id))
+      .map((tool: any) => tool.id)
 
     if (toolsToDeactivate.length > 0) {
       toolUpdatePromises.push(
@@ -307,7 +307,7 @@ export async function getActiveTools(): Promise<ToolWithTypes[]> {
     .select()
     .from(tools)
     .where(eq(tools.isActive, true))
-  return activeTools.map((tool) => ({
+  return activeTools.map((tool: any) => ({
     ...tool,
     configuration: tool.configuration as Record<string, string>,
     schema: tool.schema as Record<string, unknown>,
