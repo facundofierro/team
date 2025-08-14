@@ -346,20 +346,9 @@ Return exactly this format:
       cleanResult = jsonMatch[0]
     }
 
-    // Fix common JSON issues before parsing
+    // Minimal safe cleanup: remove control characters (except \n, \r, \t) and trailing commas
     cleanResult = cleanResult
-      // Fix unescaped quotes in strings (but not in property names)
-      .replace(
-        /"(summary|description)"\s*:\s*"([^"]*)"([^"]*)"([^"]*)"/,
-        (match, prop, start, middle, end) => {
-          return `"${prop}": "${start}\\"${middle}\\"${end}"`
-        }
-      )
-      // Fix unescaped newlines
-      .replace(/"\s*\n\s*([^"]*)\s*\n\s*"/g, (match, content) => {
-        return `"${content.replace(/\n/g, '\\n')}"`
-      })
-      // Fix trailing commas
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
       .replace(/,\s*}/g, '}')
       .replace(/,\s*]/g, ']')
 

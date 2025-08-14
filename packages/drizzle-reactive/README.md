@@ -31,7 +31,7 @@ pnpm add @drizzle/reactive drizzle-orm @trpc/server @trpc/client zod
 
 ```typescript
 // server/functions/users.ts
-import { defineReactiveFunction } from '@drizzle/reactive'
+import { defineReactiveFunction } from '@drizzle/reactive/server'
 import { z } from 'zod'
 
 // 1. Define a reactive function with explicit name
@@ -148,7 +148,7 @@ export async function generateDailyStats() {
 
 ```typescript
 // server/trpc/router.ts
-import { createReactiveRouter } from '@drizzle/reactive/trpc'
+import { createReactiveRouter } from '@drizzle/reactive/server'
 import { getUsers, createUser, getUserProfile } from '../functions/users'
 import { db } from '../db'
 
@@ -246,7 +246,7 @@ function CreateUserForm({ companyId }: { companyId: string }) {
 
 ```typescript
 // server/db.ts
-import { createReactiveDb } from '@drizzle/reactive'
+import { createReactiveDb } from '@drizzle/reactive/server'
 import { drizzle } from 'drizzle-orm/postgres-js'
 
 const config = {
@@ -269,7 +269,7 @@ export const db = createReactiveDb(drizzle(pool), config)
 
 ```typescript
 // app/api/events/route.ts
-import { createSSEStream } from '@drizzle/reactive'
+import { createSSEStream } from '@drizzle/reactive/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -283,24 +283,32 @@ export async function GET(request: Request) {
 
 ```typescript
 // client/providers/ReactiveProvider.tsx
-import { ReactiveProvider } from '@drizzle/reactive'
+// Recommended: use the built-in TrpcReactiveProvider to wire revalidation generically
+'use client'
+import { TrpcReactiveProvider } from '@drizzle/reactive/client'
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client'
+import type { AppRouter } from '../server/trpc'
+import { reactiveRelations } from '@your-db-package/reactive-config'
+
+const trpcClient = createTRPCProxyClient<AppRouter>({
+  links: [httpBatchLink({ url: '/api/trpc' })],
+})
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
+  const organizationId = 'your-organization-id'
   return (
-    <ReactiveProvider
-      companyId="your-company-id"
-      config={{
-        relations: {
-          user: ['profile.userId', 'preferences.userId'],
-          profile: ['user.id'],
-          preferences: ['user.id'],
-        },
-      }}
+    <TrpcReactiveProvider
+      organizationId={organizationId}
+      relations={reactiveRelations}
+      trpcClient={trpcClient}
     >
       {children}
-    </ReactiveProvider>
+    </TrpcReactiveProvider>
   )
 }
+
+// Alternatively, you can create your own revalidateFn with createTrpcRevalidateFn
+// and pass it to ReactiveProvider if you need custom behavior.
 ```
 
 ## 🎯 Key Benefits Over Manual Approach
@@ -344,9 +352,9 @@ function MyComponent() {
 1. **Function Definition**: `defineReactiveFunction` creates functions that work both server-side and via tRPC
 2. **Name-Based Mapping**: The `name` property becomes both the cache key and tRPC procedure name
 3. **Auto-Generated Router**: `createReactiveRouter` automatically creates tRPC procedures from functions
-4. **Smart Caching**: Cache keys are generated from function names and inputs
-5. **Real-time Updates**: SSE automatically invalidates affected queries when data changes
-6. **Session Recovery**: Smart revalidation on page load handles offline scenarios
+4. **Smart Caching**: Cache keys are generated from function names and inputs. The React hook composes a key as `name::JSON(input)` internally to uniquely cache and revalidate by input.
+5. **Real-time Updates**: SSE automatically invalidates affected queries when data changes. No heartbeats are sent; reliability is ensured via client acknowledgments and retry.
+6. **Session Recovery**: Smart revalidation on page load handles offline scenarios and avoids thrashing with a minimum revalidation window.
 
 ## 🤝 Contributing
 
