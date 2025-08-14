@@ -31,13 +31,11 @@ export { defineReactiveFunction } from './core/function'
 export type { ReactiveConfig, ReactiveDb } from './core/types'
 
 // tRPC integration exports
-export { createReactiveRouter } from './trpc/router'
-export type { ReactiveRouter } from './trpc/types'
+export { createReactiveRouter, ReactiveRouter } from './trpc/router'
+export type { ReactiveRouterInstance, BuiltReactiveRouter } from './trpc/types'
 
 // Client-side exports
-export { useReactive, useReactivePriorities } from './client/hooks'
-export { ReactiveProvider } from './client/provider'
-export type { UseReactiveResult } from './client/types'
+export * from './client/index'
 
 // Configuration exports
 export type {

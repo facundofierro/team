@@ -1,141 +1,127 @@
 /**
- * Example integration of @drizzle/reactive with TeamHub
- *
- * This shows how the reactive library would be used in the existing
- * TeamHub codebase to provide zero-config reactive database features.
+ * Example integration with TeamHub using the corrected reactive function architecture
  */
 
 import { z } from 'zod'
-import { createReactiveDb, defineReactiveFunction } from '../index'
+import { defineReactiveFunction } from '../core/function'
 import type { ReactiveConfig } from '../core/types'
 
-// Example TeamHub reactive configuration
+// Generic TeamHub reactive configuration (no hardcoded fields)
 export const teamhubReactiveConfig: ReactiveConfig = {
   relations: {
-    // When agents change, invalidate messages, memory, and organization queries
-    agent: [
-      'organization.organizationId',
-      'message.fromAgentId',
-      'message.toAgentId',
-      'memory.agentId',
-      'tool.organizationId',
-    ],
-
-    // When organizations change, invalidate all org-scoped data
-    organization: [
-      'agent.organizationId',
-      'tool.organizationId',
-      'user.organizationId',
-      'memory.organizationId',
-    ],
-
-    // When messages change, invalidate sender/receiver agents
-    message: [
-      'agent.fromAgentId',
-      'agent.toAgentId',
-      'conversation.conversationId',
-    ],
-
-    // When memory changes, invalidate related agents
-    memory: ['agent.agentId', 'organization.organizationId'],
-
-    // When tools change, invalidate organization and agent data
-    tool: ['organization.organizationId', 'agent.organizationId'],
+    agent: ['message.fromAgentId', 'memory.agentId'],
+    organization: ['agent.organizationId', 'tool.organizationId'],
+    message: ['agent.fromAgentId', 'agent.toAgentId'],
+    memory: ['agent.agentId'],
+    tool: ['organization.id'],
   },
-
-  // Smart defaults for cache and real-time features
   cache: {
-    server: { provider: 'redis' }, // Use Redis in production
-    client: { provider: 'localStorage' }, // Persist across browser sessions
+    server: { provider: 'memory' },
+    client: { provider: 'localStorage' },
   },
-
   realtime: {
     enabled: true,
-    transport: 'sse', // Perfect for Vercel deployment
-    reliability: {
-      acknowledgments: true, // Ensure important events are delivered
-      maxRetries: 3,
-      retryDelays: [2000, 5000, 10000], // 2s, 5s, 10s
-    },
   },
 }
 
-// Example reactive functions for TeamHub
+// Example reactive functions using the corrected API
 
 /**
- * Get all agents for an organization with reactive caching
+ * Get all agents for an organization
  */
 export const getAgents = defineReactiveFunction({
-  id: 'agents.getAll',
+  name: 'agents.getAll',
   input: z.object({
     organizationId: z.string(),
   }),
-  dependencies: ['agent'], // Only invalidate when agents table changes
-  handler: async ({ input, db }) => {
-    return await db.agents.findMany({
-      where: { organizationId: input.organizationId },
-      orderBy: { createdAt: 'desc' },
-    })
+  dependencies: ['agent'],
+  handler: async (input, db) => {
+    return db.query(
+      `
+      SELECT * FROM agents
+      WHERE organization_id = $1
+      ORDER BY created_at DESC
+    `,
+      [input.organizationId]
+    )
   },
 })
 
 /**
- * Get agent with statistics (complex multi-table query)
+ * Get agent with detailed statistics
  */
 export const getAgentWithStats = defineReactiveFunction({
-  id: 'agents.getWithStats',
+  name: 'agents.getWithStats',
   input: z.object({
-    agentId: z.string(),
     organizationId: z.string(),
+    agentId: z.string(),
   }),
-  dependencies: ['agent', 'message', 'memory'], // Depends on multiple tables
-
-  // Fine-grained invalidation: only invalidate for this specific agent
+  dependencies: ['agent', 'message', 'memory'],
   invalidateWhen: {
-    agent: (change) => change.keys.includes('agentId'), // Simplified for example
+    agent: (change) => change.keys.includes('agentId'),
     message: (change) => change.keys.includes('agentId'),
     memory: (change) => change.keys.includes('agentId'),
   },
+  cache: {
+    ttl: 180, // 3 minutes for detailed stats
+  },
+  handler: async (input, db) => {
+    const [agent, messageCount, memoryCount, lastMessage] = await Promise.all([
+      db.query(
+        `
+        SELECT * FROM agents
+        WHERE id = $1 AND organization_id = $2
+      `,
+        [input.agentId, input.organizationId]
+      ),
 
-  handler: async ({ input, db }) => {
-    const agent = await db.agents.findUnique({
-      where: { id: input.agentId, organizationId: input.organizationId },
-    })
+      db.query(
+        `
+        SELECT COUNT(*) as count FROM messages
+        WHERE from_agent_id = $1
+      `,
+        [input.agentId]
+      ),
 
-    const messageCount = await db.messages.count({
-      where: { fromAgentId: input.agentId },
-    })
+      db.query(
+        `
+        SELECT COUNT(*) as count FROM memory
+        WHERE agent_id = $1
+      `,
+        [input.agentId]
+      ),
 
-    const memoryCount = await db.memory.count({
-      where: { agentId: input.agentId },
-    })
-
-    const recentMessages = await db.messages.findMany({
-      where: { fromAgentId: input.agentId },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    })
+      db.query(
+        `
+        SELECT * FROM messages
+        WHERE from_agent_id = $1
+        ORDER BY created_at DESC
+        LIMIT 1
+      `,
+        [input.agentId]
+      ),
+    ])
 
     return {
-      agent,
+      agent: (agent as any[])[0],
       stats: {
-        messageCount,
-        memoryCount,
-        lastActive: recentMessages[0]?.createdAt || null,
+        messageCount: (messageCount as any[])[0]?.count || 0,
+        memoryCount: (memoryCount as any[])[0]?.count || 0,
+        lastActive: (lastMessage as any[])[0]?.created_at || null,
       },
-      recentMessages,
+      recentMessages: lastMessage,
     }
   },
 })
 
 /**
- * Update agent (mutation with automatic invalidation)
+ * Update agent data
  */
 export const updateAgent = defineReactiveFunction({
-  id: 'agents.update',
+  name: 'agents.update',
   input: z.object({
-    id: z.string(),
     organizationId: z.string(),
+    id: z.string(),
     data: z.object({
       name: z.string().optional(),
       role: z.string().optional(),
@@ -143,76 +129,105 @@ export const updateAgent = defineReactiveFunction({
       isActive: z.boolean().optional(),
     }),
   }),
-  dependencies: ['agent'], // This mutation affects the agent table
-  handler: async ({ input, db }) => {
-    const updatedAgent = await db.agents.update({
-      where: {
-        id: input.id,
-        organizationId: input.organizationId,
-      },
-      data: input.data,
-    })
+  dependencies: ['agent'],
+  invalidateWhen: {
+    agent: (change) => change.keys.includes('id'),
+  },
+  handler: async (input, db) => {
+    const updateFields = Object.entries(input.data)
+      .filter(([_, value]) => value !== undefined)
+      .map(([key, _], index) => `${key} = $${index + 3}`)
+      .join(', ')
 
-    // The reactive system will automatically:
-    // 1. Invalidate all queries that depend on 'agent' table
-    // 2. Broadcast invalidation to all connected clients
-    // 3. Trigger revalidation of active hooks first
-    // 4. Handle background revalidation for inactive queries
+    const updateValues = Object.values(input.data).filter(
+      (value) => value !== undefined
+    )
 
-    return updatedAgent
+    return db.query(
+      `
+      UPDATE agents
+      SET ${updateFields}, updated_at = NOW()
+      WHERE id = $1 AND organization_id = $2
+      RETURNING *
+    `,
+      [input.id, input.organizationId, ...updateValues]
+    )
   },
 })
 
+// Example usage patterns (React components would go in separate .tsx files)
+
 /**
- * Example of how the reactive database would be created in TeamHub
+ * Example: How to use getAgents function
  */
-export function createTeamHubReactiveDb(drizzleInstance: any) {
-  return createReactiveDb(drizzleInstance, teamhubReactiveConfig)
+export async function loadAgentsExample(
+  organizationId: string,
+  reactiveDb: any
+) {
+  // Standalone usage (server-side)
+  const agents = await getAgents.execute({ organizationId }, reactiveDb)
+  console.log('Loaded agents:', (agents as any[]).length)
+  return agents
 }
 
-// Example usage in TeamHub components:
+/**
+ * Example: How to use getAgentWithStats function
+ */
+export async function loadAgentDetailsExample(
+  organizationId: string,
+  agentId: string,
+  reactiveDb: any
+) {
+  // This function can be called both ways:
+  // 1. Standalone: await getAgentWithStats.execute({ organizationId, agentId }, reactiveDb)
+  // 2. Via tRPC: trpc.agents.getWithStats.useQuery({ organizationId, agentId })
+
+  const agentDetails = await getAgentWithStats.execute(
+    { organizationId, agentId },
+    reactiveDb
+  )
+  console.log('Loaded agent details for:', agentId)
+  return agentDetails
+}
+
+// Example of how to set up tRPC router with these functions
+
 /*
-// In a React component:
-function AgentsList({ organizationId }: { organizationId: string }) {
-  const { data: agents, isStale } = useReactive('agents.getAll', { organizationId })
+import { createReactiveRouter } from '../trpc/router'
 
-  // ✅ Shows cached data instantly
-  // ✅ Auto-revalidates when agents table changes
-  // ✅ Real-time updates via SSE
-  // ✅ Smart priority (active hooks first)
-  // ✅ Type-safe with full IntelliSense
-
-  return (
-    <div>
-      {isStale && <div className="text-sm text-gray-500">Syncing...</div>}
-      {agents?.map((agent) => (
-        <AgentCard key={agent.id} agent={agent} />
-      ))}
-    </div>
-  )
+export function createTeamHubRouter(db, config) {
+  return createReactiveRouter({ db, config })
+    .addQuery(getAgents)        // Uses 'agents.getAll' automatically
+    .addQuery(getAgentWithStats) // Uses 'agents.getWithStats' automatically
+    .addMutation(updateAgent)    // Uses 'agents.update' automatically
+    .build()
 }
+*/
 
-// In the agent detail page:
-function AgentDetail({ agentId, organizationId }: AgentDetailProps) {
-  const { data: agentData, isLoading } = useReactive('agents.getWithStats', {
-    agentId,
-    organizationId,
-  })
+// Example of server-side usage
 
-  // Only invalidates when this specific agent changes
-  // Much more efficient than invalidating all agent queries
-
-  if (isLoading || !agentData) return <Skeleton />
-
-  return (
-    <div>
-      <h1>{agentData.agent.name}</h1>
-      <p>Messages: {agentData.stats.messageCount}</p>
-      <p>Memories: {agentData.stats.memoryCount}</p>
-      {agentData.recentMessages.map(msg => (
-        <MessageCard key={msg.id} message={msg} />
-      ))}
-    </div>
+/*
+export async function serverSideExample(reactiveDb) {
+  // Functions can be executed directly on the server
+  const agents = await getAgents.execute(
+    { organizationId: 'org-123' },
+    reactiveDb
   )
+
+  const agentDetails = await getAgentWithStats.execute(
+    { organizationId: 'org-123', agentId: 'agent-456' },
+    reactiveDb
+  )
+
+  const updatedAgent = await updateAgent.execute(
+    {
+      organizationId: 'org-123',
+      id: 'agent-456',
+      data: { name: 'Updated Agent Name' }
+    },
+    reactiveDb
+  )
+
+  return { agents, agentDetails, updatedAgent }
 }
 */

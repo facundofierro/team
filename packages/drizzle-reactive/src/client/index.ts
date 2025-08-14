@@ -5,16 +5,18 @@
 // Storage and session management
 export { ReactiveStorage, createReactiveStorage } from './storage'
 export {
-  SessionRecoveryManager,
-  createSessionRecoveryManager,
-  type SessionGapInfo,
-  type RecoveryPlan,
+  SimpleSessionManager,
+  createSimpleSessionManager,
+  revalidateOnPageLoad,
+  type SessionInfo,
+  type QueryRegistry,
+  type QueryRegistryEntry,
 } from './session'
 
 // Client manager
 export {
   ReactiveClientManager,
-  createReactiveClient,
+  createReactiveClientManager,
   type ReactiveManagerOptions,
 } from './manager'
 

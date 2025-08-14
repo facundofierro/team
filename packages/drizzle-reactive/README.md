@@ -23,186 +23,330 @@ A reactive database library that transforms any Drizzle + tRPC setup into a reac
 pnpm add @drizzle/reactive drizzle-orm @trpc/server @trpc/client zod
 ```
 
-### Minimal Setup
+## 📖 Core Usage Patterns
+
+### 1. Define Reactive Functions
+
+**Key Concept**: Reactive functions work both standalone (server-side) AND via tRPC. The `name` property is crucial for cache keys and tRPC procedures.
 
 ```typescript
-// server/db.ts - Minimal setup
-export const db = createReactiveDb(drizzle, {
-  relations: {
-    agent: ['organization', 'message.fromAgentId', 'memory.agentId'],
-    organization: ['agent.organizationId', 'tool.organizationId'],
+// server/functions/users.ts
+import { defineReactiveFunction } from '@drizzle/reactive'
+import { z } from 'zod'
+
+// 1. Define a reactive function with explicit name
+export const getUsers = defineReactiveFunction({
+  name: 'users.getAll', // 🔑 This becomes the cache key and tRPC procedure name
+
+  input: z.object({
+    companyId: z.string(), // Generic, not hardcoded organizationId
+    limit: z.number().optional().default(50),
+  }),
+
+  dependencies: ['user'], // What tables this function reads from
+
+  handler: async (input, db) => {
+    // Clean signature: (input, db)
+    return db.query.users.findMany({
+      where: (users, { eq }) => eq(users.companyId, input.companyId),
+      limit: input.limit,
+    })
   },
 })
 
-// client/hooks.ts - Zero configuration usage
-const { data: agents } = useReactive('agents.findMany', { organizationId })
-// ✅ Shows cache instantly
-// ✅ Smart revalidation (only active hooks first)
-// ✅ Auto real-time mode
-// ✅ Handles page refresh gracefully
-// ✅ Recovers missed events
-// ✅ Type-safe with tRPC
-```
+export const createUser = defineReactiveFunction({
+  name: 'users.create',
 
-## 🏗️ Architecture
+  input: z.object({
+    name: z.string(),
+    email: z.string().email(),
+    companyId: z.string(),
+  }),
 
-### Real-time Transport: Server-Sent Events (SSE)
+  dependencies: ['user'],
 
-Perfect for unidirectional cache invalidation with maximum compatibility and reliability.
-
-```typescript
-// SSE is ideal for reactive cache invalidation because:
-// ✅ Server-to-client only (we don't need bidirectional)
-// ✅ Vercel compatible (works with serverless)
-// ✅ Auto-reconnection (browser handles it)
-// ✅ HTTP-based (proxy-friendly, no firewall issues)
-// ✅ Simple implementation (standard HTTP streaming)
-// ✅ No wasteful heartbeats (connection stays alive naturally)
-// ✅ Event acknowledgments (reliable delivery without periodic messages)
-```
-
-### SQL Interception Engine
-
-Intercept ALL Drizzle SQL execution using custom database drivers.
-
-```typescript
-// Every query passes through our reactive layer
-const reactiveDriver = async (sql: string, params: any[]) => {
-  const metadata = analyzeSql(sql, params) // Extract table, operation, keys
-
-  // SELECT: Check cache → Execute → Cache result
-  // INSERT/UPDATE/DELETE: Execute → Invalidate related → Broadcast
-
-  return handleReactiveQuery(metadata)
-}
-
-const db = drizzle(reactiveDriver, { schema })
-```
-
-## 📖 Usage
-
-### Server Setup
-
-```typescript
-// server/reactive.config.ts
-export const reactiveConfig = {
-  relations: {
-    agent: ['organization', 'message.fromAgentId', 'memory.agentId'],
-    organization: ['agent.organizationId', 'tool.organizationId'],
-    message: ['agent.fromAgentId', 'agent.toAgentId'],
+  handler: async (input, db) => {
+    return db.insert(users).values(input).returning()
   },
-  // Smart defaults for everything else
-}
+})
 
-// server/db.ts
-import { createReactiveDb } from '@drizzle/reactive'
-import { reactiveConfig } from './reactive.config'
+export const getUserProfile = defineReactiveFunction({
+  name: 'users.profile.getDetailed', // 🏷️ Nested names work perfectly
 
-export const db = createReactiveDb(drizzle(pool), reactiveConfig)
+  input: z.object({
+    userId: z.string(),
+  }),
 
-// server/trpc.ts
-import { createReactiveRouter } from '@drizzle/reactive/trpc'
+  dependencies: ['user', 'profile', 'preferences'],
 
-export const appRouter = createReactiveRouter({ db, config: reactiveConfig })
+  handler: async (input, db) => {
+    const user = await db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.id, input.userId),
+      with: {
+        profile: true,
+        preferences: true,
+      },
+    })
+    return user
+  },
+})
 ```
 
-### Client Usage
+### 2. Server-Side Execution (Without tRPC)
+
+**Use Case**: Background jobs, API routes, server actions, webhooks, etc.
 
 ```typescript
-// components/AgentList.tsx - Zero configuration needed
-function AgentList({ organizationId }) {
-  const { data: agents, isStale } = useReactive('agents.findMany', {
-    organizationId,
+// server/api/users/route.ts - Next.js API route
+import { getUsers, createUser } from '../functions/users'
+import { db } from '../db'
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const companyId = searchParams.get('companyId')!
+
+  // ✅ Execute reactive function directly on server
+  const users = await getUsers.execute(
+    { companyId, limit: 20 },
+    db // Your reactive database instance
+  )
+
+  return Response.json({ users })
+}
+
+export async function POST(request: Request) {
+  const body = await request.json()
+
+  // ✅ Execute reactive function directly on server
+  const newUser = await createUser.execute(body, db)
+
+  return Response.json({ user: newUser })
+}
+```
+
+```typescript
+// server/jobs/daily-stats.ts - Background job
+import { getUsers } from '../functions/users'
+import { db } from '../db'
+
+export async function generateDailyStats() {
+  const companies = await db.query.companies.findMany()
+
+  for (const company of companies) {
+    // ✅ Execute reactive function in background job
+    const users = await getUsers.execute({ companyId: company.id }, db)
+
+    // Process stats...
+    console.log(`Company ${company.name} has ${users.length} users`)
+  }
+}
+```
+
+### 3. tRPC Integration (Auto-Generated)
+
+**Key Feature**: The tRPC router automatically uses the function `name` as the procedure name.
+
+```typescript
+// server/trpc/router.ts
+import { createReactiveRouter } from '@drizzle/reactive/trpc'
+import { getUsers, createUser, getUserProfile } from '../functions/users'
+import { db } from '../db'
+
+export const appRouter = createReactiveRouter({ db })
+  .addQuery(getUsers) // 🔄 Creates procedure: users.getAll
+  .addMutation(createUser) // 🔄 Creates procedure: users.create
+  .addQuery(getUserProfile) // 🔄 Creates procedure: users.profile.getDetailed
+
+// ✅ Auto-generated procedures from function names:
+// - users.getAll (query)
+// - users.create (mutation)
+// - users.profile.getDetailed (query)
+
+export type AppRouter = typeof appRouter
+```
+
+### 4. Client-Side Usage (React Hooks)
+
+**Zero Configuration**: Just use the tRPC procedure names (which match function names).
+
+```typescript
+// client/components/UserList.tsx
+import { useReactive } from '@drizzle/reactive'
+
+function UserList({ companyId }: { companyId: string }) {
+  // ✅ Uses the function name automatically: 'users.getAll'
+  const {
+    data: users,
+    isStale,
+    isLoading,
+  } = useReactive('users.getAll', {
+    companyId,
+    limit: 20,
   })
-  // ✅ Shows cache instantly
-  // ✅ Auto-revalidates (active hook priority)
-  // ✅ Switches to real-time automatically
-  // ✅ Handles page refresh gracefully
+
+  if (isLoading) return <div>Loading...</div>
 
   return (
     <div>
-      {isStale && <div className="text-sm text-gray-500">Syncing...</div>}
-      {agents?.map((agent) => (
-        <AgentCard key={agent.id} agent={agent} />
+      {isStale && <div className="text-orange-500">Syncing...</div>}
+
+      {users?.map((user) => (
+        <UserCard key={user.id} user={user} />
       ))}
     </div>
   )
 }
 
-// Optional: Page-level priority hints for better UX
-function AgentsPage() {
-  useReactivePriorities([
-    'agents.findOne', // User might click on an agent
-    'tools.available', // Might open agent tools
-    'memory.recent', // Might view agent memory
-  ])
+function UserProfile({ userId }: { userId: string }) {
+  // ✅ Nested function names work perfectly
+  const { data: profile } = useReactive('users.profile.getDetailed', {
+    userId,
+  })
 
-  return <AgentList organizationId="org-123" />
+  return (
+    <div>
+      <h1>{profile?.name}</h1>
+      <p>{profile?.email}</p>
+      {/* Profile details... */}
+    </div>
+  )
 }
 ```
 
-### Reactive Function Definition
+### 5. Mutations with Real-time Updates
 
 ```typescript
-import { defineReactiveFunction } from '@drizzle/reactive'
+// client/components/CreateUserForm.tsx
+import { useMutation } from '@trpc/react-query'
+import { trpc } from '../trpc'
 
-// Define functions with explicit cache dependencies
-export const getAgentWithStats = defineReactiveFunction({
-  // Input validation (like tRPC)
-  input: z.object({
-    agentId: z.string(),
-    organizationId: z.string(),
-  }),
+function CreateUserForm({ companyId }: { companyId: string }) {
+  const createUserMutation = trpc.users.create.useMutation({
+    onSuccess: () => {
+      // ✅ Automatic cache invalidation happens via SSE
+      // No manual invalidation needed!
+    },
+  })
 
-  // Cache dependencies - what tables this function reads from
-  dependencies: ['agent', 'message', 'memory'],
-
-  // Optional: specific invalidation conditions
-  invalidateWhen: {
-    agent: (change) => change.keys.includes(input.agentId),
-    message: (change) => change.keys.includes(input.agentId),
-    memory: (change) => change.keys.includes(input.agentId),
-  },
-
-  // The actual function logic
-  handler: async ({ input, db }) => {
-    const agent = await db.agents.findUnique({ where: { id: input.agentId } })
-    const messageCount = await db.messages.count({
-      where: { fromAgentId: input.agentId },
+  const handleSubmit = (data: FormData) => {
+    createUserMutation.mutate({
+      name: data.get('name') as string,
+      email: data.get('email') as string,
+      companyId,
     })
-    const memoryCount = await db.memory.count({
-      where: { agentId: input.agentId },
-    })
+  }
 
-    return { agent, messageCount, memoryCount }
-  },
-})
+  return <form onSubmit={handleSubmit}>{/* Form fields... */}</form>
+}
 ```
 
-## 🎯 Key Benefits
+## 🏗️ Setup
 
-| Feature                | Current Approach       | Reactive Library              |
-| ---------------------- | ---------------------- | ----------------------------- |
-| **Configuration**      | Scattered across files | Single config file            |
-| **Cache Management**   | Manual invalidation    | Automatic based on relations  |
-| **Type Safety**        | Manual tRPC setup      | Auto-generated from schema    |
-| **Client Code**        | Verbose React Query    | One hook for everything       |
-| **Real-time**          | Manual WebSocket       | Built-in SSE with zero config |
-| **Persistence**        | Manual localStorage    | Configurable per query        |
-| **Optimistic Updates** | Manual implementation  | Automatic with config         |
-| **Deployment**         | Limited compatibility  | Works on Vercel + Self-hosted |
-| **Reconnection**       | Manual implementation  | Automatic browser handling    |
-| **Reliability**        | No delivery guarantees | Event acks without heartbeats |
+### 1. Database Configuration
 
-## 📈 Performance
+```typescript
+// server/db.ts
+import { createReactiveDb } from '@drizzle/reactive'
+import { drizzle } from 'drizzle-orm/postgres-js'
 
-- **Cache Hit Rate**: >90% for read operations
-- **Invalidation Accuracy**: 100% relevant queries
-- **SSE Latency**: <200ms invalidation propagation
-- **Bundle Size**: <50KB client-side
-- **Connection Efficiency**: Single HTTP stream per organization
-- **Vercel Compatibility**: 100% serverless compatible
-- **Bandwidth Efficiency**: No wasteful heartbeats, event-driven only
+const config = {
+  relations: {
+    // When user table changes, invalidate these queries
+    user: ['profile.userId', 'preferences.userId'],
+
+    // When profile table changes, invalidate these queries
+    profile: ['user.id'],
+
+    // When preferences table changes, invalidate these queries
+    preferences: ['user.id'],
+  },
+}
+
+export const db = createReactiveDb(drizzle(pool), config)
+```
+
+### 2. SSE Endpoint (Next.js)
+
+```typescript
+// app/api/events/route.ts
+import { createSSEStream } from '@drizzle/reactive'
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const companyId = searchParams.get('companyId')!
+
+  return createSSEStream(companyId)
+}
+```
+
+### 3. Client Setup
+
+```typescript
+// client/providers/ReactiveProvider.tsx
+import { ReactiveProvider } from '@drizzle/reactive'
+
+export function AppProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <ReactiveProvider
+      companyId="your-company-id"
+      config={{
+        relations: {
+          user: ['profile.userId', 'preferences.userId'],
+          profile: ['user.id'],
+          preferences: ['user.id'],
+        },
+      }}
+    >
+      {children}
+    </ReactiveProvider>
+  )
+}
+```
+
+## 🎯 Key Benefits Over Manual Approach
+
+| Feature                 | Manual tRPC                        | @drizzle/reactive               |
+| ----------------------- | ---------------------------------- | ------------------------------- |
+| **Function Definition** | Separate function + tRPC procedure | Single `defineReactiveFunction` |
+| **Cache Keys**          | Manual generation                  | Auto from function name         |
+| **Invalidation**        | Manual `invalidateQueries`         | Automatic via relations         |
+| **Real-time**           | Manual WebSocket setup             | Built-in SSE                    |
+| **Server Execution**    | Separate function needed           | Same function works everywhere  |
+| **Type Safety**         | Manual type wiring                 | 100% automatic                  |
+
+## 📈 Advanced Usage
+
+### Custom tRPC Procedure Names
+
+```typescript
+// If you need different tRPC names than function names
+const router = createReactiveRouter({ db })
+  .addQueryWithName(getUsers, 'getAllUsers') // Custom name
+  .addQuery(getUserProfile) // Uses function name: 'users.profile.getDetailed'
+```
+
+### Background Revalidation
+
+```typescript
+// client/hooks.ts
+function MyComponent() {
+  useReactivePriorities([
+    'users.getAll', // High priority (visible)
+    'users.profile.getDetailed', // Medium priority (likely next)
+  ])
+
+  // Component content...
+}
+```
+
+## 🔧 How It Works
+
+1. **Function Definition**: `defineReactiveFunction` creates functions that work both server-side and via tRPC
+2. **Name-Based Mapping**: The `name` property becomes both the cache key and tRPC procedure name
+3. **Auto-Generated Router**: `createReactiveRouter` automatically creates tRPC procedures from functions
+4. **Smart Caching**: Cache keys are generated from function names and inputs
+5. **Real-time Updates**: SSE automatically invalidates affected queries when data changes
+6. **Session Recovery**: Smart revalidation on page load handles offline scenarios
 
 ## 🤝 Contributing
 

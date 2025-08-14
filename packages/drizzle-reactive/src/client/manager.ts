@@ -4,7 +4,11 @@
  */
 
 import { ReactiveStorage, createReactiveStorage } from './storage'
-import { SessionRecoveryManager, createSessionRecoveryManager } from './session'
+import {
+  SimpleSessionManager,
+  createSimpleSessionManager,
+  revalidateOnPageLoad,
+} from './session'
 import {
   SmartRevalidationEngine,
   createSmartRevalidationEngine,
@@ -23,7 +27,7 @@ export interface ReactiveManagerOptions {
 
 export class ReactiveClientManager {
   private storage: ReactiveStorage
-  private sessionManager: SessionRecoveryManager
+  private sessionManager: SimpleSessionManager
   private revalidationEngine: SmartRevalidationEngine
   private sseClient: SSEClient | null = null
   private config: ReactiveConfig
@@ -43,10 +47,7 @@ export class ReactiveClientManager {
 
     // Initialize storage, session management, and smart revalidation
     this.storage = createReactiveStorage(this.organizationId)
-    this.sessionManager = createSessionRecoveryManager(
-      this.storage,
-      this.config
-    )
+    this.sessionManager = createSimpleSessionManager(this.organizationId)
     this.revalidationEngine = createSmartRevalidationEngine(
       this.storage,
       this.config
@@ -60,7 +61,7 @@ export class ReactiveClientManager {
       this.initializeSSEConnection(options.sseOptions)
     }
 
-    // Initial session gap check
+    // Initial session gap check (simple revalidation on page load)
     this.checkInitialSession()
   }
 
@@ -144,7 +145,7 @@ export class ReactiveClientManager {
   getSessionStats() {
     return {
       storage: this.storage.exportRegistry(),
-      recovery: this.sessionManager.getRecoveryStats(),
+      recovery: this.sessionManager.getSessionStats(),
       activeHooks: this.storage.getActiveHooks().length,
       revalidation: this.revalidationEngine.getRevalidationStats(),
     }
@@ -201,7 +202,7 @@ export class ReactiveClientManager {
    */
   async forceRefresh(): Promise<void> {
     console.log('[ReactiveClient] Force refresh initiated')
-    await this.sessionManager.forceRecovery(this.revalidateQuery.bind(this))
+    await this.checkInitialSession()
   }
 
   /**
@@ -294,58 +295,41 @@ export class ReactiveClientManager {
   }
 
   /**
-   * Check for session gap on initial load
+   * Check for session gap on initial load (simple approach as per spec)
    */
   private async checkInitialSession(): Promise<void> {
-    const gapInfo = this.sessionManager.analyzeSessionGap()
+    const activeHookQueries = this.storage
+      .getActiveHooks()
+      .map((hook) => hook.queryKey)
 
-    if (gapInfo.hasGap) {
-      console.log(
-        `[ReactiveClient] Initial session gap detected: ${Math.floor(
-          gapInfo.gapDuration / 1000
-        )}s`
-      )
-
-      const plan = this.sessionManager.createRecoveryPlan(gapInfo)
-      await this.sessionManager.executeRecovery(
-        plan,
-        this.revalidateQuery.bind(this)
-      )
-    } else {
-      console.log('[ReactiveClient] No initial session gap')
-    }
+    await revalidateOnPageLoad(
+      this.sessionManager,
+      activeHookQueries,
+      this.revalidateQuery.bind(this)
+    )
   }
 
   /**
    * Handle page visibility change
    */
   private async handleVisibilityChange(): Promise<void> {
-    await this.sessionManager.handleVisibilityChange(
-      true,
-      this.revalidateQuery.bind(this)
-    )
+    if (document.visibilityState === 'visible') {
+      // Check for stale data when page becomes visible
+      await this.checkInitialSession()
+    }
   }
 
   /**
    * Handle real-time reconnection
    */
   private async handleReconnection(): Promise<void> {
-    // Small delay to allow SSE to establish
-    setTimeout(async () => {
-      const gapInfo = this.sessionManager.analyzeSessionGap()
-      if (gapInfo.hasGap) {
-        console.log(
-          `[ReactiveClient] Post-reconnection gap detected: ${Math.floor(
-            gapInfo.gapDuration / 1000
-          )}s`
-        )
+    // Update connection status
+    this.sessionManager.setRealtimeConnected(true)
+    this.sessionManager.updateLastSync()
 
-        const plan = this.sessionManager.createRecoveryPlan(gapInfo)
-        await this.sessionManager.executeRecovery(
-          plan,
-          this.revalidateQuery.bind(this)
-        )
-      }
+    // Small delay to allow SSE to establish, then check for stale data
+    setTimeout(async () => {
+      await this.checkInitialSession()
     }, 1000)
   }
 
@@ -393,12 +377,19 @@ export class ReactiveClientManager {
       )
     }
   }
+
+  /**
+   * Get session information and statistics (simple approach)
+   */
+  getSessionInfo() {
+    return this.sessionManager.getSessionStats()
+  }
 }
 
 /**
  * Create a reactive client manager
  */
-export function createReactiveClient(
+export function createReactiveClientManager(
   options: ReactiveManagerOptions
 ): ReactiveClientManager {
   return new ReactiveClientManager(options)
