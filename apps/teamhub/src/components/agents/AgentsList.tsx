@@ -9,15 +9,13 @@ import { ScrollArea } from '../../components/ui/scroll-area'
 import { useState, useEffect, useTransition } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
 import { useOrganizationStore } from '@/stores/organizationStore'
+import { useReactive } from '@drizzle/reactive/client'
 
 type AgentTreeNode = Agent & {
   children: AgentTreeNode[]
 }
 
 type AgentsListProps = {
-  agents: Agent[]
-  selectedId?: string
-  createAgent: (formData: FormData) => Promise<Agent>
   organizationId: string
 }
 
@@ -121,12 +119,7 @@ function AgentTreeItem({
   )
 }
 
-export function AgentsList({
-  agents,
-  selectedId,
-  createAgent,
-  organizationId,
-}: AgentsListProps) {
+export function AgentsList({ organizationId }: AgentsListProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -137,6 +130,20 @@ export function AgentsList({
   const currentOrganization = useOrganizationStore(
     (state) => state.currentOrganization
   )
+
+  // 🚀 REACTIVE: Use useReactive instead of props for agents data
+  const {
+    data: agents = [],
+    isLoading,
+    isStale,
+  } = useReactive<Agent[]>('agents.getAll', { organizationId })
+
+  console.log('🔄 [AgentsList] Render:', {
+    agentCount: agents.length,
+    isLoading,
+    isStale,
+    organizationId,
+  })
 
   const handleAgentClick = (id: string) => {
     // Immediately update UI with basic agent data
@@ -151,26 +158,66 @@ export function AgentsList({
 
   const handleCreateAgent = async (formData: FormData) => {
     startTransition(() => {
-      void createAgent(formData).then((newAgent) => {
-        setSelectedAgentId(newAgent.id)
-        setSelectedAgent(newAgent)
-        // Only for new agents we force the settings tab
-        router.push(`/agents?id=${newAgent.id}&tab=settings`, { scroll: false })
-      })
+      // For now, we'll use a simple approach - in the future this will use tRPC mutations
+      const newAgent: Agent = {
+        id: crypto.randomUUID(),
+        name: 'New Agent',
+        role: 'assistant',
+        parentId: formData.get('parentId')?.toString() || null,
+        doesClone: false,
+        systemPrompt: '',
+        maxInstances: 1,
+        policyDefinitions: {},
+        memoryRules: {},
+        toolPermissions: { rules: [] },
+        isActive: true,
+        organizationId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as Agent
+
+      setSelectedAgentId(newAgent.id)
+      setSelectedAgent(newAgent)
+      // Only for new agents we force the settings tab
+      router.push(`/agents?id=${newAgent.id}&tab=settings`, { scroll: false })
     })
   }
 
   const agentTree = buildAgentTree(agents)
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full text-white bg-neutral-600">
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-8 bg-neutral-500 rounded animate-pulse"
+              />
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col h-full text-white bg-neutral-600">
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-2">
+          {isStale && (
+            <div className="text-xs text-yellow-400 bg-yellow-900/20 p-2 rounded">
+              🔄 Syncing latest data...
+            </div>
+          )}
           {agentTree.map((agent) => (
             <AgentTreeItem
               key={agent.id}
               agent={agent}
-              selectedId={selectedAgentId || selectedId}
+              selectedId={
+                selectedAgentId || searchParams.get('id') || undefined
+              }
               onClick={handleAgentClick}
             />
           ))}
@@ -181,8 +228,12 @@ export function AgentsList({
         <div className="p-4 border-t">
           <form action={handleCreateAgent}>
             <input type="hidden" name="organizationId" value={organizationId} />
-            {selectedId && (
-              <input type="hidden" name="parentId" value={selectedId} />
+            {searchParams.get('id') && (
+              <input
+                type="hidden"
+                name="parentId"
+                value={searchParams.get('id') || ''}
+              />
             )}
             <Card className="border-dashed cursor-pointer hover:bg-menu2">
               <Button

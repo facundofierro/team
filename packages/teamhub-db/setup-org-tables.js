@@ -78,7 +78,13 @@ async function ensureOrgTablesExist(orgDbName) {
       )
     }
 
-    console.log(`✅ Tables setup completed for: ${orgDbName}`)
+    // Optional: gate noisy setup logs behind DEBUG flag
+    if (
+      process.env.DEBUG_DB_SETUP === 'true' ||
+      process.env.DEBUG_DB_SETUP === '1'
+    ) {
+      console.log(`✅ Tables setup completed for: ${orgDbName}`)
+    }
   } catch (error) {
     console.error(`❌ Error setting up tables for ${orgDbName}:`, error.message)
     throw error

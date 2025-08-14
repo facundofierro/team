@@ -114,7 +114,26 @@ export class ReactiveRouter {
       current[parts[parts.length - 1]] = procedure
     }
 
-    return this.t.router(routerObj)
+    // Recursively wrap nested objects into tRPC routers
+    const wrapRouters = (node: Record<string, any>): Record<string, any> => {
+      const entries = Object.entries(node)
+      const built: Record<string, any> = {}
+      for (const [key, value] of entries) {
+        // Heuristic: a procedure in tRPC has a _def property; nested routers won't
+        const isProcedure =
+          value && typeof value === 'object' && '_def' in value
+        if (!isProcedure && value && typeof value === 'object') {
+          // Nested group: wrap its children first, then create a router
+          built[key] = this.t.router(wrapRouters(value))
+        } else {
+          built[key] = value
+        }
+      }
+      return built
+    }
+
+    const normalized = wrapRouters(routerObj)
+    return this.t.router(normalized)
   }
 
   /**

@@ -10,7 +10,7 @@ function createAppRouter() {
   if (_appRouter) return _appRouter
 
   try {
-    _appRouter = createReactiveRouter({ db: reactiveDb })
+    const reactiveRouter = createReactiveRouter({ db: reactiveDb })
       // Agent procedures
       .addQuery(agentFunctions.getAgents) // -> agents.getAll
       .addQuery(agentFunctions.getAgent) // -> agents.getOne
@@ -25,7 +25,9 @@ function createAppRouter() {
       .addMutation(organizationFunctions.createOrganization) // -> organizations.create
       .addQuery(organizationFunctions.getOrganizationSettings) // -> organizations.settings.getAll
       .addMutation(organizationFunctions.updateOrganizationSettings) // -> organizations.settings.update
-      .build() // Build the actual tRPC router
+
+    // Build the actual tRPC router
+    _appRouter = reactiveRouter.build()
 
     return _appRouter
   } catch (error) {
@@ -42,4 +44,5 @@ export const appRouter = new Proxy({} as any, {
   },
 })
 
-export type AppRouter = typeof _appRouter
+// Export the proper type - this should be the built tRPC router type
+export type AppRouter = NonNullable<ReturnType<typeof createAppRouter>>

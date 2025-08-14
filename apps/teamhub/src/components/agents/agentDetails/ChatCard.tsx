@@ -315,7 +315,7 @@ export function ChatCard({
       : null)
 
   return (
-    <Card className="flex h-full overflow-hidden bg-white">
+    <Card className="flex h-full min-h-0 overflow-hidden bg-white">
       {/* Instances Sidebar - Only shown if agent.doesClone is true */}
       {selectedAgent?.doesClone && (
         <div
@@ -349,7 +349,7 @@ export function ChatCard({
       )}
 
       {/* Main Chat Area */}
-      <div className="flex flex-col flex-1 min-w-0 bg-[#f8f9fa]">
+      <div className="flex flex-col flex-1 min-w-0 min-h-0 bg-[#f8f9fa]">
         {/* Scheduled Information Bar */}
         {scheduled && <ScheduledInfoBar scheduled={scheduled} />}
 

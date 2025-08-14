@@ -84,11 +84,16 @@ export function useReactive<T = any>(
   const clientManager = getClientManager()
   const isInitialMount = useRef(true)
 
+  // Compose an effective cache key that includes serialized input
+  const inputKey =
+    typeof input === 'undefined' ? '' : `::${JSON.stringify(input)}`
+  const effectiveKey = `${queryKey}${inputKey}`
+
   // Register this hook as active
   useEffect(() => {
-    const cleanup = clientManager.registerActiveHook(queryKey, [])
+    const cleanup = clientManager.registerActiveHook(effectiveKey, [])
     return cleanup
-  }, [queryKey, clientManager])
+  }, [effectiveKey, clientManager])
 
   // Load data on mount and when queryKey changes
   useEffect(() => {
@@ -98,8 +103,8 @@ export function useReactive<T = any>(
         setError(null)
 
         // Check ReactiveStorage cache first (immediate display)
-        const cached = clientManager.getCachedData(queryKey)
-        console.log(`🔍 [useReactive] Checking cache for ${queryKey}:`, cached)
+        const cached = clientManager.getCachedData(effectiveKey)
+        console.log(`🔍 [useReactive] Checking cache for ${effectiveKey}:`, cached)
 
         if (cached) {
           try {
@@ -107,7 +112,7 @@ export function useReactive<T = any>(
             const cacheAge = now - cached.lastRevalidated
             const minRevalidationTime = 5 * 60 * 1000 // 5 minutes minimum between revalidations
 
-            console.log(`📊 [useReactive] Cache details for ${queryKey}:`, {
+            console.log(`📊 [useReactive] Cache details for ${effectiveKey}:`, {
               cacheAge: `${Math.round(cacheAge / 1000)}s`,
               minRevalidationTime: `${Math.round(minRevalidationTime / 1000)}s`,
               isStale: cached.isStale,
@@ -121,21 +126,21 @@ export function useReactive<T = any>(
             // Only revalidate if cache is old enough (avoid excessive revalidation)
             if (cacheAge > minRevalidationTime) {
               console.log(
-                `[useReactive] Cache miss for ${queryKey}, triggering immediate fetch (cache age: ${Math.round(
+                `[useReactive] Cache miss for ${effectiveKey}, triggering immediate fetch (cache age: ${Math.round(
                   cacheAge / 1000
                 )}s)`
               )
 
               // Trigger revalidation in background
               clientManager
-                .revalidateQuery(queryKey)
+                .revalidateQuery(effectiveKey)
                 .then((result) => {
                   if (result !== undefined) {
                     setData(result)
                     setIsStale(false)
 
                     // Update ReactiveStorage with fresh data
-                    clientManager.registerQuery(queryKey, [], result)
+                    clientManager.registerQuery(effectiveKey, [], result)
                     console.log('💾 Updated ReactiveStorage with fresh data')
                   }
                 })
@@ -148,7 +153,7 @@ export function useReactive<T = any>(
                 })
             } else {
               console.log(
-                `[useReactive] Using fresh cache for ${queryKey} (age: ${Math.round(
+                `[useReactive] Using fresh cache for ${effectiveKey} (age: ${Math.round(
                   cacheAge / 1000
                 )}s < ${Math.round(minRevalidationTime / 1000)}s)`
               )
@@ -165,16 +170,16 @@ export function useReactive<T = any>(
 
         // No cache or corrupted cache - trigger immediate fetch
         console.log(
-          `[useReactive] No cache for ${queryKey}, triggering immediate fetch`
+          `[useReactive] No cache for ${effectiveKey}, triggering immediate fetch`
         )
 
-        const result = await clientManager.revalidateQuery(queryKey)
+        const result = await clientManager.revalidateQuery(effectiveKey)
         if (result !== undefined) {
           setData(result)
           setIsStale(false)
 
           // Store in ReactiveStorage for future use
-          clientManager.registerQuery(queryKey, [], result)
+          clientManager.registerQuery(effectiveKey, [], result)
           console.log('💾 Stored fresh data in ReactiveStorage')
         }
 
@@ -188,17 +193,17 @@ export function useReactive<T = any>(
     }
 
     loadData()
-  }, [queryKey, clientManager])
+  }, [effectiveKey, clientManager])
 
   const refetch = useCallback(async () => {
     try {
       setIsLoading(true)
       setError(null)
 
-      console.log(`[useReactive] Manual refetch for ${queryKey}`)
+    console.log(`[useReactive] Manual refetch for ${effectiveKey}`)
 
       // Trigger manual revalidation
-      await clientManager.revalidateQuery(queryKey)
+      await clientManager.revalidateQuery(effectiveKey)
 
       // Update stale state
       setIsStale(false)
@@ -207,7 +212,7 @@ export function useReactive<T = any>(
       setError(err as Error)
       setIsLoading(false)
     }
-  }, [queryKey, clientManager])
+  }, [effectiveKey, clientManager])
 
   return {
     data,

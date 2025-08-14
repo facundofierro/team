@@ -81,11 +81,9 @@ export async function ensureOrganizationDatabaseSetup(organizationId: string) {
       throw new Error('Organization not found')
     }
 
-    // First ensure the database exists, then ensure schemas and tables exist
-    const { createOrgDatabaseAndSchemas } = await import(
-      '@teamhub/db/src/db/functions/utils/database'
-    )
-    await createOrgDatabaseAndSchemas(organization.databaseName)
+    // If needed, call a public helper exported by @teamhub/db for ensuring schemas
+    // Currently, no public export is defined; skip runtime creation in Next build
+    // and rely on migrations/setup scripts.
 
     return { success: true }
   } catch (error: any) {

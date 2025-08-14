@@ -5,6 +5,15 @@ import * as embeddingsSchema from '../../connections/embeddings/schema'
 import * as mainSchema from '../../schema'
 import { sql } from 'drizzle-orm'
 
+// Debug logger for optional verbose setup logs
+const DB_SETUP_DEBUG =
+  process.env.DEBUG_DB_SETUP === 'true' || process.env.DEBUG_DB_SETUP === '1'
+const debugLog = (...args: Parameters<typeof console.log>) => {
+  if (DB_SETUP_DEBUG) {
+    console.log(...args)
+  }
+}
+
 // Types for database selection
 export type DatabaseType = 'memory' | 'embeddings' | 'insights'
 
@@ -25,7 +34,7 @@ async function installPgvectorExtension(
   pool: Pool,
   orgDbName: string
 ): Promise<boolean> {
-  console.log(`🔧 Attempting to install pgvector extension for ${orgDbName}...`)
+  debugLog(`🔧 Attempting to install pgvector extension for ${orgDbName}...`)
 
   try {
     // Try to create the extension
@@ -39,7 +48,7 @@ async function installPgvectorExtension(
     `)
 
     if (result.rows.length > 0) {
-      console.log(
+      debugLog(
         `✅ pgvector extension successfully installed for ${orgDbName} (version: ${result.rows[0].extversion})`
       )
       return true
@@ -85,14 +94,14 @@ async function checkPgvectorAvailability(
     `)
 
     if (existingResult.rows.length > 0) {
-      console.log(
+      debugLog(
         `✅ pgvector extension already available for ${orgDbName} (version: ${existingResult.rows[0].extversion})`
       )
       return true
     }
 
     // If not installed, try to install it
-    console.log(
+    debugLog(
       `🔍 pgvector extension not found for ${orgDbName}, attempting installation...`
     )
     return await installPgvectorExtension(pool, orgDbName)
@@ -111,9 +120,7 @@ async function fixVectorDimensionIssues(
   orgDbName: string
 ): Promise<void> {
   try {
-    console.log(
-      `🔧 Checking and fixing vector dimension issues for ${orgDbName}`
-    )
+    debugLog(`🔧 Checking and fixing vector dimension issues for ${orgDbName}`)
 
     // Check if memory table exists and has vector column without dimensions
     const tableCheck = await pool.query(`
@@ -126,7 +133,7 @@ async function fixVectorDimensionIssues(
 
     if (tableCheck.rows.length > 0) {
       const columnInfo = tableCheck.rows[0]
-      console.log(`📊 Found embedding column:`, columnInfo)
+      debugLog(`📊 Found embedding column:`, columnInfo)
 
       // Check if it's a vector type without dimensions
       if (columnInfo.udt_name === 'vector') {
@@ -136,10 +143,10 @@ async function fixVectorDimensionIssues(
             CREATE INDEX IF NOT EXISTS test_memory_embedding_idx
             ON memory.memory USING ivfflat (embedding vector_cosine_ops)
           `)
-          console.log(`✅ Vector column has proper dimensions in ${orgDbName}`)
+          debugLog(`✅ Vector column has proper dimensions in ${orgDbName}`)
         } catch (error: any) {
           if (error.message.includes('does not have dimensions')) {
-            console.log(`🔄 Fixing vector dimension issue in ${orgDbName}`)
+            debugLog(`🔄 Fixing vector dimension issue in ${orgDbName}`)
 
             // Drop the problematic column and recreate it with proper dimensions
             await pool.query(
@@ -149,7 +156,7 @@ async function fixVectorDimensionIssues(
               `ALTER TABLE memory.memory ADD COLUMN embedding vector(1536)`
             )
 
-            console.log(`✅ Fixed vector column dimensions in ${orgDbName}`)
+            debugLog(`✅ Fixed vector column dimensions in ${orgDbName}`)
           } else {
             console.warn(
               `⚠️ Other vector index error in ${orgDbName}:`,
@@ -178,12 +185,12 @@ async function fixVectorDimensionIssues(
             CREATE INDEX IF NOT EXISTS test_vector_idx
             ON embeddings.embedding USING ivfflat (vector vector_cosine_ops)
           `)
-          console.log(
+          debugLog(
             `✅ Embeddings vector column has proper dimensions in ${orgDbName}`
           )
         } catch (error: any) {
           if (error.message.includes('does not have dimensions')) {
-            console.log(
+            debugLog(
               `🔄 Fixing embeddings vector dimension issue in ${orgDbName}`
             )
 
@@ -194,7 +201,7 @@ async function fixVectorDimensionIssues(
               `ALTER TABLE embeddings.embedding ADD COLUMN vector vector(1536) NOT NULL`
             )
 
-            console.log(
+            debugLog(
               `✅ Fixed embeddings vector column dimensions in ${orgDbName}`
             )
           }
@@ -221,7 +228,7 @@ export async function ensureOrgTablesExist(orgDbName: string) {
     // Create memory tables if they don't exist
     await migrateMemoryTables(pool, orgDbName)
 
-    console.log(`✅ Memory tables created for: ${orgDbName}`)
+    debugLog(`✅ Memory tables created for: ${orgDbName}`)
 
     // Enhanced pgvector availability check with automatic installation
     const vectorExtensionAvailable = await checkPgvectorAvailability(
@@ -256,7 +263,7 @@ export async function ensureOrgTablesExist(orgDbName: string) {
           CREATE INDEX IF NOT EXISTS vector_idx ON embeddings.embedding USING ivfflat (vector vector_cosine_ops);
         `)
 
-        console.log(`✅ Embeddings tables created for: ${orgDbName}`)
+        debugLog(`✅ Embeddings tables created for: ${orgDbName}`)
       } catch (error: any) {
         console.warn(
           `⚠️  Could not create embeddings table for ${orgDbName}:`,
@@ -269,7 +276,7 @@ export async function ensureOrgTablesExist(orgDbName: string) {
       )
     }
 
-    console.log(`✅ Tables setup completed for: ${orgDbName}`)
+    debugLog(`✅ Tables setup completed for: ${orgDbName}`)
   } catch (error) {
     console.error(`❌ Error ensuring tables for ${orgDbName}:`, error)
     throw error
@@ -412,9 +419,9 @@ async function migrateMemoryTables(pool: Pool, orgDbName: string) {
         await pool.query(`
           CREATE INDEX IF NOT EXISTS memory_embedding_idx ON memory.memory USING ivfflat (embedding vector_cosine_ops);
         `)
-        console.log(`✅ Vector index created for memory table in ${orgDbName}`)
+        debugLog(`✅ Vector index created for memory table in ${orgDbName}`)
       } catch (error) {
-        console.log(
+        console.warn(
           `⚠️  Vector index not created for memory table in ${orgDbName}:`,
           error
         )

@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation'
 import { db, NewOrganization } from '@teamhub/db'
 import { NavigationEvents } from '@/components/layout/NavigationEvents'
 import { Toaster } from '@/components/ui/toaster'
+import { ReactiveRootProvider } from '@/components/providers/ReactiveRootProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -37,8 +38,10 @@ export default async function RootLayout({
         <div className="flex h-screen">
           <Sidebar organizations={organizations} session={session} />
           <main className="flex-1 overflow-auto">
-            {children}
-            <NavigationEvents />
+            <ReactiveRootProvider>
+              {children}
+              <NavigationEvents />
+            </ReactiveRootProvider>
           </main>
         </div>
         <Toaster />

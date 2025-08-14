@@ -7,6 +7,7 @@
 export { ReactiveProvider, useReactiveContext } from './client/provider'
 export { useReactive, initializeReactiveClient } from './client/hooks'
 export { ReactiveClientManager } from './client/manager'
+export { TrpcReactiveProvider, createTrpcRevalidateFn } from './client/trpc'
 
 // Storage providers for client
 export { LocalStorageProvider } from './providers/localStorage'
