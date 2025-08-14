@@ -7,7 +7,6 @@ import {
   LineChart,
   Settings,
   LogOut,
-  Zap,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -32,12 +31,6 @@ import { Globe } from 'lucide-react'
 const menuItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Agents', href: '/agents', icon: Users },
-  {
-    name: 'Reactive Demo',
-    href: '/agents/reactive',
-    icon: Zap,
-    temporary: true,
-  },
   { name: 'Insights', href: '/insights', icon: LineChart },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -93,24 +86,11 @@ export function Sidebar({ organizations, session }: SidebarProps) {
                 <li key={item.href}>
                   <Button
                     variant={isSelected ? 'secondary' : 'ghost'}
-                    className={`relative justify-start w-full ${
-                      item.temporary
-                        ? 'border border-orange-400/30 bg-orange-950/20'
-                        : ''
-                    }`}
+                    className="relative justify-start w-full"
                     onClick={() => handleNavigation(item.href)}
                   >
-                    <Icon
-                      className={`w-4 h-4 mr-3 ${
-                        item.temporary ? 'text-orange-400' : ''
-                      }`}
-                    />
+                    <Icon className="w-4 h-4 mr-3" />
                     {item.name}
-                    {item.temporary && (
-                      <span className="ml-auto text-xs text-orange-400 bg-orange-950/40 px-1 rounded">
-                        DEMO
-                      </span>
-                    )}
                     {isSelected && isLoading && (
                       <div className="absolute w-4 h-4 border-t-2 border-b-2 border-current rounded-full right-2 animate-spin" />
                     )}
