@@ -1,4 +1,4 @@
-import { db, dbMemories } from '@teamhub/db'
+import { db, dbMemories, createMessage, reactiveDb } from '@teamhub/db'
 import type { AgentMemoryRule, AgentToolPermission } from '@teamhub/db'
 import type { MemoryStoreRule } from '../types'
 import { generateStreamText } from '../ai/vercel/generateStreamText'
@@ -37,7 +37,7 @@ export async function sendChat(params: {
   } = params
 
   try {
-    const agent = await db.getAgent(agentId)
+    const agent = await getAgent.execute({ id: agentId }, reactiveDb)
     if (!agent) {
       throw new Error('Agent not found')
     }
@@ -64,19 +64,27 @@ export async function sendChat(params: {
         messages.filter((m) => m.role === 'user').pop()?.content || ''
 
       // Run this in background without blocking the stream
-      setImmediate(() => {
-        db.createMessage({
-          id: generateUUID(),
-          fromAgentId: null,
-          toAgentId: agentId,
-          toAgentCloneId: agentCloneId || null,
-          type: storeRule.messageType,
-          content: latestUserMessage,
-          metadata: {},
-          status: 'completed',
-        }).catch((error) => {
+      setImmediate(async () => {
+        try {
+          // For now, we'll need to handle the messageTypeId mapping
+          // The old schema used 'type' field, new schema uses 'messageTypeId'
+          // We'll need to either create a message type or use a default one
+          const messageTypeId = storeRule.messageType // This might need to be a UUID
+
+          await createMessage.execute(
+            {
+              fromAgentId: null,
+              toAgentId: agentId,
+              content: latestUserMessage,
+              messageTypeId: messageTypeId,
+              organizationId: agent.organizationId || '', // We need organizationId
+              metadata: {},
+            },
+            reactiveDb
+          )
+        } catch (error) {
           console.error('❌ SendChat: background message store failed:', error)
-        })
+        }
       })
     }
 

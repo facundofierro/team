@@ -40,6 +40,11 @@ export function ChatCard({
   onConversationLoaded,
 }: ChatCardProps) {
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
+  
+  // Debug: Log the selected agent state
+  useEffect(() => {
+    console.log('💬 [ChatCard] selectedAgent from store:', selectedAgent?.id, selectedAgent?.name)
+  }, [selectedAgent])
 
   // Custom hooks for different concerns
   const {
@@ -121,6 +126,11 @@ export function ChatCard({
     onFinish: undefined, // Will be set by tool call processor
     onError: undefined, // Will be set by tool call processor
     experimental_prepareRequestBody: ({ messages }) => {
+      // Guard: Ensure we have an agent before preparing the request
+      if (!selectedAgent?.id) {
+        console.error('💬 [ChatCard] No agent selected, cannot prepare request body')
+        throw new Error('No agent selected')
+      }
       // Build optimized context using context optimizer
       // Filter messages to only include user and assistant roles
       const filteredMessages = messages
@@ -141,6 +151,9 @@ export function ChatCard({
         formatOptimizationInfo(optimizedContext)
       )
 
+      // Debug: Log the agent ID being sent
+      console.log('💬 [ChatCard] Preparing request body with agentId:', selectedAgent?.id, 'selectedAgent:', selectedAgent?.name)
+      
       return {
         messages: optimizedContext.messages,
         summary: optimizedContext.summary,
@@ -313,6 +326,20 @@ export function ChatCard({
           isActive: currentConversation.isActive || false,
         }
       : null)
+
+  // Show loading state if no agent is selected
+  if (!selectedAgent) {
+    return (
+      <Card className="flex h-full min-h-0 overflow-hidden bg-white">
+        <div className="flex items-center justify-center w-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading agent...</p>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 
   return (
     <Card className="flex h-full min-h-0 overflow-hidden bg-white">

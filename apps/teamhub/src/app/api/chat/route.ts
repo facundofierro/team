@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { sendChat } from '@teamhub/ai'
 import { auth } from '@/auth'
-import { db } from '@teamhub/db'
+import { db, getOrganizations, getAgent, getTool, reactiveDb } from '@teamhub/db'
 import type { AgentToolPermissions } from '@teamhub/db'
 
 export async function POST(req: NextRequest) {
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     console.log('✅ Chat API: User authenticated:', session.user.id)
 
     // Get user's organization
-    const organizations = await db.getOrganizations(session.user.id)
+    const organizations = await getOrganizations.execute({ userId: session.user.id }, reactiveDb)
     if (!organizations.length) {
       console.error('❌ Chat API: No organization found for user')
       return new Response('No organization found', { status: 403 })
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     console.log('🤖 Chat API: Getting agent details...')
     // Get agent with tool permissions
-    const agent = await db.getAgent(agentId)
+    const agent = await getAgent.execute({ id: agentId }, reactiveDb)
     if (!agent) {
       console.error('❌ Chat API: Agent not found:', agentId)
       return new Response('Agent not found', { status: 404 })
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
       for (const permission of toolPermissions) {
         try {
-          const tool = await db.getTool(permission.toolId)
+          const tool = await getTool.execute({ id: permission.toolId }, reactiveDb)
           if (tool && tool.isActive) {
             console.log(
               `🔧 Chat API: Found active tool: ${tool.name} (${tool.type})`

@@ -1,7 +1,7 @@
 //import { sql } from '@vercel/postgres'
 //import { drizzle } from 'drizzle-orm/vercel-postgres'
 import * as schema from './schema'
-import * as agencyFunctions from './functions/agency'
+import * as reactiveAgencyFunctions from './functions/reactive/agency'
 import * as t from './types'
 
 import { drizzle } from 'drizzle-orm/node-postgres'
@@ -98,7 +98,7 @@ export const db = new Proxy({} as any, {
 // Export the enhanced db with functions as default
 export default {
   t,
-  ...agencyFunctions,
+  ...reactiveAgencyFunctions,
 }
 
 export { dbInsights } from './connections/insights/db'
@@ -108,7 +108,7 @@ export { dbMemories } from './connections/memory/db'
 export { authAdapter } from './authAdapter'
 
 export * from './schema'
-export * from './functions/agency'
+export * from './functions/reactive/agency'
 export * from './functions/auth'
 export * from './functions/utils/database'
 export * from './types'
