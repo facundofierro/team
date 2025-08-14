@@ -11,7 +11,7 @@ export interface ReactiveFunctionConfig<TInput = any, TOutput = any> {
   name: string
 
   /** Input validation schema */
-  input: z.ZodSchema<TInput>
+  input: z.ZodType<TInput>
 
   /** Tables this function depends on (for cache invalidation) */
   dependencies: string[]
