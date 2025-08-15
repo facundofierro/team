@@ -131,8 +131,15 @@ export function ChatCard({
   } = useChat({
     id: chatId, // Stable ID that only changes for new conversations
     api: '/api/chat', // Real chat endpoint
-    onFinish: undefined, // Will be set by tool call processor
-    onError: undefined, // Will be set by tool call processor
+    onFinish: async (message) => {
+      // Store the AI response in the database
+      if (currentConversation) {
+        await addMessageToConversation('assistant', message.content, message.id)
+      }
+    },
+    onError: (error) => {
+      console.error('💥 Chat error:', error)
+    },
     experimental_prepareRequestBody: ({ messages }) => {
       // Guard: Ensure we have an agent before preparing the request
       if (!selectedAgent?.id) {

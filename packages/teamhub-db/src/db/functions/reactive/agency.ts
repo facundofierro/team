@@ -46,20 +46,10 @@ export const createMessage = defineReactiveFunction({
   }) as any,
   dependencies: ['message'],
   handler: async (input, db) => {
-    console.log('[createMessage] Input:', input)
-    console.log('[createMessage] DB structure:', typeof db, Object.keys(db || {}))
-    
     try {
-      // Access the actual Drizzle database instance
-      const drizzleDb = db.db
-      console.log('[createMessage] Drizzle DB:', typeof drizzleDb, Object.keys(drizzleDb || {}))
-      
-      const result = await drizzleDb
-        .insert(messages)
-        .values(input)
-        .returning()
-        
-      console.log('[createMessage] Result:', result)
+      // Use the same pattern as other working reactive functions
+      const result = await db.db.insert(messages).values(input).returning()
+
       const [message] = result
       return message
     } catch (error) {
