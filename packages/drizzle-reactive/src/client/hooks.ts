@@ -69,7 +69,10 @@ export function initializeReactiveClient(
  */
 export function useReactive<T = any>(
   queryKey: string,
-  input?: any
+  input?: any,
+  options?: {
+    enabled?: boolean
+  }
 ): {
   data: T | undefined
   isLoading: boolean
@@ -84,6 +87,9 @@ export function useReactive<T = any>(
   const clientManager = getClientManager()
   const isInitialMount = useRef(true)
 
+  // Handle enabled option
+  const enabled = options?.enabled !== false
+
   // Compose an effective cache key that includes serialized input
   const inputKey =
     typeof input === 'undefined' ? '' : `::${JSON.stringify(input)}`
@@ -91,12 +97,21 @@ export function useReactive<T = any>(
 
   // Register this hook as active
   useEffect(() => {
+    if (!enabled) {
+      return
+    }
+
     const cleanup = clientManager.registerActiveHook(effectiveKey, [])
     return cleanup
-  }, [effectiveKey, clientManager])
+  }, [effectiveKey, clientManager, enabled])
 
   // Load data on mount and when queryKey changes
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false)
+      return
+    }
+
     const loadData = async () => {
       try {
         setIsLoading(true)
@@ -190,6 +205,10 @@ export function useReactive<T = any>(
   }, [effectiveKey, clientManager])
 
   const refetch = useCallback(async () => {
+    if (!enabled) {
+      return
+    }
+
     try {
       setIsLoading(true)
       setError(null)
@@ -206,7 +225,7 @@ export function useReactive<T = any>(
       setError(err as Error)
       setIsLoading(false)
     }
-  }, [effectiveKey, clientManager])
+  }, [effectiveKey, clientManager, enabled])
 
   return {
     data,

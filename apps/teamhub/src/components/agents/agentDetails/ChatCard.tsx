@@ -83,7 +83,12 @@ export function ChatCard({
     addMessageToConversation,
     completeCurrentConversation,
     loadConversationHistory,
+    loadFullConversation,
     switchToConversation,
+    // Quick access to stored conversation state
+    lastMessages,
+    activeConversationId,
+    conversationState,
   } = useConversationManager({
     onConversationChange: useCallback(
       (conversation: ConversationMemory | null) => {
@@ -241,6 +246,44 @@ export function ChatCard({
     // In a real implementation, you might need to restructure this differently
   }, [createOnFinishHandler, createOnErrorHandler])
 
+  // Quick loading of last messages when switching agents
+  useEffect(() => {
+    if (
+      selectedAgent?.id &&
+      !isActiveChatting &&
+      messages.length === 0 &&
+      lastMessages.length > 0
+    ) {
+      console.log('🚀 Quick loading last messages:', lastMessages.length)
+
+      // Convert stored last messages to Message[] format
+      const quickMessages: Message[] = lastMessages.map((msg: any) => ({
+        id: msg.id,
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+        createdAt: new Date(msg.timestamp),
+      }))
+
+      setMessages(quickMessages)
+      console.log('✅ Quick loaded', quickMessages.length, 'messages')
+
+      // Load full conversation in background after a short delay
+      if (activeConversationId) {
+        setTimeout(() => {
+          loadFullConversation(activeConversationId)
+        }, 1000) // 1 second delay
+      }
+    }
+  }, [
+    selectedAgent?.id,
+    lastMessages,
+    isActiveChatting,
+    messages.length,
+    setMessages,
+    activeConversationId,
+    loadFullConversation,
+  ])
+
   // Safe message loading - only when explicitly switching conversations
   useEffect(() => {
     // Only load if we have a conversation with content and we're not actively chatting
@@ -286,10 +329,20 @@ export function ChatCard({
       // Note: We'd need to update the tool call processor to handle loaded messages
 
       console.log('✅ Loaded', chatMessages.length, 'messages')
+    } else if (
+      // Clear messages when switching to agent with no active conversation
+      selectedAgent?.id &&
+      !currentConversation &&
+      !isActiveChatting &&
+      messages.length > 0
+    ) {
+      console.log('🧹 Clearing messages for agent with no active conversation')
+      setMessages([])
     }
   }, [
     currentConversation?.id,
     currentConversation?.content,
+    selectedAgent?.id,
     isActiveChatting,
     messages.length,
     setMessages,

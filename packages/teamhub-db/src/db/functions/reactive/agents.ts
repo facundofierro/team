@@ -189,3 +189,73 @@ export const getAgentMemories = defineReactiveFunction({
     }
   },
 })
+
+// Update agent conversation state
+export const updateAgentConversationState = defineReactiveFunction({
+  name: 'agents.updateConversationState',
+  input: z.object({
+    agentId: z.string(),
+    activeConversationId: z.string().nullable(),
+    lastMessages: z
+      .array(
+        z.object({
+          id: z.string(),
+          role: z.enum(['user', 'assistant']),
+          content: z.string(),
+          timestamp: z.string(),
+        })
+      )
+      .optional(),
+  }) as any,
+  dependencies: ['agent'],
+  handler: async (input, db) => {
+    const [result] = await db.db
+      .update(agents)
+      .set({
+        activeConversationId: input.activeConversationId,
+        lastMessages: input.lastMessages || [],
+        lastConversationUpdatedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(agents.id, input.agentId))
+      .returning()
+
+    return result as Agent
+  },
+})
+
+// Get agent with conversation state
+export const getAgentWithConversationState = defineReactiveFunction({
+  name: 'agents.getWithConversationState',
+  input: z.object({
+    agentId: z.string(),
+  }) as any,
+  dependencies: ['agent'],
+  handler: async (input, db) => {
+    const [result] = await db.db
+      .select()
+      .from(agents)
+      .where(eq(agents.id, input.agentId))
+
+    return result as Agent
+  },
+})
+
+// Get all agents with conversation state for an organization
+export const getAgentsWithConversationState = defineReactiveFunction({
+  name: 'agents.getAllWithConversationState',
+  input: z.object({
+    organizationId: z.string(),
+    limit: z.number().optional().default(50),
+  }) as any,
+  dependencies: ['agent'],
+  handler: async (input, db) => {
+    const result = await db.db
+      .select()
+      .from(agents)
+      .where(eq(agents.organizationId, input.organizationId))
+      .limit(input.limit)
+
+    return result as Agent[]
+  },
+})

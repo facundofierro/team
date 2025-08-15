@@ -20,6 +20,10 @@ function createAppRouter() {
       .addMutation(agentFunctions.deleteAgent) // -> agents.delete
       .addQuery(agentFunctions.getAgentMessages) // -> agents.messages.getAll
       .addQuery(agentFunctions.getAgentMemories) // -> agents.memory.getAll
+      // Conversation state management
+      .addMutation(agentFunctions.updateAgentConversationState) // -> agents.updateConversationState
+      .addQuery(agentFunctions.getAgentWithConversationState) // -> agents.getWithConversationState
+      .addQuery(agentFunctions.getAgentsWithConversationState) // -> agents.getAllWithConversationState
 
       // Organization procedures
       .addQuery(organizationFunctions.getOrganizations) // -> organizations.getAll

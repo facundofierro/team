@@ -47,6 +47,19 @@ export const agents = agency.table('agent', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
   isActive: boolean('is_active').default(true).notNull(),
+  // Conversation state fields for quick loading
+  activeConversationId: text('active_conversation_id'),
+  lastMessages: jsonb('last_messages')
+    .$type<
+      Array<{
+        id: string
+        role: 'user' | 'assistant'
+        content: string
+        timestamp: string
+      }>
+    >()
+    .default([]),
+  lastConversationUpdatedAt: timestamp('last_conversation_updated_at'),
 })
 
 // Message table (for communication between agents)

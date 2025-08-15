@@ -41,7 +41,7 @@
     "@types/uuid": "^9.0.7",
     "auto-playwright": "^1.16.1",
     "dotenv": "^16.3.1",
-    "drizzle-kit": "^0.20.6",
+    "drizzle-kit": "^0.31.4",
     "tsx": "^4.19.2",
     "typescript": "^5.4.5"
   }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
 import { useOrganizationStore } from '@/stores/organizationStore'
+import { useAgentConversationState } from '@/hooks/useAgentConversationState'
 import type {
   ConversationMemory,
   ConversationMessage,
@@ -38,21 +39,77 @@ export function useConversationManager({
   // Get the actual organization database name from the current organization
   const orgDatabaseName = currentOrganization?.databaseName || 'teamhub'
 
+  // Use the new conversation state management hook
+  const {
+    conversationState,
+    updateConversationState,
+    lastMessages,
+    activeConversationId,
+  } = useAgentConversationState(selectedAgent?.id || null)
+
   // Server action wrappers
   const loadActiveConversation = useCallback(async () => {
     if (!selectedAgent?.id) return
 
     try {
+      // First, check if we have a stored active conversation ID
+      if (activeConversationId) {
+        console.log(
+          '💬 [useConversationManager] Loading stored conversation:',
+          activeConversationId
+        )
+
+        // Try to load the stored conversation
+        const storedConversation = await getActiveConversation(
+          selectedAgent.id,
+          orgDatabaseName
+        )
+
+        if (
+          storedConversation &&
+          storedConversation.id === activeConversationId
+        ) {
+          setCurrentConversation(storedConversation)
+          onConversationChange?.(storedConversation)
+          return
+        }
+      }
+
+      // Fallback: load any active conversation
       const activeConversation = await getActiveConversation(
         selectedAgent.id,
         orgDatabaseName
       )
-      setCurrentConversation(activeConversation)
-      onConversationChange?.(activeConversation)
+
+      if (activeConversation) {
+        setCurrentConversation(activeConversation)
+        onConversationChange?.(activeConversation)
+
+        // Update the stored conversation state
+        updateConversationState({
+          activeConversationId: activeConversation.id,
+          lastMessages:
+            activeConversation.content
+              ?.filter((msg) => msg.role === 'user' || msg.role === 'assistant')
+              .slice(-2)
+              .map((msg) => ({
+                id: msg.id,
+                role: msg.role as 'user' | 'assistant',
+                content: msg.content,
+                timestamp: msg.timestamp,
+              })) || [],
+        })
+      }
     } catch (error) {
       console.error('Failed to load active conversation:', error)
     }
-  }, [selectedAgent?.id, orgDatabaseName, onConversationChange])
+  }, [
+    selectedAgent?.id,
+    orgDatabaseName,
+    onConversationChange,
+    activeConversationId,
+    updateConversationState,
+  ])
 
   const loadRecentConversations = useCallback(async () => {
     if (!selectedAgent?.id) return
@@ -73,11 +130,17 @@ export function useConversationManager({
   useEffect(() => {
     if (!selectedAgent?.id || !currentOrganization?.databaseName) return
 
+    // Clear current conversation when switching agents
+    setCurrentConversation(null)
+    onConversationChange?.(null)
+
     loadActiveConversation()
     loadRecentConversations()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedAgent?.id,
     currentOrganization?.databaseName,
+    onConversationChange,
     // Removed loadActiveConversation and loadRecentConversations from dependencies
     // to prevent infinite loop - these functions are stable and don't need to be in deps
   ])
@@ -135,6 +198,23 @@ export function useConversationManager({
         if (updatedConversation) {
           setCurrentConversation(updatedConversation)
           onConversationChange?.(updatedConversation)
+
+          // Update the stored conversation state with last 2 messages
+          updateConversationState({
+            activeConversationId: updatedConversation.id,
+            lastMessages:
+              updatedConversation.content
+                ?.filter(
+                  (msg) => msg.role === 'user' || msg.role === 'assistant'
+                )
+                .slice(-2)
+                .map((msg) => ({
+                  id: msg.id,
+                  role: msg.role as 'user' | 'assistant',
+                  content: msg.content,
+                  timestamp: msg.timestamp,
+                })) || [],
+          })
         }
 
         return updatedConversation
@@ -143,7 +223,12 @@ export function useConversationManager({
         return null
       }
     },
-    [currentConversation, onConversationChange, orgDatabaseName]
+    [
+      currentConversation,
+      onConversationChange,
+      orgDatabaseName,
+      updateConversationState,
+    ]
   )
 
   const completeCurrentConversation = useCallback(async () => {
@@ -165,10 +250,24 @@ export function useConversationManager({
       setRecentConversations((prev) => [currentConversation, ...prev])
       setCurrentConversation(null)
       onConversationChange?.(null)
+
+      // Clear the stored conversation state
+      if (selectedAgent?.id) {
+        updateConversationState({
+          activeConversationId: null,
+          lastMessages: [],
+        })
+      }
     } catch (error) {
       console.error('Failed to complete conversation:', error)
     }
-  }, [currentConversation, onConversationChange, orgDatabaseName])
+  }, [
+    currentConversation,
+    onConversationChange,
+    orgDatabaseName,
+    selectedAgent?.id,
+    updateConversationState,
+  ])
 
   const switchToConversationAction = useCallback(
     async (conversationId: string) => {
@@ -187,6 +286,25 @@ export function useConversationManager({
         if (conversation) {
           setCurrentConversation(conversation as ConversationMemory)
           onConversationChange?.(conversation as ConversationMemory)
+
+          // Update the stored conversation state
+          if (selectedAgent?.id) {
+            updateConversationState({
+              activeConversationId: conversation.id,
+              lastMessages:
+                conversation.content
+                  ?.filter(
+                    (msg) => msg.role === 'user' || msg.role === 'assistant'
+                  )
+                  .slice(-2)
+                  .map((msg) => ({
+                    id: msg.id,
+                    role: msg.role as 'user' | 'assistant',
+                    content: msg.content,
+                    timestamp: msg.timestamp,
+                  })) || [],
+            })
+          }
         }
       } catch (error) {
         console.error('Failed to switch conversation:', error)
@@ -197,6 +315,8 @@ export function useConversationManager({
       onConversationChange,
       completeCurrentConversation,
       orgDatabaseName,
+      selectedAgent?.id,
+      updateConversationState,
     ]
   )
 
@@ -212,6 +332,36 @@ export function useConversationManager({
     [orgDatabaseName]
   )
 
+  // Load full conversation after showing quick messages
+  const loadFullConversation = useCallback(
+    async (conversationId: string) => {
+      if (!conversationId) return
+
+      try {
+        console.log('🔄 Loading full conversation:', conversationId)
+
+        // Load the full conversation history
+        const fullConversation = await loadConversationHistory(
+          conversationId,
+          orgDatabaseName
+        )
+
+        if (fullConversation) {
+          setCurrentConversation(fullConversation)
+          onConversationChange?.(fullConversation)
+          console.log(
+            '✅ Full conversation loaded:',
+            fullConversation.content?.length,
+            'messages'
+          )
+        }
+      } catch (error) {
+        console.error('Failed to load full conversation:', error)
+      }
+    },
+    [orgDatabaseName, onConversationChange]
+  )
+
   return {
     currentConversation,
     recentConversations,
@@ -221,6 +371,11 @@ export function useConversationManager({
     completeCurrentConversation,
     switchToConversation: switchToConversationAction,
     loadConversationHistory: loadConversationHistoryAction,
+    loadFullConversation,
     refreshConversations: loadRecentConversations,
+    // Quick access to stored conversation state
+    lastMessages,
+    activeConversationId,
+    conversationState,
   }
 }
