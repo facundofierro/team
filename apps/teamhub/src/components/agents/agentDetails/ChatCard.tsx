@@ -50,14 +50,12 @@ const ChatCardComponent = ({
     { enabled: !!selectedAgentId }
   )
 
-  // Debug: Log the selected agent state (only on changes)
+  // Simplified agent state logging - only log successful loads
   useEffect(() => {
     if (selectedAgent) {
-      console.log('💬 [ChatCard] Agent loaded:', selectedAgent.name, '(ID:', selectedAgent.id, ')')
-    } else if (selectedAgentId) {
-      console.log('💬 [ChatCard] Agent loading...', selectedAgentId)
+      console.log('💬 Agent loaded:', selectedAgent.name)
     }
-  }, [selectedAgent?.id, selectedAgentId])
+  }, [selectedAgent?.id, selectedAgent?.name])
 
   // Custom hooks for different concerns
   const {
@@ -112,19 +110,31 @@ const ChatCardComponent = ({
     ),
   })
 
-  // Handle conversation loading from memory card double-click
+  // Handle conversation loading from memory card double-click - prevent duplicates
+  const conversationLoadRef = useRef<string | null>(null)
+  const isLoadingMemoryRef = useRef<boolean>(false)
+  
   useEffect(() => {
-    if (conversationToLoad && switchToConversation) {
-      console.log('🎯 [ChatCard] Memory conversation requested:', conversationToLoad)
+    if (conversationToLoad && switchToConversation && conversationToLoad !== conversationLoadRef.current) {
+      conversationLoadRef.current = conversationToLoad
+      isLoadingMemoryRef.current = true
+      console.log('💭 Loading memory:', conversationToLoad.substring(0, 12) + '...')
       
       switchToConversation(conversationToLoad)
         .then(() => {
-          console.log('✅ [ChatCard] Memory conversation loaded successfully:', conversationToLoad)
+          console.log('✅ Memory loaded successfully')
           onConversationLoaded?.()
         })
         .catch((error) => {
-          console.error('❌ [ChatCard] Memory conversation loading failed:', error)
+          console.error('❌ Memory loading failed:', error)
           onConversationLoaded?.() // Still call to clear the loading state
+        })
+        .finally(() => {
+          // Clear the ref after a delay to allow for new loads
+          setTimeout(() => {
+            conversationLoadRef.current = null
+            isLoadingMemoryRef.current = false
+          }, 1000)
         })
     }
   }, [conversationToLoad, switchToConversation, onConversationLoaded])
@@ -281,42 +291,35 @@ const ChatCardComponent = ({
   // Track the current conversation ID to detect conversation switches
   const [previousConversationId, setPreviousConversationId] = useState<string | null>(null)
   
-  // Clear messages when agent changes, but with a small delay to allow conversation state to load
+  // Clear messages when agent changes - only log meaningful changes
   useEffect(() => {
-    if (selectedAgent?.id !== previousSelectedAgentId) {
-      console.log('🧴 [ChatCard] Agent changed:', previousSelectedAgentId, '->', selectedAgent?.id)
+    // Only process if we have a valid agent ID and it's different from previous
+    if (selectedAgent?.id && selectedAgent.id !== previousSelectedAgentId) {
+      // Only log if we have a meaningful previous agent (not null/undefined transitions)
+      if (previousSelectedAgentId) {
+        console.log('🔄 Agent switch:', previousSelectedAgentId.substring(0, 8) + '... -> ' + selectedAgent.id.substring(0, 8) + '...')
+      }
       
-      // Always clear messages first
+      // Clear messages and update tracking
       setMessages([])
-      setPreviousSelectedAgentId(selectedAgent?.id || null)
-      
-      // Reset conversation tracking when agent changes
+      setPreviousSelectedAgentId(selectedAgent.id)
       setPreviousConversationId(null)
-      
-      // Add a brief delay to allow conversation state to be retrieved
-      // If no conversation state is available after 200ms, keep messages clear
-      // If conversation state is available, it will be loaded by the other useEffect
     }
   }, [selectedAgent?.id, previousSelectedAgentId, setMessages])
 
-  // Debug conversation state
+  // Simplified conversation state logging - only log significant changes
+  const prevStateRef = useRef<string>('')
   useEffect(() => {
-    console.log('🔍 [ChatCard] Conversation state changed:', {
-      agentId: selectedAgent?.id,
-      agentName: selectedAgent?.name,
-      activeConversationId,
-      lastMessagesCount: memoizedLastMessages.length,
-      currentConversationId: currentConversation?.id,
-      messagesCount: messages.length,
-    })
-  }, [
-    selectedAgent?.id,
-    selectedAgent?.name,
-    activeConversationId,
-    memoizedLastMessages.length,
-    currentConversation?.id,
-    messages.length,
-  ])
+    const currentState = `${selectedAgent?.id}:${activeConversationId}:${messages.length}`
+    if (currentState !== prevStateRef.current && selectedAgent) {
+      console.log('📊 State:', {
+        agent: selectedAgent.name,
+        conversation: activeConversationId?.substring(0, 8) + '...' || 'none',
+        messages: messages.length,
+      })
+      prevStateRef.current = currentState
+    }
+  }, [selectedAgent?.id, selectedAgent?.name, activeConversationId, messages.length])
 
   // Quick loading of last messages when switching agents
   const hasNoMessages = messages.length === 0
@@ -338,7 +341,8 @@ const ChatCardComponent = ({
       hasNoMessages &&
       hasLastMessages &&
       hasActiveConversation &&
-      !hasLoadedQuickMessages // Only load once
+      !hasLoadedQuickMessages && // Only load once
+      !isLoadingMemoryRef.current // Skip if we're loading a specific memory conversation
     ) {
       console.log('🚀 Quick loading last messages:', memoizedLastMessages.length, 'for agent:', selectedAgent.name)
 

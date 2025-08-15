@@ -317,7 +317,7 @@ export function useConversationManager({
       }
 
       try {
-        console.log('🔄 [useConversationManager] Switching to conversation:', conversationId)
+        console.log('🔄 Switching conversation:', conversationId.substring(0, 12) + '...')
 
         // Complete current conversation if exists
         if (currentConversation) {
@@ -330,11 +330,7 @@ export function useConversationManager({
           organizationId: currentOrganization.id,
         })
 
-        console.log('💬 [useConversationManager] Loaded conversation:', {
-          id: conversation?.id,
-          hasContent: !!conversation?.content,
-          messageCount: Array.isArray(conversation?.content) ? conversation.content.length : 0,
-        })
+        console.log('💬 Loaded:', conversation?.content?.length + ' msgs')
 
         if (conversation) {
           setCurrentConversation(conversation)
