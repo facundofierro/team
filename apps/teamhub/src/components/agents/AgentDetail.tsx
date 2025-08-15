@@ -12,7 +12,7 @@ import { SettingsCard } from './agentDetails/SettingsCard'
 import type { Agent, ToolWithTypes } from '@teamhub/db'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Skeleton } from '../../components/ui/skeleton'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
 import type { AgentStore } from '@/stores/agentStore'
 import { Button } from '../../components/ui/button'
@@ -74,25 +74,15 @@ export function AgentDetail({
 
   const availableTools = organizationSettings?.tools || []
 
-  // Reduced logging - only log when agent changes or when there are issues
-  if (agent && !agentLoading) {
-    console.log(
-      '🔄 [AgentDetail] Agent loaded:',
-      agent.name,
-      '(ID:',
-      agent.id.substring(0, 8) + '...)'
-    )
-  }
-
   // Update store when agent data arrives or changes
   useEffect(() => {
-    if (agent) {
+    if (agent && (!selectedAgent || selectedAgent.id !== agent.id)) {
       console.log('🔄 [AgentDetail] Setting agent in store:', agent.name)
       setSelectedAgent(agent)
       setHasChanges(false)
       setPendingChanges({})
     }
-  }, [agent, setSelectedAgent])
+  }, [agent, selectedAgent, setSelectedAgent])
 
   // Initialize tab from URL only once
   useEffect(() => {

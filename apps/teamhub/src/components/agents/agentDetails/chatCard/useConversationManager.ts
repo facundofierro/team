@@ -47,9 +47,11 @@ export function useConversationManager({
     activeConversationId,
   } = useAgentConversationState(selectedAgent?.id || null)
 
-  // Reset conversation state when agent changes
+  const [previousAgentId, setPreviousAgentId] = useState<string | null>(null)
+
+  // Reset conversation state when agent changes (but not on initial load)
   useEffect(() => {
-    if (selectedAgent?.id) {
+    if (selectedAgent?.id && previousAgentId && selectedAgent.id !== previousAgentId) {
       console.log(
         '💬 [useConversationManager] Agent changed, resetting conversation state'
       )
@@ -58,7 +60,8 @@ export function useConversationManager({
       setIsCreatingConversation(false)
       onConversationChange?.(null)
     }
-  }, [selectedAgent?.id, onConversationChange])
+    setPreviousAgentId(selectedAgent?.id || null)
+  }, [selectedAgent?.id, previousAgentId, onConversationChange])
 
   // Server action wrappers
   const loadActiveConversation = useCallback(async () => {

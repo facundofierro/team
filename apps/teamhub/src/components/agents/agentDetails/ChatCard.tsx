@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react'
 import { cn } from '@/lib/utils'
 import { useAgentStore } from '@/stores/agentStore'
 import { ConversationHeader } from './chatCard/ConversationHeader'
@@ -34,11 +34,11 @@ type ChatCardProps = {
   onConversationLoaded?: () => void
 }
 
-export function ChatCard({
+const ChatCardComponent = ({
   scheduled,
   conversationToLoad,
   onConversationLoaded,
-}: ChatCardProps) {
+}: ChatCardProps) => {
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
 
   // Debug: Log the selected agent state (reduced logging)
@@ -252,18 +252,34 @@ export function ChatCard({
     // In a real implementation, you might need to restructure this differently
   }, [createOnFinishHandler, createOnErrorHandler])
 
+  // Memoize the lastMessages array to prevent unnecessary effect triggers
+  const memoizedLastMessages = useMemo(() => lastMessages, [lastMessages])
+  
+  // Memoize the loadFullConversation callback
+  const memoizedLoadFullConversation = useCallback(
+    (conversationId: string) => {
+      if (conversationId && loadFullConversation) {
+        loadFullConversation(conversationId)
+      }
+    },
+    [loadFullConversation]
+  )
+
   // Quick loading of last messages when switching agents
+  const hasNoMessages = messages.length === 0
+  const hasLastMessages = memoizedLastMessages.length > 0
+  
   useEffect(() => {
     if (
       selectedAgent?.id &&
       !isActiveChatting &&
-      messages.length === 0 &&
-      lastMessages.length > 0
+      hasNoMessages &&
+      hasLastMessages
     ) {
-      console.log('🚀 Quick loading last messages:', lastMessages.length)
+      console.log('🚀 Quick loading last messages:', memoizedLastMessages.length)
 
       // Convert stored last messages to Message[] format
-      const quickMessages: Message[] = lastMessages.map((msg: any) => ({
+      const quickMessages: Message[] = memoizedLastMessages.map((msg: any) => ({
         id: msg.id,
         role: msg.role as 'user' | 'assistant',
         content: msg.content,
@@ -275,19 +291,23 @@ export function ChatCard({
 
       // Load full conversation in background after a short delay
       if (activeConversationId) {
-        setTimeout(() => {
-          loadFullConversation(activeConversationId)
+        const timeoutId = setTimeout(() => {
+          memoizedLoadFullConversation(activeConversationId)
         }, 1000) // 1 second delay
+        
+        // Cleanup timeout on unmount or dependency change
+        return () => clearTimeout(timeoutId)
       }
     }
   }, [
     selectedAgent?.id,
-    lastMessages,
     isActiveChatting,
-    messages.length,
+    hasNoMessages,
+    hasLastMessages,
+    memoizedLastMessages,
     setMessages,
     activeConversationId,
-    loadFullConversation,
+    memoizedLoadFullConversation,
   ])
 
   // Safe message loading - only when explicitly switching conversations
@@ -524,3 +544,6 @@ export function ChatCard({
     </Card>
   )
 }
+
+// Export memoized component to prevent unnecessary re-renders
+export const ChatCard = memo(ChatCardComponent)

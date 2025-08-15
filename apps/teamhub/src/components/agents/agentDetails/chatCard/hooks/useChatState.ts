@@ -16,14 +16,7 @@ export function useChatState() {
     useState<LocalConversation | null>(null)
 
   const selectedAgentId = useAgentStore((state) => state.selectedAgentId)
-
-  // Reset chat state when agent changes
-  useEffect(() => {
-    if (selectedAgentId) {
-      console.log('💬 [useChatState] Agent changed, resetting chat state')
-      resetChatState()
-    }
-  }, [selectedAgentId])
+  const [previousAgentId, setPreviousAgentId] = useState<string | null>(null)
 
   const generateNewChatId = useCallback(() => {
     const newChatId = `chat_${Date.now()}`
@@ -36,6 +29,15 @@ export function useChatState() {
     setLocalConversation(null)
     generateNewChatId()
   }, [generateNewChatId])
+
+  // Reset chat state when agent changes (but not on initial load)
+  useEffect(() => {
+    if (selectedAgentId && previousAgentId && selectedAgentId !== previousAgentId) {
+      console.log('💬 [useChatState] Agent changed, resetting chat state')
+      resetChatState()
+    }
+    setPreviousAgentId(selectedAgentId)
+  }, [selectedAgentId, previousAgentId, resetChatState])
 
   const toggleInstancesOpen = useCallback(() => {
     setIsInstancesOpen((prev) => !prev)
