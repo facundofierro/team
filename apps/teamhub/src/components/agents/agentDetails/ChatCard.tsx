@@ -301,11 +301,12 @@ const ChatCardComponent = ({
       }
       
       // Clear messages and update tracking
+      console.log('🧹 [DEBUG] Clearing messages on agent change from', messages.length, 'to 0')
       setMessages([])
       setPreviousSelectedAgentId(selectedAgent.id)
       setPreviousConversationId(null)
     }
-  }, [selectedAgent?.id, previousSelectedAgentId, setMessages])
+  }, [selectedAgent?.id, previousSelectedAgentId, setMessages, messages.length])
 
   // Simplified conversation state logging - only log significant changes
   const prevStateRef = useRef<string>('')
@@ -334,6 +335,7 @@ const ChatCardComponent = ({
     setHasLoadedQuickMessages(false)
   }, [selectedAgent?.id])
   
+  // Quick load - but only if full conversation isn't already loaded
   useEffect(() => {
     if (
       selectedAgent?.id &&
@@ -342,7 +344,8 @@ const ChatCardComponent = ({
       hasLastMessages &&
       hasActiveConversation &&
       !hasLoadedQuickMessages && // Only load once
-      !isLoadingMemoryRef.current // Skip if we're loading a specific memory conversation
+      !isLoadingMemoryRef.current && // Skip if we're loading a specific memory conversation
+      !currentConversation // NEW: Skip if full conversation is already loaded
     ) {
       console.log('🚀 Quick loading last messages:', memoizedLastMessages.length, 'for agent:', selectedAgent.name)
 
@@ -354,17 +357,15 @@ const ChatCardComponent = ({
         createdAt: new Date(msg.timestamp),
       }))
 
+      console.log('🧹 [DEBUG] Setting messages from quick load:', quickMessages.length)
       setMessages(quickMessages)
       setHasLoadedQuickMessages(true) // Mark as loaded
-      console.log('✅ Quick loaded', quickMessages.length, 'messages for agent:', selectedAgent.name)
 
-      // Load full conversation in background after a short delay
-      const timeoutId = setTimeout(() => {
-        memoizedLoadFullConversation(activeConversationId!)
-      }, 1000) // 1 second delay
-      
-      // Cleanup timeout on unmount or dependency change
-      return () => clearTimeout(timeoutId)
+      // Immediately trigger full conversation load
+      if (activeConversationId && loadFullConversation) {
+        console.log('🔄 Triggering full conversation load...')
+        loadFullConversation(activeConversationId)
+      }
     }
   }, [
     selectedAgent?.id,
@@ -377,7 +378,8 @@ const ChatCardComponent = ({
     memoizedLastMessages,
     setMessages,
     activeConversationId,
-    memoizedLoadFullConversation,
+    loadFullConversation,
+    currentConversation, // NEW: Added this dependency
   ])
 
   // Safe message loading - when explicitly switching conversations
@@ -429,6 +431,7 @@ const ChatCardComponent = ({
         }
       })
 
+      console.log('🧹 [DEBUG] Setting messages from conversation load:', chatMessages.length)
       setMessages(chatMessages)
       // Note: We'd need to update the tool call processor to handle loaded messages
 
@@ -442,7 +445,7 @@ const ChatCardComponent = ({
       !isActiveChatting &&
       messages.length > 0
     ) {
-      console.log('🧹 Clearing messages for agent with no conversation data')
+      console.log('🧹 [DEBUG] Clearing messages for agent with no conversation data from', messages.length, 'to 0')
       setMessages([])
       setHasLoadedQuickMessages(false) // Reset quick message tracking
     }
@@ -470,6 +473,7 @@ const ChatCardComponent = ({
     resetToolCallState()
 
     // Clear UI messages immediately - this is intentional for new conversation
+    console.log('🧹 [DEBUG] Clearing messages for new conversation from', messages.length, 'to 0')
     setMessages([])
 
     // Note: New conversation will be created when the first message is sent
@@ -481,6 +485,7 @@ const ChatCardComponent = ({
     resetMemorySelection,
     resetToolCallState,
     setMessages,
+    messages.length,
   ])
 
   // Use local conversation for immediate UI feedback, fallback to database conversation

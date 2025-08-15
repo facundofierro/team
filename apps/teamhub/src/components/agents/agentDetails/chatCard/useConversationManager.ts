@@ -2,21 +2,16 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import { useAgentConversationState } from '@/hooks/useAgentConversationState'
-import { useReactive, useReactiveQuery } from '@drizzle/reactive/client'
+import { useReactive } from '@drizzle/reactive/client'
 import type {
   ConversationMemory,
   ConversationMessage,
   ToolCall,
   Agent,
 } from '@teamhub/db'
-import {
-  getActiveConversation,
-  getRecentConversations,
-  startNewConversation,
-  addMessageToConversation,
-  completeConversation,
-  loadConversationHistory,
-} from '@/lib/actions/conversation'
+// Import the new reactive hooks
+import { useConversations } from '@/hooks/useConversations'
+import { useConversationMutations } from '@/hooks/useConversationMutations'
 
 // Types for conversation management - using database types
 type Conversation = ConversationMemory
@@ -47,8 +42,22 @@ export function useConversationManager({
   
   const { currentOrganization } = useOrganizationStore()
 
-  // Get the actual organization database name from the current organization
-  const orgDatabaseName = currentOrganization?.databaseName || 'teamhub'
+  // Initialize reactive hooks for conversations
+  const { 
+    activeConversation: reactiveActiveConversation,
+    recentConversations: reactiveRecentConversations,
+    loadActiveConversation: fetchActiveConversation,
+    loadRecentConversations: fetchRecentConversations,
+    loadConversation: fetchConversationById
+  } = useConversations(selectedAgent?.id || null)
+  
+  // Initialize reactive hooks for conversation mutations
+  const {
+    startNewConversation: startNewConversationMutation,
+    addMessageToConversation: addMessageMutation,
+    switchToConversation: switchConversationMutation,
+    completeConversation: completeConversationMutation
+  } = useConversationMutations()
 
   // Use the new conversation state management hook
   const {
@@ -75,7 +84,7 @@ export function useConversationManager({
     setPreviousAgentId(selectedAgent?.id || null)
   }, [selectedAgent?.id, previousAgentId, onConversationChange])
 
-  // Server action wrappers
+  // Reactive data loading functions with server actions as fallback
   const loadActiveConversation = useCallback(async () => {
     if (!selectedAgent?.id) return
 
@@ -87,11 +96,8 @@ export function useConversationManager({
           activeConversationId
         )
 
-        // Try to load the stored conversation
-        const storedConversation = await getActiveConversation(
-          selectedAgent.id,
-          orgDatabaseName
-        )
+        // Try to load the stored conversation with the reactive hook
+        const storedConversation = await fetchConversationById(activeConversationId)
 
         if (
           storedConversation &&
@@ -103,17 +109,24 @@ export function useConversationManager({
         }
       }
 
-      // Fallback: load any active conversation
-      const activeConversation = await getActiveConversation(
-        selectedAgent.id,
-        orgDatabaseName
-      )
+      // Fallback: load any active conversation using reactive hook
+      console.log('🔍 [useConversationManager] No stored activeConversationId, loading active conversation')
+      const activeConversation = await fetchActiveConversation()
+
+      console.log('🔍 [useConversationManager] Reactive hook returned active conversation:', {
+        found: !!activeConversation,
+        id: activeConversation?.id,
+        title: activeConversation?.title,
+        messageCount: activeConversation?.messageCount,
+        isActive: activeConversation?.isActive,
+        createdAt: activeConversation?.createdAt
+      })
 
       if (activeConversation) {
         setCurrentConversation(activeConversation)
         onConversationChange?.(activeConversation)
 
-        // Re-enabled: Update the stored conversation state (infinite loop is fixed)
+        // Update the stored conversation state (infinite loop is fixed)
         updateConversationState({
           activeConversationId: activeConversation.id,
           lastMessages:
@@ -127,32 +140,32 @@ export function useConversationManager({
                 timestamp: msg.timestamp,
               })) || [],
         })
+      } else {
+        console.log('⚠️ [useConversationManager] No active conversation found for agent')
       }
     } catch (error) {
       console.error('Failed to load active conversation:', error)
     }
   }, [
     selectedAgent?.id,
-    orgDatabaseName,
     onConversationChange,
     activeConversationId,
     updateConversationState,
+    fetchActiveConversation,
+    fetchConversationById
   ])
 
   const loadRecentConversations = useCallback(async () => {
     if (!selectedAgent?.id) return
 
     try {
-      const conversations = await getRecentConversations(
-        selectedAgent.id,
-        orgDatabaseName,
-        10
-      )
+      // Use the reactive hook to fetch recent conversations
+      const conversations = await fetchRecentConversations(10)
       setRecentConversations(conversations)
     } catch (error) {
       console.error('Failed to load recent conversations:', error)
     }
-  }, [selectedAgent?.id, orgDatabaseName])
+  }, [selectedAgent?.id, fetchRecentConversations])
 
   // Load active conversation when agent or organization changes
   useEffect(() => {
@@ -161,6 +174,9 @@ export function useConversationManager({
     // Always clear current conversation when switching agents (even if it's the same agent)
     // This ensures proper loading of conversation state
     console.log('🔄 [useConversationManager] Loading conversation for agent:', selectedAgent.id)
+    console.log('🔄 [useConversationManager] Current activeConversationId:', activeConversationId)
+    console.log('🔄 [useConversationManager] Last messages count:', lastMessages.length)
+    
     setCurrentConversation(null)
     onConversationChange?.(null)
 
@@ -181,14 +197,16 @@ export function useConversationManager({
 
       setIsCreatingConversation(true)
       try {
-        const newConversation = await startNewConversation(
-          selectedAgent.id,
-          firstMessage,
-          orgDatabaseName
-        )
+        // Use reactive mutation to start a new conversation
+        const newConversation = await startNewConversationMutation({
+          agentId: selectedAgent.id,
+          firstMessage
+        })
 
-        setCurrentConversation(newConversation)
-        onConversationChange?.(newConversation)
+        if (newConversation) {
+          setCurrentConversation(newConversation)
+          onConversationChange?.(newConversation)
+        }
 
         return newConversation
       } catch (error) {
@@ -202,7 +220,7 @@ export function useConversationManager({
       selectedAgent?.id,
       isCreatingConversation,
       onConversationChange,
-      orgDatabaseName,
+      startNewConversationMutation,
     ]
   )
 
@@ -216,20 +234,20 @@ export function useConversationManager({
       if (!currentConversation) return null
 
       try {
-        const updatedConversation = await addMessageToConversation(
-          currentConversation.id,
+        // Use reactive mutation to add a message
+        const updatedConversation = await addMessageMutation({
+          conversationId: currentConversation.id,
           role,
           content,
-          orgDatabaseName,
           messageId,
           toolCalls
-        )
+        })
 
         if (updatedConversation) {
           setCurrentConversation(updatedConversation)
           onConversationChange?.(updatedConversation)
 
-          // Re-enabled: Update the stored conversation state with last 2 messages (infinite loop is fixed)
+          // Update the stored conversation state with last 2 messages
           updateConversationState({
             activeConversationId: updatedConversation.id,
             lastMessages:
@@ -256,8 +274,8 @@ export function useConversationManager({
     [
       currentConversation,
       onConversationChange,
-      orgDatabaseName,
       updateConversationState,
+      addMessageMutation
     ]
   )
 
@@ -270,18 +288,18 @@ export function useConversationManager({
         currentConversation.messageCount && currentConversation.messageCount > 2
       )
 
-      await completeConversation(
-        currentConversation.id,
-        orgDatabaseName,
+      // Use reactive mutation to complete the conversation
+      await completeConversationMutation({
+        conversationId: currentConversation.id,
         shouldGenerateBrief
-      )
+      })
 
       // Add to recent conversations and clear current
       setRecentConversations((prev) => [currentConversation, ...prev])
       setCurrentConversation(null)
       onConversationChange?.(null)
 
-      // Re-enabled: Clear the stored conversation state (infinite loop is fixed)
+      // Clear the stored conversation state
       if (selectedAgent?.id) {
         updateConversationState({
           activeConversationId: null,
@@ -294,20 +312,12 @@ export function useConversationManager({
   }, [
     currentConversation,
     onConversationChange,
-    orgDatabaseName,
     selectedAgent?.id,
     updateConversationState,
+    completeConversationMutation
   ])
 
-  // Reactive conversation loading hook with dynamic parameters
-  const {
-    data: loadedConversation,
-    isLoading: loadingConversation,
-    error: conversationError,
-    run: loadConversationMemory,
-  } = useReactiveQuery<ConversationMemory | null, { conversationId: string; organizationId: string }>(
-    'conversations.getOne'
-  )
+  // This hook is now replaced by the reactive fetchConversationById from useConversations
 
   const switchToConversationAction = useCallback(
     async (conversationId: string) => {
@@ -324,10 +334,9 @@ export function useConversationManager({
           await completeCurrentConversation()
         }
 
-        // Load the target conversation using reactive function
-        const conversation = await loadConversationMemory({
-          conversationId,
-          organizationId: currentOrganization.id,
+        // Use the reactive mutation to switch to the conversation and mark it as active
+        const conversation = await switchConversationMutation({
+          conversationId
         })
 
         console.log('💬 Loaded:', conversation?.content?.length + ' msgs')
@@ -372,20 +381,21 @@ export function useConversationManager({
       currentOrganization?.id,
       selectedAgent?.id,
       updateConversationState,
-      loadConversationMemory,
+      switchConversationMutation,
     ]
   )
 
   const loadConversationHistoryAction = useCallback(
     async (conversationId: string) => {
       try {
-        return await loadConversationHistory(conversationId, orgDatabaseName)
+        // Use the reactive query to load conversation by ID
+        return await fetchConversationById(conversationId)
       } catch (error) {
         console.error('Failed to load conversation history:', error)
         return null
       }
     },
-    [orgDatabaseName]
+    [fetchConversationById]
   )
 
   // Load full conversation after showing quick messages
@@ -396,11 +406,8 @@ export function useConversationManager({
       try {
         console.log('🔄 Loading full conversation:', conversationId)
 
-        // Load the full conversation history
-        const fullConversation = await loadConversationHistory(
-          conversationId,
-          orgDatabaseName
-        )
+        // Load the full conversation history using reactive query
+        const fullConversation = await fetchConversationById(conversationId)
 
         if (fullConversation) {
           setCurrentConversation(fullConversation)
@@ -415,7 +422,7 @@ export function useConversationManager({
         console.error('Failed to load full conversation:', error)
       }
     },
-    [orgDatabaseName, onConversationChange]
+    [fetchConversationById, onConversationChange]
   )
 
   return {

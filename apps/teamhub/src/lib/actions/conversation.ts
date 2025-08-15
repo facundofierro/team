@@ -211,7 +211,7 @@ export async function loadConversationHistory(
 }
 
 /**
- * Switch to a different conversation
+ * Switch to a different conversation and mark it as active
  */
 export async function switchToConversation(
   conversationId: string,
@@ -222,9 +222,36 @@ export async function switchToConversation(
     const conversation = await memoryFunctions.getMemory(conversationId)
 
     if (conversation && conversation.type === 'conversation') {
-      // TODO: Mark this conversation as active in the database
-      // For now, just return the conversation
-      return conversation as ConversationMemory
+      const conversationMemory = conversation as ConversationMemory
+      
+      // Mark any existing active conversations for this agent as inactive
+      const existingActiveConversations = await memoryFunctions.getAgentMemories(
+        conversationMemory.agentId,
+        {
+          types: ['conversation'],
+          status: 'active'
+        }
+      )
+      
+      // Update existing active conversations to inactive
+      for (const activeConv of existingActiveConversations) {
+        if (activeConv.id !== conversationId && activeConv.isActive) {
+          console.log('💤 [switchToConversation] Marking conversation as inactive:', activeConv.id)
+          await memoryFunctions.updateMemory(activeConv.id, {
+            isActive: false,
+            needsBrief: Boolean(activeConv.messageCount && activeConv.messageCount > 2)
+          })
+        }
+      }
+      
+      // Mark the target conversation as active
+      console.log('✨ [switchToConversation] Marking conversation as active:', conversationId)
+      const updatedConversation = await memoryFunctions.updateMemory(conversationId, {
+        isActive: true,
+        needsBrief: false // Reset brief flag since we're actively using it
+      })
+      
+      return updatedConversation as ConversationMemory
     }
 
     return null
