@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { OrganizationSwitcher } from './OrganizationSwitcher'
 import { Organization } from '@teamhub/db'
 import { useOrganizationStore } from '@/stores/organizationStore'
-import { useNavigationStore } from '@/stores/navigationStore'
+import { useAgentStore } from '@/stores/agentStore'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { signOut } from 'next-auth/react'
@@ -45,7 +45,7 @@ export function Sidebar({ organizations, session }: SidebarProps) {
   const router = useRouter()
   const { currentOrganization } = useOrganizationStore()
   const { currentPath, setCurrentPath, setIsLoading, isLoading } =
-    useNavigationStore()
+    useAgentStore()
 
   useEffect(() => {
     console.log('debug isLoading', isLoading)

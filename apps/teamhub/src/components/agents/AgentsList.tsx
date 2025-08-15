@@ -8,7 +8,9 @@ import { Card } from '../../components/ui/card'
 import { ScrollArea } from '../../components/ui/scroll-area'
 import { useState, useEffect, useTransition } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
+import type { AgentStore } from '@/stores/agentStore'
 import { useOrganizationStore } from '@/stores/organizationStore'
+import type { OrganizationStore } from '@/stores/organizationStore'
 import { useReactive } from '@drizzle/reactive/client'
 
 type AgentTreeNode = Agent & {
@@ -71,8 +73,6 @@ function AgentTreeItem({
         <div style={{ width: `${level * 1.5}rem` }} />
         {agent.children.length > 0 && (
           <Button
-            variant="ghost"
-            size="icon"
             className="relative z-10 w-6 h-6 p-0 border border-gray-400 rounded-full hover:bg-zinc-600/50"
             onClick={(e) => {
               e.stopPropagation()
@@ -88,7 +88,6 @@ function AgentTreeItem({
         )}
         <div style={{ width: `2px` }} />
         <Button
-          variant={selectedId === agent.id ? 'secondary' : 'ghost'}
           className={`justify-start w-full rounded-2xl text-white hover:bg-zinc-700/50 hover:text-zinc-300 relative z-10 ${
             selectedId === agent.id
               ? 'bg-gray-50 text-slate-900  hover:text-zinc-300 pl-2'
@@ -124,11 +123,17 @@ export function AgentsList({ organizationId }: AgentsListProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
-  const setSelectedAgentId = useAgentStore((state) => state.setSelectedAgentId)
-  const selectedAgentId = useAgentStore((state) => state.selectedAgentId)
-  const setSelectedAgent = useAgentStore((state) => state.setSelectedAgent)
+  const setSelectedAgentId = useAgentStore(
+    (state: AgentStore) => state.setSelectedAgentId
+  )
+  const selectedAgentId = useAgentStore(
+    (state: AgentStore) => state.selectedAgentId
+  )
+  const setSelectedAgent = useAgentStore(
+    (state: AgentStore) => state.setSelectedAgent
+  )
   const currentOrganization = useOrganizationStore(
-    (state) => state.currentOrganization
+    (state: OrganizationStore) => state.currentOrganization
   )
 
   // 🚀 REACTIVE: Use useReactive instead of props for agents data
@@ -168,7 +173,7 @@ export function AgentsList({ organizationId }: AgentsListProps) {
   }
 
   const handleCreateAgent = async (formData: FormData) => {
-    startTransition(async () => {
+    startTransition(() => {
       try {
         // Create the agent using the tRPC client
         const newAgentData = {
@@ -194,7 +199,7 @@ export function AgentsList({ organizationId }: AgentsListProps) {
 
         // For now, just update the store and redirect
         // The agent will be created when the form is submitted
-        const newAgent = newAgentData as Agent
+        const newAgent = newAgentData as unknown as Agent
 
         // Update the store with the created agent
         setSelectedAgentId(newAgent.id)
@@ -250,7 +255,6 @@ export function AgentsList({ organizationId }: AgentsListProps) {
                 value={organizationId}
               />
               <Button
-                variant="default"
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 type="submit"
                 disabled={isPending}
@@ -308,7 +312,6 @@ export function AgentsList({ organizationId }: AgentsListProps) {
             )}
             <Card className="border-dashed cursor-pointer hover:bg-menu2">
               <Button
-                variant="ghost"
                 className="justify-center w-full h-10 px-4 hover:text-zinc-300"
                 type="submit"
                 disabled={isPending}

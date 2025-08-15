@@ -14,6 +14,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Skeleton } from '../../components/ui/skeleton'
 import { useEffect, useState } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
+import type { AgentStore } from '@/stores/agentStore'
 import { Button } from '../../components/ui/button'
 import { MemoryCard } from './agentDetails/MemoryCard'
 import { useReactive } from '@drizzle/reactive/client'
@@ -31,11 +32,17 @@ export function AgentDetail({
   const router = useRouter()
   const pathname = usePathname()
   const currentId = searchParams.get('id')
-  const activeTab = useAgentStore((state) => state.activeTab)
-  const setActiveTab = useAgentStore((state) => state.setActiveTab)
-  const selectedAgentId = useAgentStore((state) => state.selectedAgentId)
-  const selectedAgent = useAgentStore((state) => state.selectedAgent)
-  const setSelectedAgent = useAgentStore((state) => state.setSelectedAgent)
+  const activeTab = useAgentStore((state: AgentStore) => state.activeTab)
+  const setActiveTab = useAgentStore((state: AgentStore) => state.setActiveTab)
+  const selectedAgentId = useAgentStore(
+    (state: AgentStore) => state.selectedAgentId
+  )
+  const selectedAgent = useAgentStore(
+    (state: AgentStore) => state.selectedAgent
+  )
+  const setSelectedAgent = useAgentStore(
+    (state: AgentStore) => state.setSelectedAgent
+  )
   const [hasChanges, setHasChanges] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<Partial<Agent>>({})
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | undefined>(
@@ -52,7 +59,8 @@ export function AgentDetail({
     isStale: agentStale,
   } = useReactive<Agent | null>(
     'agents.getOne',
-    currentId ? { id: currentId } : null
+    { id: currentId || '' },
+    { enabled: !!currentId }
   )
 
   // 🚀 REACTIVE: Get organization settings using useReactive
@@ -187,12 +195,8 @@ export function AgentDetail({
             You have unsaved changes
           </span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              Save Changes
-            </Button>
+            <Button onClick={handleCancel}>Cancel</Button>
+            <Button onClick={handleSave}>Save Changes</Button>
           </div>
         </div>
       )}

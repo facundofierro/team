@@ -136,16 +136,20 @@ export function ChatCard({
   } = useChat({
     id: chatId, // Stable ID that only changes for new conversations
     api: '/api/chat', // Real chat endpoint
-    onFinish: async (message) => {
+    onFinish: async (message: Message) => {
       // Store the AI response in the database
       if (currentConversation) {
         await addMessageToConversation('assistant', message.content, message.id)
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('💥 Chat error:', error)
     },
-    experimental_prepareRequestBody: ({ messages }) => {
+    experimental_prepareRequestBody: ({
+      messages,
+    }: {
+      messages: Message[]
+    }) => {
       // Guard: Ensure we have an agent before preparing the request
       if (!selectedAgent?.id) {
         console.error(
@@ -156,8 +160,10 @@ export function ChatCard({
       // Build optimized context using context optimizer
       // Filter messages to only include user and assistant roles
       const filteredMessages = messages
-        .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
-        .map((msg) => ({
+        .filter(
+          (msg: Message) => msg.role === 'user' || msg.role === 'assistant'
+        )
+        .map((msg: Message) => ({
           role: msg.role as 'user' | 'assistant',
           content: msg.content,
         }))

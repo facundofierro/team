@@ -47,6 +47,19 @@ export function useConversationManager({
     activeConversationId,
   } = useAgentConversationState(selectedAgent?.id || null)
 
+  // Reset conversation state when agent changes
+  useEffect(() => {
+    if (selectedAgent?.id) {
+      console.log(
+        '💬 [useConversationManager] Agent changed, resetting conversation state'
+      )
+      setCurrentConversation(null)
+      setRecentConversations([])
+      setIsCreatingConversation(false)
+      onConversationChange?.(null)
+    }
+  }, [selectedAgent?.id, onConversationChange])
+
   // Server action wrappers
   const loadActiveConversation = useCallback(async () => {
     if (!selectedAgent?.id) return

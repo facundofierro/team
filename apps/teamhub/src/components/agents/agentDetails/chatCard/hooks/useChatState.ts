@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { useAgentStore } from '@/stores/agentStore'
 
 interface LocalConversation {
   id: string
@@ -13,6 +14,16 @@ export function useChatState() {
   const [isActiveChatting, setIsActiveChatting] = useState(false)
   const [localConversation, setLocalConversation] =
     useState<LocalConversation | null>(null)
+
+  const selectedAgentId = useAgentStore((state) => state.selectedAgentId)
+
+  // Reset chat state when agent changes
+  useEffect(() => {
+    if (selectedAgentId) {
+      console.log('💬 [useChatState] Agent changed, resetting chat state')
+      resetChatState()
+    }
+  }, [selectedAgentId])
 
   const generateNewChatId = useCallback(() => {
     const newChatId = `chat_${Date.now()}`

@@ -81,7 +81,7 @@ export const getAgentMessages = defineReactiveFunction({
   }) as any,
   dependencies: ['message'],
   handler: async (input, db) => {
-    return (db as any).db
+    const result = await (db as any).db
       .select()
       .from(messages)
       .where(
@@ -90,6 +90,7 @@ export const getAgentMessages = defineReactiveFunction({
           eq(messages.toAgentId, input.agentId)
         )
       )
+    return result
   },
 })
 
