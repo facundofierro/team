@@ -24,6 +24,10 @@ function createAppRouter() {
       .addMutation(agentFunctions.updateAgentConversationState) // -> agents.updateConversationState
       .addQuery(agentFunctions.getAgentWithConversationState) // -> agents.getWithConversationState
       .addQuery(agentFunctions.getAgentsWithConversationState) // -> agents.getAllWithConversationState
+      
+      // Conversation memory functions
+      .addQuery(agentFunctions.getConversationMemory) // -> conversations.getOne
+      .addQuery(agentFunctions.getActiveConversation) // -> conversations.getActive
 
       // Organization procedures
       .addQuery(organizationFunctions.getOrganizations) // -> organizations.getAll

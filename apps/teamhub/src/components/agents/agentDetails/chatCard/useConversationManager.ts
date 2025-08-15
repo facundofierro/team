@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import { useAgentConversationState } from '@/hooks/useAgentConversationState'
+import { useReactive, useReactiveQuery } from '@drizzle/reactive/client'
 import type {
   ConversationMemory,
   ConversationMessage,
   ToolCall,
+  Agent,
 } from '@teamhub/db'
 import {
   getActiveConversation,
@@ -14,7 +16,6 @@ import {
   addMessageToConversation,
   completeConversation,
   loadConversationHistory,
-  switchToConversation,
 } from '@/lib/actions/conversation'
 
 // Types for conversation management - using database types
@@ -33,7 +34,17 @@ export function useConversationManager({
   const [recentConversations, setRecentConversations] = useState<
     Conversation[]
   >([])
-  const selectedAgent = useAgentStore((state) => state.selectedAgent)
+  
+  // Get selected agent ID from simplified store
+  const selectedAgentId = useAgentStore((state) => state.selectedAgentId)
+  
+  // Get selected agent data from reactive cache
+  const { data: selectedAgent } = useReactive<Agent | null>(
+    'agents.getOne',
+    { id: selectedAgentId || '' },
+    { enabled: !!selectedAgentId }
+  )
+  
   const { currentOrganization } = useOrganizationStore()
 
   // Get the actual organization database name from the current organization
@@ -43,6 +54,7 @@ export function useConversationManager({
   const {
     conversationState,
     updateConversationState,
+    clearConversationState,
     lastMessages,
     activeConversationId,
   } = useAgentConversationState(selectedAgent?.id || null)
@@ -101,7 +113,7 @@ export function useConversationManager({
         setCurrentConversation(activeConversation)
         onConversationChange?.(activeConversation)
 
-        // Update the stored conversation state
+        // Re-enabled: Update the stored conversation state (infinite loop is fixed)
         updateConversationState({
           activeConversationId: activeConversation.id,
           lastMessages:
@@ -146,7 +158,9 @@ export function useConversationManager({
   useEffect(() => {
     if (!selectedAgent?.id || !currentOrganization?.databaseName) return
 
-    // Clear current conversation when switching agents
+    // Always clear current conversation when switching agents (even if it's the same agent)
+    // This ensures proper loading of conversation state
+    console.log('🔄 [useConversationManager] Loading conversation for agent:', selectedAgent.id)
     setCurrentConversation(null)
     onConversationChange?.(null)
 
@@ -215,7 +229,7 @@ export function useConversationManager({
           setCurrentConversation(updatedConversation)
           onConversationChange?.(updatedConversation)
 
-          // Update the stored conversation state with last 2 messages
+          // Re-enabled: Update the stored conversation state with last 2 messages (infinite loop is fixed)
           updateConversationState({
             activeConversationId: updatedConversation.id,
             lastMessages:
@@ -267,7 +281,7 @@ export function useConversationManager({
       setCurrentConversation(null)
       onConversationChange?.(null)
 
-      // Clear the stored conversation state
+      // Re-enabled: Clear the stored conversation state (infinite loop is fixed)
       if (selectedAgent?.id) {
         updateConversationState({
           activeConversationId: null,
@@ -285,31 +299,56 @@ export function useConversationManager({
     updateConversationState,
   ])
 
+  // Reactive conversation loading hook with dynamic parameters
+  const {
+    data: loadedConversation,
+    isLoading: loadingConversation,
+    error: conversationError,
+    run: loadConversationMemory,
+  } = useReactiveQuery<ConversationMemory | null, { conversationId: string; organizationId: string }>(
+    'conversations.getOne'
+  )
+
   const switchToConversationAction = useCallback(
     async (conversationId: string) => {
+      if (!conversationId || !currentOrganization?.id) {
+        console.error('Missing conversationId or organization')
+        return
+      }
+
       try {
+        console.log('🔄 [useConversationManager] Switching to conversation:', conversationId)
+
         // Complete current conversation if exists
         if (currentConversation) {
           await completeCurrentConversation()
         }
 
-        // Load the target conversation
-        const conversation = await switchToConversation(
+        // Load the target conversation using reactive function
+        const conversation = await loadConversationMemory({
           conversationId,
-          orgDatabaseName
-        )
+          organizationId: currentOrganization.id,
+        })
+
+        console.log('💬 [useConversationManager] Loaded conversation:', {
+          id: conversation?.id,
+          hasContent: !!conversation?.content,
+          messageCount: Array.isArray(conversation?.content) ? conversation.content.length : 0,
+        })
 
         if (conversation) {
-          setCurrentConversation(conversation as ConversationMemory)
-          onConversationChange?.(conversation as ConversationMemory)
+          setCurrentConversation(conversation)
+          onConversationChange?.(conversation)
 
-          // Update the stored conversation state
+          // Update the stored conversation state with message content
           if (selectedAgent?.id) {
+            const conversationMessages = Array.isArray(conversation.content) ? conversation.content : []
+            
             updateConversationState({
               activeConversationId: conversation.id,
               lastMessages:
-                conversation.content
-                  ?.filter(
+                conversationMessages
+                  .filter(
                     (msg) => msg.role === 'user' || msg.role === 'assistant'
                   )
                   .slice(-2)
@@ -318,21 +357,26 @@ export function useConversationManager({
                     role: msg.role as 'user' | 'assistant',
                     content: msg.content,
                     timestamp: msg.timestamp,
-                  })) || [],
+                  })),
             })
           }
+
+          console.log('✅ [useConversationManager] Conversation switch completed successfully')
+        } else {
+          console.warn('⚠️ [useConversationManager] No conversation found for ID:', conversationId)
         }
       } catch (error) {
-        console.error('Failed to switch conversation:', error)
+        console.error('❌ [useConversationManager] Failed to switch conversation:', error)
       }
     },
     [
       currentConversation,
       onConversationChange,
       completeCurrentConversation,
-      orgDatabaseName,
+      currentOrganization?.id,
       selectedAgent?.id,
       updateConversationState,
+      loadConversationMemory,
     ]
   )
 
@@ -389,6 +433,7 @@ export function useConversationManager({
     loadConversationHistory: loadConversationHistoryAction,
     loadFullConversation,
     refreshConversations: loadRecentConversations,
+    clearConversationState, // For debugging corrupted state
     // Quick access to stored conversation state
     lastMessages,
     activeConversationId,

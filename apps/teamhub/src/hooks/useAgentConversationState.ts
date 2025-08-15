@@ -1,17 +1,11 @@
 'use client'
 
 import { useCallback, useEffect } from 'react'
-import { useAgentStore } from '@/stores/agentStore'
 import { useReactive } from '@drizzle/reactive/client'
+import { useReactiveMutation } from './useReactiveMutation'
 import type { Agent } from '@teamhub/db'
 
 export function useAgentConversationState(agentId: string | null) {
-  const {
-    updateAgentConversationState,
-    getAgentConversationState,
-    agentConversationStates,
-  } = useAgentStore()
-
   // Get agent data with conversation state from database
   const { data: agent, isStale } = useReactive<Agent | null>(
     'agents.getWithConversationState',
@@ -19,26 +13,10 @@ export function useAgentConversationState(agentId: string | null) {
     { enabled: !!agentId }
   )
 
-  // Update local store when database changes
-  useEffect(() => {
-    if (agent && agentId) {
-      const dbState = {
-        activeConversationId: agent.activeConversationId || null,
-        lastMessages: agent.lastMessages || [],
-      }
-
-      const currentState = getAgentConversationState(agentId)
-
-      // Only update if different to avoid unnecessary re-renders
-      if (
-        currentState?.activeConversationId !== dbState.activeConversationId ||
-        JSON.stringify(currentState?.lastMessages) !==
-          JSON.stringify(dbState.lastMessages)
-      ) {
-        updateAgentConversationState(agentId, dbState)
-      }
-    }
-  }, [agent, agentId, updateAgentConversationState, getAgentConversationState])
+  // Create mutation hook for updating conversation state
+  const { mutateAsync: updateConversationStateMutation } = useReactiveMutation(
+    'agents.updateConversationState'
+  )
 
   // Function to update conversation state in database
   const updateConversationState = useCallback(
@@ -54,42 +32,59 @@ export function useAgentConversationState(agentId: string | null) {
       if (!agentId) return
 
       try {
-        // Update local store immediately for UI responsiveness
-        updateAgentConversationState(agentId, state)
-
-        // Update database via tRPC
-        // Note: This will be implemented when we add the tRPC client
-        // For now, we'll just update the local store
         console.log(
-          '💬 [useAgentConversationState] Updated conversation state:',
-          state
+          '💾 [useAgentConversationState] Updating database conversation state:',
+          {
+            agentId,
+            activeConversationId: state.activeConversationId,
+            lastMessagesCount: state.lastMessages.length,
+          }
         )
+
+        // Use reactive mutation hook
+        await updateConversationStateMutation({
+          agentId,
+          activeConversationId: state.activeConversationId,
+          lastMessages: state.lastMessages,
+        })
+
       } catch (error) {
-        console.error('Failed to update conversation state:', error)
-        // Revert local store on error
-        const currentState = getAgentConversationState(agentId)
-        if (currentState) {
-          updateAgentConversationState(agentId, currentState)
-        }
+        console.error('❌ [useAgentConversationState] Database update failed:', error)
       }
     },
-    [agentId, updateAgentConversationState, getAgentConversationState]
+    [agentId, updateConversationStateMutation]
   )
 
-  // Get current conversation state
-  const getCurrentConversationState = useCallback(() => {
-    if (!agentId) return null
-    return getAgentConversationState(agentId)
-  }, [agentId, getAgentConversationState])
+  // Function to clear conversation state (for debugging)
+  const clearConversationState = useCallback(async () => {
+    if (!agentId) return
+    
+    try {
+      console.log('🧹 [useAgentConversationState] Clearing conversation state for agent:', agentId)
+      
+      await updateConversationState({
+        activeConversationId: null,
+        lastMessages: [],
+      })
+      
+      console.log('✅ [useAgentConversationState] Successfully cleared conversation state for agent:', agentId)
+    } catch (error) {
+      console.error('❌ [useAgentConversationState] Failed to clear conversation state:', error)
+    }
+  }, [agentId, updateConversationState])
 
   return {
     agent,
     isStale,
-    conversationState: getCurrentConversationState(),
+    // All conversation state comes directly from reactive cache
+    conversationState: agent ? {
+      activeConversationId: agent.activeConversationId || null,
+      lastMessages: agent.lastMessages || [],
+    } : null,
     updateConversationState,
-    // Quick access to last messages for fast loading
-    lastMessages: getCurrentConversationState()?.lastMessages || [],
-    activeConversationId:
-      getCurrentConversationState()?.activeConversationId || null,
+    clearConversationState,
+    // Quick access properties
+    lastMessages: agent?.lastMessages || [],
+    activeConversationId: agent?.activeConversationId || null,
   }
 }

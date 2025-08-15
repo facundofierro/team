@@ -129,9 +129,6 @@ export function AgentsList({ organizationId }: AgentsListProps) {
   const selectedAgentId = useAgentStore(
     (state: AgentStore) => state.selectedAgentId
   )
-  const setSelectedAgent = useAgentStore(
-    (state: AgentStore) => state.setSelectedAgent
-  )
   const currentOrganization = useOrganizationStore(
     (state: OrganizationStore) => state.currentOrganization
   )
@@ -203,7 +200,6 @@ export function AgentsList({ organizationId }: AgentsListProps) {
 
         // Update the store with the created agent
         setSelectedAgentId(newAgent.id)
-        setSelectedAgent(newAgent)
 
         // Redirect to the agent settings page
         router.push(`/agents?id=${newAgent.id}&tab=settings`, { scroll: false })

@@ -340,6 +340,77 @@ export function useReactiveInvalidation(
 }
 
 /**
+ * Hook for manual queries with dynamic parameters
+ * Unlike useReactive, this hook doesn't auto-fetch and allows changing parameters on each call
+ */
+export function useReactiveQuery<TData = unknown, TVariables = unknown>(
+  queryKey: string
+): {
+  data: TData | undefined
+  isLoading: boolean
+  error: Error | null
+  refetch: (variables?: TVariables) => Promise<TData>
+  run: (variables: TVariables) => Promise<TData>
+} {
+  const [data, setData] = useState<TData | undefined>(undefined)
+  const [error, setError] = useState<Error | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [lastVariables, setLastVariables] = useState<TVariables | undefined>(undefined)
+  const clientManager = getClientManager()
+
+  const executeQuery = useCallback(
+    async (variables: TVariables): Promise<TData> => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        console.log(`[useReactiveQuery] Executing ${queryKey}`, variables)
+
+        // Compose cache key with variables
+        const inputKey = typeof variables === 'undefined' ? '' : `::${JSON.stringify(variables)}`
+        const effectiveKey = `${queryKey}${inputKey}`
+
+        // Execute the query through the client manager
+        const result = await clientManager.revalidateQuery(effectiveKey)
+        
+        setData(result)
+        setLastVariables(variables)
+        console.log(`✅ [useReactiveQuery] ${queryKey} completed successfully`)
+        
+        return result
+      } catch (err) {
+        const error = err as Error
+        setError(error)
+        console.error(`❌ [useReactiveQuery] ${queryKey} failed:`, error)
+        throw error
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [queryKey, clientManager]
+  )
+
+  const refetch = useCallback(
+    async (variables?: TVariables): Promise<TData> => {
+      const varsToUse = variables || lastVariables
+      if (!varsToUse) {
+        throw new Error('No variables provided for refetch and no previous variables stored')
+      }
+      return executeQuery(varsToUse)
+    },
+    [executeQuery, lastVariables]
+  )
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch,
+    run: executeQuery,
+  }
+}
+
+/**
  * Hook to get connection status
  */
 export function useReactiveConnection() {

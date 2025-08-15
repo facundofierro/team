@@ -102,8 +102,14 @@ export class SSEManager {
     }
 
     console.log(
-      `[SSE] Broadcasting invalidation for ${organizationId}, table: ${event.table}`
+      `🔥 [SSE-BROADCAST] Broadcasting invalidation for org: ${organizationId}, table: ${event.table}, operation: ${event.operation}, eventId: ${eventId}`
     )
+    console.log('🔥 [SSE-BROADCAST] Event details:', {
+      table: event.table,
+      operation: event.operation,
+      affectedQueries: event.affectedQueries,
+      affectedKeys: event.affectedKeys,
+    })
 
     // Store for potential retry
     const pendingEvent: PendingEvent = {

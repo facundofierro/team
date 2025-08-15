@@ -23,6 +23,7 @@ export {
 // React hooks
 export {
   useReactive,
+  useReactiveQuery,
   useReactivePriorities,
   useReactiveStats,
   useReactiveRefresh,

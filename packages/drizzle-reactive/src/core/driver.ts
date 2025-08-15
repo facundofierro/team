@@ -156,7 +156,7 @@ class ReactiveSqlDriver {
     originalExecute: Function
   ): Promise<any> {
     console.log(
-      `[ReactiveDB] Executing ${analysis.operation} on ${analysis.table}`
+      `🔥 [ReactiveDB] MUTATION DETECTED: ${analysis.operation} on ${analysis.table} - This WILL trigger SSE broadcast`
     )
 
     // Execute the mutation

@@ -37,12 +37,6 @@ export function AgentDetail({
   const selectedAgentId = useAgentStore(
     (state: AgentStore) => state.selectedAgentId
   )
-  const selectedAgent = useAgentStore(
-    (state: AgentStore) => state.selectedAgent
-  )
-  const setSelectedAgent = useAgentStore(
-    (state: AgentStore) => state.setSelectedAgent
-  )
   const [hasChanges, setHasChanges] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<Partial<Agent>>({})
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | undefined>(
@@ -74,15 +68,14 @@ export function AgentDetail({
 
   const availableTools = organizationSettings?.tools || []
 
-  // Update store when agent data arrives or changes
+  // Reset pending changes when agent data changes
   useEffect(() => {
-    if (agent && (!selectedAgent || selectedAgent.id !== agent.id)) {
-      console.log('🔄 [AgentDetail] Setting agent in store:', agent.name)
-      setSelectedAgent(agent)
+    if (agent) {
+      console.log('🔄 [AgentDetail] Agent data updated:', agent.name)
       setHasChanges(false)
       setPendingChanges({})
     }
-  }, [agent, selectedAgent, setSelectedAgent])
+  }, [agent])
 
   // Initialize tab from URL only once
   useEffect(() => {
@@ -101,11 +94,11 @@ export function AgentDetail({
   }
 
   const handleSave = async () => {
-    if (!selectedAgent?.id) return
+    if (!agent?.id) return
 
     // Ensure we're sending the ID with the changes
     const changes = {
-      id: selectedAgent.id,
+      id: agent.id,
       ...pendingChanges,
     }
 
@@ -119,7 +112,6 @@ export function AgentDetail({
   const handleCancel = () => {
     setHasChanges(false)
     setPendingChanges({})
-    setSelectedAgent(agent || null) // Convert undefined to null
   }
 
   const handleTabChange = (value: string) => {

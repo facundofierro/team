@@ -259,3 +259,89 @@ export const getAgentsWithConversationState = defineReactiveFunction({
     return result as Agent[]
   },
 })
+
+// Get conversation memory by ID (reactive wrapper around memory functions)
+export const getConversationMemory = defineReactiveFunction({
+  name: 'conversations.getOne',
+  input: z.object({
+    conversationId: z.string(),
+    organizationId: z.string(),
+  }) as any,
+  dependencies: ['memory'],
+  handler: async (input, db) => {
+    // Resolve tenant DB and reuse memory functions
+    try {
+      // Resolve organization's database name from main DB
+      const orgRow = await db.db
+        .select({ databaseName: organization.databaseName })
+        .from(organization)
+        .where(eq(organization.id, input.organizationId))
+        .limit(1)
+
+      if (!orgRow[0]?.databaseName) {
+        console.warn(
+          `⚠️ conversations.getOne: organization ${input.organizationId} not found or missing databaseName`
+        )
+        return null
+      }
+
+      const orgDb = await getOrgDb(orgRow[0].databaseName)
+      const memoryFns = getMemoryFunctions(orgDb as any)
+      const conversation = await memoryFns.getMemory(input.conversationId)
+      
+      // Only return conversation type memories
+      if (conversation && conversation.type === 'conversation') {
+        return conversation
+      }
+      
+      return null
+    } catch (error: any) {
+      if (error?.code === '3D000') {
+        // Org DB not initialized -> propagate so client doesn't cache empty results
+        console.warn(
+          `⚠️ conversations.getOne: org DB ${input.organizationId} missing; propagating error`
+        )
+      }
+      throw error
+    }
+  },
+})
+
+// Get active conversation for an agent (reactive wrapper)
+export const getActiveConversation = defineReactiveFunction({
+  name: 'conversations.getActive',
+  input: z.object({
+    agentId: z.string(),
+    organizationId: z.string(),
+  }) as any,
+  dependencies: ['memory'],
+  handler: async (input, db) => {
+    try {
+      // Resolve organization's database name from main DB
+      const orgRow = await db.db
+        .select({ databaseName: organization.databaseName })
+        .from(organization)
+        .where(eq(organization.id, input.organizationId))
+        .limit(1)
+
+      if (!orgRow[0]?.databaseName) {
+        console.warn(
+          `⚠️ conversations.getActive: organization ${input.organizationId} not found or missing databaseName`
+        )
+        return null
+      }
+
+      const orgDb = await getOrgDb(orgRow[0].databaseName)
+      const memoryFns = getMemoryFunctions(orgDb as any)
+      return await memoryFns.getActiveConversation(input.agentId)
+    } catch (error: any) {
+      if (error?.code === '3D000') {
+        // Org DB not initialized -> propagate so client doesn't cache empty results
+        console.warn(
+          `⚠️ conversations.getActive: org DB ${input.organizationId} missing; propagating error`
+        )
+      }
+      throw error
+    }
+  },
+})

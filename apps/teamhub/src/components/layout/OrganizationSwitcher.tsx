@@ -39,7 +39,7 @@ export function OrganizationSwitcher({
     [key: string]: 'loading' | 'success' | 'error'
   }>({})
   const { currentOrganization, setCurrentOrganization } = useOrganizationStore()
-  const { setSelectedAgentId, setSelectedAgent } = useAgentStore()
+  const { setSelectedAgentId } = useAgentStore()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -55,7 +55,6 @@ export function OrganizationSwitcher({
         setSetupStatus((prev) => ({ ...prev, [org.id]: 'success' }))
         setCurrentOrganization(org)
         setSelectedAgentId(null)
-        setSelectedAgent(null)
         setIsOpen(false)
         // Refresh the current page with new organizationId
         router.push(`${pathname}?organizationId=${org.id}`)

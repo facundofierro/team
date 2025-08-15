@@ -5,7 +5,7 @@
 
 // Essential client-side exports
 export { ReactiveProvider, useReactiveContext } from './client/provider'
-export { useReactive, initializeReactiveClient } from './client/hooks'
+export { useReactive, useReactiveQuery, initializeReactiveClient } from './client/hooks'
 export { ReactiveClientManager } from './client/manager'
 export { TrpcReactiveProvider, createTrpcRevalidateFn } from './client/trpc'
 
