@@ -104,10 +104,10 @@ export function useReactive<T = any>(
 
         // Check ReactiveStorage cache first (immediate display)
         const cached = clientManager.getCachedData(effectiveKey)
-        console.log(
-          `🔍 [useReactive] Checking cache for ${effectiveKey}:`,
-          cached
-        )
+        // Reduced logging - only log cache misses
+        if (!cached) {
+          console.log(`🔍 [useReactive] Cache miss for ${queryKey}`)
+        }
 
         if (cached) {
           try {
@@ -115,12 +115,10 @@ export function useReactive<T = any>(
             const cacheAge = now - cached.lastRevalidated
             const minRevalidationTime = 5 * 60 * 1000 // 5 minutes minimum between revalidations
 
-            console.log(`📊 [useReactive] Cache details for ${effectiveKey}:`, {
-              cacheAge: `${Math.round(cacheAge / 1000)}s`,
-              minRevalidationTime: `${Math.round(minRevalidationTime / 1000)}s`,
-              isStale: cached.isStale,
-              dataExists: !!cached.data,
-            })
+            // Reduced logging - only log when cache is stale
+            if (cached.isStale) {
+              console.log(`📊 [useReactive] Cache is stale for ${queryKey}`)
+            }
 
             // Show cached data immediately
             setData(cached.data)
@@ -129,9 +127,7 @@ export function useReactive<T = any>(
             // Only revalidate if cache is old enough (avoid excessive revalidation)
             if (cacheAge > minRevalidationTime) {
               console.log(
-                `[useReactive] Cache miss for ${effectiveKey}, triggering immediate fetch (cache age: ${Math.round(
-                  cacheAge / 1000
-                )}s)`
+                `🔄 [useReactive] Revalidating stale cache for ${queryKey}`
               )
 
               // Trigger revalidation in background
@@ -144,7 +140,7 @@ export function useReactive<T = any>(
 
                     // Update ReactiveStorage with fresh data
                     clientManager.registerQuery(effectiveKey, [], result)
-                    console.log('💾 Updated ReactiveStorage with fresh data')
+                    // Reduced logging - only log significant updates
                   }
                 })
                 .catch((error) => {
@@ -155,11 +151,7 @@ export function useReactive<T = any>(
                   // Keep showing cached data even if revalidation fails
                 })
             } else {
-              console.log(
-                `[useReactive] Using fresh cache for ${effectiveKey} (age: ${Math.round(
-                  cacheAge / 1000
-                )}s < ${Math.round(minRevalidationTime / 1000)}s)`
-              )
+              // Reduced logging - only log when cache is stale
             }
 
             setIsLoading(false)
@@ -172,9 +164,7 @@ export function useReactive<T = any>(
         }
 
         // No cache or corrupted cache - trigger immediate fetch
-        console.log(
-          `[useReactive] No cache for ${effectiveKey}, triggering immediate fetch`
-        )
+        console.log(`[useReactive] No cache for ${queryKey}, fetching...`)
 
         const result = await clientManager.revalidateQuery(effectiveKey)
         if (result !== undefined) {
@@ -183,7 +173,7 @@ export function useReactive<T = any>(
 
           // Store in ReactiveStorage for future use
           clientManager.registerQuery(effectiveKey, [], result)
-          console.log('💾 Stored fresh data in ReactiveStorage')
+          // Reduced logging - only log significant updates
         }
 
         setIsLoading(false)
@@ -204,7 +194,7 @@ export function useReactive<T = any>(
       setIsLoading(true)
       setError(null)
 
-      console.log(`[useReactive] Manual refetch for ${effectiveKey}`)
+      // Reduced logging - only log when there are issues
 
       // Trigger manual revalidation
       await clientManager.revalidateQuery(effectiveKey)
@@ -232,15 +222,14 @@ export function useReactive<T = any>(
  */
 export function useReactivePriorities(priorities: string[]): void {
   useEffect(() => {
-    console.log('[useReactivePriorities] Setting priority hints:', priorities)
-
+    // Reduced logging - only log when there are issues
     // In a full implementation, this would:
     // 1. Pre-warm cache for these queries
     // 2. Subscribe to their invalidation events
     // 3. Set higher revalidation priority
 
     return () => {
-      console.log('[useReactivePriorities] Cleaning up priority hints')
+      // Reduced logging - only log when there are issues
     }
   }, [priorities.join(',')])
 }

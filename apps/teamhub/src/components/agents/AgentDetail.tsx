@@ -66,23 +66,20 @@ export function AgentDetail({
 
   const availableTools = organizationSettings?.tools || []
 
-  console.log('🔄 [AgentDetail] Render:', {
-    currentId,
-    agent: agent?.name,
-    agentLoading,
-    agentStale,
-    toolsCount: availableTools.length,
-    settingsLoading,
-  })
+  // Reduced logging - only log when agent changes or when there are issues
+  if (agent && !agentLoading) {
+    console.log(
+      '🔄 [AgentDetail] Agent loaded:',
+      agent.name,
+      '(ID:',
+      agent.id.substring(0, 8) + '...)'
+    )
+  }
 
   // Update store when agent data arrives or changes
   useEffect(() => {
     if (agent) {
-      console.log(
-        '🔄 [AgentDetail] Setting selected agent in store:',
-        agent.id,
-        agent.name
-      )
+      console.log('🔄 [AgentDetail] Setting agent in store:', agent.name)
       setSelectedAgent(agent)
       setHasChanges(false)
       setPendingChanges({})

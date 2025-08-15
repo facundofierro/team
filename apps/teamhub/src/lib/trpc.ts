@@ -10,7 +10,5 @@ export const trpcClient = createTRPCProxyClient<AppRouter>({
   ],
 })
 
-// Debug: Log the client structure to see what's available
-console.log('🔧 [tRPC Client] Client created:', trpcClient)
-console.log('🔧 [tRPC Client] Available keys:', Object.keys(trpcClient))
-console.log('🔧 [tRPC Client] Client type:', typeof trpcClient)
+// Debug: Log the client structure to see what's available (reduced logging)
+console.log('🔧 [tRPC Client] Client created with keys:', Object.keys(trpcClient).length)

@@ -41,13 +41,17 @@ export function ChatCard({
 }: ChatCardProps) {
   const selectedAgent = useAgentStore((state) => state.selectedAgent)
 
-  // Debug: Log the selected agent state
+  // Debug: Log the selected agent state (reduced logging)
   useEffect(() => {
-    console.log(
-      '💬 [ChatCard] selectedAgent from store:',
-      selectedAgent?.id,
-      selectedAgent?.name
-    )
+    if (selectedAgent) {
+      console.log('💬 [ChatCard] Agent selected:', selectedAgent.name)
+    } else {
+      const selectedAgentId = useAgentStore.getState().selectedAgentId
+      console.log(
+        '💬 [ChatCard] No agent selected, but selectedAgentId:',
+        selectedAgentId
+      )
+    }
   }, [selectedAgent])
 
   // Custom hooks for different concerns
@@ -151,19 +155,7 @@ export function ChatCard({
         currentConversation
       )
 
-      // Log optimization info for debugging
-      console.log(
-        '💬 ChatCard: Context optimization:',
-        formatOptimizationInfo(optimizedContext)
-      )
-
-      // Debug: Log the agent ID being sent
-      console.log(
-        '💬 [ChatCard] Preparing request body with agentId:',
-        selectedAgent?.id,
-        'selectedAgent:',
-        selectedAgent?.name
-      )
+      // Reduced logging - only log when there are issues
 
       return {
         messages: optimizedContext.messages,
@@ -251,8 +243,8 @@ export function ChatCard({
       messages.length === 0
     ) {
       console.log(
-        '📨 Loading messages for conversation:',
-        currentConversation.id
+        '📨 Loading conversation:',
+        currentConversation.id.substring(0, 8) + '...'
       )
 
       // Convert ConversationMessage[] to Message[] format expected by useChat
@@ -286,11 +278,7 @@ export function ChatCard({
       setMessages(chatMessages)
       // Note: We'd need to update the tool call processor to handle loaded messages
 
-      console.log(
-        '✅ Loaded',
-        chatMessages.length,
-        'messages from conversation'
-      )
+      console.log('✅ Loaded', chatMessages.length, 'messages')
     }
   }, [
     currentConversation?.id,
@@ -340,12 +328,58 @@ export function ChatCard({
 
   // Show loading state if no agent is selected
   if (!selectedAgent) {
+    // Check if we have a selectedAgentId but the agent object is still loading
+    const selectedAgentId = useAgentStore.getState().selectedAgentId
+
+    if (selectedAgentId) {
+      // Agent is selected but still loading - show loading state
+      return (
+        <Card className="flex h-full min-h-0 overflow-hidden bg-white">
+          <div className="flex items-center justify-center w-full">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading agent...</p>
+            </div>
+          </div>
+        </Card>
+      )
+    }
+
+    // No agent selected at all - show selection message
     return (
       <Card className="flex h-full min-h-0 overflow-hidden bg-white">
         <div className="flex items-center justify-center w-full">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading agent...</p>
+          <div className="text-center max-w-md">
+            <div className="mb-6">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg
+                  className="w-8 h-8 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Select an Agent
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Choose an agent from the list to start chatting, or create a new
+                one to get started.
+              </p>
+            </div>
+
+            <div className="text-sm text-gray-500 space-y-1">
+              <p>• Click on an agent in the left sidebar</p>
+              <p>• Or use the &ldquo;Add new agent&rdquo; button</p>
+              <p>• Each agent can have different capabilities and tools</p>
+            </div>
           </div>
         </div>
       </Card>
