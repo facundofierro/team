@@ -448,6 +448,38 @@ export const getOrganizationOverview = defineReactiveFunction({
 - Authentication issues: Verify ALLOWED_EMAILS configuration
 - Memory issues: Monitor conversation memory growth
 
+## Task Management System
+
+### Task Organization
+
+TeamHub uses a milestone-based task management system with priority-based organization:
+
+- **Tasks are organized by priority**: A (Critical), B (High), C (Medium), D (Future)
+- **File naming convention**: `{Priority}: {task-name} ({story-points})`
+- **Story points scale**: 1 (1-2 days), 2 (3-5 days), 3 (1-2 weeks), 4 (2-3 weeks), 5 (3-4 weeks)
+- **Directory structure**: `pending/`, `doing/`, `done/` based on task status
+
+### Current Milestones
+
+1. **Milestone 1 (Q1 2025)**: Internal Tool Foundation - Complete Priority A tasks
+2. **Milestone 2 (Q2 2025)**: Public Agent Platform - Complete Priority B tasks
+3. **Milestone 3 (Q3 2025)**: Advanced Analytics - Complete Priority C tasks
+
+### Task Status Locations
+
+- **Pending**: `specs/tasks/pending/` - Tasks waiting to be started
+- **Doing**: `specs/tasks/doing/` - Tasks currently in development
+- **Done**: `specs/tasks/done/` - Completed tasks with implementation details
+
+### When Working on Tasks
+
+1. **Check current priorities** in `specs/tasks/tasks.md`
+2. **Move tasks between directories** as status changes
+3. **Update task files** with progress, blockers, and completion details
+4. **Follow priority order** - complete A tasks before B, B before C, etc.
+5. **Estimate story points** accurately for new tasks
+6. **Document learnings** in completed tasks for future reference
+
 ## AI Assistant Guidance
 
 When helping with TeamHub development:
@@ -459,5 +491,8 @@ When helping with TeamHub development:
 5. **Recommend cache invalidation strategies** based on data relationships
 6. **Help migrate legacy patterns** to reactive functions
 7. **Suggest performance optimizations** using reactive features
+8. **Follow task priority system** - focus on current milestone tasks first
+9. **Update task status** when completing work or encountering blockers
+10. **Document implementation details** in task files for team knowledge
 
-Remember: TeamHub is an enterprise platform - prioritize security, performance, maintainability, and now **reactive real-time features** in all decisions.
+Remember: TeamHub is an enterprise platform - prioritize security, performance, maintainability, **reactive real-time features**, and **milestone-driven development** in all decisions.
