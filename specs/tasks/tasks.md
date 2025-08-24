@@ -31,6 +31,7 @@
 - **A: mcp-tools (3)** - Docker container isolation for MCP tools per organization
 - **A: cron-capabilities (2)** - Scheduled task execution for agents
 - **A: llm-selection (2)** - Dynamic LLM selection during conversations
+- **A: mcp-server-admin (3)** - Local development application/service for MCP server administration
 
 ### Priority B (High Value - Complete Before Milestone 2)
 
@@ -38,6 +39,7 @@
 
 - **B: context-functionality (3)** - Enhanced context management and sharing between agents
 - **B: public-agents (5)** - Embeddable agent widgets for customer sites
+- **B: local-vpn-setup (2)** - Local VPN solution for remote server and internal network access
 
 ### Priority C (Medium Value - Complete Before Milestone 3)
 
