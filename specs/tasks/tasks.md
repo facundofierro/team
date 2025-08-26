@@ -1,138 +1,59 @@
-# TeamHub Development Roadmap
+# Task Management & Prioritization
 
-## Project Milestones
-
-### 🎯 Milestone 1: Internal Tool Foundation
-
-**Goal**: Make the tool useful for internal use, and prepared for milestone 2.
-**Timeline**: Q1 2025
-**Focus**: Core infrastructure, MCP tools, CRON capabilities, and internal agent management
-
-### 🚀 Milestone 2: Public Agent Platform
-
-**Goal**: Public agent to be able to use in other application.
-**Timeline**: Q2 2025
-**Focus**: Public agent creation, embedding, and external integration capabilities
-
-### 📊 Milestone 3: Advanced Analytics & Insights
-
-**Goal**: Advanced analysis, statistics, feedback, for the public agent.
-**Timeline**: Q3 2025
-**Focus**: Analytics dashboard, user feedback systems, and performance optimization
+> **📋 Strategic Goals & Business Strategy:** See [goals.md](./goals.md) for comprehensive business strategy, problem analysis, and implementation phases.
 
 ---
 
-## Task Priorities
+## 📊 Current Task Status Summary
 
-### Priority A (Critical Path - Must Complete First)
+**Total Tasks:** 12
 
-**Goal**: Essential features for internal use and milestone 1 completion
+- **Priority A (Critical):** 5 tasks (2 doing, 3 pending)
+- **Priority B (Important):** 2 tasks (0 doing, 2 pending)
+- **Priority C (Standard):** 2 tasks (0 doing, 2 pending)
+- **Priority D (Future):** 1 task (0 doing, 1 pending)
 
-- **A: mcp-tools (3)** - Docker container isolation for MCP tools per organization
-- **A: cron-capabilities (2)** - Scheduled task execution for agents
-- **A: llm-selection (2)** - Dynamic LLM selection during conversations
-- **A: mcp-server-admin (3)** - Local development application/service for MCP server administration
+**Status Breakdown:**
 
-### Priority B (High Value - Complete Before Milestone 2)
+- **Doing:** 2 tasks (Priority A)
+- **Pending:** 10 tasks
+- **Done:** 0 tasks
 
-**Goal**: Features that enable public agent functionality
-
-- **B: context-functionality (3)** - Enhanced context management and sharing between agents
-- **B: public-agents (5)** - Embeddable agent widgets for customer sites
-- **B: local-vpn-setup (2)** - Local VPN solution for remote server and internal network access
-
-### Priority C (Medium Value - Complete Before Milestone 3)
-
-**Goal**: Features that enhance the public agent platform
-
-- **C: analytics-public-agents (4)** - Comprehensive analytics and feedback system
-- **C: funnels-experiments (3)** - A/B testing and conversion optimization
-
-### Priority D (Future Enhancement - Optional)
-
-**Goal**: Advanced optimizations for enterprise scale
-
-- **D: virtual-scrolling-chat (2)** - Advanced virtual scrolling optimization for massive conversations
+**Story Points:** 32 total (8 doing, 24 pending)
 
 ---
 
-## Task Status
+## ✅ Done
 
-### 📋 Pending
-
-Tasks waiting to be started, organized by priority.
-
-### 🔄 Doing
-
-Tasks currently in development.
-
-### ✅ Done
-
-Completed tasks with implementation details and learnings.
+_No completed tasks yet_
 
 ---
 
-## Development Phases
+## 🚧 Doing
 
-### Phase 1: Foundation (Weeks 1-8)
-
-- Complete all Priority A tasks
-- Achieve Milestone 1: Internal Tool Foundation
-
-### Phase 2: Public Platform (Weeks 9-16)
-
-- Complete Priority B tasks
-- Achieve Milestone 2: Public Agent Platform
-
-### Phase 3: Analytics & Optimization (Weeks 17-24)
-
-- Complete Priority C tasks
-- Achieve Milestone 3: Advanced Analytics & Insights
-
-### Phase 4: Future Enhancements (Optional)
-
-- Complete Priority D tasks
-- Advanced optimizations and enterprise features
+- `A: mcp-tools (3).md`
+- `A: public-agents (5).md`
 
 ---
 
-## File Naming Convention
+## ⏳ Pending
 
-Tasks use the format: `{Priority}: {task-name} ({story-points})`
+### Priority A
 
-**Story Points Scale:**
+- `A: cron-capabilities (2).md`
+- `A: llm-selection (2).md`
+- `A: mcp-server-admin (3).md`
 
-- **1**: Very small task (1-2 days)
-- **2**: Small task (3-5 days)
-- **3**: Medium task (1-2 weeks)
-- **4**: Large task (2-3 weeks)
-- **5**: Very large task (3-4 weeks)
+### Priority B
 
-**Examples:**
+- `B: context-functionality (3).md`
+- `B: local-vpn-setup (2).md`
 
-- `A: mcp-tools (3)` - Priority A, medium complexity
-- `B: public-agents (5)` - Priority B, very large complexity
-- `C: analytics-public-agents (4)` - Priority C, large complexity
+### Priority C
 
----
+- `C: analytics-public-agents (4).md`
+- `C: funnels-experiments (3).md`
 
-## Last Updated
+### Priority D
 
-**Date**: December 2024
-**Updated By**: Development Team
-**Next Review**: January 2025
-
-## Recent Completions
-
-- ✅ **A: chat-performance-optimization (3)** (December 2024)
-
-  - Successfully implemented pagination, memory management, and performance monitoring
-  - Achieved 58% code reduction in ChatCard component
-  - Added tool call debugging and visualization
-  - Created enterprise-ready chat performance infrastructure
-
-- ✅ **A: reactive-db-integration (5)** (December 2024)
-  - Implemented @drizzle/reactive for real-time database operations
-  - Created reactive function framework for automatic caching
-  - Established relations configuration for cache invalidation
-  - Migrated from legacy tRPC patterns to reactive functions
+- `D: virtual-scrolling-chat (2).md`
