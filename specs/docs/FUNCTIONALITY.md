@@ -46,9 +46,41 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 
 - **Custom System Prompts**: Fine-grained control over agent behavior and personality
 - **Role-Based Configuration**: Specialized agent types for different use cases
-- **Instance Management**: Control maximum concurrent instances per agent
+- **Instance Management**: Control maximum concurrent instances per agent with advanced configuration and status management
 - **Behavioral Policies**: Define rules and constraints for agent operations
 - **Memory Management Rules**: Configure how agents store and retrieve information
+
+### Instance Management
+
+- **Multi-Instance Support**: Create multiple instances of the same agent type for different customers or contexts
+- **Instance-Specific Configuration**: Customize prompts, tools, and behavior for each instance
+- **Customer Instance Management**: Dedicated instances for customer support, sales leads, and technical support
+- **Instance Templates**: Pre-configured settings for common use cases (Customer Support, Sales Lead, Technical Support)
+- **Instance Naming Convention**: Descriptive naming (e.g., "Customer Support - John Smith", "Customer Support - Acme Corp")
+
+#### Status Management & Classification
+
+- **AI-Powered Tagging**: Automatic extraction of customer intent, urgency, and product interest from conversations
+- **Custom Status Tags**: Configurable status system (Ready to Buy, Technical Issue, Billing Question, High Priority)
+- **Priority Management**: Automatic priority assignment based on conversation content analysis
+- **Status Workflows**: Define status transitions and escalation rules for different customer scenarios
+- **Escalation Rules**: Automatic escalation to human agents based on complexity, customer emotion, or technical difficulty
+
+#### Instance Organization & Filtering
+
+- **Multi-Dimensional Grouping**: Group instances by status, customer, assigned agent, or product
+- **Advanced Search & Filtering**: Find instances by tags, status, customer, date, or conversation content
+- **Status-Based Views**: Dedicated views for all "Ready to Buy", "High Priority", or "Escalation Required" instances
+- **Customer Journey Tracking**: Monitor customer progression through different status stages
+- **Performance Comparison**: Compare performance metrics across different instance groups
+
+#### Instance Configuration & Customization
+
+- **Instance-Specific Prompts**: Customize system prompts for each customer or context
+- **Instance-Specific Tools**: Enable/disable tools based on customer needs and use case
+- **Customer Metadata Storage**: Store customer preferences, history, and specific requirements
+- **Instance Health Monitoring**: Track instance performance, resource usage, and conversation quality
+- **Resource Allocation**: Monitor and optimize resource usage across multiple instances
 
 ### Agent Communication
 
@@ -143,7 +175,7 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 
 - **Agent Creation**: Natural language agent creation and configuration
 - **Role Assignment**: Set agent roles, permissions, and access levels
-- **Instance Management**: Control agent instances and resource allocation
+- **Instance Management**: Control agent instances and resource allocation with customer-specific configuration
 - **Performance Monitoring**: Track agent performance and usage metrics
 - **Configuration Templates**: Reusable agent configuration patterns
 

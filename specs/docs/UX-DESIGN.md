@@ -271,10 +271,10 @@ Each main section has contextual tabs that change based on the selected area:
   - Response Time Monitoring
   - Quality Assessment
 - **Instances Tab**
-  - Agent Instance Management
-  - Instance Cloning
-  - Instance-specific Settings
-  - Resource Allocation
+  - Instance Management & Organization
+  - Tag-Based Filtering
+  - State Management
+  - Instance Analytics
 - **Tools Tab**
   - Tool Assignment Interface
   - Tool Configuration
