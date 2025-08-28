@@ -1,4 +1,4 @@
-// Logger implementation logic for the entire monorepo
+// Logger implementation logic for the TeamHub monorepo
 
 import { LogLevel, LogConfig, UserLogConfig, TypeLogger, Logger } from './types'
 import { getDefaultConfig } from './config'
@@ -72,64 +72,56 @@ const createTypeLogger = (type: string): TypeLogger => ({
 
 // Main typed logger object organized by source
 export const createLogger = (): Logger => ({
-  // TOL Package Loggers (from @tol/* packages)
-  tol: {
-    db: createTypeLogger('tol-db'),
-    dbFunction: createTypeLogger('tol-db-function'),
-    core: createTypeLogger('tol-core'),
-    zoho: createTypeLogger('tol-zoho'),
-    payment: createTypeLogger('tol-payment'),
-    student: createTypeLogger('tol-student'),
-    register: createTypeLogger('tol-register'),
-    correction: createTypeLogger('tol-correction'),
-    user: createTypeLogger('tol-user'),
-    teacher: createTypeLogger('tol-teacher'),
-    schedule: createTypeLogger('tol-schedule'),
-    notification: createTypeLogger('tol-notification'),
-    wallet: createTypeLogger('tol-wallet'),
+  // TeamHub Apps Loggers
+  teamhub: {
+    main: createTypeLogger('teamhub'),
+    auth: createTypeLogger('teamhub-auth'),
+    api: createTypeLogger('teamhub-api'),
+    ui: createTypeLogger('teamhub-ui'),
+    agent: createTypeLogger('teamhub-agent'),
+    chat: createTypeLogger('teamhub-chat'),
+    memory: createTypeLogger('teamhub-memory'),
   },
 
-  // Kadiel Package Loggers (from @repo/kadiel-* packages)
-  kadiel: {
-    pay: createTypeLogger('kadiel-pay'),
-    kucoin: createTypeLogger('kadiel-kucoin'),
-    ton: createTypeLogger('kadiel-ton'),
+  aiGateway: {
+    main: createTypeLogger('ai-gateway'),
+    provider: createTypeLogger('ai-gateway-provider'),
+    request: createTypeLogger('ai-gateway-request'),
   },
 
-  // API Package Loggers (from @repo/api-* packages)
-  api: {
-    facebook: createTypeLogger('api-facebook'),
-    instagram: createTypeLogger('api-instagram'),
-    telegram: createTypeLogger('api-telegram'),
-    vk: createTypeLogger('api-vk'),
+  browserService: {
+    main: createTypeLogger('browser-service'),
+    automation: createTypeLogger('browser-service-automation'),
   },
 
-  // App Loggers (from apps/*)
-  bot: {
-    main: createTypeLogger('bot'),
-    function: createTypeLogger('bot-function'),
-    lesson: createTypeLogger('bot-lesson'),
-    user: createTypeLogger('bot-user'),
-    correction: createTypeLogger('bot-correction'),
+  // TeamHub Packages Loggers
+  teamhubDb: {
+    main: createTypeLogger('teamhub-db'),
+    schema: createTypeLogger('teamhub-db-schema'),
+    query: createTypeLogger('teamhub-db-query'),
+    migration: createTypeLogger('teamhub-db-migration'),
   },
 
-  site: {
-    main: createTypeLogger('site'),
-    auth: createTypeLogger('site-auth'),
-    payment: createTypeLogger('site-payment'),
-    user: createTypeLogger('site-user'),
+  teamhubAi: {
+    main: createTypeLogger('teamhub-ai'),
+    agent: createTypeLogger('teamhub-ai-agent'),
+    tool: createTypeLogger('teamhub-ai-tool'),
+    memory: createTypeLogger('teamhub-ai-memory'),
   },
 
-  tolApp: {
-    main: createTypeLogger('tol-app'),
-    function: createTypeLogger('tol-app-function'),
-    user: createTypeLogger('tol-app-user'),
-    teacher: createTypeLogger('tol-app-teacher'),
+  aiServices: {
+    main: createTypeLogger('ai-services'),
+    provider: createTypeLogger('ai-services-provider'),
+    discovery: createTypeLogger('ai-services-discovery'),
+    generation: createTypeLogger('ai-services-generation'),
   },
 
-  market: createTypeLogger('market'),
-  cron: createTypeLogger('cron'),
-  remotion: createTypeLogger('remotion'),
+  drizzleReactive: {
+    main: createTypeLogger('drizzle-reactive'),
+    client: createTypeLogger('drizzle-reactive-client'),
+    server: createTypeLogger('drizzle-reactive-server'),
+    trpc: createTypeLogger('drizzle-reactive-trpc'),
+  },
 
   // System Loggers
   system: {
@@ -137,16 +129,17 @@ export const createLogger = (): Logger => ({
     startup: createTypeLogger('system-startup'),
     error: createTypeLogger('system-error'),
     performance: createTypeLogger('system-performance'),
+    auth: createTypeLogger('system-auth'),
+    database: createTypeLogger('system-database'),
+    api: createTypeLogger('system-api'),
   },
 
   // Legacy compatibility - these will be deprecated but maintained
-  db: createTypeLogger('db'), // Alias for tol.db
-  dbFunction: createTypeLogger('db-function'), // Alias for tol.dbFunction
-  dbCorrection: createTypeLogger('correction'), // Alias for tol.correction
-  user: createTypeLogger('user'), // Alias for tol.user
-  student: createTypeLogger('student'), // Alias for tol.student
-  register: createTypeLogger('register'), // Alias for tol.register
-  telegram: createTypeLogger('telegram'), // Alias for api.telegram
+  db: createTypeLogger('db'), // Alias for teamhubDb.main
+  'db-query': createTypeLogger('db-query'), // Alias for teamhubDb.query
+  ai: createTypeLogger('ai'), // Alias for teamhubAi.main
+  auth: createTypeLogger('auth'), // Alias for system.auth
+  api: createTypeLogger('api'), // Alias for system.api
   startup: createTypeLogger('startup'), // Alias for system.startup
   general: createTypeLogger('general'), // Alias for system.main
 })
@@ -196,7 +189,7 @@ export const createLegacyFunctions = (log: Logger) => ({
   },
 
   logTelegram: (...args: unknown[]): void => {
-    log.api.telegram.info(args.join(' '))
+    log.system.api.info(args.join(' '))
   },
 
   log_legacy: (...args: unknown[]): void => {

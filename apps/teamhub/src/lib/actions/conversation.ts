@@ -13,6 +13,7 @@ import {
   type ConversationProcessingOptions,
 } from '@teamhub/ai'
 import { auth } from '@/auth'
+import { log } from '@repo/logger'
 
 /**
  * Get the active conversation for an agent
@@ -25,7 +26,7 @@ export async function getActiveConversation(
     const memoryFunctions = await dbMemories(orgDatabaseName)
     return await memoryFunctions.getActiveConversation(agentId)
   } catch (error) {
-    console.error('Failed to get active conversation:', error)
+    log.teamhubDb.main.error('Failed to get active conversation', undefined, { error })
     return null
   }
 }

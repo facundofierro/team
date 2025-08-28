@@ -1,4 +1,4 @@
-// Logger configuration for the entire monorepo
+// Logger configuration for the TeamHub monorepo
 // Log types are organized by their source (packages and apps)
 
 import { LogLevel, LogConfig } from './types'
@@ -16,56 +16,72 @@ export const getDefaultConfig = (): LogConfig => {
   return {
     enabled: !isQuiet && !isConsoleTest,
     types: {
-      // TOL Package Log Types (from @tol/* packages)
-      'tol-db': { level: getLogLevel('LOG_TOL_DB', 'ERROR') },
-      'tol-db-function': { level: getLogLevel('LOG_TOL_DB_FUNCTION', 'INFO') },
-      'tol-core': { level: getLogLevel('LOG_TOL_CORE', 'ERROR') },
-      'tol-zoho': { level: getLogLevel('LOG_TOL_ZOHO', 'ERROR') },
-      'tol-payment': { level: getLogLevel('LOG_TOL_PAYMENT', 'ERROR') },
-      'tol-student': { level: getLogLevel('LOG_TOL_STUDENT', 'ERROR') },
-      'tol-register': { level: getLogLevel('LOG_TOL_REGISTER', 'ERROR') },
-      'tol-correction': { level: getLogLevel('LOG_TOL_CORRECTION', 'ERROR') },
-      'tol-user': { level: getLogLevel('LOG_TOL_USER', 'ERROR') },
-      'tol-teacher': { level: getLogLevel('LOG_TOL_TEACHER', 'ERROR') },
-      'tol-schedule': { level: getLogLevel('LOG_TOL_SCHEDULE', 'ERROR') },
-      'tol-notification': {
-        level: getLogLevel('LOG_TOL_NOTIFICATION', 'ERROR'),
+      // TeamHub Apps Log Types
+      teamhub: { level: getLogLevel('LOG_TEAMHUB', 'INFO') },
+      'teamhub-auth': { level: getLogLevel('LOG_TEAMHUB_AUTH', 'INFO') },
+      'teamhub-api': { level: getLogLevel('LOG_TEAMHUB_API', 'INFO') },
+      'teamhub-ui': { level: getLogLevel('LOG_TEAMHUB_UI', 'INFO') },
+      'teamhub-agent': { level: getLogLevel('LOG_TEAMHUB_AGENT', 'INFO') },
+      'teamhub-chat': { level: getLogLevel('LOG_TEAMHUB_CHAT', 'INFO') },
+      'teamhub-memory': { level: getLogLevel('LOG_TEAMHUB_MEMORY', 'INFO') },
+
+      'ai-gateway': { level: getLogLevel('LOG_AI_GATEWAY', 'INFO') },
+      'ai-gateway-provider': {
+        level: getLogLevel('LOG_AI_GATEWAY_PROVIDER', 'INFO'),
       },
-      'tol-wallet': { level: getLogLevel('LOG_TOL_WALLET', 'ERROR') },
-
-      // Kadiel Package Log Types (from @repo/kadiel-* packages)
-      'kadiel-pay': { level: getLogLevel('LOG_KADIEL_PAY', 'ERROR') },
-      'kadiel-kucoin': { level: getLogLevel('LOG_KADIEL_KUCOIN', 'ERROR') },
-      'kadiel-ton': { level: getLogLevel('LOG_KADIEL_TON', 'ERROR') },
-
-      // API Package Log Types (from @repo/api-* packages)
-      'api-facebook': { level: getLogLevel('LOG_API_FACEBOOK', 'ERROR') },
-      'api-instagram': { level: getLogLevel('LOG_API_INSTAGRAM', 'ERROR') },
-      'api-telegram': { level: getLogLevel('LOG_API_TELEGRAM', 'ERROR') },
-      'api-vk': { level: getLogLevel('LOG_API_VK', 'ERROR') },
-
-      // App Log Types (from apps/*)
-      bot: { level: getLogLevel('LOG_BOT', 'ERROR') },
-      'bot-function': { level: getLogLevel('LOG_BOT_FUNCTION', 'INFO') },
-      'bot-lesson': { level: getLogLevel('LOG_BOT_LESSON', 'ERROR') },
-      'bot-user': { level: getLogLevel('LOG_BOT_USER', 'ERROR') },
-      'bot-correction': { level: getLogLevel('LOG_BOT_CORRECTION', 'ERROR') },
-
-      site: { level: getLogLevel('LOG_SITE', 'ERROR') },
-      'site-auth': { level: getLogLevel('LOG_SITE_AUTH', 'ERROR') },
-      'site-payment': { level: getLogLevel('LOG_SITE_PAYMENT', 'ERROR') },
-      'site-user': { level: getLogLevel('LOG_SITE_USER', 'ERROR') },
-
-      'tol-app': { level: getLogLevel('LOG_TOL_APP', 'ERROR') },
-      'tol-app-function': {
-        level: getLogLevel('LOG_TOL_APP_FUNCTION', 'INFO'),
+      'ai-gateway-request': {
+        level: getLogLevel('LOG_AI_GATEWAY_REQUEST', 'INFO'),
       },
-      'tol-app-user': { level: getLogLevel('LOG_TOL_APP_USER', 'ERROR') },
-      'tol-app-teacher': { level: getLogLevel('LOG_TOL_APP_TEACHER', 'ERROR') },
 
-      market: { level: getLogLevel('LOG_MARKET', 'ERROR') },
-      cron: { level: getLogLevel('LOG_CRON', 'ERROR') },
-      remotion: { level: getLogLevel('LOG_REMOTION', 'ERROR') },
+      'browser-service': { level: getLogLevel('LOG_BROWSER_SERVICE', 'INFO') },
+      'browser-service-automation': {
+        level: getLogLevel('LOG_BROWSER_SERVICE_AUTOMATION', 'INFO'),
+      },
+
+      // TeamHub Packages Log Types
+      'teamhub-db': { level: getLogLevel('LOG_TEAMHUB_DB', 'INFO') },
+      'teamhub-db-schema': {
+        level: getLogLevel('LOG_TEAMHUB_DB_SCHEMA', 'INFO'),
+      },
+      'teamhub-db-query': {
+        level: getLogLevel('LOG_TEAMHUB_DB_QUERY', 'INFO'),
+      },
+      'teamhub-db-migration': {
+        level: getLogLevel('LOG_TEAMHUB_DB_MIGRATION', 'INFO'),
+      },
+
+      'teamhub-ai': { level: getLogLevel('LOG_TEAMHUB_AI', 'INFO') },
+      'teamhub-ai-agent': {
+        level: getLogLevel('LOG_TEAMHUB_AI_AGENT', 'INFO'),
+      },
+      'teamhub-ai-tool': { level: getLogLevel('LOG_TEAMHUB_AI_TOOL', 'INFO') },
+      'teamhub-ai-memory': {
+        level: getLogLevel('LOG_TEAMHUB_AI_MEMORY', 'INFO'),
+      },
+
+      'ai-services': { level: getLogLevel('LOG_AI_SERVICES', 'INFO') },
+      'ai-services-provider': {
+        level: getLogLevel('LOG_AI_SERVICES_PROVIDER', 'INFO'),
+      },
+      'ai-services-discovery': {
+        level: getLogLevel('LOG_AI_SERVICES_DISCOVERY', 'INFO'),
+      },
+      'ai-services-generation': {
+        level: getLogLevel('LOG_AI_SERVICES_GENERATION', 'INFO'),
+      },
+
+      'drizzle-reactive': {
+        level: getLogLevel('LOG_DRIZZLE_REACTIVE', 'INFO'),
+      },
+      'drizzle-reactive-client': {
+        level: getLogLevel('LOG_DRIZZLE_REACTIVE_CLIENT', 'INFO'),
+      },
+      'drizzle-reactive-server': {
+        level: getLogLevel('LOG_DRIZZLE_REACTIVE_SERVER', 'INFO'),
+      },
+      'drizzle-reactive-trpc': {
+        level: getLogLevel('LOG_DRIZZLE_REACTIVE_TRPC', 'INFO'),
+      },
 
       // General/System Log Types
       system: { level: getLogLevel('LOG_SYSTEM', 'ERROR') },
@@ -74,15 +90,16 @@ export const getDefaultConfig = (): LogConfig => {
       'system-performance': {
         level: getLogLevel('LOG_SYSTEM_PERFORMANCE', 'ERROR'),
       },
+      'system-auth': { level: getLogLevel('LOG_SYSTEM_AUTH', 'INFO') },
+      'system-database': { level: getLogLevel('LOG_SYSTEM_DATABASE', 'INFO') },
+      'system-api': { level: getLogLevel('LOG_SYSTEM_API', 'INFO') },
 
       // Legacy/Compatibility Log Types (for backward compatibility)
-      db: { level: getLogLevel('LOG_DB', 'ERROR') }, // Alias for tol-db
-      'db-function': { level: getLogLevel('LOG_DB_FUNCTION', 'INFO') }, // Alias for tol-db-function
-      correction: { level: getLogLevel('LOG_CORRECTION', 'ERROR') }, // Alias for tol-correction
-      user: { level: getLogLevel('LOG_USER', 'ERROR') }, // Alias for tol-user
-      student: { level: getLogLevel('LOG_STUDENT', 'ERROR') }, // Alias for tol-student
-      register: { level: getLogLevel('LOG_REGISTER', 'ERROR') }, // Alias for tol-register
-      telegram: { level: getLogLevel('LOG_TELEGRAM', 'ERROR') }, // Alias for api-telegram
+      db: { level: getLogLevel('LOG_DB', 'INFO') }, // Alias for teamhub-db
+      'db-query': { level: getLogLevel('LOG_DB_QUERY', 'INFO') }, // Alias for teamhub-db-query
+      ai: { level: getLogLevel('LOG_AI', 'INFO') }, // Alias for teamhub-ai
+      auth: { level: getLogLevel('LOG_AUTH', 'INFO') }, // Alias for system-auth
+      api: { level: getLogLevel('LOG_API', 'INFO') }, // Alias for system-api
       startup: { level: getLogLevel('LOG_STARTUP', 'INFO') }, // Alias for system-startup
       general: { level: getLogLevel('LOG_GENERAL', 'ERROR') }, // Alias for system
     },

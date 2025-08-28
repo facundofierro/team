@@ -1,4 +1,4 @@
-// Logger type definitions for the entire monorepo
+// Logger type definitions for the TeamHub monorepo
 
 export type LogLevel = 'ERROR' | 'INFO' | 'DEBUG' | 'OFF'
 
@@ -33,56 +33,55 @@ export interface TypeLogger {
   off: LoggerFunction
 }
 
-// Main logger structure types
-export interface TolLoggers {
-  db: TypeLogger
-  dbFunction: TypeLogger
-  core: TypeLogger
-  zoho: TypeLogger
-  payment: TypeLogger
-  student: TypeLogger
-  register: TypeLogger
-  correction: TypeLogger
-  user: TypeLogger
-  teacher: TypeLogger
-  schedule: TypeLogger
-  notification: TypeLogger
-  wallet: TypeLogger
-}
-
-export interface KadielLoggers {
-  pay: TypeLogger
-  kucoin: TypeLogger
-  ton: TypeLogger
-}
-
-export interface ApiLoggers {
-  facebook: TypeLogger
-  instagram: TypeLogger
-  telegram: TypeLogger
-  vk: TypeLogger
-}
-
-export interface BotLoggers {
-  main: TypeLogger
-  function: TypeLogger
-  lesson: TypeLogger
-  user: TypeLogger
-  correction: TypeLogger
-}
-
-export interface SiteLoggers {
+// Main logger structure types for TeamHub Apps
+export interface TeamHubLoggers {
   main: TypeLogger
   auth: TypeLogger
-  payment: TypeLogger
-  user: TypeLogger
+  api: TypeLogger
+  ui: TypeLogger
+  agent: TypeLogger
+  chat: TypeLogger
+  memory: TypeLogger
 }
 
-export interface TolAppLoggers {
+export interface AiGatewayLoggers {
   main: TypeLogger
-  function: TypeLogger
-  user: TypeLogger
-  teacher: TypeLogger
+  provider: TypeLogger
+  request: TypeLogger
+}
+
+export interface BrowserServiceLoggers {
+  main: TypeLogger
+  automation: TypeLogger
+}
+
+// Main logger structure types for TeamHub Packages
+export interface TeamHubDbLoggers {
+  main: TypeLogger
+  schema: TypeLogger
+  query: TypeLogger
+  migration: TypeLogger
+}
+
+export interface TeamHubAiLoggers {
+  main: TypeLogger
+  agent: TypeLogger
+  tool: TypeLogger
+  memory: TypeLogger
+}
+
+export interface AiServicesLoggers {
+  main: TypeLogger
+  provider: TypeLogger
+  discovery: TypeLogger
+  generation: TypeLogger
+}
+
+export interface DrizzleReactiveLoggers {
+  main: TypeLogger
+  client: TypeLogger
+  server: TypeLogger
+  trpc: TypeLogger
 }
 
 export interface SystemLoggers {
@@ -90,38 +89,33 @@ export interface SystemLoggers {
   startup: TypeLogger
   error: TypeLogger
   performance: TypeLogger
+  auth: TypeLogger
+  database: TypeLogger
+  api: TypeLogger
 }
 
 // Main logger interface
 export interface Logger {
-  // TOL Package Loggers (from @tol/* packages)
-  tol: TolLoggers
+  // TeamHub Apps Loggers
+  teamhub: TeamHubLoggers
+  aiGateway: AiGatewayLoggers
+  browserService: BrowserServiceLoggers
 
-  // Kadiel Package Loggers (from @repo/kadiel-* packages)
-  kadiel: KadielLoggers
-
-  // API Package Loggers (from @repo/api-* packages)
-  api: ApiLoggers
-
-  // App Loggers (from apps/*)
-  bot: BotLoggers
-  site: SiteLoggers
-  tolApp: TolAppLoggers
-  market: TypeLogger
-  cron: TypeLogger
-  remotion: TypeLogger
+  // TeamHub Packages Loggers
+  teamhubDb: TeamHubDbLoggers
+  teamhubAi: TeamHubAiLoggers
+  aiServices: AiServicesLoggers
+  drizzleReactive: DrizzleReactiveLoggers
 
   // System Loggers
   system: SystemLoggers
 
   // Legacy compatibility - these will be deprecated but maintained
-  db: TypeLogger // Alias for tol.db
-  dbFunction: TypeLogger // Alias for tol.dbFunction
-  dbCorrection: TypeLogger // Alias for tol.correction
-  user: TypeLogger // Alias for tol.user
-  student: TypeLogger // Alias for tol.student
-  register: TypeLogger // Alias for tol.register
-  telegram: TypeLogger // Alias for api.telegram
+  db: TypeLogger // Alias for teamhubDb.main
+  'db-query': TypeLogger // Alias for teamhubDb.query
+  ai: TypeLogger // Alias for teamhubAi.main
+  auth: TypeLogger // Alias for system.auth
+  api: TypeLogger // Alias for system.api
   startup: TypeLogger // Alias for system.startup
   general: TypeLogger // Alias for system.main
 }

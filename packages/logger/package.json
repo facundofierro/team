@@ -14,15 +14,10 @@
     "typecheck": "tsc --noEmit",
     "test": "jest"
   },
-  "jest": {
-    "preset": "@repo/jest-presets/jest/node"
-  },
   "devDependencies": {
     "@types/jest": "^29.5.10",
     "@types/node": "^20.14.0",
-    "@repo/eslint-config": "workspace:*",
-    "@repo/jest-presets": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "eslint": "^8.57.0",
     "tsup": "^8.0.1",
     "typescript": "^5.4.5"
   }

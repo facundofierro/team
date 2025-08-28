@@ -1,6 +1,6 @@
 # @repo/logger
 
-Unified logging system for the entire monorepo with organized, typed logging by source.
+Unified logging system for the TeamHub monorepo with organized, typed logging by source.
 
 ## Structure
 
@@ -18,20 +18,48 @@ The logger is organized into modular files for better maintainability:
 ```typescript
 import { log } from '@repo/logger'
 
-// TOL packages
-log.tol.db.info('Database operation completed', 'user123')
-log.tol.zoho.error('API call failed', 'user456', { error: 'timeout' })
+// TeamHub Apps
+log.teamhub.main.info('Application started', 'user123')
+log.teamhub.auth.info('User logged in', 'user456')
+log.teamhub.api.info('API request received', 'user789')
+log.teamhub.agent.info('Agent created', 'user101')
+log.teamhub.chat.info('Chat message sent', 'user202')
+log.teamhub.memory.info('Memory stored', 'user303')
 
-// Kadiel packages
-log.kadiel.pay.info('Payment processed', 'user789')
-log.kadiel.ton.debug('Transaction details', 'user101', { amount: 100 })
+// AI Gateway
+log.aiGateway.main.info('Gateway initialized', 'user404')
+log.aiGateway.provider.info('Provider selected', 'user505')
+log.aiGateway.request.info('Request processed', 'user606')
 
-// API packages
-log.api.telegram.info('Message received', 'user202')
+// Browser Service
+log.browserService.main.info('Service started', 'user707')
+log.browserService.automation.info('Automation completed', 'user808')
 
-// Apps
-log.bot.function.info('Bot function called', 'user303')
-log.site.auth.info('User logged in', 'user404')
+// TeamHub Packages
+log.teamhubDb.main.info('Database connected', 'user909')
+log.teamhubDb.query.info('Query executed', 'user101')
+log.teamhubDb.schema.info('Schema updated', 'user202')
+
+log.teamhubAi.main.info('AI service ready', 'user303')
+log.teamhubAi.agent.info('Agent processing', 'user404')
+log.teamhubAi.tool.info('Tool executed', 'user505')
+log.teamhubAi.memory.info('Memory retrieved', 'user606')
+
+log.aiServices.main.info('AI services ready', 'user707')
+log.aiServices.provider.info('Provider configured', 'user808')
+log.aiServices.discovery.info('Model discovered', 'user909')
+
+log.drizzleReactive.main.info('Reactive DB ready', 'user101')
+log.drizzleReactive.client.info('Client connected', 'user202')
+log.drizzleReactive.server.info('Server started', 'user303')
+log.drizzleReactive.trpc.info('tRPC initialized', 'user404')
+
+// System
+log.system.main.info('System operational', 'user505')
+log.system.startup.info('Startup complete', 'user606')
+log.system.auth.info('Authentication check', 'user707')
+log.system.database.info('Database status', 'user808')
+log.system.api.info('API status', 'user909')
 ```
 
 ### Log Levels
@@ -46,17 +74,52 @@ log.site.auth.info('User logged in', 'user404')
 Control log levels via environment variables:
 
 ```bash
-# TOL packages
-LOG_TOL_DB=INFO
-LOG_TOL_ZOHO=DEBUG
+# TeamHub Apps
+LOG_TEAMHUB=INFO
+LOG_TEAMHUB_AUTH=DEBUG
+LOG_TEAMHUB_API=INFO
+LOG_TEAMHUB_AGENT=INFO
+LOG_TEAMHUB_CHAT=INFO
+LOG_TEAMHUB_MEMORY=INFO
 
-# Kadiel packages
-LOG_KADIEL_PAY=INFO
-LOG_KADIEL_TON=ERROR
+# AI Gateway
+LOG_AI_GATEWAY=INFO
+LOG_AI_GATEWAY_PROVIDER=DEBUG
+LOG_AI_GATEWAY_REQUEST=INFO
 
-# Apps
-LOG_BOT_FUNCTION=DEBUG
-LOG_SITE_AUTH=INFO
+# Browser Service
+LOG_BROWSER_SERVICE=INFO
+LOG_BROWSER_SERVICE_AUTOMATION=DEBUG
+
+# TeamHub Packages
+LOG_TEAMHUB_DB=INFO
+LOG_TEAMHUB_DB_QUERY=DEBUG
+LOG_TEAMHUB_DB_SCHEMA=INFO
+LOG_TEAMHUB_DB_MIGRATION=INFO
+
+LOG_TEAMHUB_AI=INFO
+LOG_TEAMHUB_AI_AGENT=DEBUG
+LOG_TEAMHUB_AI_TOOL=INFO
+LOG_TEAMHUB_AI_MEMORY=INFO
+
+LOG_AI_SERVICES=INFO
+LOG_AI_SERVICES_PROVIDER=DEBUG
+LOG_AI_SERVICES_DISCOVERY=INFO
+LOG_AI_SERVICES_GENERATION=INFO
+
+LOG_DRIZZLE_REACTIVE=INFO
+LOG_DRIZZLE_REACTIVE_CLIENT=DEBUG
+LOG_DRIZZLE_REACTIVE_SERVER=INFO
+LOG_DRIZZLE_REACTIVE_TRPC=INFO
+
+# System
+LOG_SYSTEM=ERROR
+LOG_SYSTEM_STARTUP=INFO
+LOG_SYSTEM_ERROR=ERROR
+LOG_SYSTEM_PERFORMANCE=ERROR
+LOG_SYSTEM_AUTH=INFO
+LOG_SYSTEM_DATABASE=INFO
+LOG_SYSTEM_API=INFO
 
 # Global control
 QUIET_LOGS=true  # Disable all logging
@@ -68,7 +131,7 @@ Enable detailed logging for specific users:
 
 ```bash
 # Format: userId:logType:logLevel,userId2:logType2:logLevel2
-USER_LOG_CONFIG="user123:tol-db:DEBUG,user456:kadiel-pay:INFO"
+USER_LOG_CONFIG="user123:teamhub-auth:DEBUG,user456:teamhub-db-query:DEBUG"
 ```
 
 ## Adding New Log Types
@@ -83,7 +146,7 @@ types: {
   // ... existing types ...
 
   // New package/app
-  'new-package': { level: getLogLevel('LOG_NEW_PACKAGE', 'ERROR') },
+  'new-package': { level: getLogLevel('LOG_NEW_PACKAGE', 'INFO') },
   'new-package-function': { level: getLogLevel('LOG_NEW_PACKAGE_FUNCTION', 'INFO') },
 }
 ```
