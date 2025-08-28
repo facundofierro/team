@@ -3,6 +3,7 @@
 import { useReactive, useReactiveQuery } from '@drizzle/reactive/client'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import type { ConversationMemory } from '@teamhub/db'
+import { log } from '@repo/logger'
 
 /**
  * Hook for reactive conversation queries
@@ -18,9 +19,10 @@ export function useConversations(agentId: string | null) {
     isLoading: loadingActive,
     error: activeError,
     run: refetchActiveConversation,
-  } = useReactiveQuery<ConversationMemory | null, { agentId: string; organizationId: string }>(
-    'conversations.getActive'
-  )
+  } = useReactiveQuery<
+    ConversationMemory | null,
+    { agentId: string; organizationId: string }
+  >('conversations.getActive')
 
   // Note: conversations.getRecent is not available in tRPC router yet
   // We'll use server actions as fallback for now
@@ -34,24 +36,35 @@ export function useConversations(agentId: string | null) {
     isLoading: loadingById,
     error: byIdError,
     run: loadConversationById,
-  } = useReactiveQuery<ConversationMemory | null, { conversationId: string; organizationId: string }>(
-    'conversations.getOne'
-  )
+  } = useReactiveQuery<
+    ConversationMemory | null,
+    { conversationId: string; organizationId: string }
+  >('conversations.getOne')
 
   // Load active conversation when agent or organization changes
   const loadActiveConversation = async () => {
     if (!agentId || !organizationId) return null
-    
+
     try {
-      console.log('🔍 [useConversations] Loading active conversation for agent:', agentId)
-      const result = await refetchActiveConversation({ 
-        agentId, 
-        organizationId 
+      log.teamhub.chat.debug(
+        'Loading active conversation for agent',
+        undefined,
+        { agentId }
+      )
+      const result = await refetchActiveConversation({
+        agentId,
+        organizationId,
       })
-      console.log('✅ [useConversations] Active conversation loaded:', !!result)
+      log.teamhub.chat.info('Active conversation loaded', undefined, {
+        agentId,
+        success: !!result,
+      })
       return result
     } catch (error) {
-      console.error('❌ [useConversations] Failed to load active conversation:', error)
+      log.teamhub.chat.error('Failed to load active conversation', undefined, {
+        error,
+        agentId,
+      })
       return null
     }
   }
@@ -59,19 +72,36 @@ export function useConversations(agentId: string | null) {
   // Load recent conversations using server action fallback
   const loadRecentConversations = async (limit: number = 10) => {
     if (!agentId || !organizationId) return []
-    
+
     try {
-      console.log('🔍 [useConversations] Loading recent conversations for agent (fallback):', agentId)
+      log.teamhub.chat.debug(
+        'Loading recent conversations for agent (fallback)',
+        undefined,
+        { agentId }
+      )
       // Import server action dynamically to avoid SSR issues
-      const { getRecentConversations } = await import('@/lib/actions/conversation')
+      const { getRecentConversations } = await import(
+        '@/lib/actions/conversation'
+      )
       // Use the existing organization store
       const orgDatabaseName = currentOrganization?.databaseName || 'teamhub'
-      
-      const result = await getRecentConversations(agentId, orgDatabaseName, limit)
-      console.log('✅ [useConversations] Recent conversations loaded (fallback):', result?.length || 0)
+
+      const result = await getRecentConversations(
+        agentId,
+        orgDatabaseName,
+        limit
+      )
+      log.teamhub.chat.info(
+        'Recent conversations loaded (fallback)',
+        undefined,
+        { agentId, count: result?.length || 0 }
+      )
       return result || []
     } catch (error) {
-      console.error('❌ [useConversations] Failed to load recent conversations:', error)
+      log.teamhub.chat.error('Failed to load recent conversations', undefined, {
+        error,
+        agentId,
+      })
       return []
     }
   }
@@ -79,17 +109,25 @@ export function useConversations(agentId: string | null) {
   // Load specific conversation by ID
   const loadConversation = async (conversationId: string) => {
     if (!organizationId) return null
-    
+
     try {
-      console.log('🔍 [useConversations] Loading conversation:', conversationId)
-      const result = await loadConversationById({ 
-        conversationId, 
-        organizationId 
+      log.teamhub.chat.debug('Loading conversation', undefined, {
+        conversationId,
       })
-      console.log('✅ [useConversations] Conversation loaded:', !!result)
+      const result = await loadConversationById({
+        conversationId,
+        organizationId,
+      })
+      log.teamhub.chat.info('Conversation loaded', undefined, {
+        conversationId,
+        success: !!result,
+      })
       return result
     } catch (error) {
-      console.error('❌ [useConversations] Failed to load conversation:', error)
+      log.teamhub.chat.error('Failed to load conversation', undefined, {
+        error,
+        conversationId,
+      })
       return null
     }
   }
@@ -99,19 +137,19 @@ export function useConversations(agentId: string | null) {
     activeConversation,
     recentConversations: recentConversations || [],
     conversationById,
-    
+
     // Loading states
     loadingActive,
     loadingRecent,
     loadingById,
     isLoading: loadingActive || loadingRecent || loadingById,
-    
+
     // Errors
     activeError,
     recentError,
     byIdError,
     error: activeError || recentError || byIdError,
-    
+
     // Actions
     loadActiveConversation,
     loadRecentConversations,

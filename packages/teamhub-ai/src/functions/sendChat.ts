@@ -8,6 +8,7 @@ import {
 import type { AgentMemoryRule, AgentToolPermission } from '@teamhub/db'
 import type { MemoryStoreRule } from '../types'
 import { generateStreamText } from '../ai/vercel/generateStreamText'
+import { log } from '@repo/logger'
 
 // Helper function to generate UUID using Web Crypto API
 const generateUUID = () => {
@@ -53,7 +54,11 @@ export async function sendChat(params: {
       agentCloneId,
     })
 
-    console.log('🎬 SendChat: Calling generateStreamText (without await)...')
+    log.teamhubAi.main.debug(
+      'Calling generateStreamText (without await)',
+      undefined,
+      { agentId }
+    )
 
     const streamPromise = generateStreamText({
       messages,
@@ -91,15 +96,22 @@ export async function sendChat(params: {
             reactiveDb
           )
         } catch (error) {
-          console.error('❌ SendChat: background message store failed:', error)
+          log.teamhubAi.main.error(
+            'Background message store failed',
+            undefined,
+            { error, agentId }
+          )
         }
       })
     }
 
-    console.log('🎬 SendChat: Returning stream promise...')
+    log.teamhubAi.main.debug('Returning stream promise', undefined, { agentId })
     return streamPromise
   } catch (error) {
-    console.error('💥 SendChat: Error processing chat:', error)
+    log.teamhubAi.main.error('Error processing chat', undefined, {
+      error,
+      agentId,
+    })
     return new Response('An error occurred during stream generation.', {
       status: 500,
     })

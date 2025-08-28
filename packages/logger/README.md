@@ -65,6 +65,7 @@ log.system.api.info('API status', 'user909')
 ### Log Levels
 
 - `ERROR` - Only critical errors
+- `WARN` - Warning messages and non-critical issues
 - `INFO` - Essential information (default for most types)
 - `DEBUG` - Detailed debugging information
 - `OFF` - No logging for this type
@@ -78,7 +79,7 @@ Control log levels via environment variables:
 LOG_TEAMHUB=INFO
 LOG_TEAMHUB_AUTH=DEBUG
 LOG_TEAMHUB_API=INFO
-LOG_TEAMHUB_AGENT=INFO
+LOG_TEAMHUB_AGENT=WARN
 LOG_TEAMHUB_CHAT=INFO
 LOG_TEAMHUB_MEMORY=INFO
 

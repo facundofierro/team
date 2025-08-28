@@ -7,6 +7,7 @@ import {
   updateMessage,
   reactiveDb,
 } from '@teamhub/db'
+import { log } from '@repo/logger'
 
 export type A2AParameters = {
   targetAgentId: string
@@ -159,11 +160,10 @@ export const agentToAgent: ToolTypeDefinition = {
     params: unknown,
     configuration: Record<string, string>
   ): Promise<A2AResult> => {
-    console.log('🤖 A2A Communication Tool: Starting execution')
-    console.log(
-      '📋 A2A Tool: Received params:',
-      JSON.stringify(params, null, 2)
-    )
+    log.teamhubAi.tool.info('A2A Communication Tool: Starting execution')
+    log.teamhubAi.tool.debug('A2A Tool: Received params', undefined, {
+      params: JSON.stringify(params, null, 2),
+    })
 
     const {
       targetAgentId,
@@ -184,7 +184,13 @@ export const agentToAgent: ToolTypeDefinition = {
       }
 
       if (!targetAgent.isActive) {
-        console.warn(`⚠️ A2A Tool: Target agent ${targetAgentId} is not active`)
+        log.teamhubAi.tool.warn(
+          'A2A Tool: Target agent is not active',
+          undefined,
+          {
+            targetAgentId,
+          }
+        )
         return {
           success: false,
           messageId: '',
@@ -198,7 +204,10 @@ export const agentToAgent: ToolTypeDefinition = {
         }
       }
 
-      console.log(`✅ A2A Tool: Target agent found: ${targetAgent.name}`)
+      log.teamhubAi.tool.info('A2A Tool: Target agent found', undefined, {
+        targetAgentId,
+        targetAgentName: targetAgent.name,
+      })
 
       // Generate unique message ID
       const messageId = `a2a_${Date.now()}_${Math.random()
@@ -212,7 +221,10 @@ export const agentToAgent: ToolTypeDefinition = {
       const isScheduled = scheduledFor && scheduledFor > new Date()
 
       if (isScheduled) {
-        console.log(`⏰ A2A Tool: Scheduling message for ${scheduledFor}`)
+        log.teamhubAi.tool.info('A2A Tool: Scheduling message', undefined, {
+          targetAgentId,
+          scheduledFor: scheduledFor.toISOString(),
+        })
 
         // Create a cron job for scheduled delivery
         const cronJob = await createCron.execute(
@@ -267,8 +279,13 @@ export const agentToAgent: ToolTypeDefinition = {
       }
 
       // For immediate delivery, create message and start conversation
-      console.log(
-        `📤 A2A Tool: Delivering immediate message to ${targetAgent.name}`
+      log.teamhubAi.tool.info(
+        'A2A Tool: Delivering immediate message',
+        undefined,
+        {
+          targetAgentId,
+          targetAgentName: targetAgent.name,
+        }
       )
 
       // Create the message record
@@ -299,7 +316,14 @@ export const agentToAgent: ToolTypeDefinition = {
       let conversationId: string | undefined
 
       if (['task', 'workflow', 'request'].includes(messageType)) {
-        console.log(`💬 A2A Tool: Creating new conversation for ${messageType}`)
+        log.teamhubAi.tool.info(
+          'A2A Tool: Creating new conversation',
+          undefined,
+          {
+            targetAgentId,
+            messageType,
+          }
+        )
 
         // Import the memory functions dynamically to avoid circular dependencies
         const { dbMemories } = await import('@teamhub/db')
@@ -370,7 +394,11 @@ Please review and respond to this request.`
         )
 
         conversationId = newConversation.id
-        console.log(`✅ A2A Tool: Created conversation ${conversationId}`)
+        log.teamhubAi.tool.info('A2A Tool: Created conversation', undefined, {
+          targetAgentId,
+          conversationId,
+          messageType,
+        })
 
         // Update the message with conversation reference
         const currentMetadata =
@@ -389,13 +417,24 @@ Please review and respond to this request.`
         )
       } else {
         // For other message types (response, notification, status_update), just log them
-        console.log(
-          `📝 A2A Tool: ${messageType} message delivered without conversation`
+        log.teamhubAi.tool.info(
+          'A2A Tool: Message delivered without conversation',
+          undefined,
+          {
+            targetAgentId,
+            messageType,
+          }
         )
       }
 
-      console.log(
-        `✅ A2A Tool: Successfully delivered message to ${targetAgent.name}`
+      log.teamhubAi.tool.info(
+        'A2A Tool: Successfully delivered message',
+        undefined,
+        {
+          targetAgentId,
+          targetAgentName: targetAgent.name,
+          messageType,
+        }
       )
 
       return {
@@ -413,7 +452,10 @@ Please review and respond to this request.`
         }`,
       }
     } catch (error) {
-      console.error('💥 A2A Tool: Error occurred:', error)
+      log.teamhubAi.tool.error('A2A Tool: Error occurred', undefined, {
+        error,
+        targetAgentId,
+      })
 
       return {
         success: false,

@@ -2,6 +2,7 @@ import { spawn, exec } from 'child_process'
 import { promisify } from 'util'
 import path from 'path'
 import fs from 'fs/promises'
+import { log } from '@repo/logger'
 
 const execAsync = promisify(exec)
 
@@ -88,7 +89,7 @@ export class MCPContainerManager {
       await execAsync('docker --version')
       return true
     } catch (error) {
-      console.error('Docker is not available:', error)
+      log.teamhubAi.main.error('Docker is not available', undefined, { error })
       return false
     }
   }
@@ -101,7 +102,9 @@ export class MCPContainerManager {
       const { stdout } = await execAsync(`docker images -q ${this.imageTag}`)
       return stdout.trim().length > 0
     } catch (error) {
-      console.error('Error checking runtime image:', error)
+      log.teamhubAi.main.error('Error checking runtime image', undefined, {
+        error,
+      })
       return false
     }
   }
@@ -110,7 +113,7 @@ export class MCPContainerManager {
    * Build the MCP runtime image
    */
   async buildRuntimeImage(): Promise<void> {
-    console.log('Building MCP runtime image...')
+    log.teamhubAi.main.info('Building MCP runtime image')
 
     const buildScript = path.join(
       process.cwd(),
@@ -128,20 +131,28 @@ export class MCPContainerManager {
 
       buildProcess.stdout?.on('data', (data) => {
         output += data.toString()
-        console.log(data.toString().trim())
+        log.teamhubAi.main.debug('Build output', undefined, {
+          output: data.toString().trim(),
+        })
       })
 
       buildProcess.stderr?.on('data', (data) => {
         errorOutput += data.toString()
-        console.error(data.toString().trim())
+        log.teamhubAi.main.error('Build error output', undefined, {
+          error: data.toString().trim(),
+        })
       })
 
       buildProcess.on('close', (code) => {
         if (code === 0) {
-          console.log('✅ MCP runtime image built successfully')
+          log.teamhubAi.main.info('MCP runtime image built successfully')
           resolve()
         } else {
-          console.error('❌ Failed to build MCP runtime image')
+          log.teamhubAi.main.error(
+            'Failed to build MCP runtime image',
+            undefined,
+            { code, errorOutput }
+          )
           reject(new Error(`Build failed with code ${code}: ${errorOutput}`))
         }
       })
@@ -159,7 +170,9 @@ export class MCPContainerManager {
       )
 
       if (stdout.trim() === this.networkName) {
-        console.log(`Network ${this.networkName} already exists`)
+        log.teamhubAi.main.info('Network already exists', undefined, {
+          networkName: this.networkName,
+        })
         return
       }
 
@@ -180,9 +193,11 @@ export class MCPContainerManager {
       ].join(' ')
 
       await execAsync(networkCommand)
-      console.log(`✅ Created hardened network: ${this.networkName}`)
+      log.teamhubAi.main.info('Created hardened network', undefined, {
+        networkName: this.networkName,
+      })
     } catch (error) {
-      console.error('Error ensuring network:', error)
+      log.teamhubAi.main.error('Error ensuring network', undefined, { error })
       throw error
     }
   }

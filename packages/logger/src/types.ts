@@ -1,6 +1,6 @@
 // Logger type definitions for the TeamHub monorepo
 
-export type LogLevel = 'ERROR' | 'INFO' | 'DEBUG' | 'OFF'
+export type LogLevel = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG' | 'OFF'
 
 export interface LogTypeConfig {
   level: LogLevel
@@ -28,6 +28,7 @@ export type LoggerFunction = (
 // Logger object for a specific type
 export interface TypeLogger {
   error: LoggerFunction
+  warn: LoggerFunction
   info: LoggerFunction
   debug: LoggerFunction
   off: LoggerFunction

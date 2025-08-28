@@ -10,6 +10,7 @@ export async function sendWorkflow(params: {
   agentId: string
   agentCloneId?: string
   fromAgentId?: string
+  organizationId: string
   memoryRules?: AgentMemoryRule[]
   storeRule?: MemoryStoreRule
 }) {

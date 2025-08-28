@@ -40,7 +40,7 @@ const coreLog = (
   const effectiveLevel = getEffectiveLogLevel(type, userId)
 
   // Check if the current level meets the minimum level for this type
-  const levelPriority = { ERROR: 0, INFO: 1, DEBUG: 2, OFF: -1 }
+  const levelPriority = { ERROR: 0, WARN: 1, INFO: 2, DEBUG: 3, OFF: -1 }
   const currentPriority = levelPriority[level]
   const minPriority = levelPriority[effectiveLevel]
 
@@ -62,6 +62,8 @@ const coreLog = (
 const createTypeLogger = (type: string): TypeLogger => ({
   error: (message: string, userId?: string, data?: any) =>
     coreLog('ERROR', type, message, userId, data),
+  warn: (message: string, userId?: string, data?: any) =>
+    coreLog('WARN', type, message, userId, data),
   info: (message: string, userId?: string, data?: any) =>
     coreLog('INFO', type, message, userId, data),
   debug: (message: string, userId?: string, data?: any) =>
