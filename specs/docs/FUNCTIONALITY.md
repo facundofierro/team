@@ -52,10 +52,6 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 
 ### Instance Management
 
-- **Multi-Instance Support**: Create multiple instances of the same agent type for different customers or contexts
-- **Instance-Specific Configuration**: Customize prompts, tools, and behavior for each instance
-- **Customer Instance Management**: Dedicated instances for customer support, sales leads, and technical support
-- **Instance Templates**: Pre-configured settings for common use cases (Customer Support, Sales Lead, Technical Support)
 - **Instance Naming Convention**: Descriptive naming (e.g., "Customer Support - John Smith", "Customer Support - Acme Corp")
 
 #### Status Management & Classification
@@ -76,9 +72,6 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 
 #### Instance Configuration & Customization
 
-- **Instance-Specific Prompts**: Customize system prompts for each customer or context
-- **Instance-Specific Tools**: Enable/disable tools based on customer needs and use case
-- **Customer Metadata Storage**: Store customer preferences, history, and specific requirements
 - **Instance Health Monitoring**: Track instance performance, resource usage, and conversation quality
 - **Resource Allocation**: Monitor and optimize resource usage across multiple instances
 

@@ -4,7 +4,7 @@ The Settings section provides organization and system configuration management.
 
 ---
 
-## 15. Settings → Organization Tab
+## Settings → Organization Tab
 
 **Flow**: When clicking Settings tab → Organization tab, displays organization management and configuration.
 
@@ -24,7 +24,7 @@ The Settings section provides organization and system configuration management.
 
 ---
 
-## 16. Settings → Users Tab
+## Settings → Users Tab
 
 **Flow**: When clicking Settings tab → Users tab, manages user accounts and permissions.
 
@@ -44,104 +44,9 @@ The Settings section provides organization and system configuration management.
 - **User Activity Monitoring**: Track user login history and activity patterns
 - **Bulk User Operations**: Import users, bulk role assignment, bulk deactivation
 
-**Core Features**:
-
-#### 1. User Management
-
-- **User Creation**: Add new users with email, name, and initial role
-- **User Profiles**: Edit user information, contact details, and preferences
-- **User Status**: Active, Inactive, Suspended, Pending activation
-- **User Authentication**: Password management, 2FA settings, SSO integration
-- **User Deactivation**: Temporary or permanent user deactivation
-
-#### 2. Role Management
-
-- **Predefined Roles**: Admin, Manager, User, Viewer, Guest
-- **Custom Roles**: Create organization-specific roles with custom permissions
-- **Permission Matrix**: Granular permissions for agents, tools, data, and features
-- **Role Hierarchy**: Define role inheritance and escalation paths
-- **Role Templates**: Pre-configured role templates for common use cases
-
-#### 3. Permission System
-
-- **Agent Permissions**: Who can create, configure, and use specific agents
-- **Tool Permissions**: Control access to different tools and integrations
-- **Data Permissions**: Limit access to sensitive data and reports
-- **Feature Permissions**: Control access to advanced features and settings
-- **Instance Permissions**: Manage access to customer-specific instances
-
-#### 4. Access Control
-
-- **IP Restrictions**: Limit access to specific IP addresses or ranges
-- **Time-based Access**: Restrict access to business hours or specific time windows
-- **Device Management**: Control access from different devices and locations
-- **Session Management**: Session timeout, concurrent session limits
-- **Emergency Access**: Break-glass procedures for critical situations
-
-#### 5. User Monitoring & Security
-
-- **Activity Logs**: Track user actions, login attempts, and system usage
-- **Security Alerts**: Notify admins of suspicious activity or policy violations
-- **Compliance Reporting**: Generate reports for audits and compliance
-- **User Analytics**: Monitor user engagement and feature adoption
-- **Security Policies**: Enforce password policies, MFA requirements, etc.
-
-**Sample Data**:
-
-#### User Examples
-
-- **John Smith** (Admin) - Last login: 2 hours ago, Status: Active, 2FA: Enabled
-- **Sarah Chen** (Project Manager) - Last login: 1 day ago, Status: Active, 2FA: Enabled
-- **Mike Rodriguez** (User) - Last login: 3 days ago, Status: Active, 2FA: Disabled
-- **Lisa Thompson** (Viewer) - Last login: 1 week ago, Status: Inactive, 2FA: Disabled
-
-#### Role Examples
-
-- **Admin Role**:
-
-  - Full system access and configuration
-  - User and role management
-  - System monitoring and maintenance
-  - All agent and tool permissions
-
-- **Manager Role**:
-
-  - Team management and oversight
-  - Agent configuration and monitoring
-  - Report generation and data access
-  - Limited system configuration
-
-- **User Role**:
-
-  - Agent interaction and usage
-  - Basic tool access
-  - Personal data and preferences
-  - No configuration access
-
-- **Viewer Role**:
-  - Read-only access to assigned data
-  - No agent interaction
-  - Limited tool access
-  - No configuration or modification
-
-#### Permission Matrix Examples
-
-- **Agent Permissions**:
-
-  - Admin: Create, Configure, Delete, Use all agents
-  - Manager: Configure assigned agents, Use all agents
-  - User: Use assigned agents only
-  - Viewer: View agent information only
-
-- **Tool Permissions**:
-  - Admin: All tools with full access
-  - Manager: Project tools, communication tools, limited admin tools
-  - User: Basic tools, project-specific tools
-  - Viewer: Read-only tools, no data modification
-
 ---
 
-## 17. Settings → Tools Tab
+## Settings → Tools Tab
 
 **Flow**: When clicking Settings tab → Tools tab, manages available tools and integrations.
 
@@ -161,7 +66,7 @@ The Settings section provides organization and system configuration management.
 
 ---
 
-## 18. Settings → System Tab
+## Settings → System Tab
 
 **Flow**: When clicking Settings tab → System tab, provides system-level configuration and monitoring.
 
@@ -181,7 +86,7 @@ The Settings section provides organization and system configuration management.
 
 ---
 
-## 19. Settings → Security Tab
+## Settings → Security Tab
 
 **Flow**: When clicking Settings tab → Security tab, manages authentication, security policies, and compliance.
 
@@ -199,32 +104,9 @@ The Settings section provides organization and system configuration management.
 - **Security Monitoring**: Real-time security event monitoring and alerts
 - **Audit Logging**: Comprehensive security event logging and reporting
 
-**Core Features**:
-
-#### 1. Authentication & Authorization
-
-- **Multi-Provider OAuth**: Yandex, Google OAuth with secure token handling
-- **JWT Configuration**: Session management and token security
-- **Access Control**: IP restrictions, time-based access, device management
-- **Session Management**: Secure JWT sessions with configurable expiration
-
-#### 2. Security Policies
-
-- **Password Policies**: Complexity requirements, expiration, history
-- **Multi-Factor Authentication**: 2FA setup and enforcement
-- **Access Controls**: Role-based permissions, IP whitelisting
-- **Security Hardening**: Container security, API security, data encryption
-
-#### 3. Compliance & Monitoring
-
-- **GDPR Compliance**: Data privacy, retention, and user rights
-- **SOC 2 Compliance**: Security controls and audit trails
-- **Security Monitoring**: Real-time threat detection and alerts
-- **Audit Reporting**: Compliance reports and security audits
-
 ---
 
-## 20. Settings → MCP Management Tab
+## Settings → MCP Management Tab
 
 **Flow**: When clicking Settings tab → MCP Management tab, manages MCP containers, servers, and integrations.
 
@@ -242,35 +124,9 @@ The Settings section provides organization and system configuration management.
 - **Configuration Management**: MCP settings and parameter configuration
 - **Health Monitoring**: Container and MCP process health checks
 
-**Core Features**:
-
-#### 1. Container Management
-
-- **Isolated MCP Containers**: Docker-based isolated environments per organization
-- **Resource Limits**: CPU, memory, and process limits with monitoring
-- **Security Hardening**: No-privilege containers with restricted capabilities
-- **Volume Management**: Persistent data and log storage
-- **Network Isolation**: Dedicated networks for security
-
-#### 2. MCP Operations
-
-- **Lifecycle Management**: Start, stop, install, and remove MCPs
-- **Health Monitoring**: Container and MCP process health checks
-- **Resource Monitoring**: Real-time resource usage tracking
-- **Error Handling**: Comprehensive error recovery and logging
-- **Configuration Management**: Per-MCP configuration with validation
-
-#### 3. MCP Discovery & Installation
-
-- **MCP Registry**: Built-in catalog of popular MCP servers
-- **GitHub Integration**: Search and discover MCPs from GitHub repositories
-- **NPM Package Support**: Install MCPs from npm registry
-- **Community MCPs**: Support for community-developed MCP servers
-- **Custom MCP Installation**: Support for private and custom MCP servers
-
 ---
 
-## 21. Settings → Organization Management Tab
+## Settings → Organization Management Tab
 
 **Flow**: When clicking Settings tab → Organization Management tab, manages organization creation, database setup, and multi-tenant configuration.
 
@@ -287,29 +143,3 @@ The Settings section provides organization and system configuration management.
 - **Organization Creation**: Self-service organization setup and configuration
 - **Resource Management**: Container resources, storage, and network allocation
 - **Branding & Customization**: Organization-specific theming and configuration
-
-**Core Features**:
-
-#### 1. Organization Setup
-
-- **Self-Service Creation**: Automated organization setup with database provisioning
-- **Database Management**: Automatic PostgreSQL database creation with custom naming
-- **Schema Setup**: Automated schema creation and table initialization
-- **Resource Allocation**: CPU, memory, storage allocation per organization
-- **Network Isolation**: Dedicated networks for each organization
-
-#### 2. Multi-Tenant Management
-
-- **Organization Switching**: Seamless UI context switching between organizations
-- **Data Isolation**: Complete data separation between organizations
-- **Resource Monitoring**: Monitor resource usage across organizations
-- **Performance Optimization**: Optimize performance for each organization
-- **Scaling Management**: Handle organization growth and resource scaling
-
-#### 3. Organization Configuration
-
-- **Branding Options**: Custom logos, colors, and themes
-- **Policy Management**: Organization-specific policies and settings
-- **Integration Settings**: External service connections and API keys
-- **Backup Configuration**: Organization-specific backup and retention policies
-- **Compliance Settings**: GDPR, industry-specific compliance configuration

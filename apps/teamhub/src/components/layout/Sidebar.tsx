@@ -7,6 +7,7 @@ import {
   LineChart,
   Settings,
   LogOut,
+  FileText,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -31,6 +32,7 @@ import { Globe } from 'lucide-react'
 const menuItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Agents', href: '/agents', icon: Users },
+  { name: 'Documents', href: '/documents', icon: FileText },
   { name: 'Insights', href: '/insights', icon: LineChart },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
