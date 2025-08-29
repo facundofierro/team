@@ -9,7 +9,7 @@
     "./reactive-config": "./src/reactive-config.ts"
   },
   "scripts": {
-    "build": "pnpm install && tsc",
+    "build": "tsc",
     "db": "pnpm drizzle-kit migrate --config=src/db/drizzle.config.ts",
     "db:gen": "pnpm drizzle-kit generate --config src/db/drizzle.config.ts",
     "db:migrate": "pnpm tsx src/db/migrate.ts",
@@ -20,7 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@auth/core": "^0.34.2",
-    "@drizzle/reactive": "link:../drizzle-reactive",
+    "@drizzle/reactive": "workspace:*",
     "@trpc/server": "^10.45.2",
     "@types/pg": "^8.15.1",
     "@vercel/kv": "^1.0.1",
