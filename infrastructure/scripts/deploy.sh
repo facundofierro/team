@@ -107,6 +107,22 @@ check_data_safety() {
         echo -e "${YELLOW}⚠️  PostHog Redis data volume not found - will be created${NC}"
     fi
 
+    # Check ClickHouse data
+    if docker volume ls --filter name=teamhub_clickhouse_data --format "{{.Name}}" | grep -q teamhub_clickhouse_data; then
+        local CLICKHOUSE_SIZE=$(docker system df -v | grep teamhub_clickhouse_data | awk '{print $3}' || echo "Unknown")
+        echo -e "${GREEN}✅ ClickHouse data volume exists (${CLICKHOUSE_SIZE})${NC}"
+    else
+        echo -e "${YELLOW}⚠️  ClickHouse data volume not found - will be created${NC}"
+    fi
+
+    # Check ClickHouse logs
+    if docker volume ls --filter name=teamhub_clickhouse_logs --format "{{.Name}}" | grep -q teamhub_clickhouse_logs; then
+        local CLICKHOUSE_LOGS_SIZE=$(docker system df -v | grep teamhub_clickhouse_logs | awk '{print $3}' || echo "Unknown")
+        echo -e "${GREEN}✅ ClickHouse logs volume exists (${CLICKHOUSE_LOGS_SIZE})${NC}"
+    else
+        echo -e "${YELLOW}⚠️  ClickHouse logs volume not found - will be created${NC}"
+    fi
+
     echo -e "${GREEN}💾 Data volumes are preserved during service redeployment${NC}"
     echo ""
 }
@@ -325,6 +341,7 @@ deploy_full_stack() {
     export POSTGRES_PGVECTOR_IMAGE="${POSTGRES_PGVECTOR_IMAGE:-${CONTAINER_REGISTRY}/postgres-pgvector:${IMAGE_TAG}}"
     export POSTHOG_DB_PASSWORD="${POSTHOG_DB_PASSWORD:-posthog123}"
     export POSTHOG_SECRET_KEY="${POSTHOG_SECRET_KEY:-your-secret-key-here}"
+    export POSTHOG_CLICKHOUSE_PASSWORD="${POSTHOG_CLICKHOUSE_PASSWORD:-clickhouse123}"
 
     echo -e "${BLUE}🚀 Deploying application stack...${NC}"
     docker stack deploy -c ./docker-stack-temp.yml teamhub
