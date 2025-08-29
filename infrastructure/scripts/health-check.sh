@@ -114,6 +114,15 @@ NEXTCLOUD_STATUS=$?
 check_service "teamhub_nextcloud_db" "Nextcloud Database"
 NEXTCLOUD_DB_STATUS=$?
 
+check_service "teamhub_posthog" "PostHog Analytics"
+POSTHOG_STATUS=$?
+
+check_service "teamhub_posthog_db" "PostHog Database"
+POSTHOG_DB_STATUS=$?
+
+check_service "teamhub_posthog_redis" "PostHog Redis"
+POSTHOG_REDIS_STATUS=$?
+
 # Wait a bit for services to stabilize after confirming they're running
 if [ $NGINX_STATUS -eq 0 ]; then
     echo -e "${BLUE}⏳ Waiting 10 seconds for nginx to fully initialize...${NC}"
@@ -173,6 +182,12 @@ NEXTCLOUD_ENDPOINT_STATUS=$?
 check_endpoint_with_retry "http://127.0.0.1:80/remotion/health" "Remotion"
 REMOTION_ENDPOINT_STATUS=$?
 
+check_endpoint_with_retry "http://127.0.0.1:8000/health" "PostHog Health"
+POSTHOG_HEALTH_STATUS=$?
+
+check_endpoint_with_retry "http://127.0.0.1:8000" "PostHog Application"
+POSTHOG_ENDPOINT_STATUS=$?
+
 # Optional external services (may not be deployed)
 echo ""
 echo "=== Optional External Services ==="
@@ -187,7 +202,7 @@ echo "🔍 Debug: Proceeding to overall status calculation..."
 echo ""
 echo "=== Overall Status ==="
 
-TOTAL_SERVICES=7
+TOTAL_SERVICES=10
 HEALTHY_SERVICES=0
 
 echo "🔍 Debug: Calculating service health status..."
@@ -199,10 +214,13 @@ echo "🔍 Debug: Calculating service health status..."
 [ $REMOTION_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Remotion: healthy"
 [ $NEXTCLOUD_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nextcloud: healthy"
 [ $NEXTCLOUD_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nextcloud DB: healthy"
+[ $POSTHOG_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ PostHog: healthy"
+[ $POSTHOG_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ PostHog DB: healthy"
+[ $POSTHOG_REDIS_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ PostHog Redis: healthy"
 
 echo "Core services: $HEALTHY_SERVICES/$TOTAL_SERVICES healthy"
 
-echo "🔍 Debug: Endpoint status - Nginx Health: $NGINX_HEALTH_STATUS, Main App: $MAIN_APP_STATUS, Nextcloud: $NEXTCLOUD_ENDPOINT_STATUS, Remotion: $REMOTION_ENDPOINT_STATUS"
+echo "🔍 Debug: Endpoint status - Nginx Health: $NGINX_HEALTH_STATUS, Main App: $MAIN_APP_STATUS, Nextcloud: $NEXTCLOUD_ENDPOINT_STATUS, Remotion: $REMOTION_ENDPOINT_STATUS, PostHog Health: $POSTHOG_HEALTH_STATUS, PostHog App: $POSTHOG_ENDPOINT_STATUS"
 
 # More lenient exit criteria - allow deployment to succeed if core services are up
 # even if some endpoints are temporarily not accessible
