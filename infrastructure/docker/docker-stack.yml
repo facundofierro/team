@@ -140,6 +140,35 @@ services:
   #   networks:
   #     - teamhub_network
 
+  # ClickHouse for PostHog Analytics
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    environment:
+      - CLICKHOUSE_DB=posthog
+      - CLICKHOUSE_USER=posthog
+      - CLICKHOUSE_PASSWORD=${POSTHOG_CLICKHOUSE_PASSWORD}
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+    ports:
+      - '8123:8123'    # HTTP interface
+      - '9000:9000'    # Native protocol
+      - '9440:9440'    # Secure native protocol
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+    networks:
+      - teamhub_network
+    healthcheck:
+      test: ['CMD', 'clickhouse-client', '--query', 'SELECT 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   # PostHog Analytics Platform
   posthog:
     image: posthog/posthog:latest
@@ -162,8 +191,13 @@ services:
       - POSTGRES_PASSWORD=${POSTHOG_DB_PASSWORD}
       - POSTGRES_PORT=5432
       - DATABASE_URL=postgresql://posthog:${POSTHOG_DB_PASSWORD}@posthog_db:5432/posthog
-      - CLICKHOUSE_HOST=localhost
-      - CLICKHOUSE_PORT=8443
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=9000
+      - CLICKHOUSE_SECURE=false
+      - CLICKHOUSE_VERIFY=false
+      - CLICKHOUSE_DATABASE=posthog
+      - CLICKHOUSE_USER=posthog
+      - CLICKHOUSE_PASSWORD=${POSTHOG_CLICKHOUSE_PASSWORD}
       - REDIS_URL=redis://posthog_redis:6379
       - SECRET_KEY=${POSTHOG_SECRET_KEY}
       - SITE_URL=${POSTHOG_SITE_URL}
@@ -178,6 +212,7 @@ services:
     depends_on:
       - posthog_db
       - posthog_redis
+      - clickhouse
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
       interval: 30s
@@ -228,6 +263,8 @@ volumes:
   posthog_data:
   posthog_db_data:
   posthog_redis_data:
+  clickhouse_data:
+  clickhouse_logs:
 
 networks:
   teamhub_network:

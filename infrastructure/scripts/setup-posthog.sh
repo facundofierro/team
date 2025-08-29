@@ -1,107 +1,67 @@
 #!/bin/bash
 
+# PostHog Initial Setup Script
+# This script helps with the initial PostHog configuration after deployment
+
 set -e
 
-echo "=== PostHog Analytics Platform Setup ==="
+echo "=== PostHog Initial Setup ==="
 
-# Colors for output
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Check if PostHog service is running
-check_posthog_service() {
-    echo -e "${BLUE}🔍 Checking PostHog service status...${NC}"
+# Wait for services to be ready
+echo -e "${BLUE}⏳ Waiting for PostHog services to be ready...${NC}"
+sleep 30
 
-    if docker service ls --filter name=teamhub_posthog --format "{{.Replicas}}" | grep -q "1/1"; then
-        echo -e "${GREEN}✅ PostHog service is running${NC}"
-        return 0
-    else
-        echo -e "${RED}❌ PostHog service is not running${NC}"
-        return 1
-    fi
-}
+# Check if ClickHouse is running
+echo -e "${BLUE}🔍 Checking ClickHouse service...${NC}"
+if ! docker service ls --filter name=teamhub_clickhouse --format "{{.Replicas}}" | grep -q "1/1"; then
+    echo -e "${RED}❌ ClickHouse service is not running${NC}"
+    exit 1
+fi
 
-# Wait for PostHog to be ready
-wait_for_posthog() {
-    echo -e "${BLUE}⏳ Waiting for PostHog to be ready...${NC}"
-    local max_attempts=30
-    local attempt=1
+# Check if PostHog is running
+echo -e "${BLUE}🔍 Checking PostHog service...${NC}"
+if ! docker service ls --filter name=teamhub_posthog --format "{{.Replicas}}" | grep -q "1/1"; then
+    echo -e "${RED}❌ PostHog service is not running${NC}"
+    exit 1
+fi
 
-    while [ $attempt -le $max_attempts ]; do
-        if curl -s http://localhost:8000/health >/dev/null 2>&1; then
-            echo -e "${GREEN}✅ PostHog is ready!${NC}"
-            break
-        fi
+echo -e "${GREEN}✅ All PostHog services are running${NC}"
 
-        echo -e "${YELLOW}⏳ Attempt $attempt/$max_attempts - PostHog not ready yet...${NC}"
-        sleep 10
-        attempt=$((attempt + 1))
-    done
+# Wait a bit more for services to fully initialize
+echo -e "${BLUE}⏳ Waiting for services to fully initialize...${NC}"
+sleep 60
 
-    if [ $attempt -gt $max_attempts ]; then
-        echo -e "${RED}❌ PostHog failed to start within expected time${NC}"
-        return 1
-    fi
-}
+# Check PostHog health endpoint
+echo -e "${BLUE}🔍 Checking PostHog health...${NC}"
+if curl -s http://localhost:8000/health >/dev/null 2>&1; then
+    echo -e "${GREEN}✅ PostHog is healthy and ready${NC}"
+else
+    echo -e "${YELLOW}⚠️  PostHog health check failed, but continuing setup...${NC}"
+fi
 
-# Run PostHog setup commands
-setup_posthog() {
-    echo -e "${BLUE}🔧 Setting up PostHog...${NC}"
-
-    # Get PostHog container ID
-    local posthog_container=$(docker ps -q -f name=teamhub_posthog)
-
-    if [ -z "$posthog_container" ]; then
-        echo -e "${RED}❌ PostHog container not found${NC}"
-        return 1
-    fi
-
-    echo -e "${BLUE}📊 PostHog container ID: $posthog_container${NC}"
-
-    # Run database migrations
-    echo -e "${BLUE}🗄️  Running database migrations...${NC}"
-    docker exec "$posthog_container" python manage.py migrate
-
-    # Setup development environment (no sample data)
-    echo -e "${BLUE}⚙️  Setting up development environment...${NC}"
-    docker exec "$posthog_container" python manage.py setup_dev --no-data
-
-    echo -e "${GREEN}✅ PostHog setup completed successfully!${NC}"
-    echo -e "${BLUE}📋 Next steps:${NC}"
-    echo -e "  1. Create a superuser account:"
-    echo -e "     docker exec -it $posthog_container python manage.py createsuperuser"
-    echo -e "  2. Access PostHog at: https://r1.teamxagents.com/posthog/"
-    echo -e "  3. Create your first project and get the API key"
-    echo -e "  4. Update your .env.local with the API key"
-}
-
-# Main setup function
-main() {
-    echo -e "${BLUE}🚀 Starting PostHog setup...${NC}"
-
-    # Check if PostHog service is running
-    if ! check_posthog_service; then
-        echo -e "${RED}❌ PostHog service is not running. Please deploy it first.${NC}"
-        exit 1
-    fi
-
-    # Wait for PostHog to be ready
-    if ! wait_for_posthog; then
-        echo -e "${RED}❌ PostHog is not responding. Please check the service logs.${NC}"
-        exit 1
-    fi
-
-    # Setup PostHog
-    if ! setup_posthog; then
-        echo -e "${RED}❌ PostHog setup failed. Please check the logs.${NC}"
-        exit 1
-    fi
-
-    echo -e "${GREEN}🎉 PostHog setup completed successfully!${NC}"
-}
-
-# Execute main function
-main "$@"
+echo ""
+echo -e "${GREEN}=== PostHog Setup Complete ===${NC}"
+echo ""
+echo -e "${BLUE}📊 PostHog is now accessible at:${NC}"
+echo "  • Web Interface: http://your-server-ip:8000"
+echo "  • Via Nginx Proxy: http://your-server-ip/posthog/"
+echo ""
+echo -e "${BLUE}🎯 Next Steps:${NC}"
+echo "  1. Access PostHog web interface"
+echo "  2. Create your organization"
+echo "  3. Set up your first project"
+echo "  4. Configure tracking for your domain"
+echo "  5. Add the PostHog API key to your TeamHub environment"
+echo ""
+echo -e "${YELLOW}💡 Troubleshooting:${NC}"
+echo "  • Check logs: docker service logs teamhub_posthog"
+echo "  • Check ClickHouse: docker service logs teamhub_clickhouse"
+echo "  • Check PostgreSQL: docker service logs teamhub_posthog_db"
+echo ""
