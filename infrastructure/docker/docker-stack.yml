@@ -158,6 +158,7 @@ services:
     environment:
       - POSTGRES_HOST=posthog_db
       - POSTGRES_DB=posthog
+      - POSTHOG_DB_NAME=posthog
       - POSTGRES_USER=posthog
       - POSTGRES_PASSWORD=${POSTHOG_DB_PASSWORD}
       - REDIS_URL=redis://posthog_redis:6379
