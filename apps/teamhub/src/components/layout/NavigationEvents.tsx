@@ -2,12 +2,12 @@
 
 import { useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useNavigationStore } from '@/stores/navigationStore'
+import { useAgentStore } from '@/stores/agentStore'
 
 export function NavigationEvents() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { setIsLoading } = useNavigationStore()
+  const { setIsLoading } = useAgentStore()
 
   useEffect(() => {
     // This runs after navigation is complete

@@ -1,5 +1,6 @@
 import { ToolTypeDefinition } from '../tools'
 import { z } from 'zod'
+import { log } from '@repo/logger'
 
 export type SearchYandexParameters = {
   query: string
@@ -106,14 +107,16 @@ export const searchYandex: ToolTypeDefinition = {
     params: unknown,
     configuration: Record<string, string>
   ): Promise<unknown[]> => {
-    console.log('🔍 Yandex Search Tool: Starting execution')
-    console.log(
-      '📋 Yandex Search Tool: Received params:',
-      JSON.stringify(params, null, 2)
-    )
-    console.log(
-      '⚙️ Yandex Search Tool: Received configuration keys:',
-      Object.entries(configuration)
+    log.teamhubAi.tool.info('Yandex Search Tool: Starting execution')
+    log.teamhubAi.tool.debug('Yandex Search Tool: Received params', undefined, {
+      params: JSON.stringify(params, null, 2),
+    })
+    log.teamhubAi.tool.debug(
+      'Yandex Search Tool: Received configuration keys',
+      undefined,
+      {
+        configKeys: Object.entries(configuration),
+      }
     )
 
     const {
@@ -133,9 +136,11 @@ export const searchYandex: ToolTypeDefinition = {
       language,
     } = params as SearchYandexParameters
 
-    console.log(
-      `🔍 Yandex Search Tool: Query="${query}", Results=${numResults}, Type=${searchType}`
-    )
+    log.teamhubAi.tool.info('Yandex Search Tool: Query details', undefined, {
+      query,
+      numResults,
+      searchType,
+    })
 
     // Get API keys from environment variables first, then configuration
     const YANDEX_API_KEY =
@@ -143,40 +148,48 @@ export const searchYandex: ToolTypeDefinition = {
     const YANDEX_USER_ID =
       process.env.YANDEX_USER_KEY || configuration.YANDEX_USER_KEY
 
-    console.log('🔑 Yandex Search Tool: API Key available:', !!YANDEX_API_KEY)
-    console.log('🔑 Yandex Search Tool: User ID available:', !!YANDEX_USER_ID)
+    log.teamhubAi.tool.debug(
+      'Yandex Search Tool: API Key available',
+      undefined,
+      {
+        hasApiKey: !!YANDEX_API_KEY,
+        hasUserId: !!YANDEX_USER_ID,
+      }
+    )
     if (YANDEX_API_KEY) {
-      console.log(
-        '🔑 Yandex Search Tool: API Key preview:',
-        YANDEX_API_KEY.substring(0, 8) + '...'
-      )
-      console.log(
-        '🔑 Yandex Search Tool: API Key length:',
-        YANDEX_API_KEY.length
+      log.teamhubAi.tool.debug(
+        'Yandex Search Tool: API Key details',
+        undefined,
+        {
+          apiKeyPreview: YANDEX_API_KEY.substring(0, 8) + '...',
+          apiKeyLength: YANDEX_API_KEY.length,
+        }
       )
     }
     if (YANDEX_USER_ID) {
-      console.log(
-        '🔑 Yandex Search Tool: User ID preview:',
-        YANDEX_USER_ID.substring(0, 8) + '...'
-      )
-      console.log(
-        '🔑 Yandex Search Tool: User ID length:',
-        YANDEX_USER_ID.length
+      log.teamhubAi.tool.debug(
+        'Yandex Search Tool: User ID details',
+        undefined,
+        {
+          userIdPreview: YANDEX_USER_ID.substring(0, 8) + '...',
+          userIdLength: YANDEX_USER_ID.length,
+        }
       )
     }
 
     try {
       if (!YANDEX_API_KEY) {
-        console.error('❌ Yandex Search Tool: YANDEX_API_KEY is missing')
+        log.teamhubAi.tool.error(
+          'Yandex Search Tool: YANDEX_API_KEY is missing'
+        )
         throw new Error(
           'YANDEX_API_KEY must be set in configuration or environment'
         )
       }
 
       if (!YANDEX_USER_ID) {
-        console.error(
-          '❌ Yandex Search Tool: YANDEX_USER_KEY (User ID) is missing'
+        log.teamhubAi.tool.error(
+          'Yandex Search Tool: YANDEX_USER_KEY (User ID) is missing'
         )
         throw new Error(
           'YANDEX_USER_KEY (User ID) must be set in configuration or environment'
@@ -184,7 +197,9 @@ export const searchYandex: ToolTypeDefinition = {
       }
 
       // Test IAM token validity before making the search request
-      console.log('🧪 Yandex API_KEY: ', YANDEX_API_KEY.substring(0, 8) + '...')
+      log.teamhubAi.tool.debug('Yandex API_KEY test', undefined, {
+        apiKeyPreview: YANDEX_API_KEY.substring(0, 8) + '...',
+      })
       const tokenTestResponse = await fetch(
         'https://iam.api.cloud.yandex.net/iam/v1/tokens',
         {

@@ -116,14 +116,10 @@ export const getFunctions = (database: NodePgDatabase<typeof schema>) => {
       userId: string,
       firstMessage: string
     ): Promise<ConversationMemory> => {
-      // First, mark any existing active conversation as inactive and needing brief
-      await database
-        .update(memory)
-        .set({
-          isActive: false,
-          needsBrief: true,
-          updatedAt: new Date(),
-        })
+      // First, mark any existing active conversation as inactive and needing brief (only if it has meaningful content)
+      const existingActiveConversations = await database
+        .select(baseColumns)
+        .from(memory)
         .where(
           and(
             eq(memory.agentId, agentId),
@@ -131,6 +127,22 @@ export const getFunctions = (database: NodePgDatabase<typeof schema>) => {
             eq(memory.isActive, true)
           )
         )
+
+      // Update existing active conversations - only set needsBrief if they have meaningful content
+      for (const conversation of existingActiveConversations) {
+        const shouldNeedBrief = Boolean(
+          conversation.messageCount && conversation.messageCount > 2
+        )
+
+        await database
+          .update(memory)
+          .set({
+            isActive: false,
+            needsBrief: shouldNeedBrief,
+            updatedAt: new Date(),
+          })
+          .where(eq(memory.id, conversation.id))
+      }
 
       // Generate title from first message (placeholder - integrate with AI later)
       const title =
@@ -205,6 +217,7 @@ export const getFunctions = (database: NodePgDatabase<typeof schema>) => {
 
       const currentMessages =
         (conversation[0].content as ConversationMessage[]) || []
+
       const newMessage: ConversationMessage = {
         id:
           messageId ||

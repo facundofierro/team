@@ -1,0 +1,24 @@
+{
+  "name": "@repo/logger",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "watch": "tsup --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.10",
+    "@types/node": "^20.14.0",
+    "eslint": "^8.57.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.4.5"
+  }
+}

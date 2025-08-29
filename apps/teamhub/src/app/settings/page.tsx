@@ -1,7 +1,7 @@
 import { SettingsDetails } from '@/components/settings/SettingsDetails'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { db, OrganizationSettings, ToolTypeWithTypes } from '@teamhub/db'
+import { db, OrganizationSettings, ToolTypeWithTypes, getOrganizationSettings, updateOrganizationSettings, reactiveDb } from '@teamhub/db'
 import { getToolTypes } from '@teamhub/ai'
 import { ToolTypeDefinition } from '@teamhub/ai/src/tools'
 
@@ -9,7 +9,7 @@ async function updateSettings(settings: OrganizationSettings) {
   'use server'
   if (!settings.organizationId) return
 
-  await db.updateOrganizationSettings(settings)
+  await updateOrganizationSettings.execute(settings, reactiveDb)
   revalidatePath('/settings')
 }
 
@@ -43,7 +43,7 @@ export default async function SettingsPage({ searchParams }: PageProps) {
     )
   }
 
-  const settings = await db.getOrganizationSettings(organizationId)
+  const settings = await getOrganizationSettings.execute({ organizationId }, reactiveDb)
   const toolTypes = await getToolTypes()
   settings.toolTypes = toolTypes
 

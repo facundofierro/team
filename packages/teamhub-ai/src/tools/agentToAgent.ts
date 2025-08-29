@@ -1,6 +1,13 @@
 import { ToolTypeDefinition } from '../tools'
 import { z } from 'zod'
-import { db } from '@teamhub/db'
+import {
+  getAgent,
+  createCron,
+  createMessage,
+  updateMessage,
+  reactiveDb,
+} from '@teamhub/db'
+import { log } from '@repo/logger'
 
 export type A2AParameters = {
   targetAgentId: string
@@ -153,11 +160,10 @@ export const agentToAgent: ToolTypeDefinition = {
     params: unknown,
     configuration: Record<string, string>
   ): Promise<A2AResult> => {
-    console.log('🤖 A2A Communication Tool: Starting execution')
-    console.log(
-      '📋 A2A Tool: Received params:',
-      JSON.stringify(params, null, 2)
-    )
+    log.teamhubAi.tool.info('A2A Communication Tool: Starting execution')
+    log.teamhubAi.tool.debug('A2A Tool: Received params', undefined, {
+      params: JSON.stringify(params, null, 2),
+    })
 
     const {
       targetAgentId,
@@ -169,13 +175,22 @@ export const agentToAgent: ToolTypeDefinition = {
 
     try {
       // First, verify the target agent exists and is active
-      const targetAgent = await db.getAgent(targetAgentId)
+      const targetAgent = await getAgent.execute(
+        { id: targetAgentId },
+        reactiveDb
+      )
       if (!targetAgent) {
         throw new Error(`Target agent with ID ${targetAgentId} not found`)
       }
 
       if (!targetAgent.isActive) {
-        console.warn(`⚠️ A2A Tool: Target agent ${targetAgentId} is not active`)
+        log.teamhubAi.tool.warn(
+          'A2A Tool: Target agent is not active',
+          undefined,
+          {
+            targetAgentId,
+          }
+        )
         return {
           success: false,
           messageId: '',
@@ -189,7 +204,10 @@ export const agentToAgent: ToolTypeDefinition = {
         }
       }
 
-      console.log(`✅ A2A Tool: Target agent found: ${targetAgent.name}`)
+      log.teamhubAi.tool.info('A2A Tool: Target agent found', undefined, {
+        targetAgentId,
+        targetAgentName: targetAgent.name,
+      })
 
       // Generate unique message ID
       const messageId = `a2a_${Date.now()}_${Math.random()
@@ -203,37 +221,46 @@ export const agentToAgent: ToolTypeDefinition = {
       const isScheduled = scheduledFor && scheduledFor > new Date()
 
       if (isScheduled) {
-        console.log(`⏰ A2A Tool: Scheduling message for ${scheduledFor}`)
+        log.teamhubAi.tool.info('A2A Tool: Scheduling message', undefined, {
+          targetAgentId,
+          scheduledFor: scheduledFor.toISOString(),
+        })
 
         // Create a cron job for scheduled delivery
-        const cronJob = await db.createCron({
-          id: `a2a_cron_${messageId}`,
-          organizationId: targetAgent.organizationId!,
-          messageId: messageId,
-          schedule: `${scheduledFor.getMinutes()} ${scheduledFor.getHours()} ${scheduledFor.getDate()} ${
-            scheduledFor.getMonth() + 1
-          } *`,
-          isActive: true,
-          nextRun: scheduledFor,
-        })
+        const cronJob = await createCron.execute(
+          {
+            id: `a2a_cron_${messageId}`,
+            organizationId: targetAgent.organizationId!,
+            messageId: messageId,
+            schedule: `${scheduledFor.getMinutes()} ${scheduledFor.getHours()} ${scheduledFor.getDate()} ${
+              scheduledFor.getMonth() + 1
+            } *`,
+            isActive: true,
+            nextRun: scheduledFor,
+          },
+          reactiveDb
+        )
 
         // Create the message with pending status
-        await db.createMessage({
-          id: messageId,
-          organizationId: targetAgent.organizationId!,
-          fromAgentId: null, // Will be filled when executed
-          toAgentId: targetAgentId,
-          type: `a2a_${messageType}`,
-          content: content,
-          metadata: {
-            ...metadata,
-            priority,
-            originalMessageType: messageType,
-            isA2AMessage: true,
-            scheduledFor: scheduledFor.toISOString(),
+        await createMessage.execute(
+          {
+            id: messageId,
+            organizationId: targetAgent.organizationId!,
+            fromAgentId: null, // Will be filled when executed
+            toAgentId: targetAgentId,
+            type: `a2a_${messageType}`,
+            content: content,
+            metadata: {
+              ...metadata,
+              priority,
+              originalMessageType: messageType,
+              isA2AMessage: true,
+              scheduledFor: scheduledFor.toISOString(),
+            },
+            status: 'scheduled',
           },
-          status: 'scheduled',
-        })
+          reactiveDb
+        )
 
         return {
           success: true,
@@ -252,27 +279,35 @@ export const agentToAgent: ToolTypeDefinition = {
       }
 
       // For immediate delivery, create message and start conversation
-      console.log(
-        `📤 A2A Tool: Delivering immediate message to ${targetAgent.name}`
+      log.teamhubAi.tool.info(
+        'A2A Tool: Delivering immediate message',
+        undefined,
+        {
+          targetAgentId,
+          targetAgentName: targetAgent.name,
+        }
       )
 
       // Create the message record
-      const message = await db.createMessage({
-        id: messageId,
-        organizationId: targetAgent.organizationId!,
-        fromAgentId: null, // The current agent context will be determined by the conversation
-        toAgentId: targetAgentId,
-        type: `a2a_${messageType}`,
-        content: content,
-        metadata: {
-          ...metadata,
-          priority,
-          originalMessageType: messageType,
-          isA2AMessage: true,
-          deliveredAt: new Date().toISOString(),
+      const message = await createMessage.execute(
+        {
+          id: messageId,
+          organizationId: targetAgent.organizationId!,
+          fromAgentId: null, // The current agent context will be determined by the conversation
+          toAgentId: targetAgentId,
+          type: `a2a_${messageType}`,
+          content: content,
+          metadata: {
+            ...metadata,
+            priority,
+            originalMessageType: messageType,
+            isA2AMessage: true,
+            deliveredAt: new Date().toISOString(),
+          },
+          status: 'delivered',
         },
-        status: 'delivered',
-      })
+        reactiveDb
+      )
 
       // Create or get the organization's database name for memory functions
       const orgDatabaseName = targetAgent.organizationId || 'teamhub' // fallback
@@ -281,7 +316,14 @@ export const agentToAgent: ToolTypeDefinition = {
       let conversationId: string | undefined
 
       if (['task', 'workflow', 'request'].includes(messageType)) {
-        console.log(`💬 A2A Tool: Creating new conversation for ${messageType}`)
+        log.teamhubAi.tool.info(
+          'A2A Tool: Creating new conversation',
+          undefined,
+          {
+            targetAgentId,
+            messageType,
+          }
+        )
 
         // Import the memory functions dynamically to avoid circular dependencies
         const { dbMemories } = await import('@teamhub/db')
@@ -352,26 +394,47 @@ Please review and respond to this request.`
         )
 
         conversationId = newConversation.id
-        console.log(`✅ A2A Tool: Created conversation ${conversationId}`)
+        log.teamhubAi.tool.info('A2A Tool: Created conversation', undefined, {
+          targetAgentId,
+          conversationId,
+          messageType,
+        })
 
         // Update the message with conversation reference
         const currentMetadata =
           (message.metadata as Record<string, unknown>) || {}
-        await db.updateMessage(messageId, {
-          metadata: {
-            ...currentMetadata,
-            conversationId,
+        await updateMessage.execute(
+          {
+            id: messageId,
+            data: {
+              metadata: {
+                ...currentMetadata,
+                conversationId,
+              },
+            },
           },
-        })
+          reactiveDb
+        )
       } else {
         // For other message types (response, notification, status_update), just log them
-        console.log(
-          `📝 A2A Tool: ${messageType} message delivered without conversation`
+        log.teamhubAi.tool.info(
+          'A2A Tool: Message delivered without conversation',
+          undefined,
+          {
+            targetAgentId,
+            messageType,
+          }
         )
       }
 
-      console.log(
-        `✅ A2A Tool: Successfully delivered message to ${targetAgent.name}`
+      log.teamhubAi.tool.info(
+        'A2A Tool: Successfully delivered message',
+        undefined,
+        {
+          targetAgentId,
+          targetAgentName: targetAgent.name,
+          messageType,
+        }
       )
 
       return {
@@ -389,7 +452,10 @@ Please review and respond to this request.`
         }`,
       }
     } catch (error) {
-      console.error('💥 A2A Tool: Error occurred:', error)
+      log.teamhubAi.tool.error('A2A Tool: Error occurred', undefined, {
+        error,
+        targetAgentId,
+      })
 
       return {
         success: false,

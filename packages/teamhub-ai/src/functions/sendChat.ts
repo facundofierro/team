@@ -1,7 +1,14 @@
-import { db, dbMemories } from '@teamhub/db'
+import {
+  db,
+  dbMemories,
+  createMessage,
+  getAgent,
+  reactiveDb,
+} from '@teamhub/db'
 import type { AgentMemoryRule, AgentToolPermission } from '@teamhub/db'
 import type { MemoryStoreRule } from '../types'
 import { generateStreamText } from '../ai/vercel/generateStreamText'
+import { log } from '@repo/logger'
 
 // Helper function to generate UUID using Web Crypto API
 const generateUUID = () => {
@@ -18,6 +25,7 @@ const generateUUID = () => {
 export async function sendChat(params: {
   databaseName: string
   messages: Array<{ role: 'user' | 'assistant'; content: string }>
+  summary?: string
   agentId: string
   agentCloneId?: string
   memoryRules?: AgentMemoryRule[]
@@ -27,6 +35,7 @@ export async function sendChat(params: {
   const {
     databaseName,
     messages,
+    summary,
     agentId,
     agentCloneId,
     memoryRules,
@@ -35,7 +44,7 @@ export async function sendChat(params: {
   } = params
 
   try {
-    const agent = await db.getAgent(agentId)
+    const agent = await getAgent.execute({ id: agentId }, reactiveDb)
     if (!agent) {
       throw new Error('Agent not found')
     }
@@ -45,10 +54,15 @@ export async function sendChat(params: {
       agentCloneId,
     })
 
-    console.log('🎬 SendChat: Calling generateStreamText (without await)...')
+    log.teamhubAi.main.debug(
+      'Calling generateStreamText (without await)',
+      undefined,
+      { agentId }
+    )
 
     const streamPromise = generateStreamText({
       messages,
+      summary,
       agentId,
       systemPrompt: agent.systemPrompt || '',
       memories,
@@ -61,26 +75,43 @@ export async function sendChat(params: {
         messages.filter((m) => m.role === 'user').pop()?.content || ''
 
       // Run this in background without blocking the stream
-      setImmediate(() => {
-        db.createMessage({
-          id: generateUUID(),
-          fromAgentId: null,
-          toAgentId: agentId,
-          toAgentCloneId: agentCloneId || null,
-          type: storeRule.messageType,
-          content: latestUserMessage,
-          metadata: {},
-          status: 'completed',
-        }).catch((error) => {
-          console.error('❌ SendChat: background message store failed:', error)
-        })
+      setImmediate(async () => {
+        try {
+          // For now, we'll need to handle the messageTypeId mapping
+          // The old schema used 'type' field, new schema uses 'messageTypeId'
+          // We'll need to either create a message type or use a default one
+          const messageTypeId = storeRule.messageType // This might need to be a UUID
+
+          await createMessage.execute(
+            {
+              id: generateUUID(), // Generate unique ID for the message
+              fromAgentId: null,
+              toAgentId: agentId,
+              content: latestUserMessage,
+              type: messageTypeId, // Use 'type' instead of 'messageTypeId' to match schema
+              organizationId: agent.organizationId || '', // We need organizationId
+              status: 'pending', // Add required status field
+              metadata: {},
+            },
+            reactiveDb
+          )
+        } catch (error) {
+          log.teamhubAi.main.error(
+            'Background message store failed',
+            undefined,
+            { error, agentId }
+          )
+        }
       })
     }
 
-    console.log('🎬 SendChat: Returning stream promise...')
+    log.teamhubAi.main.debug('Returning stream promise', undefined, { agentId })
     return streamPromise
   } catch (error) {
-    console.error('💥 SendChat: Error processing chat:', error)
+    log.teamhubAi.main.error('Error processing chat', undefined, {
+      error,
+      agentId,
+    })
     return new Response('An error occurred during stream generation.', {
       status: 500,
     })

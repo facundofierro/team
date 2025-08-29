@@ -7,13 +7,14 @@ import {
   LineChart,
   Settings,
   LogOut,
+  FileText,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { OrganizationSwitcher } from './OrganizationSwitcher'
 import { Organization } from '@teamhub/db'
 import { useOrganizationStore } from '@/stores/organizationStore'
-import { useNavigationStore } from '@/stores/navigationStore'
+import { useAgentStore } from '@/stores/agentStore'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { signOut } from 'next-auth/react'
@@ -31,6 +32,7 @@ import { Globe } from 'lucide-react'
 const menuItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Agents', href: '/agents', icon: Users },
+  { name: 'Documents', href: '/documents', icon: FileText },
   { name: 'Insights', href: '/insights', icon: LineChart },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -45,7 +47,7 @@ export function Sidebar({ organizations, session }: SidebarProps) {
   const router = useRouter()
   const { currentOrganization } = useOrganizationStore()
   const { currentPath, setCurrentPath, setIsLoading, isLoading } =
-    useNavigationStore()
+    useAgentStore()
 
   useEffect(() => {
     console.log('debug isLoading', isLoading)

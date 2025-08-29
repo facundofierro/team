@@ -1,4 +1,4 @@
-import { ToolTypeWithTypes, db } from '@teamhub/db'
+import { ToolTypeWithTypes, verifyToolUsage, reactiveDb } from '@teamhub/db'
 import { searchGoogle, SearchGoogleParameters } from './tools/searchGoogle'
 import { searchYandex, SearchYandexParameters } from './tools/searchYandex'
 import {
@@ -19,6 +19,7 @@ import {
   AgentDiscoveryParameters,
 } from './tools/agentDiscovery'
 import { memorySearch, MemorySearchParameters } from './tools/memorySearch'
+import { mcpConnector, MCPConnectorParameters } from './tools/mcpConnector'
 // import { webBrowser } from './tools/webBrowser'
 // import { webBrowserSession } from './tools/webBrowserSession'
 
@@ -34,6 +35,7 @@ const TOOLS = [
   agentToAgent,
   agentDiscovery,
   memorySearch,
+  mcpConnector,
   // webBrowser,
   // webBrowserSession,
 ]
@@ -118,7 +120,10 @@ export const getAISDKTool = async (toolRecord: any) => {
 
       try {
         console.log('⏱️ Tool Executor: Verifying tool usage...')
-        const isAllowed = await db.verifyToolUsage(toolRecord.type)
+        const isAllowed = await verifyToolUsage.execute(
+          { toolTypeId: toolRecord.type },
+          reactiveDb
+        )
         if (!isAllowed) {
           console.error(
             '❌ Tool Executor: Tool usage limit exceeded for type:',

@@ -12,7 +12,7 @@
       "cache": false
     },
     "build": {
-      "dependsOn": ["^db:generate", "^build"],
+      "dependsOn": ["^build"],
       "outputs": [".next/**", "dist/**", "build/**"]
     },
     "test": {
@@ -26,7 +26,6 @@
       "outputs": []
     },
     "dev": {
-      "dependsOn": ["^db:generate"],
       "cache": false
     },
     "start": {

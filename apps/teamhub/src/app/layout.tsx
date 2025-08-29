@@ -5,9 +5,10 @@ import './globals.css'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { db, NewOrganization } from '@teamhub/db'
+import { db, NewOrganization, getOrganizations, reactiveDb } from '@teamhub/db'
 import { NavigationEvents } from '@/components/layout/NavigationEvents'
 import { Toaster } from '@/components/ui/toaster'
+import { ReactiveRootProvider } from '@/components/providers/ReactiveRootProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,7 +24,10 @@ export default async function RootLayout({
 }) {
   const session = await auth()
 
-  const organizations = await db.getOrganizations(session?.user?.id!)
+  const organizations = await getOrganizations.execute(
+    { userId: session?.user?.id! },
+    reactiveDb
+  )
 
   // Redirect to sign-in if not authenticated
   if (!session) {
@@ -37,8 +41,10 @@ export default async function RootLayout({
         <div className="flex h-screen">
           <Sidebar organizations={organizations} session={session} />
           <main className="flex-1 overflow-auto">
-            {children}
-            <NavigationEvents />
+            <ReactiveRootProvider>
+              {children}
+              <NavigationEvents />
+            </ReactiveRootProvider>
           </main>
         </div>
         <Toaster />

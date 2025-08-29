@@ -13,6 +13,7 @@ import {
   type ConversationProcessingOptions,
 } from '@teamhub/ai'
 import { auth } from '@/auth'
+import { log } from '@repo/logger'
 
 /**
  * Get the active conversation for an agent
@@ -25,7 +26,9 @@ export async function getActiveConversation(
     const memoryFunctions = await dbMemories(orgDatabaseName)
     return await memoryFunctions.getActiveConversation(agentId)
   } catch (error) {
-    console.error('Failed to get active conversation:', error)
+    log.teamhubDb.main.error('Failed to get active conversation', undefined, {
+      error,
+    })
     return null
   }
 }
@@ -42,7 +45,9 @@ export async function getRecentConversations(
     const memoryFunctions = await dbMemories(orgDatabaseName)
     return await memoryFunctions.getConversations(agentId, undefined, limit)
   } catch (error) {
-    console.error('Failed to get recent conversations:', error)
+    log.teamhubDb.main.error('Failed to get recent conversations', undefined, {
+      error,
+    })
     return []
   }
 }
@@ -95,7 +100,9 @@ export async function startNewConversation(
           await memoryFunctions.updateMemory(newConversation.id, {
             title: aiTitle,
           })
-          console.log('✅ Updated conversation title to:', aiTitle)
+          log.teamhub.main.info('Updated conversation title', undefined, {
+            aiTitle,
+          })
         }
       })
       .catch((error) => {
@@ -140,7 +147,8 @@ export async function addMessageToConversation(
  */
 export async function completeConversation(
   conversationId: string,
-  orgDatabaseName: string
+  orgDatabaseName: string,
+  shouldGenerateBrief: boolean = false
 ): Promise<void> {
   try {
     const memoryFunctions = await dbMemories(orgDatabaseName)
@@ -154,8 +162,9 @@ export async function completeConversation(
     // Mark conversation as complete
     await memoryFunctions.completeConversation(conversationId)
 
-    // Trigger AI brief generation in background if conversation has messages
+    // Only trigger AI brief generation if explicitly requested AND conversation has messages
     if (
+      shouldGenerateBrief &&
       conversation.content &&
       Array.isArray(conversation.content) &&
       conversation.content.length > 1
@@ -172,14 +181,29 @@ export async function completeConversation(
         processingOptions
       )
         .then(() => {
-          console.log('✅ Generated conversation brief for:', conversationId)
+          log.teamhub.memory.info('Generated conversation brief', undefined, {
+            conversationId,
+          })
         })
         .catch((error) => {
-          console.error('❌ Failed to generate conversation brief:', error)
+          log.teamhub.memory.error(
+            'Failed to generate conversation brief',
+            undefined,
+            { error, conversationId }
+          )
         })
+    } else {
+      log.teamhub.memory.info(
+        'Conversation completed without brief generation',
+        undefined,
+        { conversationId }
+      )
     }
   } catch (error) {
-    console.error('Failed to complete conversation:', error)
+    log.teamhub.memory.error('Failed to complete conversation', undefined, {
+      error,
+      conversationId,
+    })
     throw error
   }
 }
@@ -207,7 +231,7 @@ export async function loadConversationHistory(
 }
 
 /**
- * Switch to a different conversation
+ * Switch to a different conversation and mark it as active
  */
 export async function switchToConversation(
   conversationId: string,
@@ -218,9 +242,45 @@ export async function switchToConversation(
     const conversation = await memoryFunctions.getMemory(conversationId)
 
     if (conversation && conversation.type === 'conversation') {
-      // TODO: Mark this conversation as active in the database
-      // For now, just return the conversation
-      return conversation as ConversationMemory
+      const conversationMemory = conversation as ConversationMemory
+
+      // Mark any existing active conversations for this agent as inactive
+      const existingActiveConversations =
+        await memoryFunctions.getAgentMemories(conversationMemory.agentId, {
+          types: ['conversation'],
+          status: 'active',
+        })
+
+      // Update existing active conversations to inactive
+      for (const activeConv of existingActiveConversations) {
+        if (activeConv.id !== conversationId && activeConv.isActive) {
+          log.teamhub.chat.info('Marking conversation as inactive', undefined, {
+            conversationId: activeConv.id,
+            action: 'switchToConversation',
+          })
+          await memoryFunctions.updateMemory(activeConv.id, {
+            isActive: false,
+            needsBrief: Boolean(
+              activeConv.messageCount && activeConv.messageCount > 2
+            ),
+          })
+        }
+      }
+
+      // Mark the target conversation as active
+      log.teamhub.chat.info('Marking conversation as active', undefined, {
+        conversationId,
+        action: 'switchToConversation',
+      })
+      const updatedConversation = await memoryFunctions.updateMemory(
+        conversationId,
+        {
+          isActive: true,
+          needsBrief: false, // Reset brief flag since we're actively using it
+        }
+      )
+
+      return updatedConversation as ConversationMemory
     }
 
     return null

@@ -18,6 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useOrganizationStore } from '@/stores/organizationStore'
+import { useReactive } from '@drizzle/reactive/client'
 import type { MemoryWithTypes, ConversationMessage } from '@teamhub/db'
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 
@@ -61,60 +62,24 @@ export function MemoryCard({
   const [deleting, setDeleting] = useState(false)
   const { currentOrganization } = useOrganizationStore()
 
-  // Fetch memories from API
-  useEffect(() => {
-    const fetchMemories = async () => {
-      if (!currentOrganization?.id || !agentId) {
-        console.log('MemoryCard: Missing required data:', {
-          organizationId: currentOrganization?.id,
-          agentId,
-        })
-        return
-      }
-
-      setLoading(true)
-      try {
-        const url = new URL(
-          `/api/agents/${agentId}/memories`,
-          window.location.origin
-        )
-        url.searchParams.set('organizationId', currentOrganization.id)
-        // Removed server-side search - we'll filter client-side for better performance
-
-        console.log('MemoryCard: Fetching memories from:', url.toString())
-        console.log('MemoryCard: Request params:', {
-          agentId,
-          organizationId: currentOrganization.id,
-        })
-
-        const response = await fetch(url.toString())
-        console.log('MemoryCard: Response status:', response.status)
-
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error('MemoryCard: API error response:', errorText)
-          throw new Error('Failed to fetch memories')
-        }
-
-        const data = await response.json()
-        console.log('MemoryCard: Response data:', data)
-        console.log('MemoryCard: Memories count:', data.memories?.length || 0)
-
-        setMemories(data.memories || [])
-        setError(null)
-      } catch (err) {
-        console.error('MemoryCard: Fetch error:', err)
-        setError(
-          err instanceof Error ? err.message : 'Failed to fetch memories'
-        )
-        setMemories([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchMemories()
+  // Reactive memories query
+  const reactiveInput = useMemo(() => {
+    if (!currentOrganization?.id || !agentId) return null
+    return { agentId, organizationId: currentOrganization.id }
   }, [agentId, currentOrganization?.id])
+
+  const { data: reactiveMemories, isLoading: reactiveLoading } = useReactive<
+    MemoryWithTypes[]
+  >('agents.memory.getAll', reactiveInput || undefined)
+
+  // Sync reactive data into local UI state (keeps rest of component unchanged)
+  useEffect(() => {
+    if (reactiveMemories) {
+      setMemories(reactiveMemories)
+      setError(null)
+    }
+    setLoading(reactiveLoading)
+  }, [reactiveMemories, reactiveLoading])
 
   // Filter and sort memories client-side
   const filteredAndSortedMemories = useMemo(() => {

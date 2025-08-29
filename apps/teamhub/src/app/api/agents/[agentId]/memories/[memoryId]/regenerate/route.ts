@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { db, dbMemories } from '@teamhub/db'
+import { getOrganizations, dbMemories, reactiveDb } from '@teamhub/db'
 import {
   generateConversationTitle,
   generateConversationBrief,
@@ -33,7 +33,10 @@ export async function POST(
     }
 
     // Get organization details
-    const organizations = await db.getOrganizations(session.user.id)
+    const organizations = await getOrganizations.execute(
+      { userId: session.user.id },
+      reactiveDb
+    )
     const organization = organizations.find((org) => org.id === organizationId)
 
     if (!organization) {

@@ -12,33 +12,31 @@ import { SettingsCard } from './agentDetails/SettingsCard'
 import type { Agent, ToolWithTypes } from '@teamhub/db'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Skeleton } from '../../components/ui/skeleton'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useAgentStore } from '@/stores/agentStore'
+import type { AgentStore } from '@/stores/agentStore'
 import { Button } from '../../components/ui/button'
 import { MemoryCard } from './agentDetails/MemoryCard'
+import { useReactive } from '@drizzle/reactive/client'
 
 type AgentDetailProps = {
   defaultTab?: string
-  agent?: Agent
-  onSave?: (agent: Partial<Agent>) => Promise<void>
-  availableTools?: ToolWithTypes[]
+  organizationId: string
 }
 
 export function AgentDetail({
   defaultTab = 'chat',
-  agent,
-  onSave,
-  availableTools = [],
+  organizationId,
 }: AgentDetailProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
   const currentId = searchParams.get('id')
-  const activeTab = useAgentStore((state) => state.activeTab)
-  const setActiveTab = useAgentStore((state) => state.setActiveTab)
-  const selectedAgentId = useAgentStore((state) => state.selectedAgentId)
-  const selectedAgent = useAgentStore((state) => state.selectedAgent)
-  const setSelectedAgent = useAgentStore((state) => state.setSelectedAgent)
+  const activeTab = useAgentStore((state: AgentStore) => state.activeTab)
+  const setActiveTab = useAgentStore((state: AgentStore) => state.setActiveTab)
+  const selectedAgentId = useAgentStore(
+    (state: AgentStore) => state.selectedAgentId
+  )
   const [hasChanges, setHasChanges] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<Partial<Agent>>({})
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | undefined>(
@@ -48,14 +46,36 @@ export function AgentDetail({
     string | undefined
   >(undefined)
 
-  // Update store when agent data arrives or changes
+  // 🚀 REACTIVE: Get agent data using useReactive
+  const {
+    data: agent,
+    isLoading: agentLoading,
+    isStale: agentStale,
+  } = useReactive<Agent | null>(
+    'agents.getOne',
+    { id: currentId || '' },
+    { enabled: !!currentId }
+  )
+
+  // 🚀 REACTIVE: Get organization settings using useReactive
+  const { data: organizationSettings, isLoading: settingsLoading } =
+    useReactive<{
+      tools: ToolWithTypes[]
+      messageTypes: any[]
+      toolTypes: any[]
+      users: any[]
+    }>('organizations.settings.getAll', { organizationId })
+
+  const availableTools = organizationSettings?.tools || []
+
+  // Reset pending changes when agent data changes
   useEffect(() => {
     if (agent) {
-      setSelectedAgent(agent)
+      console.log('🔄 [AgentDetail] Agent data updated:', agent.name)
       setHasChanges(false)
       setPendingChanges({})
     }
-  }, [agent, setSelectedAgent])
+  }, [agent])
 
   // Initialize tab from URL only once
   useEffect(() => {
@@ -63,7 +83,7 @@ export function AgentDetail({
     if (urlTab) {
       setActiveTab(urlTab)
     }
-  }, []) // Empty dependency array - only run once
+  }, [searchParams, setActiveTab])
 
   const handleChange = async (changes: Partial<Agent>) => {
     // Include all previous pending changes when updating
@@ -74,15 +94,17 @@ export function AgentDetail({
   }
 
   const handleSave = async () => {
-    if (!selectedAgent?.id) return
+    if (!agent?.id) return
 
     // Ensure we're sending the ID with the changes
     const changes = {
-      id: selectedAgent.id,
+      id: agent.id,
       ...pendingChanges,
     }
 
-    await onSave?.(changes)
+    // TODO: In the future, this will use tRPC mutations
+    console.log('💾 [AgentDetail] Would save agent changes:', changes)
+
     setHasChanges(false)
     setPendingChanges({})
   }
@@ -90,7 +112,6 @@ export function AgentDetail({
   const handleCancel = () => {
     setHasChanges(false)
     setPendingChanges({})
-    setSelectedAgent(agent || null) // Convert undefined to null
   }
 
   const handleTabChange = (value: string) => {
@@ -115,113 +136,117 @@ export function AgentDetail({
   }
 
   // Show loading if we have an ID but no agent data
-  if (selectedAgentId && !selectedAgent) {
+  if (selectedAgentId && !agent && agentLoading) {
     return (
-      <div
-        className="flex flex-col h-full p-6"
-        style={{ backgroundColor: 'rgb(237, 234, 224)' }}
-      >
-        <Skeleton className="w-full mb-4 h-9" />
-        <Skeleton className="h-[calc(100%-3rem)] w-full rounded-xl" />
+      <div className="flex flex-col h-full p-6">
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-32" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show message if no agent is selected
+  if (!agent) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center p-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No Agent Selected
+          </h3>
+          <p className="text-gray-600">
+            Select an agent from the list to view details
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div
-      className="flex flex-col h-full"
-      style={{ backgroundColor: 'rgb(237, 234, 224)' }}
-    >
-      <Tabs
-        value={activeTab}
-        defaultValue={defaultTab}
-        className="flex flex-col h-full"
-        onValueChange={handleTabChange}
-      >
-        <div className="px-6 pt-6">
-          <TabsList className="flex w-full bg-cardLight">
-            <TabsTrigger value="dashboard" className="flex-1">
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex-1">
-              Chat
-            </TabsTrigger>
-            <TabsTrigger value="memory" className="flex-1">
-              Memory
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex-1">
-              Settings
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <div className="flex-1 p-6 pt-4 overflow-hidden rounded-xl">
-          <div className={hasChanges ? 'h-[calc(100%-4rem)]' : 'h-full'}>
-            <TabsContent
-              value="dashboard"
-              className="h-full m-0 rounded-xl"
-              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
-            >
-              <DashboardCard />
-            </TabsContent>
-
-            <TabsContent
-              value="chat"
-              className="h-full m-0 rounded-xl"
-              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
-            >
-              <ChatCard
-                conversationToLoad={conversationToLoad}
-                onConversationLoaded={() => setConversationToLoad(undefined)}
-              />
-            </TabsContent>
-
-            <TabsContent
-              value="memory"
-              className="h-full m-0 rounded-xl"
-              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
-            >
-              <MemoryCard
-                agentId={selectedAgent?.id || ''}
-                selectedMemoryId={selectedMemoryId}
-                onMemorySelect={setSelectedMemoryId}
-                onConversationOpen={handleOpenConversation}
-              />
-            </TabsContent>
-
-            <TabsContent
-              value="settings"
-              className="h-full m-0 rounded-xl"
-              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
-            >
-              <SettingsCard
-                agent={selectedAgent || undefined}
-                onChange={handleChange}
-                availableTools={availableTools}
-              />
-            </TabsContent>
+    <div className="flex flex-col h-full">
+      {/* Header with save/cancel buttons */}
+      {hasChanges && (
+        <div className="flex items-center justify-between p-4 border-b bg-yellow-50">
+          <span className="text-sm text-yellow-800">
+            You have unsaved changes
+          </span>
+          <div className="flex gap-2">
+            <Button onClick={handleCancel}>Cancel</Button>
+            <Button onClick={handleSave}>Save Changes</Button>
           </div>
-
-          {hasChanges && (
-            <div
-              className="flex items-center justify-end h-16 gap-2 px-4 mt-4 rounded-xl"
-              style={{ backgroundColor: 'rgb(220, 215, 200)' }}
-            >
-              <Button variant="outline" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                onClick={handleSave}
-                disabled={!selectedAgent}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                Save changes
-              </Button>
-            </div>
-          )}
         </div>
-      </Tabs>
+      )}
+
+      {/* Agent stale indicator */}
+      {agentStale && (
+        <div className="p-2 bg-blue-50 border-b border-blue-200">
+          <div className="text-xs text-blue-800 flex items-center gap-1">
+            🔄 Syncing latest agent data...
+          </div>
+        </div>
+      )}
+
+      {/* Main content */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="flex h-full flex-col min-h-0"
+        >
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="chat">Chat</TabsTrigger>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="memory">Memory</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+
+          <TabsContent
+            value="chat"
+            className="flex-1 min-h-0 overflow-hidden p-0"
+          >
+            <ChatCard
+              conversationToLoad={conversationToLoad}
+              onConversationLoaded={() => setConversationToLoad(undefined)}
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="dashboard"
+            className="flex-1 min-h-0 overflow-hidden p-0"
+          >
+            <DashboardCard />
+          </TabsContent>
+
+          <TabsContent
+            value="memory"
+            className="flex-1 min-h-0 overflow-hidden p-0"
+          >
+            <MemoryCard
+              agentId={agent.id}
+              selectedMemoryId={selectedMemoryId}
+              onMemorySelect={setSelectedMemoryId}
+              onConversationOpen={handleOpenConversation}
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="settings"
+            className="flex-1 min-h-0 overflow-hidden p-0"
+          >
+            <SettingsCard
+              agent={agent}
+              onChange={handleChange}
+              availableTools={availableTools}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }

@@ -1,10 +1,8 @@
 {
-  "id": "7ab1f442-3bc5-4526-839e-f3f7e1441a30",
-  "prevId": "a5d2eebd-1416-4014-adff-4197c6c62bdc",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "accounts": {
+    "auth.accounts": {
       "name": "accounts",
       "schema": "auth",
       "columns": {
@@ -74,22 +72,25 @@
         "accounts_user_id_users_id_fk": {
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
-          "tableTo": "users",
-          "schemaTo": "auth",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
+          "schemaTo": "auth",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "agent": {
+    "agency.agent": {
       "name": "agent",
       "schema": "agency",
       "columns": {
@@ -192,22 +193,25 @@
         "agent_organization_id_organization_id_fk": {
           "name": "agent_organization_id_organization_id_fk",
           "tableFrom": "agent",
-          "tableTo": "organization",
-          "schemaTo": "agency",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "cron": {
+    "agency.cron": {
       "name": "cron",
       "schema": "agency",
       "columns": {
@@ -267,36 +271,39 @@
         "cron_organization_id_organization_id_fk": {
           "name": "cron_organization_id_organization_id_fk",
           "tableFrom": "cron",
-          "tableTo": "organization",
-          "schemaTo": "agency",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "cron_message_id_message_id_fk": {
           "name": "cron_message_id_message_id_fk",
           "tableFrom": "cron",
-          "tableTo": "message",
-          "schemaTo": "agency",
           "columnsFrom": [
             "message_id"
           ],
+          "tableTo": "message",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "message_type": {
+    "agency.message_type": {
       "name": "message_type",
       "schema": "agency",
       "columns": {
@@ -362,22 +369,25 @@
         "message_type_organization_id_organization_id_fk": {
           "name": "message_type_organization_id_organization_id_fk",
           "tableFrom": "message_type",
-          "tableTo": "organization",
-          "schemaTo": "agency",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "message": {
+    "agency.message": {
       "name": "message",
       "schema": "agency",
       "columns": {
@@ -455,64 +465,67 @@
         "message_organization_id_organization_id_fk": {
           "name": "message_organization_id_organization_id_fk",
           "tableFrom": "message",
-          "tableTo": "organization",
-          "schemaTo": "agency",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "message_from_agent_id_agent_id_fk": {
           "name": "message_from_agent_id_agent_id_fk",
           "tableFrom": "message",
-          "tableTo": "agent",
-          "schemaTo": "agency",
           "columnsFrom": [
             "from_agent_id"
           ],
+          "tableTo": "agent",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "message_to_agent_id_agent_id_fk": {
           "name": "message_to_agent_id_agent_id_fk",
           "tableFrom": "message",
-          "tableTo": "agent",
-          "schemaTo": "agency",
           "columnsFrom": [
             "to_agent_id"
           ],
+          "tableTo": "agent",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "message_to_agent_clone_id_agent_id_fk": {
           "name": "message_to_agent_clone_id_agent_id_fk",
           "tableFrom": "message",
-          "tableTo": "agent",
-          "schemaTo": "agency",
           "columnsFrom": [
             "to_agent_clone_id"
           ],
+          "tableTo": "agent",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "organization": {
+    "agency.organization": {
       "name": "organization",
       "schema": "agency",
       "columns": {
@@ -566,30 +579,33 @@
         "organization_user_id_users_id_fk": {
           "name": "organization_user_id_users_id_fk",
           "tableFrom": "organization",
-          "tableTo": "users",
-          "schemaTo": "auth",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
+          "schemaTo": "auth",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "organization_name_unique": {
           "name": "organization_name_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "name"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "sessions": {
+    "auth.sessions": {
       "name": "sessions",
       "schema": "auth",
       "columns": {
@@ -623,30 +639,33 @@
         "sessions_user_id_users_id_fk": {
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
-          "tableTo": "users",
-          "schemaTo": "auth",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
+          "schemaTo": "auth",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "sessions_session_token_unique": {
           "name": "sessions_session_token_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "session_token"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "tool_type": {
+    "agency.tool_type": {
       "name": "tool_type",
       "schema": "agency",
       "columns": {
@@ -740,9 +759,12 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "tool": {
+    "agency.tool": {
       "name": "tool",
       "schema": "agency",
       "columns": {
@@ -828,22 +850,25 @@
         "tool_organization_id_organization_id_fk": {
           "name": "tool_organization_id_organization_id_fk",
           "tableFrom": "tool",
-          "tableTo": "organization",
-          "schemaTo": "agency",
           "columnsFrom": [
             "organization_id"
           ],
+          "tableTo": "organization",
+          "schemaTo": "agency",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "users": {
+    "auth.users": {
       "name": "users",
       "schema": "auth",
       "columns": {
@@ -897,14 +922,17 @@
       "uniqueConstraints": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "verification_tokens": {
+    "auth.verification_tokens": {
       "name": "verification_tokens",
       "schema": "auth",
       "columns": {
@@ -930,14 +958,23 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "7ab1f442-3bc5-4526-839e-f3f7e1441a30",
+  "prevId": "a5d2eebd-1416-4014-adff-4197c6c62bdc",
+  "sequences": {},
+  "policies": {},
+  "views": {},
+  "roles": {}
 }

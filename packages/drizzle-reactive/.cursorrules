@@ -1,0 +1,157 @@
+/\*
+AI Assistant Guidelines for @drizzle/reactive Library Usage
+
+CORE CONCEPTS:
+
+1. Always use defineReactiveFunction() for database operations
+2. Functions have explicit 'name' property for cache keys and tRPC procedures
+3. Functions work BOTH server-side standalone AND via tRPC
+4. Explicitly declare dependencies array for cache invalidation
+5. Use generic design (no hardcoded organizationId)
+
+FUNCTION DEFINITION PATTERN (REQUIRED):
+\*/
+export const functionName = defineReactiveFunction({
+name: 'domain.operation', // 🔑 CRITICAL: Used for cache keys AND tRPC procedure names
+input: z.object({
+// Generic validation (companyId, userId, etc. - not hardcoded organizationId)
+}),
+dependencies: ['table1', 'table2'], // Tables this function reads from
+handler: async (input, db) => { // Clean signature: (input, db)
+// Database operations here
+return db.query.tableName.findMany(...)
+},
+})
+
+/\*
+DUAL EXECUTION PATTERNS:
+
+1. SERVER-SIDE EXECUTION (API routes, background jobs, webhooks):
+   \*/
+   const result = await myFunction.execute({ companyId: 'test' }, db)
+
+/_ 2. tRPC INTEGRATION (auto-generated from function name):
+_/
+const router = createReactiveRouter({ db })
+.addQuery(myFunction) // Creates 'domain.operation' procedure automatically
+
+/_ 3. CLIENT USAGE (React hooks):
+_/
+const { data, isLoading, isStale } = useReactive('domain.operation', input)
+
+/\*
+NAMING CONVENTIONS:
+
+- Use descriptive, hierarchical names: 'users.getAll', 'users.profile.getDetailed'
+- Names become both cache keys and tRPC procedure names
+- Consistent naming eliminates duplication
+- Nested names create nested tRPC router structure
+
+CONFIGURATION REQUIREMENTS:
+Only 'relations' configuration is required. Everything else has smart defaults:
+\*/
+const config = {
+relations: {
+// When table X changes, which queries need invalidation?
+user: ['profile.userId', 'preferences.userId'],
+profile: ['user.id'],
+message: ['user.fromUserId', 'user.toUserId'],
+}
+// ✅ Smart defaults: memory cache, SSE enabled, auto-reconnection
+}
+
+/\*
+RELATIONS CONFIGURATION GUIDE:
+
+- Think: "If this table changes, what cached data becomes outdated?"
+- Use format: tableName: ['relatedTable.column', 'anotherTable']
+
+COMMON PATTERNS:
+
+1. User changes → invalidate profile, preferences, messages
+2. Organization changes → invalidate all org-scoped data
+3. Message changes → invalidate sender/receiver users
+4. Post changes → invalidate author user, comment counts
+
+MIGRATION FROM EXISTING CODE:
+
+1. Replace manual database functions with defineReactiveFunction
+2. Add explicit 'name' property to each function
+3. Replace manual tRPC procedures with .addQuery(reactiveFunction)
+4. Replace manual cache invalidation with dependencies array
+5. Replace useState/useEffect with useReactive hook
+6. Update relations config for automatic invalidation
+
+AI ANALYSIS ASSISTANCE:
+When helping with @drizzle/reactive:
+
+- Analyze function code to suggest dependencies (what tables are queried?)
+- Detect missing dependencies that could cause stale data
+- Recommend invalidation strategies based on table relationships
+- Suggest function names that follow hierarchical conventions
+- Generate migration suggestions from existing tRPC/React Query code
+
+PERFORMANCE BEST PRACTICES:
+
+- Declare minimal dependencies (only tables the function actually reads)
+- Use conditional invalidation for specific records when possible
+- Leverage background revalidation for non-critical data
+- Use page-level priority hints with useReactivePriorities()
+- Monitor cache hit rates and revalidation patterns
+
+ERROR PATTERNS TO AVOID:
+
+- Missing dependencies (causes stale data - very bad!)
+- Over-broad dependencies (causes unnecessary invalidation)
+- Manual cache management (defeats purpose of library)
+- Mixing reactive and non-reactive patterns in same codebase
+- Hardcoded organizationId (use generic field names)
+- Missing 'name' property in defineReactiveFunction
+- Duplicate function logic between server-side and tRPC
+
+DEBUGGING TIPS:
+
+- Check isStale flag for cache freshness indication
+- Monitor function execution logs for cache hits/misses
+- Verify dependencies match actual table usage in function
+- Test invalidation by performing mutations and checking cache
+- Use browser dev tools to monitor SSE connection status
+- Check that function names match tRPC procedure names
+
+ARCHITECTURE UNDERSTANDING:
+
+1. defineReactiveFunction creates functions that work everywhere
+2. Functions have built-in caching, invalidation, and tRPC compatibility
+3. tRPC router is just a thin wrapper that exposes function names
+4. SSE provides real-time cache invalidation automatically
+5. Simple session gap detection handles page refresh gracefully
+6. Zero configuration except for table relations
+
+COMMON MISTAKES TO HELP FIX:
+
+1. Creating separate functions for server-side and tRPC (use one function for both)
+2. Manual tRPC procedure definitions (use .addQuery(reactiveFunction))
+3. Manual cache key generation (use function name automatically)
+4. Complex session recovery (keep it simple with localStorage + revalidation)
+5. Missing function names (required for cache keys and tRPC procedures)
+
+EXAMPLES TO REFERENCE:
+
+- Check packages/drizzle-reactive/complete-example.js for comprehensive usage
+- Check packages/drizzle-reactive/naming-example.js for naming patterns
+- Check packages/drizzle-reactive/README.md for setup and configuration
+- Check src/examples/teamhub-integration.ts for real-world patterns
+
+WHEN SUGGESTING CODE:
+
+1. Always include 'name' property in defineReactiveFunction
+2. Use generic field names (companyId, userId) not hardcoded organizationId
+3. Show both server-side execution AND tRPC usage
+4. Include proper dependencies array based on function logic
+5. Suggest appropriate cache invalidation relations
+6. Use clean (input, db) handler signature
+7. Follow hierarchical naming conventions
+
+Remember: This library's goal is "Zero configuration, maximum intelligence. Reactive everywhere with no boilerplate."
+Every suggestion should support this vision.
+\*/

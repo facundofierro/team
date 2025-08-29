@@ -1,4 +1,4 @@
-import { db } from '@teamhub/db'
+import { createMessage, createCron, reactiveDb } from '@teamhub/db'
 import type { AgentMemoryRule, AgentToolPermission } from '@teamhub/db'
 import type { MemoryStoreRule, CronConfig, TaskMetadata } from '../types'
 
@@ -8,6 +8,7 @@ export async function sendTask(params: {
   agentId: string
   agentCloneId?: string
   fromAgentId?: string
+  organizationId: string // Add required organizationId
   memoryRules?: AgentMemoryRule[]
   storeRule?: MemoryStoreRule
   tools?: AgentToolPermission[]
@@ -19,29 +20,38 @@ export async function sendTask(params: {
     agentId,
     agentCloneId,
     fromAgentId,
+    organizationId,
     storeRule,
     cron,
   } = params
 
-  const message = await db.createMessage({
-    id: crypto.randomUUID(),
-    fromAgentId: fromAgentId || null,
-    toAgentId: agentId,
-    toAgentCloneId: agentCloneId,
-    type: 'task',
-    content: taskId,
-    metadata,
-    status: 'pending',
-  })
+  const message = await createMessage.execute(
+    {
+      id: crypto.randomUUID(),
+      fromAgentId: fromAgentId || null,
+      toAgentId: agentId,
+      toAgentCloneId: agentCloneId,
+      type: 'task',
+      content: taskId,
+      organizationId,
+      metadata,
+      status: 'pending',
+    },
+    reactiveDb
+  )
 
   if (cron) {
-    await db.createCron({
-      id: crypto.randomUUID(),
-      messageId: message.id,
-      schedule: cron.schedule,
-      isActive: true,
-      nextRun: cron.startDate || new Date(),
-    })
+    await createCron.execute(
+      {
+        id: crypto.randomUUID(),
+        organizationId,
+        messageId: message.id,
+        schedule: cron.schedule,
+        isActive: true,
+        nextRun: cron.startDate || new Date(),
+      },
+      reactiveDb
+    )
   }
 
   return message

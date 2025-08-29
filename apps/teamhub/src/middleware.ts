@@ -8,8 +8,7 @@ export function middleware(req: NextRequest) {
     req.cookies.get('authjs.session-token') ||
     req.cookies.get('next-auth.session-token')
 
-  console.log('Middleware cookies:', req.cookies)
-  console.log('Middleware session token:', session)
+  // Avoid logging cookies/session in production or during normal operation
 
   const isAuthPage = req.nextUrl.pathname.startsWith('/api/auth')
 

@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+
+    /* TeamHub Design System Colors - Based on actual design */
+    --teamhub-primary: 280 25% 44%; /* #8A548C - Main purple */
+    --teamhub-primary-foreground: 0 0% 100%;
+    --teamhub-secondary: 280 38% 20%; /* #3B2146 - Dark purple */
+    --teamhub-secondary-foreground: 0 0% 100%;
+    --teamhub-accent: 280 30% 71%; /* #A091DA - Light purple */
+    --teamhub-accent-foreground: 0 0% 100%;
+    --teamhub-highlight: 340 89% 65%; /* #F45584 - Hot pink */
+    --teamhub-highlight-foreground: 0 0% 100%;
+    --teamhub-success: 55 70% 60%; /* #E6D24D - Golden yellow */
+    --teamhub-success-foreground: 0 0% 0%;
+    --teamhub-warning: 60 25% 45%; /* #847F42 - Olive green */
+    --teamhub-warning-foreground: 0 0% 100%;
+    --teamhub-muted: 280 15% 61%; /* #9B8FA7 - Muted purple-gray */
+    --teamhub-muted-foreground: 0 0% 100%;
+    --teamhub-background: 280 20% 96%; /* #F4F3F5 - Light purple-gray */
+    --teamhub-background-foreground: 0 0% 0%;
+    --teamhub-card: 0 0% 100%;
+    --teamhub-card-foreground: 222.2 84% 4.9%;
+    --teamhub-border: 280 15% 85%;
+    --teamhub-input: 280 15% 90%;
+    --teamhub-ring: 280 25% 44%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+
+    /* TeamHub Dark Mode Colors */
+    --teamhub-primary: 280 30% 60%;
+    --teamhub-primary-foreground: 0 0% 100%;
+    --teamhub-secondary: 280 25% 25%;
+    --teamhub-secondary-foreground: 0 0% 100%;
+    --teamhub-accent: 280 25% 65%;
+    --teamhub-accent-foreground: 0 0% 100%;
+    --teamhub-highlight: 340 80% 70%;
+    --teamhub-highlight-foreground: 0 0% 100%;
+    --teamhub-success: 55 65% 65%;
+    --teamhub-success-foreground: 0 0% 0%;
+    --teamhub-warning: 60 30% 50%;
+    --teamhub-warning-foreground: 0 0% 100%;
+    --teamhub-muted: 280 20% 45%;
+    --teamhub-muted-foreground: 0 0% 100%;
+    --teamhub-background: 280 15% 15%;
+    --teamhub-background-foreground: 0 0% 100%;
+    --teamhub-card: 280 15% 20%;
+    --teamhub-card-foreground: 0 0% 100%;
+    --teamhub-border: 280 20% 30%;
+    --teamhub-input: 280 20% 25%;
+    --teamhub-ring: 280 30% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* TeamHub Design System Utility Classes */
+@layer utilities {
+  .bg-teamhub-primary {
+    background-color: hsl(var(--teamhub-primary));
+  }
+  .bg-teamhub-secondary {
+    background-color: hsl(var(--teamhub-secondary));
+  }
+  .bg-teamhub-accent {
+    background-color: hsl(var(--teamhub-accent));
+  }
+  .bg-teamhub-highlight {
+    background-color: hsl(var(--teamhub-highlight));
+  }
+  .bg-teamhub-success {
+    background-color: hsl(var(--teamhub-success));
+  }
+  .bg-teamhub-warning {
+    background-color: hsl(var(--teamhub-warning));
+  }
+  .bg-teamhub-muted {
+    background-color: hsl(var(--teamhub-muted));
+  }
+  .bg-teamhub-background {
+    background-color: hsl(var(--teamhub-background));
+  }
+
+  .text-teamhub-primary {
+    color: hsl(var(--teamhub-primary));
+  }
+  .text-teamhub-secondary {
+    color: hsl(var(--teamhub-secondary));
+  }
+  .text-teamhub-accent {
+    color: hsl(var(--teamhub-accent));
+  }
+  .text-teamhub-highlight {
+    color: hsl(var(--teamhub-highlight));
+  }
+  .text-teamhub-success {
+    color: hsl(var(--teamhub-success));
+  }
+  .text-teamhub-warning {
+    color: hsl(var(--teamhub-warning));
+  }
+  .text-teamhub-muted {
+    color: hsl(var(--teamhub-muted));
+  }
+  .text-teamhub-background {
+    color: hsl(var(--teamhub-background));
+  }
+
+  .border-teamhub-primary {
+    border-color: hsl(var(--teamhub-primary));
+  }
+  .border-teamhub-secondary {
+    border-color: hsl(var(--teamhub-secondary));
+  }
+  .border-teamhub-accent {
+    border-color: hsl(var(--teamhub-accent));
+  }
+  .border-teamhub-highlight {
+    border-color: hsl(var(--teamhub-highlight));
+  }
+  .border-teamhub-success {
+    border-color: hsl(var(--teamhub-success));
+  }
+  .border-teamhub-warning {
+    border-color: hsl(var(--teamhub-warning));
+  }
+  .border-teamhub-muted {
+    border-color: hsl(var(--teamhub-muted));
+  }
+  .border-teamhub-background {
+    border-color: hsl(var(--teamhub-background));
+  }
+}

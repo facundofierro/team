@@ -1,0 +1,498 @@
+# TeamHub Cursor Rules
+
+## Project Overview
+
+TeamHub is an enterprise AI agent management platform built with Next.js 14, TypeScript, and a modern monorepo structure. It provides multi-tenant environments for organizations to create, manage, and orchestrate AI agents at scale.
+
+## Architecture Guidelines
+
+### Monorepo Structure
+
+- Use `pnpm` for package management across the monorepo
+- Follow the established folder structure: `apps/`, `packages/`, `infrastructure/`, `docs/`
+- Each package should have clear responsibilities and minimal dependencies
+- Use Turbo for build orchestration and caching
+
+### Applications
+
+- **teamhub**: Main Next.js application (UI + API)
+- **ai-gateway**: AI provider abstraction service
+- **browser-service**: Automated browser control (currently disabled due to Playwright build issues)
+
+### Packages
+
+- **teamhub-ai**: AI functions, tools, and agent communication
+- **teamhub-db**: Database schemas, ORM functions, and data access
+- **ai-services**: Multi-provider AI service abstractions
+- **drizzle-reactive**: Reactive database library for zero-config real-time features
+
+## Technology Stack Conventions
+
+### Frontend (Next.js 14)
+
+- Use App Router exclusively (no Pages Router)
+- Prefer Server Components when possible, use Client Components only when necessary
+- Always mark Client Components with `'use client'` directive
+- Use TypeScript strictly - no `any` types without justification
+- Follow shadcn/ui component patterns and naming conventions
+
+### UI/UX Standards
+
+- Use shadcn/ui components exclusively for consistency
+- Follow the established color scheme: `bg-menu`, `bg-menu2`, `bg-background`, etc.
+- Implement responsive design with mobile-first approach
+- Use Tailwind CSS classes consistently
+- Maintain accessibility standards (ARIA labels, keyboard navigation)
+
+### State Management
+
+- Use Zustand for client-side state management
+- Keep stores focused and minimal (agentStore, organizationStore, navigationStore)
+- Avoid prop drilling - use stores for shared state
+- Server state should be managed separately from client state
+
+### Database & ORM
+
+- Use Drizzle ORM exclusively for database operations
+- **NEW: Use @drizzle/reactive for all database functions**
+- All database functions should be in `packages/teamhub-db`
+- Follow type-safe query patterns
+- Use transactions for multi-table operations
+- Implement proper error handling and validation
+
+### AI Integration
+
+- All AI provider interactions should go through `packages/ai-services`
+- Support multiple providers: OpenAI, DeepSeek, Fal, Eden AI
+- Implement streaming responses where possible
+- Handle region restrictions gracefully (especially for OpenAI embeddings)
+- Use the established tool framework for new integrations
+
+## @drizzle/reactive Integration Guidelines
+
+### Client/Server imports
+
+- Server-only code must import from `@drizzle/reactive/server`.
+- Client-only code must import from `@drizzle/reactive/client`.
+- Do not mix client modules on the server or vice versa.
+
+### App provider usage (global)
+
+- Provide reactive context once at the app root using `TrpcReactiveProvider`.
+- Inputs:
+  - `organizationId` (URL/store/session)
+  - `relations` from `@teamhub/db/reactive-config` (client-safe)
+  - `trpcClient` via `createTRPCProxyClient` + `httpBatchLink('/api/trpc')`
+- Do not add per-page providers.
+
+### Core Reactive Patterns
+
+Always use `defineReactiveFunction` for database operations:
+
+```typescript
+// ✅ CORRECT: Reactive function with explicit name
+export const getAgents = defineReactiveFunction({
+  name: 'agents.getAll', // Used for cache keys AND tRPC procedures
+  input: z.object({
+    organizationId: z.string(),
+    limit: z.number().optional().default(50),
+  }),
+  dependencies: ['agent'], // Tables this function reads from
+  handler: async (input, db) => {
+    return db.agents.findMany({
+      where: { organizationId: input.organizationId },
+      limit: input.limit,
+    })
+  },
+})
+
+// ✅ CORRECT: Server-side execution
+const agents = await getAgents.execute({ organizationId: 'org-123' }, db)
+
+// ✅ CORRECT: tRPC integration
+const router = createReactiveRouter({ db }).addQuery(getAgents) // Creates 'agents.getAll' procedure automatically
+
+// ✅ CORRECT: Client usage
+const { data: agents, isStale } = useReactive('agents.getAll', {
+  organizationId,
+})
+```
+
+### TeamHub Relations Configuration
+
+```typescript
+const teamhubReactiveConfig = {
+  relations: {
+    // When agent changes, invalidate these queries
+    agent: ['message.fromAgentId', 'memory.agentId', 'organization.id'],
+
+    // When organization changes, invalidate these queries
+    organization: ['agent.organizationId', 'tool.organizationId'],
+
+    // When message changes, invalidate these queries
+    message: ['agent.fromAgentId', 'agent.toAgentId'],
+
+    // When memory changes, invalidate these queries
+    memory: ['agent.agentId'],
+
+    // When tool changes, invalidate these queries
+    tool: ['organization.id'],
+  },
+}
+```
+
+### Migration from Legacy Patterns
+
+```typescript
+// ❌ OLD: Manual tRPC procedures
+export const agentsRouter = t.router({
+  getAll: t.procedure
+    .input(z.object({ organizationId: z.string() }))
+    .query(async ({ input }) => {
+      return db.agents.findMany({ where: input })
+    }),
+})
+
+// ✅ NEW: Reactive function + auto-generated tRPC
+export const getAgents = defineReactiveFunction({
+  name: 'agents.getAll',
+  input: z.object({ organizationId: z.string() }),
+  dependencies: ['agent'],
+  handler: async (input, db) => {
+    return db.agents.findMany({ where: input })
+  },
+})
+
+const router = createReactiveRouter({ db }).addQuery(getAgents)
+```
+
+### Multi-tenant DB rules (TeamHub specific)
+
+- Resolve tenant DB via main DB: look up `organization.databaseName` by `organizationId`.
+- Never use `organizationId` as a database name.
+- Read paths must not create databases. If DB missing (3D000), either:
+  - propagate the error so client keeps cache intact, or
+  - return empty for read-only endpoints by product decision (avoid caching as fresh).
+- Provisioning (create DB/schemas) belongs in explicit setup flows, not reactive handlers.
+
+### LocalStorage caching (client)
+
+- Storage is sharded per query:
+  - Index per-org key: `reactive_registry_<orgId>` stores only metadata.
+  - Per-query entry key: `@drizzle/reactive:entry:<orgId>:<hash>` stores `{ name, input, queryKey, data }`.
+- Do not write cache on errors.
+
+### UI layout when adding tabs with scroll
+
+- Parent flex containers must include `min-h-0`.
+- Tabs wrapper: `className="flex h-full flex-col min-h-0"`.
+- TabsContent: `className="flex-1 min-h-0 overflow-hidden p-0"`.
+- Inner ScrollArea: `className="flex-1 min-h-0 ..."`.
+
+## Code Style & Quality
+
+### TypeScript
+
+- Enable strict mode and all strict checks
+- Use proper type definitions - avoid `any`
+- Prefer interfaces over types for object shapes
+- Use generic types for reusable components
+- Export types alongside implementations
+
+### File Organization
+
+- Use kebab-case for file names
+- Group related components in directories
+- Index files should re-export main components
+- Keep components focused and single-responsibility
+- Use meaningful, descriptive names
+
+### Naming Conventions
+
+- Components: PascalCase (e.g., `AgentDetail`, `ChatCard`)
+- Functions: camelCase (e.g., `sendChat`, `getAgents`)
+- Reactive Functions: camelCase with hierarchical names (e.g., `agents.getAll`, `agents.memory.getRecent`)
+- Constants: SCREAMING_SNAKE_CASE (e.g., `API_ENDPOINTS`)
+- Files: kebab-case (e.g., `agent-detail.tsx`, `chat-card.tsx`)
+- Database entities: camelCase in code, snake_case in database
+
+### Error Handling
+
+- Always handle errors gracefully
+- Use try-catch blocks for async operations
+- Provide meaningful error messages to users
+- Log errors appropriately with context
+- Implement proper fallbacks and loading states
+
+## Component Guidelines
+
+### React Components
+
+- Use functional components exclusively
+- Implement proper loading and error states
+- Use React.memo() for expensive computations
+- Prefer composition over inheritance
+- Keep components under 200 lines when possible
+
+### Props & Types
+
+- Define explicit prop interfaces
+- Use optional props with default values
+- Implement prop validation with TypeScript
+- Document complex props with JSDoc comments
+- Avoid passing entire objects when specific props will do
+
+### Hooks
+
+- Use built-in hooks appropriately
+- **NEW: Use `useReactive` instead of manual React Query**
+- Create custom hooks for reusable logic
+- Keep hooks focused and testable
+- Follow hooks rules (always call at top level)
+- Use dependency arrays correctly in useEffect
+
+## API & Server Actions
+
+### Server Actions
+
+- **NEW: Use reactive functions for mutations**
+- Implement proper validation using Zod
+- Handle authentication and authorization
+- Return typed responses
+- Use revalidatePath/revalidateTag appropriately
+
+### API Routes
+
+- Use API routes for external integrations
+- **NEW: Use reactive functions for internal data operations**
+- Implement proper error handling and status codes
+- Use middleware for authentication
+- Document API endpoints
+- Follow RESTful conventions where applicable
+
+### Database Operations
+
+- **NEW: All database operations should use defineReactiveFunction**
+- Use organization-scoped queries for multi-tenancy
+- Implement proper pagination for large datasets
+- Use database transactions for consistency
+- Handle unique constraints and conflicts
+- Optimize queries for performance
+
+## Security Guidelines
+
+### Authentication & Authorization
+
+- Use NextAuth.js for authentication
+- Implement proper session management
+- Check permissions on all protected routes
+- Validate user access to organizations
+- Use environment variables for secrets
+
+### Data Protection
+
+- Implement organization-level data isolation
+- Validate all input data
+- Sanitize user-generated content
+- Use parameterized queries to prevent SQL injection
+- Implement rate limiting where appropriate
+
+### Environment Variables
+
+- Use `.env.local` for development
+- Never commit secrets to version control
+- Use GitHub Secrets for production
+- Validate required environment variables at startup
+- Provide meaningful defaults where possible
+
+## AI & Tools Development
+
+### Tool Creation
+
+- Implement the `ToolTypeDefinition` interface
+- Use Zod schemas for parameter validation
+- Include proper error handling and timeouts
+- Test tools thoroughly before deployment
+- Document tool capabilities and limitations
+
+### AI Provider Integration
+
+- Follow the established provider abstraction pattern
+- Implement both generation and discovery functions
+- Handle provider-specific errors gracefully
+- Support streaming where available
+- Test with multiple providers
+
+### Memory Management
+
+- **NEW: Use reactive functions for memory operations**
+- Use semantic search with pgvector when possible
+- Implement proper memory categorization
+- Handle embedding generation failures gracefully
+- Respect retention policies and cleanup old data
+- Optimize memory retrieval performance
+
+## Performance Guidelines
+
+### Frontend Performance
+
+- Use React.memo() for expensive components
+- **NEW: Leverage reactive caching automatically**
+- Implement proper loading states
+- Optimize images and assets
+- Use code splitting where appropriate
+- Monitor bundle size
+
+### Database Performance
+
+- **NEW: Reactive functions provide automatic caching**
+- Use indexes appropriately
+- Implement query optimization
+- Use connection pooling
+- Monitor query performance
+- Implement proper caching strategies
+
+### Caching
+
+- **NEW: @drizzle/reactive handles caching automatically**
+- Use Redis for application caching when needed
+- Implement proper cache invalidation via relations config
+- Cache expensive computations
+- Use browser caching for static assets
+- Monitor cache hit rates
+
+## Common TeamHub Patterns
+
+### Agent Operations
+
+```typescript
+// Get agents with statistics
+export const getAgentsWithStats = defineReactiveFunction({
+  name: 'agents.getWithStats',
+  input: z.object({ organizationId: z.string() }),
+  dependencies: ['agent', 'message', 'memory'],
+  handler: async (input, db) => {
+    // Complex query with joins
+  },
+})
+
+// Update agent
+export const updateAgent = defineReactiveFunction({
+  name: 'agents.update',
+  input: z.object({ id: z.string(), data: agentUpdateSchema }),
+  dependencies: ['agent'],
+  handler: async (input, db) => {
+    return db.agents.update({
+      where: { id: input.id },
+      data: input.data,
+    })
+  },
+})
+```
+
+### Memory Operations
+
+```typescript
+export const getAgentMemories = defineReactiveFunction({
+  name: 'agents.memory.getAll',
+  input: z.object({ agentId: z.string(), limit: z.number().optional() }),
+  dependencies: ['memory', 'agent'],
+  handler: async (input, db) => {
+    return db.memory.findMany({
+      where: { agentId: input.agentId },
+      limit: input.limit,
+      orderBy: { createdAt: 'desc' },
+    })
+  },
+})
+```
+
+### Organization Operations
+
+```typescript
+export const getOrganizationOverview = defineReactiveFunction({
+  name: 'organizations.getOverview',
+  input: z.object({ organizationId: z.string() }),
+  dependencies: ['organization', 'agent', 'message', 'memory', 'tool'],
+  handler: async (input, db) => {
+    // Comprehensive overview query
+  },
+})
+```
+
+## Debugging & Troubleshooting
+
+### Logging
+
+- Use structured logging with context
+- Include operation IDs for tracing
+- Log errors with stack traces
+- Use appropriate log levels
+- Include timing information
+
+### Development Tools
+
+- Use React DevTools for component debugging
+- Use Drizzle Studio for database inspection
+- **NEW: Monitor reactive cache hits/misses in console**
+- Use browser DevTools for performance profiling
+- Use TypeScript strict mode for better error detection
+- Use ESLint and Prettier for code quality
+
+### Common Issues
+
+- **NEW: Check reactive function dependencies if data seems stale**
+- **NEW: Verify relations config covers all table relationships**
+- Playwright build issues: Browser service currently disabled
+- Database connection issues: Check environment variables
+- Authentication issues: Verify ALLOWED_EMAILS configuration
+- Memory issues: Monitor conversation memory growth
+
+## Task Management System
+
+### Task Organization
+
+TeamHub uses a milestone-based task management system with priority-based organization:
+
+- **Tasks are organized by priority**: A (Critical), B (High), C (Medium), D (Future)
+- **File naming convention**: `{Priority}: {task-name} ({story-points})`
+- **Story points scale**: 1 (1-2 days), 2 (3-5 days), 3 (1-2 weeks), 4 (2-3 weeks), 5 (3-4 weeks)
+- **Directory structure**: `pending/`, `doing/`, `done/` based on task status
+
+### Current Milestones
+
+1. **Milestone 1 (Q1 2025)**: Internal Tool Foundation - Complete Priority A tasks
+2. **Milestone 2 (Q2 2025)**: Public Agent Platform - Complete Priority B tasks
+3. **Milestone 3 (Q3 2025)**: Advanced Analytics - Complete Priority C tasks
+
+### Task Status Locations
+
+- **Pending**: `specs/tasks/pending/` - Tasks waiting to be started
+- **Doing**: `specs/tasks/doing/` - Tasks currently in development
+- **Done**: `specs/tasks/done/` - Completed tasks with implementation details
+
+### When Working on Tasks
+
+1. **Check current priorities** in `specs/tasks/tasks.md`
+2. **Move tasks between directories** as status changes
+3. **Update task files** with progress, blockers, and completion details
+4. **Follow priority order** - complete A tasks before B, B before C, etc.
+5. **Estimate story points** accurately for new tasks
+6. **Document learnings** in completed tasks for future reference
+
+## AI Assistant Guidance
+
+When helping with TeamHub development:
+
+1. **Always suggest @drizzle/reactive patterns** for database operations
+2. **Check existing relations config** when adding new reactive functions
+3. **Suggest appropriate function names** following hierarchical conventions
+4. **Analyze function dependencies** based on actual table usage
+5. **Recommend cache invalidation strategies** based on data relationships
+6. **Help migrate legacy patterns** to reactive functions
+7. **Suggest performance optimizations** using reactive features
+8. **Follow task priority system** - focus on current milestone tasks first
+9. **Update task status** when completing work or encountering blockers
+10. **Document implementation details** in task files for team knowledge
+
+Remember: TeamHub is an enterprise platform - prioritize security, performance, maintainability, **reactive real-time features**, and **milestone-driven development** in all decisions.
