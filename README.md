@@ -175,7 +175,7 @@ TeamHub follows a modern microservices architecture with clear separation of con
 - **Reverse Proxy**: Nginx with custom routing
 - **Video Processing**: Remotion service
 - **Testing**: Playwright for E2E testing
-- **Error Tracking**: Sentry integration
+- **Error Tracking**: PostHog integration
 - **Performance**: Optimized build pipeline with Turbo
 
 ---
@@ -477,7 +477,7 @@ VERBOSE_DEPLOY=true
 ### Monitoring
 
 - **Health Checks**: Automated service health monitoring
-- **Error Tracking**: Sentry integration for error monitoring
+- **Error Tracking**: PostHog integration for error monitoring
 - **Performance**: Real-time performance metrics
 - **Usage Analytics**: Tool usage and interaction tracking
 

@@ -148,7 +148,7 @@ packages/logger/
 
 ## Notes
 
-- Consider integration with existing monitoring tools (Sentry, etc.)
+- Consider integration with existing monitoring tools (PostHog, etc.)
 - Ensure logging doesn't expose sensitive information
 - Plan for log retention and storage policies
 - Consider real-time log streaming for development

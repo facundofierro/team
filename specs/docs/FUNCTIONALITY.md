@@ -427,7 +427,7 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 - **Service Health**: Real-time service health monitoring
 - **Performance Metrics**: Application and infrastructure monitoring
 - **Log Aggregation**: Centralized logging across all services
-- **Error Tracking**: Sentry integration for error monitoring
+- **Error Tracking**: PostHog integration for error monitoring
 - **Backup Systems**: Automated backup and recovery procedures
 
 ---

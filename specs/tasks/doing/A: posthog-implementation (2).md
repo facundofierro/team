@@ -9,6 +9,8 @@
 
 Implement PostHog analytics across the TeamHub platform to gain valuable insights into user behavior, website performance, and customer journey optimization. This will provide data-driven decision making for product development and marketing strategies.
 
+**Note**: As part of this implementation, we will also remove Sentry error tracking to consolidate our monitoring approach with PostHog.
+
 ## Business Value
 
 - **User Behavior Insights**: Understand how visitors interact with our platform
@@ -16,6 +18,7 @@ Implement PostHog analytics across the TeamHub platform to gain valuable insight
 - **Product Development**: Data-driven feature prioritization and improvements
 - **Marketing Effectiveness**: Measure campaign performance and ROI
 - **Customer Experience**: Identify and resolve user experience issues
+- **Monitoring Consolidation**: Single platform for analytics and error tracking
 
 ## Requirements
 
@@ -26,6 +29,7 @@ Implement PostHog analytics across the TeamHub platform to gain valuable insight
 - **Conversion Tracking**: Measure lead generation and conversion funnel performance
 - **Performance Monitoring**: Track page load times and Core Web Vitals
 - **A/B Testing**: Enable experimentation and optimization testing
+- **Error Tracking**: Replace Sentry with PostHog error monitoring
 
 ### Key Metrics to Track
 
@@ -65,7 +69,7 @@ Implement PostHog analytics across the TeamHub platform to gain valuable insight
 - **API Tracking**: Monitor API usage and performance metrics
 - **Server Events**: Track server-side events and business logic
 - **User Analytics**: Monitor user behavior and system usage
-- **Error Tracking**: Capture and analyze application errors
+- **Error Tracking**: Replace Sentry with PostHog error monitoring
 
 ### Dashboard & Reporting
 
@@ -74,9 +78,35 @@ Implement PostHog analytics across the TeamHub platform to gain valuable insight
 - **Automated Reports**: Scheduled reports for key stakeholders
 - **Alert System**: Notifications for critical metrics and anomalies
 
+## Sentry Removal
+
+### Files to Remove
+
+- `sentry.client.config.ts` - Client-side Sentry configuration
+- `sentry.server.config.ts` - Server-side Sentry configuration
+- `sentry.edge.config.ts` - Edge runtime Sentry configuration
+- `.env.sentry-build-plugin` - Sentry build plugin environment file
+
+### Code Changes Required
+
+- Remove `@sentry/nextjs` dependency from `package.json`
+- Remove Sentry wrapper from `next.config.mjs`
+- Remove Sentry imports from `instrumentation.ts`
+- Remove Sentry error handling from `global-error.tsx`
+- Update `.gitignore` to remove Sentry-related entries
+- Clean up `pnpm-lock.yaml` by removing Sentry packages
+
+### Error Handling Replacement
+
+- Implement PostHog error tracking in place of Sentry
+- Update global error boundary to use PostHog
+- Ensure proper error reporting without Sentry dependencies
+
 ## Acceptance Criteria
 
 - [ ] PostHog project configured and API keys set up
+- [x] **Sentry completely removed from the project**
+- [ ] **PostHog error tracking implemented to replace Sentry**
 - [ ] Frontend SDK integrated across all applications
 - [ ] Key user events and conversions tracked
 - [ ] Custom dashboards created for business metrics
@@ -93,6 +123,7 @@ Implement PostHog analytics across the TeamHub platform to gain valuable insight
 - **Performance Impact**: Minimal impact on application performance
 - **Team Adoption**: Analytics team trained and actively using data
 - **Privacy Compliance**: Full GDPR and privacy compliance
+- **Monitoring Consolidation**: Single platform for all analytics and error tracking
 
 ## Notes
 
@@ -104,3 +135,4 @@ Implement PostHog analytics across the TeamHub platform to gain valuable insight
 - **Integration**: Seamless integration with existing development workflow
 - **Documentation**: Comprehensive documentation for team usage
 - **Scalability**: Design for future growth and additional tracking needs
+- **Sentry Migration**: Ensure smooth transition from Sentry to PostHog error tracking
