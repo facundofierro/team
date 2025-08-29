@@ -158,12 +158,15 @@ services:
     environment:
       - POSTGRES_HOST=posthog_db
       - POSTGRES_DB=posthog
-      - POSTHOG_DB_NAME=posthog
       - POSTGRES_USER=posthog
       - POSTGRES_PASSWORD=${POSTHOG_DB_PASSWORD}
+      - POSTGRES_PORT=5432
+      - DATABASE_URL=postgresql://posthog:${POSTHOG_DB_PASSWORD}@posthog_db:5432/posthog
+      - CLICKHOUSE_HOST=localhost
+      - CLICKHOUSE_PORT=8443
       - REDIS_URL=redis://posthog_redis:6379
       - SECRET_KEY=${POSTHOG_SECRET_KEY}
-      - SITE_URL=https://r1.teamxagents.com/posthog
+      - SITE_URL=${POSTHOG_SITE_URL}
       - DISABLE_SECURE_SSL_REDIRECT=true
       - NODE_ENV=production
     ports:
@@ -175,6 +178,12 @@ services:
     depends_on:
       - posthog_db
       - posthog_redis
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # PostHog PostgreSQL Database
   posthog_db:
