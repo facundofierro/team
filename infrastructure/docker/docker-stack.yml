@@ -140,6 +140,71 @@ services:
   #   networks:
   #     - teamhub_network
 
+  # PostHog Analytics Platform
+  posthog:
+    image: posthog/posthog:latest
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+    environment:
+      - POSTGRES_HOST=posthog_db
+      - POSTGRES_DB=posthog
+      - POSTGRES_USER=posthog
+      - POSTGRES_PASSWORD=${POSTHOG_DB_PASSWORD}
+      - REDIS_URL=redis://posthog_redis:6379
+      - SECRET_KEY=${POSTHOG_SECRET_KEY}
+      - SITE_URL=https://r1.teamxagents.com/posthog
+      - DISABLE_SECURE_SSL_REDIRECT=true
+      - NODE_ENV=production
+    ports:
+      - '8000:8000'
+    volumes:
+      - posthog_data:/app/media
+    networks:
+      - teamhub_network
+    depends_on:
+      - posthog_db
+      - posthog_redis
+
+  # PostHog PostgreSQL Database
+  posthog_db:
+    image: postgres:15
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    environment:
+      - POSTGRES_DB=posthog
+      - POSTGRES_USER=posthog
+      - POSTGRES_PASSWORD=${POSTHOG_DB_PASSWORD}
+    volumes:
+      - posthog_db_data:/var/lib/postgresql/data
+    networks:
+      - teamhub_network
+
+  # PostHog Redis Cache
+  posthog_redis:
+    image: redis:7-alpine
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - posthog_redis_data:/data
+    networks:
+      - teamhub_network
+
 configs:
   nginx_config:
     external: true
@@ -150,6 +215,9 @@ volumes:
   redis_data:
   nextcloud_data:
   nextcloud_db_data:
+  posthog_data:
+  posthog_db_data:
+  posthog_redis_data:
 
 networks:
   teamhub_network:

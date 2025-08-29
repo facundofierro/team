@@ -6,6 +6,7 @@ import { reactiveRelations } from '@teamhub/db/reactive-config'
 import { trpcClient } from '@/lib/trpc'
 import { useSearchParams } from 'next/navigation'
 import { useOrganizationStore } from '@/stores/organizationStore'
+import { PostHogProvider } from './PostHogProvider'
 
 export function ReactiveRootProvider({
   children,
@@ -28,7 +29,7 @@ export function ReactiveRootProvider({
       relations={reactiveRelations}
       trpcClient={trpcClient}
     >
-      {children}
+      <PostHogProvider>{children}</PostHogProvider>
     </TrpcReactiveProvider>
   )
 }
