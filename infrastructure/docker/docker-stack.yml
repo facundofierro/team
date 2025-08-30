@@ -253,6 +253,8 @@ services:
       - CLICKHOUSE_ENABLE_STORAGE_POLICY=false
       - CLICKHOUSE_ENABLE_REPLICATION=false
       - CLICKHOUSE_ASYNC_MIGRATIONS_OPT_OUT=true
+      - ASYNC_MIGRATIONS_SKIP_SERVICE_SETUP=true
+      - SKIP_ASYNC_MIGRATIONS_SETUP=true
       - CLICKHOUSE_HTTP_URL=http://clickhouse:8123
       - CLICKHOUSE_SECURE_PORT=9440
       - CLICKHOUSE_NON_SECURE_PORT=9000
@@ -273,6 +275,7 @@ services:
       - posthog_db
       - posthog_redis
       - clickhouse
+      - zookeeper
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
       interval: 30s
