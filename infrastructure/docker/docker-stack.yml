@@ -215,7 +215,6 @@ services:
       - CLICKHOUSE_DATABASE=posthog
       - CLICKHOUSE_USER=posthog
       - CLICKHOUSE_PASSWORD=${POSTHOG_CLICKHOUSE_PASSWORD}
-      - CLICKHOUSE_CLUSTER=posthog_migrations
       - CLICKHOUSE_REPLICATION=false
       - CLICKHOUSE_ASYNC_MIGRATIONS_OPT_OUT=true
       - REDIS_URL=redis://posthog_redis:6379

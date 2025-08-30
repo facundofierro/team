@@ -36,31 +36,24 @@
         </default>
     </quotas>
 
-    <!-- Cluster configuration for PostHog -->
+    <!-- Cluster configuration for PostHog (simplified for single-node setup) -->
     <remote_servers>
-        <posthog_migrations>
-            <shard>
-                <replica>
-                    <host>clickhouse</host>
-                    <port>9000</port>
-                </replica>
-            </shard>
-        </posthog_migrations>
+        <!-- Empty for single-node setup -->
     </remote_servers>
 
-    <!-- Macros for distributed tables -->
+    <!-- Macros for distributed tables (simplified) -->
     <macros>
         <shard>01</shard>
         <replica>01</replica>
     </macros>
 
-    <!-- Zookeeper configuration (placeholder for future scaling) -->
-    <zookeeper>
+    <!-- Zookeeper configuration (commented out for single-node setup) -->
+    <!-- <zookeeper>
         <node>
             <host>zookeeper</host>
             <port>2181</port>
         </node>
-    </zookeeper>
+    </zookeeper> -->
 
     <!-- Storage configuration -->
     <storage_configuration>
