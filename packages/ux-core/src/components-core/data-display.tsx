@@ -25,6 +25,17 @@ import {
   Pause,
 } from 'lucide-react'
 
+// Icon wrapper to resolve type compatibility issues
+const IconWrapper = ({
+  icon: Icon,
+  ...props
+}: {
+  icon: any
+  [key: string]: any
+}) => {
+  return <Icon {...props} />
+}
+
 // Status indicator component
 export interface StatusIndicatorProps {
   status:
@@ -35,6 +46,8 @@ export interface StatusIndicatorProps {
     | 'error'
     | 'warning'
     | 'pending'
+    | 'idle'
+    | 'offline'
   size?: 'sm' | 'md' | 'lg'
   showLabel?: boolean
   className?: string
@@ -50,22 +63,89 @@ export function StatusIndicator({
     switch (status) {
       case 'active':
       case 'running':
-        return { color: 'bg-green-500', label: 'Active', icon: CheckCircle }
+        return {
+          color: 'bg-elegant-success',
+          label: 'Active',
+          icon: CheckCircle,
+          textColor: 'text-elegant-success',
+          bgColor: 'bg-elegant-status-success-50',
+          borderColor: 'border-elegant-success',
+        }
       case 'inactive':
       case 'stopped':
-        return { color: 'bg-gray-400', label: 'Inactive', icon: XCircle }
+        return {
+          color: 'bg-elegant-neutral',
+          label: 'Inactive',
+          icon: XCircle,
+          textColor: 'text-elegant-neutral',
+          bgColor: 'bg-elegant-neutral-50',
+          borderColor: 'border-elegant-neutral',
+        }
       case 'error':
-        return { color: 'bg-red-500', label: 'Error', icon: AlertCircle }
+        return {
+          color: 'bg-elegant-error',
+          label: 'Error',
+          icon: AlertCircle,
+          textColor: 'text-elegant-error',
+          bgColor: 'bg-elegant-status-error-50',
+          borderColor: 'border-elegant-error',
+        }
       case 'warning':
-        return { color: 'bg-yellow-500', label: 'Warning', icon: AlertCircle }
+        return {
+          color: 'bg-elegant-warning',
+          label: 'Warning',
+          icon: AlertCircle,
+          textColor: 'text-elegant-warning',
+          bgColor: 'bg-elegant-status-warning-50',
+          borderColor: 'border-elegant-warning',
+        }
       case 'pending':
-        return { color: 'bg-blue-500', label: 'Pending', icon: Clock }
+        return {
+          color: 'bg-elegant-status-info-500',
+          label: 'Pending',
+          icon: Clock,
+          textColor: 'text-elegant-status-info-600',
+          bgColor: 'bg-elegant-status-info-50',
+          borderColor: 'border-elegant-status-info-500',
+        }
+      case 'idle':
+        return {
+          color: 'bg-elegant-highlight',
+          label: 'Idle',
+          icon: Clock,
+          textColor: 'text-elegant-highlight',
+          bgColor: 'bg-elegant-accent-yellow/10',
+          borderColor: 'border-elegant-highlight',
+        }
+      case 'offline':
+        return {
+          color: 'bg-elegant-neutral',
+          label: 'Offline',
+          icon: XCircle,
+          textColor: 'text-elegant-neutral',
+          bgColor: 'bg-elegant-neutral-50',
+          borderColor: 'border-elegant-neutral',
+        }
       default:
-        return { color: 'bg-gray-400', label: 'Unknown', icon: XCircle }
+        return {
+          color: 'bg-elegant-neutral',
+          label: 'Unknown',
+          icon: XCircle,
+          textColor: 'text-elegant-neutral',
+          bgColor: 'bg-elegant-neutral-50',
+          borderColor: 'border-elegant-neutral',
+        }
     }
   }
 
-  const { color, label, icon: Icon } = getStatusConfig(status)
+  const {
+    color,
+    label,
+    icon: Icon,
+    textColor,
+    bgColor,
+    borderColor,
+  } = getStatusConfig(status)
   const sizeClasses = {
     sm: 'h-2 w-2',
     md: 'h-3 w-3',
@@ -76,7 +156,7 @@ export function StatusIndicator({
     <div className={cn('flex items-center space-x-2', className)}>
       <div className={cn('rounded-full', color, sizeClasses[size])} />
       {showLabel && (
-        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <span className={cn('text-sm font-medium', textColor)}>{label}</span>
       )}
     </div>
   )

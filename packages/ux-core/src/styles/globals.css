@@ -48,6 +48,121 @@
     --teamhub-border: 280 15% 85%;
     --teamhub-input: 280 15% 90%;
     --teamhub-ring: 280 25% 44%;
+
+    /* Sophisticated Design System Colors - From Reference Projects */
+    /* Primary Brand Colors - Rich Purple Palette */
+    --elegant-primary-50: #f4f3f5;
+    --elegant-primary-100: #e9e6eb;
+    --elegant-primary-200: #d3cdd7;
+    --elegant-primary-300: #bdb4c3;
+    --elegant-primary-400: #a79baf;
+    --elegant-primary-500: #8a548c; /* Main brand color */
+    --elegant-primary-600: #7a4a7c;
+    --elegant-primary-700: #6a406c;
+    --elegant-primary-800: #5a365c;
+    --elegant-primary-900: #4a2c4c;
+    --elegant-primary-950: #3b2146; /* Deep purple */
+
+    /* Secondary - Warm Coral/Pink Accent */
+    --elegant-secondary-50: #fef2f4;
+    --elegant-secondary-100: #fde5e9;
+    --elegant-secondary-200: #fbcbd3;
+    --elegant-secondary-300: #f9b1bd;
+    --elegant-secondary-400: #f797a7;
+    --elegant-secondary-500: #f45584; /* Main accent */
+    --elegant-secondary-600: #e24d7a;
+    --elegant-secondary-700: #d04570;
+    --elegant-secondary-800: #be3d66;
+    --elegant-secondary-900: #ac355c;
+
+    /* Neutral Grays - Sophisticated and Modern */
+    --elegant-neutral-50: #f4f3f5;
+    --elegant-neutral-100: #ebeaec;
+    --elegant-neutral-200: #d7d5d9;
+    --elegant-neutral-300: #c3c0c6;
+    --elegant-neutral-400: #afabb3;
+    --elegant-neutral-500: #9b8fa7;
+    --elegant-neutral-600: #847f8a;
+    --elegant-neutral-700: #6d6f6d;
+    --elegant-neutral-800: #565f50;
+    --elegant-neutral-900: #3f4f33;
+    --elegant-neutral-950: #282f20;
+
+    /* Accent Colors */
+    --elegant-accent-lavender: #a091da;
+    --elegant-accent-yellow: #e6d24d;
+    --elegant-accent-olive: #847f42;
+    --elegant-accent-purple: #8a548c;
+
+    /* Status Colors */
+    --elegant-status-success-50: #f0fdf4;
+    --elegant-status-success-500: #22c55e;
+    --elegant-status-success-600: #16a34a;
+    --elegant-status-success-700: #15803d;
+    --elegant-status-warning-50: #fffbeb;
+    --elegant-status-warning-500: #f59e0b;
+    --elegant-status-warning-600: #d97706;
+    --elegant-status-warning-700: #b45309;
+    --elegant-status-error-50: #fef2f2;
+    --elegant-status-error-500: #ef4444;
+    --elegant-status-error-600: #dc2626;
+    --elegant-status-error-700: #b91c1c;
+    --elegant-status-info-50: #eff6ff;
+    --elegant-status-info-500: #3b82f6;
+    --elegant-status-info-600: #2563eb;
+    --elegant-status-info-700: #1d4ed8;
+
+    /* Background System */
+    --elegant-bg-primary: #f4f3f5;
+    --elegant-bg-secondary: #fafafa;
+    --elegant-bg-tertiary: #ffffff;
+    --elegant-bg-dark: #3b2146;
+    --elegant-bg-dark-secondary: #4a2c4c;
+    --elegant-bg-dark-tertiary: #5a365c;
+
+    /* Border System */
+    --elegant-border-light: rgba(215, 213, 217, 0.6);
+    --elegant-border-medium: rgba(195, 192, 198, 0.8);
+    --elegant-border-strong: rgba(175, 171, 179, 0.9);
+    --elegant-border-dark: rgba(90, 54, 92, 0.6);
+    --elegant-border-dark-medium: rgba(106, 64, 108, 0.8);
+    --elegant-border-dark-strong: rgba(122, 74, 124, 0.9);
+    --elegant-border-focus: rgba(138, 84, 140, 0.5);
+    --elegant-border-focus-strong: rgba(138, 84, 140, 0.8);
+    --elegant-border-hover: rgba(138, 84, 140, 0.3);
+
+    /* Text Colors */
+    --elegant-text-primary: #2d1b2e;
+    --elegant-text-secondary: #5a365c;
+    --elegant-text-tertiary: #847f8a;
+    --elegant-text-quaternary: #afabb3;
+    --elegant-text-inverse: #f4f3f5;
+    --elegant-text-inverse-secondary: #ebeaec;
+    --elegant-text-inverse-tertiary: #d7d5d9;
+    --elegant-text-brand: #8a548c;
+    --elegant-text-accent: #f45584;
+
+    /* Interactive States */
+    --elegant-interactive-primary-default: #8a548c;
+    --elegant-interactive-primary-hover: #7a4a7c;
+    --elegant-interactive-primary-active: #6a406c;
+    --elegant-interactive-primary-disabled: #c3c0c6;
+    --elegant-interactive-secondary-default: rgba(138, 84, 140, 0.1);
+    --elegant-interactive-secondary-hover: rgba(138, 84, 140, 0.15);
+    --elegant-interactive-secondary-active: rgba(138, 84, 140, 0.2);
+    --elegant-interactive-ghost-hover: rgba(244, 243, 245, 0.8);
+    --elegant-interactive-ghost-active: rgba(235, 234, 236, 0.9);
+    --elegant-interactive-ghost-dark-hover: rgba(59, 33, 70, 0.8);
+    --elegant-interactive-ghost-dark-active: rgba(74, 44, 76, 0.9);
+    --elegant-interactive-selected: rgba(138, 84, 140, 0.12);
+    --elegant-interactive-selected-border: rgba(138, 84, 140, 0.3);
+    --elegant-interactive-selected-strong: rgba(138, 84, 140, 0.18);
+
+    /* Glass/Blur effects */
+    --elegant-glass: rgba(255, 255, 255, 0.8);
+    --elegant-glass-strong: rgba(255, 255, 255, 0.95);
+    --elegant-glass-dark: rgba(59, 33, 70, 0.8);
+    --elegant-glass-dark-strong: rgba(59, 33, 70, 0.95);
   }
 
   .dark {
@@ -93,6 +208,21 @@
     --teamhub-border: 280 20% 30%;
     --teamhub-input: 280 20% 25%;
     --teamhub-ring: 280 30% 60%;
+
+    /* Elegant Dark Mode Colors */
+    --elegant-bg-primary: #3b2146;
+    --elegant-bg-secondary: #4a2c4c;
+    --elegant-bg-tertiary: #5a365c;
+    --elegant-bg-dark: #2d1b2e;
+    --elegant-bg-dark-secondary: #3b2146;
+    --elegant-bg-dark-tertiary: #4a2c4c;
+    --elegant-text-primary: #f4f3f5;
+    --elegant-text-secondary: #ebeaec;
+    --elegant-text-tertiary: #d7d5d9;
+    --elegant-text-quaternary: #c3c0c6;
+    --elegant-text-inverse: #2d1b2e;
+    --elegant-text-inverse-secondary: #3b2146;
+    --elegant-text-inverse-tertiary: #4a2c4c;
   }
 }
 
@@ -180,5 +310,160 @@
   }
   .border-teamhub-background {
     border-color: hsl(var(--teamhub-background));
+  }
+
+  /* Elegant Design System Utility Classes */
+  .bg-elegant-primary {
+    background-color: var(--elegant-primary-500);
+  }
+  .bg-elegant-primary-light {
+    background-color: var(--elegant-primary-50);
+  }
+  .bg-elegant-secondary {
+    background-color: var(--elegant-secondary-500);
+  }
+  .bg-elegant-accent {
+    background-color: var(--elegant-accent-lavender);
+  }
+  .bg-elegant-highlight {
+    background-color: var(--elegant-accent-yellow);
+  }
+  .bg-elegant-success {
+    background-color: var(--elegant-status-success-500);
+  }
+  .bg-elegant-warning {
+    background-color: var(--elegant-status-warning-500);
+  }
+  .bg-elegant-error {
+    background-color: var(--elegant-status-error-500);
+  }
+  .bg-elegant-neutral {
+    background-color: var(--elegant-neutral-500);
+  }
+
+  .text-elegant-primary {
+    color: var(--elegant-primary-500);
+  }
+  .text-elegant-secondary {
+    color: var(--elegant-secondary-500);
+  }
+  .text-elegant-accent {
+    color: var(--elegant-accent-lavender);
+  }
+  .text-elegant-highlight {
+    color: var(--elegant-accent-yellow);
+  }
+  .text-elegant-success {
+    color: var(--elegant-status-success-600);
+  }
+  .text-elegant-warning {
+    color: var(--elegant-status-warning-600);
+  }
+  .text-elegant-error {
+    color: var(--elegant-status-error-600);
+  }
+  .text-elegant-neutral {
+    color: var(--elegant-neutral-600);
+  }
+
+  .border-elegant-primary {
+    border-color: var(--elegant-primary-500);
+  }
+  .border-elegant-secondary {
+    border-color: var(--elegant-secondary-500);
+  }
+  .border-elegant-accent {
+    border-color: var(--elegant-accent-lavender);
+  }
+  .border-elegant-success {
+    border-color: var(--elegant-status-success-500);
+  }
+  .border-elegant-warning {
+    border-color: var(--elegant-status-warning-500);
+  }
+  .border-elegant-error {
+    border-color: var(--elegant-status-error-500);
+  }
+  .border-elegant-neutral {
+    border-color: var(--elegant-neutral-300);
+  }
+
+  /* Glass Effects */
+  .bg-elegant-glass {
+    background-color: var(--elegant-glass);
+    backdrop-filter: blur(12px);
+  }
+  .bg-elegant-glass-strong {
+    background-color: var(--elegant-glass-strong);
+    backdrop-filter: blur(16px);
+  }
+  .bg-elegant-glass-dark {
+    background-color: var(--elegant-glass-dark);
+    backdrop-filter: blur(12px);
+  }
+  .bg-elegant-glass-dark-strong {
+    background-color: var(--elegant-glass-dark-strong);
+    backdrop-filter: blur(16px);
+  }
+
+  /* Gradients */
+  .bg-elegant-gradient-primary {
+    background: linear-gradient(
+      135deg,
+      var(--elegant-primary-500) 0%,
+      var(--elegant-accent-lavender) 100%
+    );
+  }
+  .bg-elegant-gradient-dark {
+    background: linear-gradient(
+      135deg,
+      var(--elegant-primary-950) 0%,
+      var(--elegant-primary-800) 100%
+    );
+  }
+  .bg-elegant-gradient-accent {
+    background: linear-gradient(
+      135deg,
+      var(--elegant-secondary-500) 0%,
+      var(--elegant-accent-lavender) 100%
+    );
+  }
+  .bg-elegant-gradient-subtle {
+    background: linear-gradient(
+      135deg,
+      var(--elegant-primary-50) 0%,
+      var(--elegant-bg-secondary) 100%
+    );
+  }
+
+  /* Interactive States */
+  .hover\:bg-elegant-interactive-primary:hover {
+    background-color: var(--elegant-interactive-primary-hover);
+  }
+  .hover\:bg-elegant-interactive-secondary:hover {
+    background-color: var(--elegant-interactive-secondary-hover);
+  }
+  .hover\:bg-elegant-interactive-ghost:hover {
+    background-color: var(--elegant-interactive-ghost-hover);
+  }
+  .hover\:bg-elegant-interactive-ghost-dark:hover {
+    background-color: var(--elegant-interactive-ghost-dark-hover);
+  }
+
+  .focus\:border-elegant-focus:focus {
+    border-color: var(--elegant-border-focus);
+  }
+  .focus\:border-elegant-focus-strong:focus {
+    border-color: var(--elegant-border-focus-strong);
+  }
+
+  .bg-elegant-selected {
+    background-color: var(--elegant-interactive-selected);
+  }
+  .bg-elegant-selected-strong {
+    background-color: var(--elegant-interactive-selected-strong);
+  }
+  .border-elegant-selected {
+    border-color: var(--elegant-interactive-selected-border);
   }
 }
