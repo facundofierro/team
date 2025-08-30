@@ -1,0 +1,143 @@
+{
+  "navigation": {
+    "product": "Producto",
+    "howItWorks": "Cómo Funciona",
+    "aboutUs": "Sobre Nosotros",
+    "getStarted": "Comenzar"
+  },
+  "hero": {
+    "headline": "La IA Ya No Es Opcional Para El Éxito",
+    "subheadline": "El panorama competitivo ha cambiado. Las empresas inteligentes están aprovechando la IA para reducir costos en un 25%, entregar proyectos 40% más rápido y escalar sin límites. La pregunta no es si adoptar la IA, sino qué tan rápido puedes implementarla.",
+    "cta": {
+      "title": "La Ventana de Oportunidad Se Está Cerrando",
+      "description": "Los líderes de la industria ya han obtenido ventajas significativas a través de la implementación de IA. La brecha entre las empresas habilitadas por IA y las tradicionales se amplía cada mes, haciendo crucial la adopción temprana para mantener la posición competitiva.",
+      "button": "Obtén Análisis Gratuito de IA Ahora"
+    }
+  },
+  "problem": {
+    "title": "La Implementación de IA Ya No Es Opcional",
+    "competitiveReality": {
+      "title": "La Realidad Competitiva",
+      "description": "Los líderes de la industria están obteniendo ventajas operativas del 15-30% con la IA",
+      "features": [
+        "Los líderes de la industria están obteniendo ventajas operativas del 15-30% con la IA",
+        "Las demandas del mercado se están desplazando hacia organizaciones habilitadas por IA",
+        "El talento superior elige cada vez más empresas orientadas a la IA"
+      ]
+    },
+    "aiAdvantage": {
+      "title": "La Ventaja de la IA",
+      "description": "Transforma tu negocio con automatización inteligente",
+      "features": [
+        "40% de reducción en el tiempo de entrega de proyectos",
+        "25% de ahorro en costos a través de automatización inteligente",
+        "Información en tiempo real para una mejor toma de decisiones"
+      ]
+    }
+  },
+  "solution": {
+    "title": "La Garantía de TeamHub",
+    "description": "No solo implementamos IA, transformamos toda tu operación en un sistema inteligente y auto-optimizador que entrega ROI medible desde el primer día.",
+    "guarantees": [
+      {
+        "title": "Implementación en 90 Días",
+        "description": "De cero a agentes de IA completamente operativos"
+      },
+      {
+        "title": "ROI Garantizado",
+        "description": "Mínimo 3x retorno sobre la inversión o devolución del dinero"
+      },
+      {
+        "title": "Inicio Sin Riesgo",
+        "description": "Análisis gratuito y prueba de concepto"
+      }
+    ]
+  },
+  "features": {
+    "title": "Capacidades de la Plataforma",
+    "items": [
+      {
+        "title": "Gestión de Agentes de IA",
+        "description": "Crea, configura y orquesta agentes de IA a escala con herramientas y flujos de trabajo intuitivos."
+      },
+      {
+        "title": "Arquitectura Multi-Tenant",
+        "description": "Entornos seguros y aislados para cada organización con seguridad de nivel empresarial."
+      },
+      {
+        "title": "Colaboración en Tiempo Real",
+        "description": "Los equipos pueden trabajar juntos sin problemas con espacios de trabajo compartidos y actualizaciones en tiempo real."
+      },
+      {
+        "title": "Analíticas Avanzadas",
+        "description": "Información integral sobre el rendimiento de los agentes, patrones de uso y métricas de ROI."
+      },
+      {
+        "title": "Centro de Integración",
+        "description": "Conecta con herramientas y sistemas existentes a través de nuestro extenso ecosistema de API."
+      },
+      {
+        "title": "Seguridad Empresarial",
+        "description": "Cumplimiento SOC 2, control de acceso basado en roles y registro de auditoría para uso empresarial."
+      }
+    ]
+  },
+  "socialProof": {
+    "title": "Resultados Comprobados en Todas las Industrias",
+    "stats": [
+      { "value": "40%", "label": "Entrega de Proyectos Más Rápida" },
+      { "value": "25%", "label": "Reducción de Costos" },
+      { "value": "90%", "label": "Automatización de Procesos" },
+      { "value": "3x", "label": "ROI en el Primer Año" }
+    ],
+    "testimonial": {
+      "quote": "TeamHub transformó nuestras operaciones de IA de reactivas a predictivas. Ahora gestionamos más de 50 agentes de IA con entrega de proyectos 40% más rápida y 25% menos costos. La plataforma maneja todo desde el despliegue de agentes hasta el monitoreo del rendimiento.",
+      "author": "Sarah Chen, CTO",
+      "company": "Industrias TechCorp"
+    }
+  },
+  "howItWorks": {
+    "title": "Cómo Funciona TeamHub",
+    "description": "Comienza con agentes de IA en tres pasos simples",
+    "steps": [
+      {
+        "title": "Conectar y Configurar",
+        "description": "Conecta tus fuentes de datos y configura tus agentes de IA con nuestra interfaz intuitiva."
+      },
+      {
+        "title": "Desplegar y Monitorear",
+        "description": "Despliega agentes en toda tu organización y monitorea su rendimiento en tiempo real."
+      },
+      {
+        "title": "Escalar y Optimizar",
+        "description": "Escala tus operaciones de IA y optimiza continuamente el rendimiento basado en información."
+      }
+    ]
+  },
+  "contact": {
+    "title": "¿Listo para Transformar tu Negocio?",
+    "description": "Únete a la revolución de la IA y comienza a ver resultados en 90 días o menos",
+    "freeAnalysis": {
+      "title": "Obtén Análisis Gratuito",
+      "description": "Nuestros expertos en IA analizarán tu negocio y proporcionarán un plan de implementación personalizado.",
+      "button": "Comenzar Análisis Gratuito"
+    },
+    "scheduleDemo": {
+      "title": "Programar Demo",
+      "description": "Ve TeamHub en acción con una demo personalizada de las capacidades de nuestra plataforma.",
+      "button": "Reservar Demo"
+    }
+  },
+  "aiWidget": {
+    "title": "Consultor de Negocios con IA",
+    "subtitle": "En línea • Listo para ayudar",
+    "message": "¡Hola! Soy tu consultor de transformación de negocios con IA. Puedo ayudarte a entender cómo TeamHub puede revolucionar tus operaciones y entregar ROI garantizado. ¿Qué te gustaría explorar primero?",
+    "quickReplies": [
+      "Analizar Mi Negocio",
+      "Mostrarme Ejemplos",
+      "Calcular Mis Ahorros",
+      "Cómo Funciona"
+    ],
+    "footer": "Impulsado por TeamHub AI"
+  }
+}

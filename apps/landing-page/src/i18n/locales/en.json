@@ -1,0 +1,143 @@
+{
+  "navigation": {
+    "product": "Product",
+    "howItWorks": "How It Works",
+    "aboutUs": "About Us",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "headline": "AI Is No Longer Optional For Success",
+    "subheadline": "The competitive landscape has shifted. Smart businesses are leveraging AI to cut costs by 25%, deliver projects 40% faster, and scale without limits. The question isn't whether to adopt AI —it's how quickly you can implement it.",
+    "cta": {
+      "title": "The Opportunity Window Is Narrowing",
+      "description": "Industry leaders have already gained significant advantages through AI implementation. The gap between AI-enabled and traditional businesses grows wider each month, making early adoption crucial for maintaining competitive position.",
+      "button": "Get Free AI Analysis Now"
+    }
+  },
+  "problem": {
+    "title": "AI Implementation Is No Longer Optional",
+    "competitiveReality": {
+      "title": "The Competitive Reality",
+      "description": "Industry leaders are gaining 15-30% operational advantages with AI",
+      "features": [
+        "Industry leaders are gaining 15-30% operational advantages with AI",
+        "Market demands are shifting toward AI-enabled organizations",
+        "Top talent increasingly chooses AI-forward companies"
+      ]
+    },
+    "aiAdvantage": {
+      "title": "The AI Advantage",
+      "description": "Transform your business with intelligent automation",
+      "features": [
+        "40% reduction in project delivery time",
+        "25% cost savings through intelligent automation",
+        "Real-time insights for better decision making"
+      ]
+    }
+  },
+  "solution": {
+    "title": "The TeamHub Guarantee",
+    "description": "We don't just implement AI - we transform your entire operation into an intelligent, self-optimizing system that delivers measurable ROI from day one.",
+    "guarantees": [
+      {
+        "title": "90-Day Implementation",
+        "description": "From zero to fully operational AI agents"
+      },
+      {
+        "title": "Guaranteed ROI",
+        "description": "Minimum 3x return on investment or money back"
+      },
+      {
+        "title": "Zero Risk Start",
+        "description": "Free analysis and proof of concept"
+      }
+    ]
+  },
+  "features": {
+    "title": "Platform Capabilities",
+    "items": [
+      {
+        "title": "AI Agent Management",
+        "description": "Create, configure, and orchestrate AI agents at scale with intuitive tools and workflows."
+      },
+      {
+        "title": "Multi-Tenant Architecture",
+        "description": "Secure, isolated environments for each organization with enterprise-grade security."
+      },
+      {
+        "title": "Real-time Collaboration",
+        "description": "Teams can work together seamlessly with shared workspaces and real-time updates."
+      },
+      {
+        "title": "Advanced Analytics",
+        "description": "Comprehensive insights into agent performance, usage patterns, and ROI metrics."
+      },
+      {
+        "title": "Integration Hub",
+        "description": "Connect with existing tools and systems through our extensive API ecosystem."
+      },
+      {
+        "title": "Enterprise Security",
+        "description": "SOC 2 compliance, role-based access control, and audit logging for enterprise use."
+      }
+    ]
+  },
+  "socialProof": {
+    "title": "Proven Results Across Industries",
+    "stats": [
+      { "value": "40%", "label": "Faster Project Delivery" },
+      { "value": "25%", "label": "Cost Reduction" },
+      { "value": "90%", "label": "Process Automation" },
+      { "value": "3x", "label": "ROI in First Year" }
+    ],
+    "testimonial": {
+      "quote": "TeamHub transformed our AI operations from reactive to predictive. We're now managing 50+ AI agents with 40% faster project delivery and 25% lower costs. The platform handles everything from agent deployment to performance monitoring.",
+      "author": "Sarah Chen, CTO",
+      "company": "TechCorp Industries"
+    }
+  },
+  "howItWorks": {
+    "title": "How TeamHub Works",
+    "description": "Get started with AI agents in three simple steps",
+    "steps": [
+      {
+        "title": "Connect & Configure",
+        "description": "Connect your data sources and configure your AI agents with our intuitive interface."
+      },
+      {
+        "title": "Deploy & Monitor",
+        "description": "Deploy agents across your organization and monitor their performance in real-time."
+      },
+      {
+        "title": "Scale & Optimize",
+        "description": "Scale your AI operations and continuously optimize performance based on insights."
+      }
+    ]
+  },
+  "contact": {
+    "title": "Ready to Transform Your Business?",
+    "description": "Join the AI revolution and start seeing results in 90 days or less",
+    "freeAnalysis": {
+      "title": "Get Free Analysis",
+      "description": "Our AI experts will analyze your business and provide a customized implementation plan.",
+      "button": "Start Free Analysis"
+    },
+    "scheduleDemo": {
+      "title": "Schedule Demo",
+      "description": "See TeamHub in action with a personalized demo of our platform capabilities.",
+      "button": "Book Demo"
+    }
+  },
+  "aiWidget": {
+    "title": "AI Business Consultant",
+    "subtitle": "Online • Ready to help",
+    "message": "Hi! I'm your AI business transformation consultant. I can help you understand how TeamHub can revolutionize your operations and deliver guaranteed ROI. What would you like to explore first?",
+    "quickReplies": [
+      "Analyze My Business",
+      "Show Me Examples",
+      "Calculate My Savings",
+      "How It Works"
+    ],
+    "footer": "Powered by TeamHub AI"
+  }
+}
