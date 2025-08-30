@@ -532,15 +532,28 @@ wait_for_services() {
         done
     fi
 
-    # At the end, check if any critical services failed
-    if [ $CRITICAL_FAILURES -gt 0 ]; then
-        echo -e "${RED}🚨 DEPLOYMENT FAILED: $CRITICAL_FAILURES critical service(s) failed to start${NC}"
-        echo -e "${RED}Failed services: ${SERVICE_FAILURES[*]}${NC}"
-        echo -e "${RED}Pipeline will not continue to stabilization and health checks${NC}"
-        exit 1
-    fi
+        # Show complete service status before failing
+    echo -e "${BLUE}📊 Complete Service Status Summary:${NC}"
+    echo -e "${BLUE}================================${NC}"
 
-    echo -e "${GREEN}✅ All critical services started successfully${NC}"
+    # Check current status of all services
+    echo -e "${BLUE}🔍 Current Service Status:${NC}"
+    docker service ls --filter name=teamhub_ --format "table {{.Name}}\t{{.Replicas}}\t{{.Image}}\t{{.Ports}}"
+
+    echo ""
+    echo -e "${BLUE}📋 Service Check Results:${NC}"
+    if [ $CRITICAL_FAILURES -gt 0 ]; then
+        echo -e "${RED}❌ Critical Failures: $CRITICAL_FAILURES${NC}"
+        echo -e "${RED}Failed services: ${SERVICE_FAILURES[*]}${NC}"
+        echo ""
+        echo -e "${RED}🚨 DEPLOYMENT FAILED: Critical service(s) failed to start${NC}"
+        echo -e "${RED}Pipeline will not continue to stabilization and health checks${NC}"
+        echo -e "${RED}Please fix the failed services before retrying deployment${NC}"
+        exit 1
+    else
+        echo -e "${GREEN}✅ All critical services started successfully${NC}"
+        echo -e "${GREEN}Deployment can proceed to next steps${NC}"
+    fi
 }
 
 # Test application endpoints
