@@ -36,9 +36,16 @@
         </default>
     </quotas>
 
-    <!-- Cluster configuration for PostHog (simplified for single-node setup) -->
+    <!-- Cluster configuration for PostHog -->
     <remote_servers>
-        <!-- Empty for single-node setup -->
+        <posthog>
+            <shard>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </posthog>
     </remote_servers>
 
     <!-- Macros for distributed tables (simplified) -->
