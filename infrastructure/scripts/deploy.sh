@@ -542,7 +542,6 @@ wait_for_services() {
 
     echo -e "${GREEN}✅ All critical services started successfully${NC}"
 }
-}
 
 # Test application endpoints
 test_application() {
