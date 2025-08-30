@@ -12,27 +12,19 @@
         </posthog>
     </remote_servers>
 
+    <!-- Required for PostHog -->
+    <profiles>
+        <default>
+            <max_memory_usage>10000000000</max_memory_usage>
+            <use_uncompressed_cache>0</use_uncompressed_cache>
+            <load_balancing>random</load_balancing>
+        </default>
+    </profiles>
+
     <!-- Macros for distributed tables -->
     <macros>
         <shard>01</shard>
         <replica>01</replica>
     </macros>
 
-    <!-- Storage configuration -->
-    <storage_configuration>
-        <disks>
-            <default>
-                <path>/var/lib/clickhouse/</path>
-            </default>
-        </disks>
-        <policies>
-            <default>
-                <volumes>
-                    <main>
-                        <disk>default</disk>
-                    </main>
-                </volumes>
-            </default>
-        </policies>
-    </storage_configuration>
 </clickhouse>
