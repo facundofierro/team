@@ -11,7 +11,10 @@ export * from './components/ai-sdk'
 export * from './components/aceternity'
 
 // TeamHub custom components
-export * from './core-components'
+export * from './components-core'
+
+// TeamHub site components
+export * from './components-site'
 
 // Re-export commonly used components for convenience
 export { Button } from './components/shadcn/button'

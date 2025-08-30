@@ -10,13 +10,13 @@ import {
 } from '../src/components/shadcn/card'
 
 // TeamHub Core components (with design system styling)
-import { TeamHubButton } from '../src/core-components/teamhub-button'
+import { TeamHubButton } from '../src/components-core/teamhub-button'
 import {
   TeamHubCard,
   TeamHubCardContent,
   TeamHubCardHeader,
   TeamHubCardTitle,
-} from '../src/core-components/teamhub-card'
+} from '../src/components-core/teamhub-card'
 
 export function ComponentUsageExamples() {
   return (
