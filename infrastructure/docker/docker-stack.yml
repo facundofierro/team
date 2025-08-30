@@ -17,7 +17,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - postgres
 
   # Redis cache for teamhub
   redis:
@@ -30,7 +32,9 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - redis
 
   # Add nginx reverse proxy service
   nginx:
@@ -43,7 +47,9 @@ services:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - nginx
 
   # Remotion rendering service
   remotion:
@@ -61,7 +67,9 @@ services:
       - NODE_ENV=production
       # Add any environment variables your remotion service needs
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - remotion
 
   teamhub:
     image: localhost:5000/teamhub:latest
@@ -81,7 +89,9 @@ services:
       - REDIS_URL=redis://redis:6379
       # Add other env vars here, or use secrets/configs
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - teamhub
     depends_on:
       - postgres
       - redis
@@ -104,7 +114,9 @@ services:
     volumes:
       - nextcloud_data:/var/www/html
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - nextcloud
     depends_on:
       - nextcloud_db
 
@@ -119,7 +131,9 @@ services:
     volumes:
       - nextcloud_db_data:/var/lib/postgresql/data
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - nextcloud_db
 
   # DISABLED: Browser Service
   # browser-service:
@@ -154,15 +168,17 @@ services:
       - CLICKHOUSE_PASSWORD=${POSTHOG_CLICKHOUSE_PASSWORD}
       - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
     ports:
-      - '8123:8123'    # HTTP interface
-      - '9000:9000'    # Native protocol
-      - '9440:9440'    # Secure native protocol
+      - '8123:8123' # HTTP interface
+      - '9000:9000' # Native protocol
+      - '9440:9440' # Secure native protocol
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - clickhouse_logs:/var/log/clickhouse-server
       - ./infrastructure/configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/posthog-config.xml:ro
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - clickhouse
     healthcheck:
       test: ['CMD', 'clickhouse-client', '--query', 'SELECT 1']
       interval: 30s
@@ -212,7 +228,9 @@ services:
     volumes:
       - posthog_data:/app/media
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - posthog
     depends_on:
       - posthog_db
       - posthog_redis
@@ -239,7 +257,9 @@ services:
     volumes:
       - posthog_db_data:/var/lib/postgresql/data
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - posthog_db
 
   # PostHog Redis Cache
   posthog_redis:
@@ -252,7 +272,9 @@ services:
     volumes:
       - posthog_redis_data:/data
     networks:
-      - teamhub_network
+      teamhub_network:
+        aliases:
+          - posthog_redis
 
 configs:
   nginx_config:

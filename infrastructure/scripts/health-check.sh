@@ -28,6 +28,16 @@ check_service() {
             return 0
         else
             echo -e "${YELLOW}⚠️  $display_name exists but not ready ($replicas)${NC}"
+
+            # Provide more helpful information about why the service might not be ready
+            echo -e "${BLUE}  🔍 Checking service details...${NC}"
+            local service_status=$(docker service ls --filter name="$service_name" --format "{{.Replicas}} {{.Image}}")
+            echo -e "${BLUE}    Status: $service_status${NC}"
+
+            # Check if there are any recent service logs
+            echo -e "${BLUE}    Recent logs:${NC}"
+            docker service logs "$service_name" --tail 3 2>/dev/null | head -3 || echo -e "${YELLOW}      No logs available yet${NC}"
+
             return 1
         fi
     else
@@ -90,11 +100,36 @@ check_endpoint() {
 
 # Infrastructure services
 echo "=== Infrastructure Services ==="
-check_service "teamhub_postgres" "PostgreSQL Database"
-POSTGRES_STATUS=$?
 
-check_service "teamhub_redis" "Redis Cache"
-REDIS_STATUS=$?
+# Check PostgreSQL with retries
+echo -e "${BLUE}🔍 Checking PostgreSQL Database...${NC}"
+POSTGRES_STATUS=1
+for attempt in {1..3}; do
+    if check_service "teamhub_postgres" "PostgreSQL Database"; then
+        POSTGRES_STATUS=0
+        break
+    else
+        if [ $attempt -lt 3 ]; then
+            echo -e "${BLUE}  ⏳ Retrying PostgreSQL check in 10 seconds... (attempt $attempt/3)${NC}"
+            sleep 10
+        fi
+    fi
+done
+
+# Check Redis with retries
+echo -e "${BLUE}🔍 Checking Redis Cache...${NC}"
+REDIS_STATUS=1
+for attempt in {1..3}; do
+    if check_service "teamhub_redis" "Redis Cache"; then
+        REDIS_STATUS=0
+        break
+    else
+        if [ $attempt -lt 3 ]; then
+            echo -e "${BLUE}  ⏳ Retrying Redis check in 10 seconds... (attempt $attempt/3)${NC}"
+            sleep 10
+        fi
+    fi
+done
 
 # Application services
 echo ""

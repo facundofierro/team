@@ -273,6 +273,49 @@ jobs:
             docker logs pinggy-tunnel 2>/dev/null || echo "No logs available"
           fi
 
+      - name: Wait for services to stabilize
+        run: |
+          echo "⏳ Waiting for services to stabilize before health check..."
+          echo "This gives Docker Swarm time to fully start all services"
+
+          # Wait for infrastructure services first
+          echo "⏳ Waiting for PostgreSQL and Redis..."
+          for i in {1..30}; do
+            if docker service ls --filter name=teamhub_postgres --format "{{.Replicas}}" | grep -q "1/1" && \
+               docker service ls --filter name=teamhub_redis --format "{{.Replicas}}" | grep -q "1/1"; then
+              echo "✅ Infrastructure services are ready"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "⚠️  Infrastructure services taking longer than expected, proceeding anyway..."
+            else
+              echo "⏳ Waiting for infrastructure services... (attempt $i/30)"
+              sleep 15
+            fi
+          done
+
+          # Wait for application services
+          echo "⏳ Waiting for application services..."
+          for i in {1..20}; do
+            if docker service ls --filter name=teamhub_teamhub --format "{{.Replicas}}" | grep -q "1/1" && \
+               docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
+              echo "✅ Core application services are ready"
+              break
+            fi
+            if [ $i -eq 20 ]; then
+              echo "⚠️  Application services taking longer than expected, proceeding anyway..."
+            else
+              echo "⏳ Waiting for application services... (attempt $i/20)"
+              sleep 10
+            fi
+          done
+
+          # Additional stabilization time
+          echo "⏳ Additional stabilization time..."
+          sleep 30
+
+          echo "✅ Services should be stable now, proceeding with health check..."
+
       - name: Run health check
         run: |
           chmod +x infrastructure/scripts/health-check.sh
