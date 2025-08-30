@@ -320,6 +320,8 @@ check_individual_service_status() {
 
     if [ "$FORCE_REDEPLOY_POSTHOG" = "true" ] || [ "$POSTHOG_OK" = false ]; then
         NEEDS_DEPLOYMENT=true
+        # When PostHog is redeployed, also redeploy ClickHouse
+        export FORCE_REDEPLOY_CLICKHOUSE="true"
     fi
 
     if [ "$FORCE_REDEPLOY_CLICKHOUSE" = "true" ] || [ "$CLICKHOUSE_OK" = false ]; then
