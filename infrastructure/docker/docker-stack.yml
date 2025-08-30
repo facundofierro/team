@@ -50,6 +50,11 @@ services:
       teamhub_network:
         aliases:
           - nginx
+    depends_on:
+      - teamhub
+      - posthog
+      - nextcloud
+      - remotion
 
   # Remotion rendering service
   remotion:
