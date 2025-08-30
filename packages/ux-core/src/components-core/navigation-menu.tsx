@@ -19,7 +19,7 @@ export interface NavigationMenuItem {
   children?: NavigationMenuItem[]
 }
 
-export interface NavigationMenuProps {
+export interface SidebarNavigationMenuProps {
   className?: string
   items: NavigationMenuItem[]
   orientation?: 'horizontal' | 'vertical'
@@ -28,14 +28,14 @@ export interface NavigationMenuProps {
   onItemClick?: (item: NavigationMenuItem) => void
 }
 
-export function NavigationMenu({
+export function SidebarNavigationMenu({
   className,
   items,
   orientation = 'horizontal',
   variant = 'default',
   activeItem,
   onItemClick,
-}: NavigationMenuProps) {
+}: SidebarNavigationMenuProps) {
   const [openItems, setOpenItems] = React.useState<Set<string>>(new Set())
 
   const toggleItem = (itemId: string) => {

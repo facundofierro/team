@@ -36,6 +36,7 @@ export interface UserProfileProps {
     onGlobeClick?: () => void
     onNotificationsClick?: () => void
     onHelpClick?: () => void
+    region?: string
   }
   variant?: 'default' | 'compact' | 'detailed'
   showActions?: boolean

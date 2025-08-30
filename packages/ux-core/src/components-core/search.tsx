@@ -42,6 +42,7 @@ export interface SearchProps {
   variant?: 'default' | 'minimal' | 'expanded'
   size?: 'sm' | 'md' | 'lg'
   disabled?: boolean
+  autoFocus?: boolean
 }
 
 export function Search({
@@ -57,6 +58,7 @@ export function Search({
   variant = 'default',
   size = 'md',
   disabled = false,
+  autoFocus = false,
 }: SearchProps) {
   const [isFocused, setIsFocused] = React.useState(false)
   const [showSuggestions, setShowSuggestions] = React.useState(false)
@@ -141,6 +143,7 @@ export function Search({
             getSizeClasses(size)
           )}
           disabled={disabled}
+          autoFocus={autoFocus}
         />
         {value && (
           <Button
@@ -185,6 +188,7 @@ export function Search({
             getSizeClasses(size)
           )}
           disabled={disabled}
+          autoFocus={autoFocus}
         />
         {value && (
           <Button
