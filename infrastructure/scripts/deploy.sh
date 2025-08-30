@@ -51,10 +51,10 @@ show_deployment_options() {
 check_disk_space() {
     local DISK_USAGE=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
     local DISK_AVAILABLE=$(df / | awk 'NR==2 {print $4}' | sed 's/%//')
-    
+
     echo -e "${BLUE}💾 Checking disk space...${NC}"
     echo -e "  📊 Root partition: ${DISK_USAGE}% used (${DISK_AVAILABLE}% available)"
-    
+
     if [ $DISK_USAGE -gt 85 ]; then
         echo -e "${YELLOW}⚠️  WARNING: Disk usage is ${DISK_USAGE}% - cleanup recommended!${NC}"
         echo -e "${YELLOW}💡 Consider running: docker system prune -a -f${NC}"
@@ -66,6 +66,7 @@ check_disk_space() {
 }
 
 # Check data volumes and warn about persistence
+check_data_volumes() {
     echo -e "${BLUE}🛡️  Checking data volume safety...${NC}"
 
     # Check PostgreSQL data
@@ -545,38 +546,38 @@ test_application() {
 # Enhanced cleanup function with disk space monitoring
 cleanup() {
     echo -e "${BLUE}🧹 Enhanced cleanup and disk space management...${NC}"
-    
+
     # Check disk space before cleanup
     local DISK_USAGE=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
     echo -e "${BLUE}💾 Disk usage before cleanup: ${DISK_USAGE}%${NC}"
-    
+
     # Clean up old containers
     echo -e "${BLUE}🗑️  Cleaning up old containers...${NC}"
     docker container prune -f
-    
+
     # Clean up old images (only unused ones - safe!)
     echo -e "${BLUE}🖼️  Cleaning up unused Docker images...${NC}"
     docker image prune -a -f
-    
+
     # Clean up unused networks
     echo -e "${BLUE}🌐 Cleaning up unused networks...${NC}"
     docker network prune -f
-    
+
     # Clean up build cache
     echo -e "${BLUE}🏗️  Cleaning up build cache...${NC}"
     docker builder prune -f
-    
+
     # Check disk space after cleanup
     local DISK_USAGE_AFTER=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
     local SPACE_FREED=$((DISK_USAGE - DISK_USAGE_AFTER))
-    
+
     echo -e "${GREEN}✅ Cleanup completed!${NC}"
     echo -e "${BLUE}💾 Disk usage after cleanup: ${DISK_USAGE_AFTER}%${NC}"
-    
+
     if [ $SPACE_FREED -gt 0 ]; then
         echo -e "${GREEN}🎉 Freed up approximately ${SPACE_FREED}% disk space!${NC}"
     fi
-    
+
     # Warning if still high usage
     if [ $DISK_USAGE_AFTER -gt 85 ]; then
         echo -e "${YELLOW}⚠️  Warning: Disk usage still high (${DISK_USAGE_AFTER}%)${NC}"
@@ -672,7 +673,7 @@ main() {
     show_deployment_options
 
     # Check data safety
-    check_data_safety
+    check_data_volumes
 
     # Stage 1: Setup infrastructure first (if needed)
     echo -e "${BLUE}=== STAGE 1: Infrastructure Setup ===${NC}"
