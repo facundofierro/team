@@ -249,14 +249,13 @@ services:
       - CLICKHOUSE_VERIFY=false
       - CLICKHOUSE_CLUSTER_ENABLED=false
       - CLICKHOUSE_REPLICATION=false
-      - SKIP_ASYNC_MIGRATIONS_SETUP=0
-      - RUN_MIGRATIONS=1
       - CLICKHOUSE_HTTP_URL=http://clickhouse:8123
       - REDIS_URL=redis://posthog_redis:6379
       - SECRET_KEY=${POSTHOG_SECRET_KEY}
       - SITE_URL=${POSTHOG_SITE_URL}
       - DISABLE_SECURE_SSL_REDIRECT=true
       - NODE_ENV=production
+      - DEBUG=1
     ports:
       - '8000:8000'
     volumes:
