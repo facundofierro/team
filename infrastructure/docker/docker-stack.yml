@@ -233,6 +233,11 @@ services:
       rollback_config:
         parallelism: 1
         delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
     environment:
       - POSTGRES_HOST=posthog_db
       - POSTGRES_DB=posthog
