@@ -1,8 +1,9 @@
 import OpenAI from 'openai'
 import { db } from '../db'
-import * as schema from '../db/schema'
+import { models } from '../db/schema'
+import { eq, inArray, sql } from 'drizzle-orm'
+import { log } from '@repo/logger'
 import { Feature, Subfeature } from '../modelRegistry'
-import { sql, eq, and, inArray } from 'drizzle-orm'
 
 // Helper function to generate display names based on the user's example
 const getDisplayName = (modelId: string): string => {
@@ -146,9 +147,9 @@ export const discover = async () => {
 
   // Step 2: Get all model IDs from the database for this provider
   const dbModels = await db
-    .select({ id: schema.models.id })
-    .from(schema.models)
-    .where(eq(schema.models.provider, providerId))
+    .select({ id: models.id })
+    .from(models)
+    .where(eq(models.provider, providerId))
   const dbModelIds = dbModels.map((model) => model.id)
 
   // Step 3: Determine which models to delete
@@ -161,17 +162,15 @@ export const discover = async () => {
     console.log('--- Deleting obsolete OpenAI Models ---')
     console.log(JSON.stringify(modelsToDelete, null, 2))
     console.log('------------------------------------')
-    await db
-      .delete(schema.models)
-      .where(inArray(schema.models.id, modelsToDelete))
+    await db.delete(models).where(inArray(models.id, modelsToDelete))
   }
 
   if (modelsToUpsert.length > 0) {
     await db
-      .insert(schema.models)
+      .insert(models)
       .values(modelsToUpsert)
       .onConflictDoUpdate({
-        target: schema.models.id,
+        target: models.id,
         set: {
           displayName: sql`excluded.display_name`,
           provider: sql`excluded.provider`,

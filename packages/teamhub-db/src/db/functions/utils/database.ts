@@ -4,6 +4,7 @@ import * as memorySchema from '../../connections/memory/schema'
 import * as embeddingsSchema from '../../connections/embeddings/schema'
 import * as mainSchema from '../../schema'
 import { sql } from 'drizzle-orm'
+import { log } from '@repo/logger'
 
 // Debug logger for optional verbose setup logs
 const DB_SETUP_DEBUG =

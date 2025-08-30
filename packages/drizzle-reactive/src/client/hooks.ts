@@ -6,6 +6,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { ReactiveClientManager, createReactiveClientManager } from './manager'
 import type { ReactiveConfig, InvalidationEvent } from '../core/types'
+import { log } from '@repo/logger'
 
 // Global client manager instance
 let globalClientManager: ReactiveClientManager | null = null
@@ -355,7 +356,9 @@ export function useReactiveQuery<TData = unknown, TVariables = unknown>(
   const [data, setData] = useState<TData | undefined>(undefined)
   const [error, setError] = useState<Error | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [lastVariables, setLastVariables] = useState<TVariables | undefined>(undefined)
+  const [lastVariables, setLastVariables] = useState<TVariables | undefined>(
+    undefined
+  )
   const clientManager = getClientManager()
 
   const executeQuery = useCallback(
@@ -367,16 +370,19 @@ export function useReactiveQuery<TData = unknown, TVariables = unknown>(
         console.log(`[useReactiveQuery] Executing ${queryKey}`, variables)
 
         // Compose cache key with variables
-        const inputKey = typeof variables === 'undefined' ? '' : `::${JSON.stringify(variables)}`
+        const inputKey =
+          typeof variables === 'undefined'
+            ? ''
+            : `::${JSON.stringify(variables)}`
         const effectiveKey = `${queryKey}${inputKey}`
 
         // Execute the query through the client manager
         const result = await clientManager.revalidateQuery(effectiveKey)
-        
+
         setData(result)
         setLastVariables(variables)
         console.log(`✅ [useReactiveQuery] ${queryKey} completed successfully`)
-        
+
         return result
       } catch (err) {
         const error = err as Error
@@ -394,7 +400,9 @@ export function useReactiveQuery<TData = unknown, TVariables = unknown>(
     async (variables?: TVariables): Promise<TData> => {
       const varsToUse = variables || lastVariables
       if (!varsToUse) {
-        throw new Error('No variables provided for refetch and no previous variables stored')
+        throw new Error(
+          'No variables provided for refetch and no previous variables stored'
+        )
       }
       return executeQuery(varsToUse)
     },

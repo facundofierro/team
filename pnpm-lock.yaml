@@ -29,6 +29,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^1.3.22
         version: 1.3.22(zod@4.1.5)
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@team/ai-services':
         specifier: workspace:*
         version: link:../../packages/ai-services
@@ -69,6 +72,9 @@ importers:
 
   apps/browser-service:
     dependencies:
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       auto-playwright:
         specifier: ^1.16.1
         version: 1.16.1(@playwright/test@1.52.0)(encoding@0.1.13)(ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.3))
@@ -136,9 +142,6 @@ importers:
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
-      '@teamhub/ux-core':
-        specifier: workspace:*
-        version: link:../../packages/ux-core
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -427,6 +430,9 @@ importers:
       '@fal-ai/client':
         specifier: ^1.5.0
         version: 1.5.0
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
       ai:
         specifier: ^4.3.16
         version: 4.3.16(react@19.1.0)(zod@4.1.5)
@@ -464,6 +470,9 @@ importers:
 
   packages/drizzle-reactive:
     dependencies:
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.85.0(react@18.3.1)
@@ -580,6 +589,9 @@ importers:
       '@drizzle/reactive':
         specifier: workspace:*
         version: link:../drizzle-reactive
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@trpc/server':
         specifier: ^10.45.2
         version: 10.45.2

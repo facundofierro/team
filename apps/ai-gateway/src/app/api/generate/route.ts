@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generate } from '@team/ai-services'
+import { log } from '@repo/logger'
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,6 +8,17 @@ export async function POST(req: NextRequest) {
     const token = authHeader?.split(' ')[1]
 
     if (token !== process.env.AI_GATEWAY_API_KEY) {
+      log.aiGateway.request.warn(
+        'Unauthorized API request attempt',
+        undefined,
+        {
+          ip:
+            req.headers.get('x-forwarded-for') ||
+            req.headers.get('x-real-ip') ||
+            'unknown',
+          userAgent: req.headers.get('user-agent') || 'unknown',
+        }
+      )
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -21,6 +33,16 @@ export async function POST(req: NextRequest) {
       gateway,
     } = body
 
+    log.aiGateway.request.info('AI generation request received', undefined, {
+      provider,
+      model,
+      feature,
+      subfeature,
+      featureOptions: featureOptions ? 'present' : 'none',
+      hasInput: !!input,
+      gateway,
+    })
+
     // Call the generate function
     const result = await generate({
       provider,
@@ -31,6 +53,18 @@ export async function POST(req: NextRequest) {
       featureOptions,
       input,
     })
+
+    log.aiGateway.provider.info(
+      'AI generation completed successfully',
+      undefined,
+      {
+        provider,
+        model,
+        feature,
+        subfeature,
+        resultType: result instanceof ReadableStream ? 'stream' : typeof result,
+      }
+    )
 
     // Handle streaming (assume result is a ReadableStream if streaming)
     if (featureOptions?.streaming && result instanceof ReadableStream) {
