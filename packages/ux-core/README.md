@@ -31,11 +31,27 @@ For detailed information about available components and libraries, see:
 ```
 ux-core/
 ├── src/                    # Source code and component implementations
-│   ├── components/         # External library components (shadcn, aceternity, etc.)
-│   ├── core-components/    # TeamHub custom design system components
+│   ├── components/         # External library components
+│   │   ├── shadcn/        # shadcn/ui components
+│   │   ├── tailark/       # Tailark UI components
+│   │   ├── origin/        # Origin UI components
+│   │   ├── motion/        # Motion/Animation components
+│   │   ├── ai-sdk/        # AI SDK components
+│   │   └── aceternity/    # Aceternity UI components
+│   ├── components-core/    # TeamHub custom design system components
+│   │   ├── teamhub-button.tsx
+│   │   ├── teamhub-card.tsx
+│   │   ├── teamhub-dialog.tsx
+│   │   ├── teamhub-form.tsx
+│   │   ├── teamhub-input.tsx
+│   │   └── index.ts
+│   ├── components-site/    # Site-specific components
+│   │   ├── hero-section.tsx
+│   │   └── index.ts
 │   ├── utils/              # Utility functions
 │   ├── types/              # Type definitions
-│   └── styles/             # Global styles and CSS variables
+│   ├── styles/             # Global styles and CSS variables
+│   └── index.ts            # Main export file
 ├── specs/                  # Documentation and specifications
 │   ├── libraries.md        # Component library catalog
 │   └── design-system.md    # Design system guidelines
@@ -48,15 +64,36 @@ ux-core/
 
 ## Usage
 
-### Core Components
+### Component Categories
+
+The package provides three main categories of components:
+
+#### 1. External Library Components
 
 ```typescript
-// Import core components
+// Import from external libraries (shadcn, tailark, origin, etc.)
 import { Button, Card, Badge } from '@teamhub/ux-core'
 
-// Or import specific components
+// Or import specific components from specific libraries
 import { Button } from '@teamhub/ux-core/components/shadcn/button'
 import { Card } from '@teamhub/ux-core/components/shadcn/card'
+```
+
+#### 2. TeamHub Core Components (Styled)
+
+```typescript
+// Import TeamHub design system components
+import { TeamHubButton, TeamHubCard, TeamHubDialog } from '@teamhub/ux-core'
+
+// Or import directly from core components
+import { TeamHubButton } from '@teamhub/ux-core/components-core/teamhub-button'
+```
+
+#### 3. Site-Specific Components
+
+```typescript
+// Import site-specific components
+import { HeroSection } from '@teamhub/ux-core/components-site/hero-section'
 ```
 
 ### Examples and Demos
@@ -68,14 +105,6 @@ import { ComponentShowcase, SimpleDemo } from '@teamhub/ux-core/examples'
 // Use in your app
 <ComponentShowcase />  // Full component library
 <SimpleDemo />         // Quick overview
-```
-
-### TeamHub Core Components (Styled)
-
-```typescript
-// Import TeamHub design system components
-import { TeamHubButton } from '@teamhub/ux-core/core-components/teamhub-button'
-import { TeamHubCard } from '@teamhub/ux-core/core-components/teamhub-card'
 ```
 
 ## Quick Start
@@ -136,29 +165,38 @@ pnpm lint
 
 When adding new components or libraries:
 
-### External Components
+### External Components (`src/components/`)
 
 1. Update the component catalog in `specs/libraries.md`
 2. Install components using their official CLI (e.g., `npx shadcn@latest add component-name`)
 3. Components will be placed in `src/components/[library-name]/`
 4. Apply TeamHub design system colors where appropriate
+5. Update the main `src/index.ts` to export new components
 
-### TeamHub Core Components
+### TeamHub Core Components (`src/components-core/`)
 
-1. Create custom components in `src/core-components/`
+1. Create custom components in `src/components-core/`
 2. Use external components as building blocks
 3. Apply TeamHub design system styling
-4. Update `src/core-components/index.ts` to export new components
+4. Update `src/components-core/index.ts` to export new components
 5. Add examples to the component showcase
+
+### Site-Specific Components (`src/components-site/`)
+
+1. Create site-specific components in `src/components-site/`
+2. These are components tailored for specific use cases or pages
+3. Update `src/components-site/index.ts` to export new components
+4. Consider if the component should be moved to core if it's reusable
 
 ### General Guidelines
 
-1. Follow the established folder structure
+1. Follow the established folder structure with three component directories
 2. Use TeamHub design system colors consistently
 3. Update this README with any new sections or information
 4. Ensure all components have proper TypeScript types
 5. Test components across different scenarios
 6. Update the component showcase with new components
+7. Keep components organized by their purpose and reusability
 
 ## License
 

@@ -70,6 +70,22 @@ Tailark provides a collection of Tailwind CSS components designed for modern web
 - Modern aesthetic
 - Lightweight components
 
+### Available Components
+
+- **Navigation**: Navbar, Sidebar, Breadcrumb, Pagination, Tabs
+- **Forms**: Input, Button, Select, Checkbox, Radio, Textarea
+- **Layout**: Card, Container, Grid, Flexbox utilities
+- **Feedback**: Alert, Toast, Modal, Tooltip
+- **Data Display**: Table, List, Badge, Avatar
+- **Utilities**: Loading states, Animations, Responsive helpers
+
+### Best For
+
+- **Rapid prototyping** with Tailwind CSS
+- **Responsive layouts** and navigation
+- **Clean, minimal designs**
+- **Lightweight component needs**
+
 ---
 
 ## Aceternity UI
@@ -88,6 +104,22 @@ Aceternity UI offers modern, animated UI components with a focus on the latest d
 - Smooth animations
 - Interactive components
 - Latest UI trends
+
+### Available Components
+
+- **Animated Elements**: Floating labels, Gradient borders, Animated backgrounds
+- **Interactive Components**: Hover effects, Parallax elements, Scroll animations
+- **Modern Patterns**: Glass morphism, Neumorphism, Gradient overlays
+- **Layout Components**: Hero sections, Feature grids, Testimonial cards
+- **Form Elements**: Animated inputs, Floating labels, Interactive buttons
+- **Navigation**: Animated menus, Scroll-triggered effects
+
+### Best For
+
+- **Modern landing pages** and hero sections
+- **Interactive experiences** and micro-interactions
+- **Cutting-edge design** trends
+- **Animation-heavy interfaces**
 
 ---
 
@@ -108,6 +140,22 @@ AI SDK Elements provides pre-built UI components specifically designed for AI ap
 - Message handling
 - AI integration patterns
 
+### Available Components
+
+- **Chat Interface**: Message bubbles, Chat input, Typing indicators
+- **AI Components**: AI avatar, Response streaming, Suggestion chips
+- **Message Handling**: Message list, Thread view, Conversation history
+- **AI Integration**: Model selection, Parameter controls, Response formatting
+- **Interactive Elements**: Voice input, File upload, Image generation
+- **Analytics**: Usage tracking, Response metrics, Performance monitoring
+
+### Best For
+
+- **AI chat applications** and chatbots
+- **Conversational interfaces**
+- **AI-powered tools** and assistants
+- **Real-time AI interactions**
+
 ---
 
 ## React Bits
@@ -126,6 +174,22 @@ React Bits offers React-specific component patterns, hooks, and utilities design
 - Custom hooks
 - Performance optimizations
 - Common solutions
+
+### Available Components
+
+- **Custom Hooks**: useLocalStorage, useDebounce, useIntersectionObserver
+- **Performance Patterns**: React.memo, useMemo, useCallback examples
+- **State Management**: Local state patterns, Context patterns, Reducer patterns
+- **Form Handling**: Form validation, Field arrays, Dynamic forms
+- **Data Fetching**: SWR patterns, React Query patterns, Error boundaries
+- **Accessibility**: Focus management, Keyboard navigation, Screen reader support
+
+### Best For
+
+- **React performance optimization**
+- **Custom hook development**
+- **Common React patterns**
+- **Best practices implementation**
 
 ---
 
@@ -146,6 +210,22 @@ Magic UI provides premium, production-ready UI components with a focus on qualit
 - Performance optimized
 - Developer experience focused
 
+### Available Components
+
+- **Advanced Forms**: Multi-step forms, Dynamic validation, File uploads
+- **Data Visualization**: Charts, Graphs, Data tables with sorting
+- **Interactive Elements**: Drag and drop, Resizable panels, Sortable lists
+- **Layout Components**: Advanced grids, Masonry layouts, Virtual scrolling
+- **Navigation**: Mega menus, Breadcrumb navigation, Advanced tabs
+- **Feedback Systems**: Toast notifications, Progress indicators, Loading states
+
+### Best For
+
+- **Production applications** requiring high quality
+- **Complex data interfaces** and dashboards
+- **Enterprise applications** with advanced UX needs
+- **Performance-critical** user interfaces
+
 ---
 
 ## Origin UI
@@ -164,6 +244,22 @@ Origin UI offers a modern component library built with accessibility and clean d
 - Clean design
 - Modern aesthetics
 - Comprehensive component set
+
+### Available Components
+
+- **Core Components**: Button, Input, Select, Checkbox, Radio, Switch
+- **Layout**: Container, Grid, Flexbox, Spacing utilities
+- **Navigation**: Navbar, Sidebar, Breadcrumb, Pagination
+- **Feedback**: Alert, Toast, Modal, Tooltip, Progress
+- **Data Display**: Table, Card, List, Badge, Avatar
+- **Forms**: Form validation, Field groups, Error handling
+
+### Best For
+
+- **Accessibility-focused** applications
+- **Clean, minimal designs**
+- **Design system** foundations
+- **WCAG compliance** requirements
 
 ---
 
@@ -184,6 +280,22 @@ Chanh Dai UI provides creative and unique UI components with innovative design p
 - Innovative components
 - Artistic approach
 
+### Available Components
+
+- **Creative Elements**: Gradient text, Animated backgrounds, Particle effects
+- **Interactive Patterns**: Hover animations, Click effects, Scroll triggers
+- **Visual Components**: Custom icons, Animated illustrations, Creative layouts
+- **Animation Components**: Entrance animations, Exit animations, State transitions
+- **Unique Patterns**: Morphing shapes, Liquid effects, Organic animations
+- **Experimental UI**: Novel interaction patterns, Creative navigation
+
+### Best For
+
+- **Creative portfolios** and artistic websites
+- **Experimental interfaces** and prototypes
+- **Unique user experiences**
+- **Creative agency** projects
+
 ---
 
 ## shadcn-form
@@ -202,6 +314,22 @@ shadcn-form extends shadcn/ui with advanced form components, validation patterns
 - Validation patterns
 - Form state management
 - shadcn/ui integration
+
+### Available Components
+
+- **Form Components**: Form provider, Form field, Form item, Form label
+- **Validation**: Zod integration, Error handling, Field validation
+- **Form Types**: Controlled forms, Uncontrolled forms, Dynamic forms
+- **Advanced Features**: Field arrays, Conditional fields, Nested forms
+- **State Management**: Form state, Field state, Validation state
+- **Utilities**: Form submission, Reset functionality, Field transformation
+
+### Best For
+
+- **Complex form applications**
+- **Form validation** requirements
+- **shadcn/ui** projects needing advanced forms
+- **Multi-step forms** and wizards
 
 ---
 
@@ -222,6 +350,22 @@ Components.work is a marketplace for high-quality, curated UI components from va
 - Quality assurance
 - Diverse styles
 
+### Available Components
+
+- **Designer Collections**: Curated by professional designers
+- **Developer Components**: Built by experienced developers
+- **Premium Components**: High-quality, paid components
+- **Free Components**: Open-source, community components
+- **Specialized UI**: Industry-specific components, Niche use cases
+- **Design Systems**: Complete component libraries, Brand-specific components
+
+### Best For
+
+- **Finding unique components** not available elsewhere
+- **Premium quality** when budget allows
+- **Specialized use cases** and niche requirements
+- **Design inspiration** and component research
+
 ---
 
 ## Motion Primitives
@@ -240,6 +384,22 @@ Motion Primitives provides fundamental animation components and patterns for bui
 - Motion patterns
 - Performance optimized
 - Framework agnostic
+
+### Available Components
+
+- **Animation Primitives**: Fade, Slide, Scale, Rotate, Flip
+- **Motion Patterns**: Stagger, Sequence, Parallel, Chain
+- **Transition Types**: Enter, Exit, Update, State changes
+- **Performance Features**: GPU acceleration, Reduced motion, Frame optimization
+- **Easing Functions**: Custom easing, Preset curves, Spring animations
+- **Gesture Support**: Drag, Pinch, Swipe, Hover, Focus
+
+### Best For
+
+- **Performance-critical** animations
+- **Smooth transitions** and state changes
+- **Gesture-based** interactions
+- **Animation foundations** for custom components
 
 ---
 
@@ -291,7 +451,7 @@ This catalog should be updated regularly to:
 ### Last Updated
 
 - **Date**: January 2025
-- **Version**: 1.0.0
+- **Version**: 1.1.0
 - **Maintainer**: TeamHub UX Team
 
 ---

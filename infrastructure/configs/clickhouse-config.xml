@@ -1,26 +1,9 @@
 <?xml version="1.0"?>
 <clickhouse>
-    <!-- PostHog cluster configuration -->
-    <remote_servers>
-        <posthog>
-            <shard>
-                <replica>
-                    <host>clickhouse</host>
-                    <port>9000</port>
-                </replica>
-            </shard>
-        </posthog>
-        <posthog_migrations>
-            <shard>
-                <replica>
-                    <host>clickhouse</host>
-                    <port>9000</port>
-                </replica>
-            </shard>
-        </posthog_migrations>
-    </remote_servers>
+    <!-- Single-node ClickHouse configuration for PostHog -->
+    <!-- Removed cluster configuration for single-instance setup -->
 
-    <!-- Required for PostHog -->
+    <!-- Required for PostHog single-node -->
     <profiles>
         <default>
             <max_memory_usage>10000000000</max_memory_usage>
@@ -29,10 +12,7 @@
         </default>
     </profiles>
 
-    <!-- Macros for distributed tables -->
-    <macros>
-        <shard>01</shard>
-        <replica>01</replica>
-    </macros>
+    <!-- Single-node setup - no macros needed -->
+    <!-- Remove macros section for single-instance ClickHouse -->
 
 </clickhouse>
