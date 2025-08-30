@@ -24,12 +24,20 @@
         </posthog_migrations>
     </remote_servers>
 
-    <!-- Required for PostHog single-node -->
+    <!-- Disable ZooKeeper for single-node setup -->
+    <zookeeper>
+        <!-- Empty zookeeper config for single-node -->
+    </zookeeper>
+
+    <!-- Force non-replicated tables for single-node setup -->
     <profiles>
         <default>
             <max_memory_usage>10000000000</max_memory_usage>
             <use_uncompressed_cache>0</use_uncompressed_cache>
             <load_balancing>random</load_balancing>
+            <insert_deduplicate>0</insert_deduplicate>
+            <replicated_deduplication_window>0</replicated_deduplication_window>
+            <replicated_deduplication_window_seconds>0</replicated_deduplication_window_seconds>
         </default>
     </profiles>
 

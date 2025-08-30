@@ -18,11 +18,10 @@ export * from './hero'
 export * from './features'
 
 // AI Widget Components
-// export * from './ai-widget/chat-widget'
-// export * from './ai-widget/message-bubble'
-// export * from './ai-widget/quick-replies'
+export * from './ai-widget'
 
 // Content Components
-// export * from './content/statistics'
-// export * from './content/testimonials'
-// export * from './content/contact-form'
+export * from './content'
+
+// Landing Page Example
+export { LandingPageExample } from './landing-page-example'

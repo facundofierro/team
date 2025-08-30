@@ -180,6 +180,7 @@ services:
       - clickhouse_data:/var/lib/clickhouse
       - clickhouse_logs:/var/log/clickhouse-server
       - ./infrastructure/configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/posthog-config.xml:ro
+      - ./infrastructure/configs/disable-replication.xml:/etc/clickhouse-server/config.d/disable-replication.xml:ro
     networks:
       teamhub_network:
         aliases:
@@ -223,6 +224,8 @@ services:
       - CLICKHOUSE_CLUSTER_ENABLED=false
       - CLICKHOUSE_CLUSTER=
       - CLICKHOUSE_REPLICATION=false
+      - CLICKHOUSE_ENABLE_STORAGE_POLICY=false
+      - CLICKHOUSE_ENABLE_REPLICATION=false
       - CLICKHOUSE_ASYNC_MIGRATIONS_OPT_OUT=true
       - CLICKHOUSE_HTTP_URL=http://clickhouse:8123
       - CLICKHOUSE_SECURE_PORT=9440

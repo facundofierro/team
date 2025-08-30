@@ -44,6 +44,106 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 - Use Tailwind CSS classes consistently
 - Maintain accessibility standards (ARIA labels, keyboard navigation)
 
+### Component Organization & UX-Core Package
+
+TeamHub uses a centralized component system through the `packages/ux-core` package to ensure consistent styling and maintainability across the entire monorepo.
+
+#### Package Structure
+
+```
+packages/ux-core/src/
+├── components/          # External component libraries (NOT exported)
+│   ├── shadcn/         # shadcn/ui components
+│   ├── tailark/        # Tailark components
+│   ├── origin/         # Origin UI components
+│   ├── motion/         # Framer Motion components
+│   ├── ai-sdk/         # AI SDK components
+│   └── aceternity/     # Aceternity UI components
+├── components-core/     # TeamHub application components (exported)
+│   ├── teamhub-button.tsx
+│   ├── teamhub-form.tsx
+│   ├── teamhub-input.tsx
+│   ├── teamhub-dialog.tsx
+│   └── teamhub-card.tsx
+├── components-site/     # Landing page & public site components (exported)
+│   ├── features/        # Feature showcase components
+│   ├── layout/          # Layout components
+│   ├── hero/            # Hero section components
+│   ├── content/         # Content display components
+│   ├── ai-widget/       # AI widget components
+│   └── navigation/      # Navigation components
+├── styles/              # Global styles and design tokens
+├── types/               # TypeScript type definitions
+└── utils/               # Utility functions
+```
+
+#### Component Usage Guidelines
+
+**1. External Components (`components/`)**
+
+- **NOT exported** - these are internal dependencies only
+- Used as base components for building custom TeamHub components
+- All styling and customization should be applied in `components-core` or `components-site`
+- Never import directly from external packages in applications
+
+**2. Core Components (`components-core/`)**
+
+- **Exported** for use in TeamHub applications (`apps/teamhub`, `apps/ai-gateway`)
+- Contain all styling, colors, and TeamHub-specific design tokens
+- Built on top of external components with consistent theming
+- Use TeamHub color scheme: `bg-menu`, `bg-menu2`, `bg-background`, etc.
+- Include responsive design and accessibility features
+
+**3. Site Components (`components-site/`)**
+
+- **Exported** for use in public-facing sites (`apps/landing-page`)
+- Optimized for marketing and public presentation
+- May include different styling than core components
+- Focus on conversion and user engagement
+
+#### Import Patterns
+
+```typescript
+// ✅ CORRECT: Import from ux-core package
+import { Button, Card, TeamHubButton } from '@teamhub/ux-core'
+
+// ❌ WRONG: Direct import from external packages
+import { Button } from '@/components/ui/button'
+import { Button } from 'shadcn/ui'
+
+// ✅ CORRECT: Use TeamHub-styled components
+<TeamHubButton variant="primary" size="lg">
+  Create Agent
+</TeamHubButton>
+
+// ❌ WRONG: Use raw external components
+<Button variant="default">Create Agent</Button>
+```
+
+#### Styling & Theming
+
+- **All styling changes must be made in `packages/ux-core`**
+- Use Tailwind CSS classes consistently across all components
+- Define design tokens in `packages/ux-core/src/styles/`
+- Maintain consistent spacing, typography, and color schemes
+- Implement responsive breakpoints consistently
+
+#### Component Development Workflow
+
+1. **Base Component**: Start with external component (shadcn, etc.)
+2. **Styling**: Apply TeamHub design system in `components-core/`
+3. **Export**: Add to `packages/ux-core/src/index.ts`
+4. **Usage**: Import from `@teamhub/ux-core` in applications
+5. **Updates**: Modify styling only in ux-core package
+
+#### Benefits of This Approach
+
+- **Single Source of Truth**: All styling changes in one place
+- **Consistency**: Uniform appearance across all applications
+- **Maintainability**: Easy to update design system globally
+- **Performance**: Optimized bundle sizes with tree-shaking
+- **Developer Experience**: Clear import patterns and component hierarchy
+
 ### State Management
 
 - Use Zustand for client-side state management
@@ -233,6 +333,22 @@ const router = createReactiveRouter({ db }).addQuery(getAgents)
 - Use React.memo() for expensive computations
 - Prefer composition over inheritance
 - Keep components under 200 lines when possible
+
+### Component Development with UX-Core
+
+- **Always use components from `@teamhub/ux-core` package**
+- Never create new UI components directly in applications
+- Extend existing ux-core components when new functionality is needed
+- Follow the established component hierarchy: external → core → site
+- Maintain consistent prop interfaces across similar components
+
+### Component Styling
+
+- **All styling must be defined in `packages/ux-core`**
+- Use Tailwind CSS classes consistently
+- Follow TeamHub design system: colors, spacing, typography
+- Implement responsive design patterns
+- Ensure accessibility compliance (ARIA labels, keyboard navigation)
 
 ### Props & Types
 
@@ -494,5 +610,16 @@ When helping with TeamHub development:
 8. **Follow task priority system** - focus on current milestone tasks first
 9. **Update task status** when completing work or encountering blockers
 10. **Document implementation details** in task files for team knowledge
+
+### Component Development Guidance
+
+11. **Always use `@teamhub/ux-core` package** for UI components
+12. **Check existing ux-core components** before suggesting new ones
+13. **Follow component hierarchy**: external → core → site components
+14. **Suggest styling changes in ux-core** package, not in applications
+15. **Maintain consistent design system** across all components
+16. **Use TeamHub color scheme** and design tokens consistently
+17. **Implement responsive design** patterns in all components
+18. **Ensure accessibility compliance** in component suggestions
 
 Remember: TeamHub is an enterprise platform - prioritize security, performance, maintainability, **reactive real-time features**, and **milestone-driven development** in all decisions.

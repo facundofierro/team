@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn } from '@teamhub/ux-core/utils'
+import { cn } from '../../utils'
 
 interface FeatureCardProps {
   icon?: React.ReactNode
@@ -22,9 +22,9 @@ const cardVariants = {
   default: 'bg-white border border-teamhub-border/20 shadow-sm',
   elevated:
     'bg-white border border-teamhub-border/20 shadow-lg hover:shadow-xl',
-  outlined: 'bg-transparent border-2 border-teamhub-border/20',
+  outlined: 'bg-transparent border-2 border-teamhub-highlight/30',
   gradient:
-    'bg-gradient-to-br from-teamhub-background to-white border border-teamhub-border/20 shadow-md',
+    'bg-gradient-to-br from-teamhub-highlight/5 to-teamhub-accent/5 border border-teamhub-highlight/20 shadow-md',
 }
 
 const cardSizes = {
@@ -65,7 +65,7 @@ export function FeatureCard({
       {/* Icon */}
       {icon && (
         <div className="mb-4 flex justify-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-teamhub-primary to-teamhub-accent rounded-lg flex items-center justify-center text-white">
+          <div className="w-12 h-12 bg-gradient-to-br from-teamhub-highlight to-teamhub-accent rounded-lg flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow">
             {icon}
           </div>
         </div>

@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import {
   FeatureGrid,
   FeatureGridItem,
-  FeatureCard,
-  IndustrySelector,
+  ValuePropositionCard,
+  IndustryTabSelector,
 } from './index'
 
 export function FeatureExample() {
@@ -137,7 +137,7 @@ export function FeatureExample() {
       ),
       title: 'Cost Analysis & Reporting',
       metric: 'Live ROI tracking',
-      metricColor: 'teamhub-hot-pink' as const,
+      metricColor: 'teamhub-highlight' as const,
       description:
         'Real-time project profitability tracking and predictive cost modeling.',
       features: [
@@ -190,14 +190,35 @@ export function FeatureExample() {
             </p>
           </div>
 
-          <IndustrySelector
-            industries={industries}
-            selectedIndustry={selectedIndustry}
-            onIndustryChange={setSelectedIndustry}
-            variant="buttons"
-            size="md"
-            showFeatures
-            showDescription
+          <IndustryTabSelector
+            tabs={industries.map((industry) => ({
+              id: industry.id,
+              name: industry.name,
+              icon: (
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: industry.color }}
+                />
+              ),
+              description: industry.description,
+              content: (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {industry.features.map((feature, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-teamhub-highlight rounded-full"></div>
+                        <span className="text-teamhub-secondary">
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-teamhub-muted">{industry.description}</p>
+                </div>
+              ),
+            }))}
+            defaultTab={selectedIndustry}
+            onTabChange={setSelectedIndustry}
           />
         </div>
 
@@ -216,11 +237,14 @@ export function FeatureExample() {
           <FeatureGrid cols={2} gap="lg">
             {aiSolutions.map((solution, index) => (
               <FeatureGridItem key={index}>
-                <FeatureCard
+                <ValuePropositionCard
                   icon={solution.icon}
                   title={solution.title}
-                  metric={solution.metric}
-                  metricColor={solution.metricColor}
+                  metric={{
+                    value: solution.metric,
+                    label: '',
+                    color: solution.metricColor,
+                  }}
                   description={solution.description}
                   features={solution.features}
                   variant="elevated"

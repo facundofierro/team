@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <!-- Disable ZooKeeper for single-node setup -->
+    <zookeeper>
+        <!-- Empty zookeeper config for single-node -->
+    </zookeeper>
+
+    <!-- Disable replication features -->
+    <profiles>
+        <default>
+            <!-- Disable replication features -->
+            <insert_deduplicate>0</insert_deduplicate>
+            <replicated_deduplication_window>0</replicated_deduplication_window>
+            <replicated_deduplication_window_seconds>0</replicated_deduplication_window_seconds>
+            <distributed_ddl>
+                <!-- Disable distributed DDL -->
+                <path>/clickhouse/task_queue/ddl</path>
+            </distributed_ddl>
+        </default>
+    </profiles>
+
+    <!-- Override default table engines to use non-replicated versions -->
+    <default_table_engine>MergeTree</default_table_engine>
+
+</clickhouse>

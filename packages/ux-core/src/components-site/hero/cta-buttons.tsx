@@ -1,7 +1,12 @@
 import React from 'react'
-import { cn } from '@teamhub/ux-core/utils'
+import { cn } from '../../utils'
+import {
+  GradientButton,
+  SecondaryButton,
+  OutlineButton,
+} from './gradient-button'
 
-interface CTAButton {
+interface CTAButtonConfig {
   text: string
   href?: string
   onClick?: () => void
@@ -12,11 +17,11 @@ interface CTAButton {
 }
 
 interface CTAButtonsProps {
-  buttons: CTAButton[]
+  buttons: CTAButtonConfig[]
   className?: string
   layout?: 'horizontal' | 'vertical' | 'stacked'
   align?: 'left' | 'center' | 'right'
-  spacing?: 'sm' | 'md' | 'lg'
+  spacing?: 'md' | 'lg'
 }
 
 const buttonVariants = {
@@ -62,7 +67,7 @@ export function CTAButtons({
   align = 'center',
   spacing = 'md',
 }: CTAButtonsProps) {
-  const renderButton = (button: CTAButton, index: number) => {
+  const renderButton = (button: CTAButtonConfig, index: number) => {
     const buttonClasses = cn(
       'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teamhub-hot-pink focus:ring-offset-2',
       buttonVariants[button.variant || 'primary'],
