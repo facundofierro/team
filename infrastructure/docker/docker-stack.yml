@@ -160,6 +160,31 @@ services:
   #     - teamhub_network
 
   # ClickHouse for PostHog Analytics
+  # ZooKeeper for ClickHouse cluster coordination
+  zookeeper:
+    image: zookeeper:3.8
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+    environment:
+      - ZOO_MY_ID=1
+      - ZOO_SERVERS=server.1=zookeeper:2888:3888;2181
+    volumes:
+      - zookeeper_data:/data
+      - zookeeper_logs:/logs
+    networks:
+      teamhub_network:
+        aliases:
+          - zookeeper
+    healthcheck:
+      test: ['CMD', 'zkCli.sh', 'ls', '/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   clickhouse:
     image: clickhouse/clickhouse-server:23.8
     deploy:
@@ -180,11 +205,12 @@ services:
       - clickhouse_data:/var/lib/clickhouse
       - clickhouse_logs:/var/log/clickhouse-server
       - ./infrastructure/configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/posthog-config.xml:ro
-      - ./infrastructure/configs/disable-replication.xml:/etc/clickhouse-server/config.d/disable-replication.xml:ro
     networks:
       teamhub_network:
         aliases:
           - clickhouse
+    depends_on:
+      - zookeeper
     healthcheck:
       test: ['CMD', 'clickhouse-client', '--query', 'SELECT 1']
       interval: 30s
@@ -303,6 +329,8 @@ volumes:
   posthog_redis_data:
   clickhouse_data:
   clickhouse_logs:
+  zookeeper_data:
+  zookeeper_logs:
 
 networks:
   teamhub_network:
