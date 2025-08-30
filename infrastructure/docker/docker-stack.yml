@@ -160,6 +160,7 @@ services:
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - clickhouse_logs:/var/log/clickhouse-server
+      - ./infrastructure/configs/clickhouse-config.xml:/etc/clickhouse-server/config.d/posthog-config.xml:ro
     networks:
       - teamhub_network
     healthcheck:
@@ -198,6 +199,9 @@ services:
       - CLICKHOUSE_DATABASE=posthog
       - CLICKHOUSE_USER=posthog
       - CLICKHOUSE_PASSWORD=${POSTHOG_CLICKHOUSE_PASSWORD}
+      - CLICKHOUSE_CLUSTER=posthog_migrations
+      - CLICKHOUSE_REPLICATION=false
+      - CLICKHOUSE_ASYNC_MIGRATIONS_OPT_OUT=true
       - REDIS_URL=redis://posthog_redis:6379
       - SECRET_KEY=${POSTHOG_SECRET_KEY}
       - SITE_URL=${POSTHOG_SITE_URL}
