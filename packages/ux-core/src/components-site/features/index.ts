@@ -2,6 +2,14 @@
 // Components for showcasing features, solutions, and industry-specific content
 
 export { FeatureGrid, FeatureGridItem } from './feature-grid'
-export { FeatureCard, CompactFeatureCard } from './feature-card'
+export {
+  ValuePropositionCard,
+  CompactValuePropositionCard,
+} from './value-proposition-card'
 export { ContentSelector } from './content-selector'
 export { FeatureExample } from './feature-example'
+export {
+  IndustryTabSelector,
+  AutomationIndustrySelector,
+  CompactIndustrySelector,
+} from './industry-tab-selector'

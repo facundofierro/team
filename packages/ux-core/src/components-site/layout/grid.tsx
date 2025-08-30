@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn } from '@teamhub/ux-core/utils'
+import { cn } from '@/utils'
 
 interface GridProps {
   children: React.ReactNode

@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn } from '@teamhub/ux-core/utils'
+import { cn } from '@/utils'
 import { Container } from '../layout'
 
 interface HeroSectionProps {
@@ -22,7 +22,7 @@ const backgroundClasses = {
   none: '',
   dark: 'bg-gradient-to-br from-teamhub-secondary to-teamhub-secondary/80',
   gradient:
-    'bg-gradient-to-br from-teamhub-primary via-teamhub-accent to-teamhub-hot-pink',
+    'bg-gradient-to-br from-teamhub-highlight via-teamhub-accent to-teamhub-primary',
   'teamhub-primary': 'bg-teamhub-primary',
   'teamhub-secondary': 'bg-teamhub-secondary',
 }
@@ -78,7 +78,7 @@ export function HeroSection({
       {/* Background Pattern (optional) */}
       {background === 'gradient' && (
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:20px_20px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(244,85,132,0.2)_1px,transparent_1px)] bg-[length:24px_24px]" />
         </div>
       )}
     </section>

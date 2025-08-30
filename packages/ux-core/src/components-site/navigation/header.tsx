@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { cn } from '@teamhub/ux-core/utils'
+import { cn } from '@/utils'
 import { Container } from '../layout'
 
 interface HeaderProps {
@@ -70,7 +70,10 @@ export function Header({
                   'text-teamhub-secondary hover:text-teamhub-primary transition-colors font-medium',
                   transparent && 'text-white hover:text-teamhub-accent'
                 )}
-                {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
+                {...(item.external && {
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                })}
               >
                 {item.label}
               </a>
@@ -148,7 +151,10 @@ export function Header({
                   href={item.href}
                   className="text-teamhub-secondary hover:text-teamhub-primary transition-colors font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
+                  {...(item.external && {
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                  })}
                 >
                   {item.label}
                 </a>
@@ -170,7 +176,7 @@ export function Header({
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {ctaText}
-                </button>
+                </a>
               )}
             </nav>
           </div>

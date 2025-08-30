@@ -1,13 +1,17 @@
 import React from 'react'
-import { cn } from '@teamhub/ux-core/utils'
+import { cn } from '@/utils'
 
 interface HeadlineProps {
   children: React.ReactNode
   className?: string
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
-  color?: 'white' | 'teamhub-secondary' | 'teamhub-primary' | 'teamhub-hot-pink'
+  color?:
+    | 'white'
+    | 'teamhub-secondary'
+    | 'teamhub-primary'
+    | 'teamhub-highlight'
   emphasis?: 'none' | 'gradient' | 'highlight'
-  emphasisColor?: 'teamhub-hot-pink' | 'teamhub-accent' | 'teamhub-primary'
+  emphasisColor?: 'teamhub-highlight' | 'teamhub-accent' | 'teamhub-primary'
   align?: 'left' | 'center' | 'right'
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 }
@@ -24,7 +28,7 @@ const headlineColors = {
   white: 'text-white',
   'teamhub-secondary': 'text-teamhub-secondary',
   'teamhub-primary': 'text-teamhub-primary',
-  'teamhub-hot-pink': 'text-teamhub-hot-pink',
+  'teamhub-highlight': 'text-teamhub-highlight',
 }
 
 const headlineAlign = {
@@ -47,7 +51,7 @@ export function Headline({
   size = 'lg',
   color = 'white',
   emphasis = 'none',
-  emphasisColor = 'teamhub-hot-pink',
+  emphasisColor = 'teamhub-highlight',
   align = 'center',
   maxWidth = 'lg',
 }: HeadlineProps) {
@@ -61,15 +65,16 @@ export function Headline({
       if (
         emphasis === 'highlight' &&
         (word.toLowerCase().includes('ai') ||
-          word.toLowerCase().includes('success'))
+          word.toLowerCase().includes('success') ||
+          word.toLowerCase().includes('automation'))
       ) {
         return (
           <span
             key={index}
             className={cn(
               'text-transparent bg-clip-text bg-gradient-to-r',
-              emphasisColor === 'teamhub-hot-pink' &&
-                'from-teamhub-hot-pink to-teamhub-accent',
+              emphasisColor === 'teamhub-highlight' &&
+                'from-teamhub-highlight to-teamhub-accent',
               emphasisColor === 'teamhub-accent' &&
                 'from-teamhub-accent to-teamhub-primary',
               emphasisColor === 'teamhub-primary' &&

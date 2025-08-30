@@ -33,7 +33,7 @@ export function HeroExample() {
             size="xl"
             color="white"
             emphasis="highlight"
-            emphasisColor="teamhub-hot-pink"
+            emphasisColor="teamhub-highlight"
             maxWidth="xl"
           >
             AI Is No Longer Optional For Success

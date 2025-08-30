@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { cn } from '@teamhub/ux-core/utils'
+import { cn } from '@/utils'
 
 interface NavigationMenuItem {
   label: string
