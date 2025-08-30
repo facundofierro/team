@@ -375,17 +375,25 @@ deploy_full_stack() {
 wait_for_services() {
     echo -e "${BLUE}⏳ Waiting for services to be ready...${NC}"
 
+    # Track service failures
+    local CRITICAL_FAILURES=0
+    local SERVICE_FAILURES=()
+
     # Check infrastructure services first (if being deployed)
     if [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] || ! check_service_status "teamhub_postgres" "PostgreSQL" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for PostgreSQL service...${NC}"
+        local postgres_ready=false
         for i in {1..30}; do
             if docker service ls --filter name=teamhub_postgres --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ PostgreSQL service is ready${NC}"
+                postgres_ready=true
                 break
             fi
             if [ $i -eq 30 ]; then
                 echo -e "${RED}❌ PostgreSQL service failed to start after 30 attempts${NC}"
                 docker service logs teamhub_postgres --tail 20 || true
+                CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+                SERVICE_FAILURES+=("PostgreSQL")
             else
                 echo "Waiting for PostgreSQL service... (attempt $i/30)"
                 sleep 15
@@ -395,14 +403,18 @@ wait_for_services() {
 
     if [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] || ! check_service_status "teamhub_redis" "Redis" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Redis service...${NC}"
+        local redis_ready=false
         for i in {1..15}; do
             if docker service ls --filter name=teamhub_redis --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Redis service is ready${NC}"
+                redis_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ Redis service failed to start after 15 attempts${NC}"
                 docker service logs teamhub_redis --tail 20 || true
+                CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+                SERVICE_FAILURES+=("Redis")
             else
                 echo "Waiting for Redis service... (attempt $i/15)"
                 sleep 10
@@ -413,14 +425,18 @@ wait_for_services() {
     # Check teamhub service first (if being deployed)
     if [ "$FORCE_REDEPLOY_TEAMHUB" = "true" ] || ! check_service_status "teamhub_teamhub" "TeamHub" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for TeamHub service...${NC}"
+        local teamhub_ready=false
         for i in {1..15}; do
             if docker service ls --filter name=teamhub_teamhub --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ TeamHub service is ready${NC}"
+                teamhub_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ TeamHub service failed to start after 15 attempts${NC}"
                 docker service logs teamhub_teamhub --tail 20 || true
+                CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+                SERVICE_FAILURES+=("TeamHub")
             else
                 echo "Waiting for TeamHub service... (attempt $i/15)"
                 sleep 10
@@ -431,14 +447,18 @@ wait_for_services() {
     # Check remotion service (if being deployed)
     if [ "$FORCE_REDEPLOY_REMOTION" = "true" ] || ! check_service_status "teamhub_remotion" "Remotion" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Remotion service...${NC}"
+        local remotion_ready=false
         for i in {1..15}; do
             if docker service ls --filter name=teamhub_remotion --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Remotion service is ready${NC}"
+                remotion_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ Remotion service failed to start after 15 attempts${NC}"
                 docker service logs teamhub_remotion --tail 20 || true
+                CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+                SERVICE_FAILURES+=("Remotion")
             else
                 echo "Waiting for Remotion service... (attempt $i/15)"
                 sleep 10
@@ -449,14 +469,18 @@ wait_for_services() {
     # Check nginx service last (if being deployed)
     if [ "$FORCE_REDEPLOY_NGINX" = "true" ] || ! check_service_status "teamhub_nginx" "Nginx" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Nginx service...${NC}"
+        local nginx_ready=false
         for i in {1..15}; do
             if docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Nginx service is ready${NC}"
+                nginx_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ Nginx service failed to start after 15 attempts${NC}"
                 docker service logs teamhub_nginx --tail 20 || true
+                CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+                SERVICE_FAILURES+=("Nginx")
             else
                 echo "Waiting for Nginx service... (attempt $i/15)"
                 sleep 10
@@ -467,14 +491,18 @@ wait_for_services() {
     # Check nextcloud service (if being deployed)
     if [ "$FORCE_REDEPLOY_NEXTCLOUD" = "true" ] || ! check_service_status "teamhub_nextcloud" "Nextcloud" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Nextcloud service...${NC}"
+        local nextcloud_ready=false
         for i in {1..15}; do
             if docker service ls --filter name=teamhub_nextcloud --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Nextcloud service is ready${NC}"
+                nextcloud_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ Nextcloud service failed to start after 15 attempts${NC}"
                 docker service logs teamhub_nextcloud --tail 20 || true
+                # Nextcloud is non-critical, don't count as critical failure
+                echo -e "${YELLOW}⚠️  Nextcloud failed but is non-critical${NC}"
             else
                 echo "Waiting for Nextcloud service... (attempt $i/15)"
                 sleep 10
@@ -485,20 +513,35 @@ wait_for_services() {
     # Check PostHog service (if being deployed)
     if [ "$FORCE_REDEPLOY_POSTHOG" = "true" ] || ! check_service_status "teamhub_posthog" "PostHog" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for PostHog service...${NC}"
+        local posthog_ready=false
         for i in {1..15}; do
             if docker service ls --filter name=teamhub_posthog --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ PostHog service is ready${NC}"
+                posthog_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ PostHog service failed to start after 15 attempts${NC}"
                 docker service logs teamhub_posthog --tail 20 || true
+                # PostHog is non-critical, don't count as critical failure
+                echo -e "${YELLOW}⚠️  PostHog failed but is non-critical${NC}"
             else
                 echo "Waiting for PostHog service... (attempt $i/15)"
                 sleep 10
             fi
         done
     fi
+
+    # At the end, check if any critical services failed
+    if [ $CRITICAL_FAILURES -gt 0 ]; then
+        echo -e "${RED}🚨 DEPLOYMENT FAILED: $CRITICAL_FAILURES critical service(s) failed to start${NC}"
+        echo -e "${RED}Failed services: ${SERVICE_FAILURES[*]}${NC}"
+        echo -e "${RED}Pipeline will not continue to stabilization and health checks${NC}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}✅ All critical services started successfully${NC}"
+}
 }
 
 # Test application endpoints
