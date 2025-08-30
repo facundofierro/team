@@ -220,7 +220,7 @@ services:
 
   # PostHog Analytics Platform
   posthog:
-    image: posthog/posthog:release-1.215.2
+    image: posthog/posthog:latest
     deploy:
       replicas: 1
       placement:
@@ -274,7 +274,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 300s
 
   # PostHog PostgreSQL Database
   posthog_db:
