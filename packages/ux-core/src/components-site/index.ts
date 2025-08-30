@@ -5,19 +5,17 @@
 // Landing Page Components
 // New components will be exported here as they are created
 
+// Layout Components
+export * from './layout'
+
 // Navigation Components
-// export * from './navigation/header'
-// export * from './navigation/navigation-menu'
+export * from './navigation'
 
 // Hero Section Components
-// export * from './hero/hero-section'
-// export * from './hero/headline'
-// export * from './hero/cta-buttons'
+export * from './hero'
 
 // Feature Components
-// export * from './features/feature-grid'
-// export * from './features/feature-card'
-// export * from './features/industry-selector'
+export * from './features'
 
 // AI Widget Components
 // export * from './ai-widget/chat-widget'
@@ -28,8 +26,3 @@
 // export * from './content/statistics'
 // export * from './content/testimonials'
 // export * from './content/contact-form'
-
-// Layout Components
-// export * from './layout/container'
-// export * from './layout/grid'
-// export * from './layout/section'
