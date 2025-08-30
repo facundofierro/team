@@ -1,29 +1,34 @@
 'use client'
 
 import React from 'react'
-import { 
-  Sidebar, 
+import {
+  Sidebar,
   defaultTeamHubItems,
-  NavigationMenu,
+  SidebarNavigationMenu,
   Breadcrumbs,
   Tabs,
   UserProfile,
   Search,
   Layout,
   PageHeader,
-  ContentContainer
+  ContentContainer,
 } from '../src/components-core'
 import { Button } from '../src/components/shadcn/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../src/components/shadcn/card'
-import { 
-  LayoutDashboard, 
-  Users, 
-  Settings, 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '../src/components/shadcn/card'
+import {
+  LayoutDashboard,
+  Users,
+  Settings,
   FileText,
   Database,
   Wrench,
   CheckSquare,
-  Infinity
+  Infinity,
 } from 'lucide-react'
 
 export default function NavigationDemo() {
@@ -38,7 +43,7 @@ export default function NavigationDemo() {
     email: 'facundofierr...',
     initials: 'F',
     role: 'Admin',
-    status: 'online' as const
+    status: 'online' as const,
   }
 
   const actions = {
@@ -48,7 +53,7 @@ export default function NavigationDemo() {
     onNotificationsClick: () => console.log('Notifications clicked'),
     onSettingsClick: () => console.log('Settings clicked'),
     onHelpClick: () => console.log('Help clicked'),
-    onCreateClick: () => console.log('Create clicked')
+    onCreateClick: () => console.log('Create clicked'),
   }
 
   const navigationItems = [
@@ -56,26 +61,26 @@ export default function NavigationDemo() {
       id: 'overview',
       label: 'Overview',
       icon: LayoutDashboard,
-      content: <div className="p-4">Overview content goes here</div>
+      content: <div className="p-4">Overview content goes here</div>,
     },
     {
       id: 'details',
       label: 'Details',
       icon: FileText,
-      content: <div className="p-4">Details content goes here</div>
+      content: <div className="p-4">Details content goes here</div>,
     },
     {
       id: 'settings',
       label: 'Settings',
       icon: Settings,
-      content: <div className="p-4">Settings content goes here</div>
-    }
+      content: <div className="p-4">Settings content goes here</div>,
+    },
   ]
 
   const breadcrumbItems = [
     { label: 'Dashboard', onClick: () => console.log('Dashboard') },
     { label: 'Agents', onClick: () => console.log('Agents') },
-    { label: 'AI Assistant' }
+    { label: 'AI Assistant' },
   ]
 
   return (
@@ -84,13 +89,13 @@ export default function NavigationDemo() {
         items: defaultTeamHubItems,
         activeItem,
         collapsed,
-        onToggleCollapse: () => setCollapsed(!collapsed)
+        onToggleCollapse: () => setCollapsed(!collapsed),
       }}
       user={user}
       actions={actions}
       header={{
         title: 'Navigation Components Demo',
-        subtitle: 'Showcasing all TeamHub navigation components'
+        subtitle: 'Showcasing all TeamHub navigation components',
       }}
     >
       <ContentContainer>
@@ -122,31 +127,32 @@ export default function NavigationDemo() {
                     region: 'spb',
                     onRegionClick: actions.onRegionClick,
                     onGlobeClick: actions.onGlobeClick,
-                    onLogoutClick: actions.onLogoutClick
+                    onLogoutClick: actions.onLogoutClick,
                   }}
                 />
               </div>
               <div className="mt-4 space-y-2">
                 <p className="text-sm text-gray-600">
-                  Features: Collapsible, user profile, action buttons, active states
+                  Features: Collapsible, user profile, action buttons, active
+                  states
                 </p>
                 <div className="flex space-x-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => setActiveItem('dashboard')}
                   >
                     Dashboard
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => setActiveItem('agents')}
                   >
                     Agents
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => setActiveItem('settings')}
                   >
@@ -179,7 +185,8 @@ export default function NavigationDemo() {
               </div>
               <div className="mt-4">
                 <p className="text-sm text-gray-600">
-                  Features: Auto-complete, search suggestions, quick actions, keyboard shortcuts
+                  Features: Auto-complete, search suggestions, quick actions,
+                  keyboard shortcuts
                 </p>
               </div>
             </CardContent>
@@ -231,7 +238,8 @@ export default function NavigationDemo() {
               </div>
               <div className="mt-4">
                 <p className="text-sm text-gray-600">
-                  Features: Multiple variants (default, pills, underline), content switching
+                  Features: Multiple variants (default, pills, underline),
+                  content switching
                 </p>
               </div>
             </CardContent>
@@ -244,13 +252,12 @@ export default function NavigationDemo() {
             </CardHeader>
             <CardContent>
               <div className="bg-gradient-to-b from-[#3B2146] to-[#8A548C] p-4 rounded-lg">
-                <Breadcrumbs
-                  items={breadcrumbItems}
-                />
+                <Breadcrumbs items={breadcrumbItems} />
               </div>
               <div className="mt-4">
                 <p className="text-sm text-gray-600">
-                  Features: Clickable navigation, customizable separators, max items limit
+                  Features: Clickable navigation, customizable separators, max
+                  items limit
                 </p>
               </div>
             </CardContent>
@@ -263,7 +270,7 @@ export default function NavigationDemo() {
             </CardHeader>
             <CardContent>
               <div className="bg-gradient-to-b from-[#3B2146] to-[#8A548C] p-4 rounded-lg">
-                <NavigationMenu
+                <SidebarNavigationMenu
                   items={[
                     {
                       id: 'agents',
@@ -272,8 +279,8 @@ export default function NavigationDemo() {
                       children: [
                         { id: 'all-agents', label: 'All Agents' },
                         { id: 'active-agents', label: 'Active Agents' },
-                        { id: 'inactive-agents', label: 'Inactive Agents' }
-                      ]
+                        { id: 'inactive-agents', label: 'Inactive Agents' },
+                      ],
                     },
                     {
                       id: 'workflows',
@@ -282,9 +289,9 @@ export default function NavigationDemo() {
                       children: [
                         { id: 'all-workflows', label: 'All Workflows' },
                         { id: 'running-workflows', label: 'Running' },
-                        { id: 'completed-workflows', label: 'Completed' }
-                      ]
-                    }
+                        { id: 'completed-workflows', label: 'Completed' },
+                      ],
+                    },
                   ]}
                   orientation="vertical"
                   activeItem="agents"
@@ -292,7 +299,8 @@ export default function NavigationDemo() {
               </div>
               <div className="mt-4">
                 <p className="text-sm text-gray-600">
-                  Features: Dropdown menus, nested navigation, horizontal/vertical orientation
+                  Features: Dropdown menus, nested navigation,
+                  horizontal/vertical orientation
                 </p>
               </div>
             </CardContent>
@@ -309,7 +317,7 @@ export default function NavigationDemo() {
               <div>
                 <h4 className="font-semibold mb-2">Basic Sidebar Usage</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-{`import { Sidebar, defaultTeamHubItems } from '@teamhub/ux-core'
+                  {`import { Sidebar, defaultTeamHubItems } from '@teamhub/ux-core'
 
 <Sidebar
   items={defaultTeamHubItems}
@@ -319,11 +327,11 @@ export default function NavigationDemo() {
 />`}
                 </pre>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">Search with Results</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-{`import { Search } from '@teamhub/ux-core'
+                  {`import { Search } from '@teamhub/ux-core'
 
 <Search
   value={searchValue}
@@ -338,7 +346,7 @@ export default function NavigationDemo() {
               <div>
                 <h4 className="font-semibold mb-2">Complete Layout</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-{`import { Layout } from '@teamhub/ux-core'
+                  {`import { Layout } from '@teamhub/ux-core'
 
 <Layout
   sidebar={{ items: defaultTeamHubItems, activeItem: 'agents' }}

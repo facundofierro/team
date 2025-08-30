@@ -6,10 +6,10 @@
 export { Sidebar, defaultTeamHubItems, type SidebarItem } from './sidebar'
 
 export {
-  NavigationMenu,
+  SidebarNavigationMenu,
   Breadcrumbs,
   Tabs,
-  type NavigationMenuItem,
+  type SidebarNavigationMenuProps,
   type BreadcrumbItem,
   type TabItem,
 } from './navigation-menu'
