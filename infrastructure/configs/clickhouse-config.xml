@@ -1,7 +1,28 @@
 <?xml version="1.0"?>
 <clickhouse>
     <!-- Single-node ClickHouse configuration for PostHog -->
-    <!-- Removed cluster configuration for single-instance setup -->
+    <!-- Minimal cluster definitions required for PostHog migrations -->
+
+    <remote_servers>
+        <!-- Single shard/replica pointing to localhost -->
+        <posthog>
+            <shard>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </posthog>
+        <!-- Required for PostHog migrations -->
+        <posthog_migrations>
+            <shard>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </posthog_migrations>
+    </remote_servers>
 
     <!-- Required for PostHog single-node -->
     <profiles>
@@ -12,7 +33,10 @@
         </default>
     </profiles>
 
-    <!-- Single-node setup - no macros needed -->
-    <!-- Remove macros section for single-instance ClickHouse -->
+    <!-- Macros for compatibility with PostHog migrations -->
+    <macros>
+        <shard>01</shard>
+        <replica>01</replica>
+    </macros>
 
 </clickhouse>
