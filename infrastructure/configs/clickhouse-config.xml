@@ -10,6 +10,14 @@
                 </replica>
             </shard>
         </posthog>
+        <posthog_migrations>
+            <shard>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </posthog_migrations>
     </remote_servers>
 
     <!-- Required for PostHog -->
