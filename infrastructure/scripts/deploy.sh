@@ -11,6 +11,7 @@ export FORCE_REDEPLOY_REMOTION="${FORCE_REDEPLOY_REMOTION:-false}"
 export FORCE_REDEPLOY_INFRASTRUCTURE="${FORCE_REDEPLOY_INFRASTRUCTURE:-false}"
 export FORCE_REDEPLOY_NEXTCLOUD="${FORCE_REDEPLOY_NEXTCLOUD:-false}"
 export FORCE_REDEPLOY_POSTHOG="${FORCE_REDEPLOY_POSTHOG:-false}"
+export FORCE_REDEPLOY_CLICKHOUSE="${FORCE_REDEPLOY_CLICKHOUSE:-false}"
 export FORCE_REDEPLOY_ALL="${FORCE_REDEPLOY_ALL:-false}"
 
 # Backwards compatibility with old FORCE_REDEPLOY
@@ -26,6 +27,7 @@ if [ "$FORCE_REDEPLOY_ALL" = "true" ]; then
     export FORCE_REDEPLOY_INFRASTRUCTURE="true"
     export FORCE_REDEPLOY_NEXTCLOUD="true"
     export FORCE_REDEPLOY_POSTHOG="true"
+    export FORCE_REDEPLOY_CLICKHOUSE="true"
 fi
 
 # Colors for output
@@ -43,6 +45,7 @@ show_deployment_options() {
     echo -e "  🔧 PostgreSQL/Redis: ${FORCE_REDEPLOY_INFRASTRUCTURE}"
     echo -e "  ☁️ Nextcloud:      ${FORCE_REDEPLOY_NEXTCLOUD}"
     echo -e "  📊 PostHog:        ${FORCE_REDEPLOY_POSTHOG}"
+    echo -e "  🗄️  ClickHouse:     ${FORCE_REDEPLOY_CLICKHOUSE}"
     echo -e "  🔄 All Services:   ${FORCE_REDEPLOY_ALL}"
     echo ""
 }
@@ -270,6 +273,7 @@ check_individual_service_status() {
     local REMOTION_OK=false
     local NEXTCLOUD_OK=false
     local POSTHOG_OK=false
+    local CLICKHOUSE_OK=false
 
     if check_service_status "teamhub_teamhub" "TeamHub"; then
         TEAMHUB_OK=true
@@ -289,6 +293,10 @@ check_individual_service_status() {
 
     if check_service_status "teamhub_posthog" "PostHog"; then
         POSTHOG_OK=true
+    fi
+
+    if check_service_status "teamhub_clickhouse" "ClickHouse"; then
+        CLICKHOUSE_OK=true
     fi
 
     # Return status based on force redeploy flags
@@ -311,6 +319,10 @@ check_individual_service_status() {
     fi
 
     if [ "$FORCE_REDEPLOY_POSTHOG" = "true" ] || [ "$POSTHOG_OK" = false ]; then
+        NEEDS_DEPLOYMENT=true
+    fi
+
+    if [ "$FORCE_REDEPLOY_CLICKHOUSE" = "true" ] || [ "$CLICKHOUSE_OK" = false ]; then
         NEEDS_DEPLOYMENT=true
     fi
 
@@ -658,6 +670,7 @@ show_deployment_summary() {
     [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] && echo -e "  🔧 Infrastructure: ✅ Redeployed"
     [ "$FORCE_REDEPLOY_NEXTCLOUD" = "true" ] && echo -e "  ☁️  Nextcloud: ✅ Redeployed"
     [ "$FORCE_REDEPLOY_POSTHOG" = "true" ] && echo -e "  📊 PostHog: ✅ Redeployed"
+    [ "$FORCE_REDEPLOY_CLICKHOUSE" = "true" ] && echo -e "  🗄️  ClickHouse: ✅ Redeployed"
 
     # Show running services
     echo ""
