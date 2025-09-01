@@ -27,7 +27,7 @@ export function PrimaryButton({
       onClick={onClick}
       disabled={disabled || loading}
       className={cn(
-        'px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200',
+        'px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200',
         'flex items-center space-x-2',
         'focus:outline-none',
         disabled
@@ -38,12 +38,7 @@ export function PrimaryButton({
       style={{
         ...coreUtils.getButtonDefault('primary'),
       }}
-      onFocus={(e) =>
-        Object.assign(e.currentTarget.style, {
-          ...coreUtils.getButtonDefault('primary'),
-          ...coreUtils.getFocusStyles(),
-        })
-      }
+      onFocus={(e) => {}}
       onBlur={(e) =>
         Object.assign(
           e.currentTarget.style,
@@ -52,7 +47,7 @@ export function PrimaryButton({
       }
     >
       {loading ? (
-        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        <div className="w-4 h-4 rounded-full border-2 border-white animate-spin border-t-transparent" />
       ) : (
         Icon && <Icon className="w-4 h-4" />
       )}

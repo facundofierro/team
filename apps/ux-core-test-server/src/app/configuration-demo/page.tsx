@@ -12,6 +12,7 @@ import {
   ResetButton,
   AddButton,
   GhostButton,
+  coreUtils,
 } from '@teamhub/ux-core'
 import {
   ScheduledExecutionItem,
@@ -192,17 +193,30 @@ export default function ConfigurationDemoPage() {
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setShowTemplates(!showTemplates)}
-                      className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all"
+                      className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all focus:outline-none"
                       style={{
-                        color: '#847F8A',
-                        backgroundColor: 'transparent',
+                        ...coreUtils.getButtonDefault('ghost'),
                       }}
+                      onFocus={(e) => {
+                        Object.assign(e.currentTarget.style, coreUtils.getFocusStyles())
+                        setTimeout(() => {
+                          e.currentTarget.blur()
+                        }, 150)
+                      }}
+                      onBlur={(e) =>
+                        Object.assign(
+                          e.currentTarget.style,
+                          coreUtils.getButtonDefault('ghost')
+                        )
+                      }
                       onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          'rgba(244, 243, 245, 0.8)')
+                        Object.assign(e.currentTarget.style, coreUtils.getButtonHover('ghost'))
                       }
                       onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = 'transparent')
+                        Object.assign(
+                          e.currentTarget.style,
+                          coreUtils.getButtonDefault('ghost')
+                        )
                       }
                     >
                       <FileText className="w-3 h-3" />

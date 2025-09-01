@@ -38,12 +38,7 @@ export function ActionButton({
       style={{
         ...coreUtils.getButtonDefault('action'),
       }}
-      onFocus={(e) =>
-        Object.assign(e.currentTarget.style, {
-          ...coreUtils.getButtonDefault('action'),
-          ...coreUtils.getFocusStyles(),
-        })
-      }
+      onFocus={(e) => {}}
       onBlur={(e) =>
         Object.assign(
           e.currentTarget.style,

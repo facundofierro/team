@@ -32,9 +32,7 @@ export function GhostButton({
       style={{
         ...coreUtils.getButtonDefault('ghost'),
       }}
-      onFocus={(e) =>
-        Object.assign(e.currentTarget.style, coreUtils.getFocusStyles())
-      }
+      onFocus={(e) => {}}
       onBlur={(e) =>
         Object.assign(
           e.currentTarget.style,
