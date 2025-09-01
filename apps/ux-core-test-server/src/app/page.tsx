@@ -83,38 +83,38 @@ const componentCategories = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-bg-background p-8">
+    <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-bg-foreground mb-4">
-            TeamHub UX Core - Component Test Suite
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Agelum UX Core - Component Test Suite
           </h1>
-          <p className="text-lg text-bg-muted-foreground mb-6">
+          <p className="text-lg text-gray-600 mb-6">
             Start with Demo Pages to see components working together, then
             explore individual components
           </p>
 
           {/* Component Statistics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-bg-card border border-bg-border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-bg-foreground">2</div>
-              <div className="text-sm text-bg-muted-foreground">Demo Pages</div>
+            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-gray-900">2</div>
+              <div className="text-sm text-gray-600">Demo Pages</div>
             </div>
-            <div className="bg-bg-card border border-bg-border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-bg-foreground">5</div>
-              <div className="text-sm text-bg-muted-foreground">
+            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-gray-900">5</div>
+              <div className="text-sm text-gray-600">
                 Implemented
               </div>
             </div>
-            <div className="bg-bg-card border border-bg-border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-bg-foreground">7</div>
-              <div className="text-sm text-bg-muted-foreground">
+            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-gray-900">7</div>
+              <div className="text-sm text-gray-600">
                 Total Components
               </div>
             </div>
-            <div className="bg-bg-card border border-bg-border rounded-lg p-4 text-center">
+            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-green-600">71%</div>
-              <div className="text-sm text-bg-muted-foreground">Complete</div>
+              <div className="text-sm text-gray-600">Complete</div>
             </div>
           </div>
         </div>
@@ -123,9 +123,9 @@ export default function HomePage() {
           {componentCategories.map((category) => (
             <div
               key={category.name}
-              className="bg-bg-card border border-bg-border rounded-lg p-6"
+              className="bg-white border border-gray-200 rounded-lg p-6"
             >
-              <h2 className="text-xl font-semibold text-bg-foreground mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
                 {category.name}
               </h2>
               <div className="space-y-3">
@@ -134,13 +134,13 @@ export default function HomePage() {
                     <Link
                       key={component.name}
                       href={component.path}
-                      className="block p-4 rounded-md bg-bg-accent hover:bg-bg-accent/80 transition-colors text-bg-accent-foreground group"
+                      className="block p-4 rounded-md bg-purple-50 hover:bg-purple-100 transition-colors text-purple-900 group"
                     >
-                      <div className="font-medium text-bg-accent-foreground group-hover:text-bg-accent-foreground/90">
+                      <div className="font-medium text-purple-900 group-hover:text-purple-800">
                         {component.name}
                       </div>
                       {component.description && (
-                        <div className="text-sm text-bg-accent-foreground/70 mt-1">
+                        <div className="text-sm text-purple-700 mt-1">
                           {component.description}
                         </div>
                       )}
@@ -167,11 +167,11 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className="mt-8 p-6 bg-bg-card border border-bg-border rounded-lg">
-          <h2 className="text-xl font-semibold text-bg-foreground mb-4">
+        <div className="mt-8 p-6 bg-white border border-gray-200 rounded-lg">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Test Commands
           </h2>
-          <div className="space-y-2 text-sm font-mono text-bg-muted-foreground">
+          <div className="space-y-2 text-sm font-mono text-gray-600">
             <div>pnpm test - Run all tests</div>
             <div>pnpm test:ui - Run tests with UI</div>
             <div>pnpm test:headed - Run tests in headed mode</div>
