@@ -79,6 +79,7 @@ export function FormSection({
 // Enhanced input component
 export interface EnhancedInputProps {
   label: string
+  subtitle?: string
   placeholder?: string
   value?: string
   onChange?: (value: string) => void
@@ -94,6 +95,7 @@ export interface EnhancedInputProps {
 
 export function EnhancedInput({
   label,
+  subtitle,
   placeholder,
   value = '',
   onChange,
@@ -108,10 +110,17 @@ export function EnhancedInput({
 }: EnhancedInputProps) {
   return (
     <div className={cn('space-y-2', className)}>
-      <Label className="text-xs font-medium" style={{ color: '#5A365C' }}>
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </Label>
+      <div>
+        <Label className="text-sm font-medium" style={{ color: '#2D1B2E' }}>
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </Label>
+        {subtitle && (
+          <p className="mt-1 text-xs" style={{ color: '#847F8A' }}>
+            {subtitle}
+          </p>
+        )}
+      </div>
       <div className="relative">
         {Icon && (
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -125,7 +134,7 @@ export function EnhancedInput({
           onChange={(e) => onChange?.(e.target.value)}
           disabled={disabled}
           maxLength={maxLength}
-          className={cn(Icon && 'pl-10', 'px-3 py-2 rounded-lg border text-sm')}
+          className={cn(Icon && 'pl-10', 'px-3 py-2 rounded-xl border text-sm')}
           style={{
             backgroundColor: '#F4F3F5',
             borderColor: 'rgba(195, 192, 198, 0.8)',
@@ -165,6 +174,7 @@ export interface SelectOption {
 
 export interface EnhancedSelectProps {
   label: string
+  subtitle?: string
   options: SelectOption[]
   value?: string
   onChange?: (value: string) => void
@@ -178,6 +188,7 @@ export interface EnhancedSelectProps {
 
 export function EnhancedSelect({
   label,
+  subtitle,
   options,
   value,
   onChange,
@@ -198,10 +209,17 @@ export function EnhancedSelect({
 
   return (
     <div className={cn('space-y-2', className)}>
-      <Label className="text-sm font-medium text-gray-700">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </Label>
+      <div>
+        <Label className="text-sm font-medium" style={{ color: '#2D1B2E' }}>
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </Label>
+        {subtitle && (
+          <p className="mt-1 text-xs" style={{ color: '#847F8A' }}>
+            {subtitle}
+          </p>
+        )}
+      </div>
       <div className="relative">
         <button
           type="button"

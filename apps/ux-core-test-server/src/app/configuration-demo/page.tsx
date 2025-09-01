@@ -6,6 +6,7 @@ import {
   FormCard,
   FormActions,
   EnhancedInput,
+  EnhancedSelect,
   ActiveIndicator,
 } from '@teamhub/ux-core'
 import {
@@ -94,10 +95,13 @@ export default function ConfigurationDemoPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F4F3F5' }}>
+    <div
+      className="h-screen flex flex-col"
+      style={{ backgroundColor: '#F4F3F5' }}
+    >
       {/* Header - Full width, not a card */}
       <div
-        className="px-6 py-4 border-b"
+        className="px-6 py-4 border-b flex-shrink-0"
         style={{
           backgroundColor: '#FFFFFF',
           borderColor: 'rgba(215, 213, 217, 0.6)',
@@ -113,20 +117,26 @@ export default function ConfigurationDemoPage() {
       </div>
 
       {/* Main Content */}
-      <div className="p-6">
+      <div className="flex-1 p-6 overflow-auto">
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Left Column */}
           <div className="space-y-6">
             {/* Basic Settings */}
-            <FormCard title="Basic Settings" icon={Shield}>
+            <FormCard
+              title="Basic Settings"
+              subtitle="Configure the basic information for your AI agent"
+              icon={Shield}
+            >
               <EnhancedInput
                 label="Agent Name"
+                subtitle="The display name for your AI agent"
                 value={agentName}
                 onChange={setAgentName}
                 placeholder="Enter agent name"
               />
               <EnhancedInput
                 label="Role/Type"
+                subtitle="The role or type of agent (e.g., Manager, Assistant, Specialist)"
                 value={roleType}
                 onChange={setRoleType}
                 placeholder="Enter role or type"
@@ -136,6 +146,7 @@ export default function ConfigurationDemoPage() {
             {/* Prompt */}
             <FormCard
               title="Prompt"
+              subtitle="Define the AI agent's behavior and capabilities"
               icon={Sparkles}
               headerContent={
                 <div className="flex space-x-2">
@@ -164,7 +175,7 @@ export default function ConfigurationDemoPage() {
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="w-full h-32 p-3 border rounded-md resize-none"
+                  className="w-full h-32 p-3 border rounded-xl resize-none"
                   style={{
                     backgroundColor: '#F4F3F5',
                     borderColor: 'rgba(195, 192, 198, 0.8)',
@@ -177,6 +188,53 @@ export default function ConfigurationDemoPage() {
                 </div>
               </div>
             </FormCard>
+
+            {/* Security & Access */}
+            <FormCard
+              title="Security & Access"
+              subtitle="Manage permissions and access controls"
+              icon={Shield}
+            >
+              <div className="space-y-4">
+                <EnhancedSelect
+                  label="User Role Permissions"
+                  subtitle="Define which user roles can manage this agent"
+                  options={[
+                    { value: 'admins', label: 'Admins Only' },
+                    { value: 'all', label: 'All Users' },
+                    { value: 'specific', label: 'Specific Roles' },
+                  ]}
+                  value="admins"
+                  onChange={() => {}}
+                />
+                <EnhancedSelect
+                  label="Chat Access Control"
+                  subtitle="Specify who can initiate conversations with this agent"
+                  options={[
+                    {
+                      value: 'specific-groups',
+                      label: 'Users in Specific Groups',
+                    },
+                    { value: 'all', label: 'All Users' },
+                    { value: 'none', label: 'No Access' },
+                  ]}
+                  value="specific-groups"
+                  onChange={() => {}}
+                />
+                <EnhancedSelect
+                  label="Configuration Access"
+                  subtitle="Control who can view or edit this agent's configuration"
+                  options={[
+                    { value: '', label: 'Select access level...' },
+                    { value: 'full', label: 'Full Access' },
+                    { value: 'read-only', label: 'Read Only' },
+                    { value: 'none', label: 'No Access' },
+                  ]}
+                  value=""
+                  onChange={() => {}}
+                />
+              </div>
+            </FormCard>
           </div>
 
           {/* Right Column */}
@@ -184,6 +242,7 @@ export default function ConfigurationDemoPage() {
             {/* Scheduled Executions */}
             <FormCard
               title="Scheduled Executions"
+              subtitle="Set up automated tasks and recurring actions"
               icon={Calendar}
               headerAction={
                 <button
@@ -223,6 +282,7 @@ export default function ConfigurationDemoPage() {
             {/* Tool Assignment */}
             <FormCard
               title="Tool Assignment"
+              subtitle="Assign tools and capabilities to your agent"
               icon={Database}
               headerAction={
                 <button
@@ -253,71 +313,13 @@ export default function ConfigurationDemoPage() {
                 ))}
               </div>
             </FormCard>
-
-            {/* Security & Access */}
-            <FormCard title="Security & Access" icon={Shield}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    User Role Permissions
-                  </label>
-                  <select
-                    className="w-full p-3 border rounded-md"
-                    style={{
-                      backgroundColor: '#F4F3F5',
-                      borderColor: 'rgba(195, 192, 198, 0.8)',
-                      color: '#2D1B2E',
-                    }}
-                  >
-                    <option>Admins Only</option>
-                    <option>All Users</option>
-                    <option>Specific Roles</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Chat Access Control
-                  </label>
-                  <select
-                    className="w-full p-3 border rounded-md"
-                    style={{
-                      backgroundColor: '#F4F3F5',
-                      borderColor: 'rgba(195, 192, 198, 0.8)',
-                      color: '#2D1B2E',
-                    }}
-                  >
-                    <option>Users in Specific Groups</option>
-                    <option>All Users</option>
-                    <option>No Access</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Configuration Access
-                  </label>
-                  <select
-                    className="w-full p-3 border rounded-md"
-                    style={{
-                      backgroundColor: '#F4F3F5',
-                      borderColor: 'rgba(195, 192, 198, 0.8)',
-                      color: '#2D1B2E',
-                    }}
-                  >
-                    <option>Select access level...</option>
-                    <option>Full Access</option>
-                    <option>Read Only</option>
-                    <option>No Access</option>
-                  </select>
-                </div>
-              </div>
-            </FormCard>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer - Fixed at bottom */}
       <div
-        className="px-6 py-4 border-t"
+        className="px-6 py-4 border-t flex-shrink-0"
         style={{
           backgroundColor: '#FFFFFF',
           borderColor: 'rgba(215, 213, 217, 0.6)',

@@ -24,7 +24,7 @@ export function ToolAssignmentItem({
   return (
     <div
       className={cn(
-        'flex items-start space-x-2.5 p-2.5 rounded-lg border transition-all',
+        'flex items-start space-x-2.5 p-2.5 rounded-xl border transition-all',
         className
       )}
       style={{

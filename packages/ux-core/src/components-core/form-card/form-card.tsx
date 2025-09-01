@@ -25,7 +25,7 @@ export function FormCard({
 }: FormCardProps) {
   return (
     <div
-      className={cn('p-4 bg-white rounded-lg border', className)}
+      className={cn('p-4 bg-white rounded-xl border', className)}
       style={{
         backgroundColor: elegantColors.background.tertiary,
         borderColor: elegantColors.border.light,
@@ -37,22 +37,19 @@ export function FormCard({
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center space-x-3">
             {Icon && (
-              <div className="p-2 bg-gray-50 rounded-lg">
+              <div className="p-2 bg-gray-50 rounded-xl">
                 <Icon className="w-5 h-5 text-purple-600" />
               </div>
             )}
             <div>
               <h3
                 className="text-base font-semibold"
-                style={{ color: elegantColors.text.primary }}
+                style={{ color: '#2D1B2E' }}
               >
                 {title}
               </h3>
               {subtitle && (
-                <p
-                  className="mt-1 text-sm"
-                  style={{ color: elegantColors.text.secondary }}
-                >
+                <p className="mt-1 text-sm" style={{ color: '#847F8A' }}>
                   {subtitle}
                 </p>
               )}
