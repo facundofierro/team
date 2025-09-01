@@ -403,19 +403,26 @@ export function ToolAssignmentItem({
 
   return (
     <div
-      className={cn('flex items-start space-x-2.5 p-2.5 rounded-lg', className)}
+      className={cn(
+        'flex items-start space-x-2.5 p-2.5 rounded-lg border transition-all',
+        className
+      )}
       style={{
-        backgroundColor: 'rgba(138, 84, 140, 0.12)',
+        backgroundColor: enabled ? 'rgba(138, 84, 140, 0.12)' : '#F4F3F5',
+        borderColor: enabled
+          ? 'rgba(138, 84, 140, 0.3)'
+          : 'rgba(215, 213, 217, 0.6)',
       }}
     >
       <div
-        className="w-4 h-4 mt-0.5 flex-shrink-0 rounded border-2 flex items-center justify-center"
+        className="w-4 h-4 mt-0.5 flex-shrink-0 rounded border-2 flex items-center justify-center cursor-pointer"
         style={{
-          borderColor: '#8A548C',
-          backgroundColor: '#8A548C',
+          borderColor: enabled ? '#8A548C' : '#9B8FA7',
+          backgroundColor: enabled ? '#8A548C' : 'transparent',
         }}
+        onClick={() => onToggle(!enabled)}
       >
-        <Check className="w-2.5 h-2.5 text-white" />
+        {enabled && <Check className="w-2.5 h-2.5 text-white" />}
       </div>
       <div className="flex-1">
         <div className="flex items-center justify-between">
