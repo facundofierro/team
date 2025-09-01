@@ -20,6 +20,7 @@ import {
   Database,
   Calendar,
 } from 'lucide-react'
+import { elegantColors } from '@teamhub/ux-core'
 
 export default function ConfigurationDemoPage() {
   const [agentName, setAgentName] = useState('Procurement Manager')
@@ -138,10 +139,22 @@ export default function ConfigurationDemoPage() {
               icon={Sparkles}
               headerContent={
                 <div className="flex space-x-2">
-                  <button className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50">
+                  <button
+                    className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50"
+                    style={{
+                      borderColor: elegantColors.border.medium,
+                      color: elegantColors.text.secondary,
+                    }}
+                  >
                     AI
                   </button>
-                  <button className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50">
+                  <button
+                    className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50"
+                    style={{
+                      borderColor: elegantColors.border.medium,
+                      color: elegantColors.text.secondary,
+                    }}
+                  >
                     Templates
                   </button>
                 </div>
@@ -175,7 +188,11 @@ export default function ConfigurationDemoPage() {
               headerAction={
                 <button
                   onClick={handleAddSchedule}
-                  className="px-3 py-1 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  className="px-3 py-1 text-sm rounded-md"
+                  style={{
+                    background: elegantColors.background.primaryGradient,
+                    color: elegantColors.text.inverse,
+                  }}
                 >
                   + Add Schedule
                 </button>
@@ -210,7 +227,11 @@ export default function ConfigurationDemoPage() {
               headerAction={
                 <button
                   onClick={handleAddTool}
-                  className="px-3 py-1 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  className="px-3 py-1 text-sm rounded-md"
+                  style={{
+                    background: elegantColors.background.primaryGradient,
+                    color: elegantColors.text.inverse,
+                  }}
                 >
                   + Add Tool
                 </button>

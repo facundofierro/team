@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { cn } from '../../utils/cn'
+import { elegantColors } from '../../styles/color-tokens'
 import { Input } from '../../components/shadcn/input'
 import { Label } from '../../components/shadcn/label'
 import { Button } from '../../components/shadcn/button'
@@ -572,11 +573,11 @@ export function FormActions({
           disabled={loading}
           className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
           style={{
-            color: '#5A365C',
+            color: elegantColors.primary[800],
             backgroundColor: 'transparent',
           }}
           onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = 'rgba(244, 243, 245, 0.8)')
+            (e.currentTarget.style.backgroundColor = elegantColors.primary[50])
           }
           onMouseLeave={(e) =>
             (e.currentTarget.style.backgroundColor = 'transparent')
@@ -592,11 +593,11 @@ export function FormActions({
           disabled={loading}
           className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
           style={{
-            color: '#5A365C',
+            color: elegantColors.primary[800],
             backgroundColor: 'transparent',
           }}
           onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = 'rgba(244, 243, 245, 0.8)')
+            (e.currentTarget.style.backgroundColor = elegantColors.primary[50])
           }
           onMouseLeave={(e) =>
             (e.currentTarget.style.backgroundColor = 'transparent')
@@ -611,8 +612,8 @@ export function FormActions({
           disabled={disabled || loading}
           className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
           style={{
-            background: 'linear-gradient(135deg, #8A548C 0%, #A091DA 100%)',
-            color: '#F4F3F5',
+            background: elegantColors.background.primaryGradient,
+            color: elegantColors.text.inverse,
             boxShadow:
               '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           }}

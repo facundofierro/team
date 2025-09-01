@@ -1,5 +1,6 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
+import { elegantColors } from '../../styles/color-tokens'
 
 export interface FormCardProps {
   children: React.ReactNode
@@ -26,8 +27,8 @@ export function FormCard({
     <div
       className={cn('p-4 bg-white rounded-lg border', className)}
       style={{
-        backgroundColor: '#FFFFFF',
-        borderColor: 'rgba(215, 213, 217, 0.6)',
+        backgroundColor: elegantColors.background.tertiary,
+        borderColor: elegantColors.border.light,
         boxShadow:
           '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
       }}
@@ -43,12 +44,17 @@ export function FormCard({
             <div>
               <h3
                 className="text-base font-semibold"
-                style={{ color: '#2D1B2E' }}
+                style={{ color: elegantColors.text.primary }}
               >
                 {title}
               </h3>
               {subtitle && (
-                <p className="mt-1 text-sm text-gray-600">{subtitle}</p>
+                <p
+                  className="mt-1 text-sm"
+                  style={{ color: elegantColors.text.secondary }}
+                >
+                  {subtitle}
+                </p>
               )}
             </div>
           </div>
@@ -64,7 +70,7 @@ export function FormCard({
       {footerContent && (
         <div
           className="pt-3 mt-4 border-t"
-          style={{ borderColor: 'rgba(215, 213, 217, 0.6)' }}
+          style={{ borderColor: elegantColors.border.light }}
         >
           {footerContent}
         </div>
