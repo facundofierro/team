@@ -111,7 +111,7 @@ export function EnhancedInput({
   return (
     <div className={cn('space-y-2', className)}>
       <div>
-        <Label className="text-sm font-medium" style={{ color: '#2D1B2E' }}>
+        <Label className="text-xs font-medium" style={{ color: '#2D1B2E' }}>
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
@@ -216,7 +216,7 @@ export function EnhancedTextarea({
       {(label || subtitle) && (
         <div>
           {label && (
-            <Label className="text-sm font-medium" style={{ color: '#2D1B2E' }}>
+            <Label className="text-xs font-medium" style={{ color: '#2D1B2E' }}>
               {label}
               {required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -314,7 +314,7 @@ export function EnhancedSelect({
   return (
     <div className={cn('space-y-2', className)}>
       <div>
-        <Label className="text-sm font-medium" style={{ color: '#2D1B2E' }}>
+        <Label className="text-xs font-medium" style={{ color: '#2D1B2E' }}>
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>

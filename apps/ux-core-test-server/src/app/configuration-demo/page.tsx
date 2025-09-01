@@ -190,17 +190,29 @@ export default function ConfigurationDemoPage() {
                 <div className="flex space-x-2">
                   <GhostButton icon={Sparkles}>AI</GhostButton>
                   <div className="relative" ref={dropdownRef}>
-                    <GhostButton
+                    <button
                       onClick={() => setShowTemplates(!showTemplates)}
-                      icon={FileText}
+                      className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all"
+                      style={{
+                        color: '#847F8A',
+                        backgroundColor: 'transparent',
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor =
+                          'rgba(244, 243, 245, 0.8)')
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = 'transparent')
+                      }
                     >
-                      Templates
+                      <FileText className="w-3 h-3" />
+                      <span>Templates</span>
                       <ChevronDown
                         className={`w-3 h-3 transition-transform ${
                           showTemplates ? 'rotate-180' : ''
                         }`}
                       />
-                    </GhostButton>
+                    </button>
                     {showTemplates && (
                       <div
                         className="absolute top-full right-0 mt-2 w-56 rounded-xl border overflow-hidden z-10"

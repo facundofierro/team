@@ -218,7 +218,7 @@ export function AddButton({
 }: Omit<ActionButtonProps, 'icon'>) {
   return (
     <ActionButton {...props} icon={Plus}>
-      + {children}
+      {children}
     </ActionButton>
   )
 }
