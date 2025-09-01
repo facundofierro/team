@@ -111,12 +111,15 @@ export function EnhancedInput({
   return (
     <div className={cn('space-y-2', className)}>
       <div>
-        <Label className="text-xs font-medium" style={{ color: '#2D1B2E' }}>
+        <Label
+          className="text-xs font-medium ml-1"
+          style={{ color: '#2D1B2E' }}
+        >
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
         {subtitle && (
-          <p className="mt-1 text-xs" style={{ color: '#847F8A' }}>
+          <p className="mt-0.5 text-xs ml-1" style={{ color: '#847F8A' }}>
             {subtitle}
           </p>
         )}
@@ -216,13 +219,16 @@ export function EnhancedTextarea({
       {(label || subtitle) && (
         <div>
           {label && (
-            <Label className="text-xs font-medium" style={{ color: '#2D1B2E' }}>
+            <Label
+              className="text-xs font-medium ml-1"
+              style={{ color: '#2D1B2E' }}
+            >
               {label}
               {required && <span className="text-red-500 ml-1">*</span>}
             </Label>
           )}
           {subtitle && (
-            <p className="mt-1 text-xs" style={{ color: '#847F8A' }}>
+            <p className="mt-0.5 text-xs ml-1" style={{ color: '#847F8A' }}>
               {subtitle}
             </p>
           )}
@@ -314,12 +320,15 @@ export function EnhancedSelect({
   return (
     <div className={cn('space-y-2', className)}>
       <div>
-        <Label className="text-xs font-medium" style={{ color: '#2D1B2E' }}>
+        <Label
+          className="text-xs font-medium ml-1"
+          style={{ color: '#2D1B2E' }}
+        >
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
         {subtitle && (
-          <p className="mt-1 text-xs" style={{ color: '#847F8A' }}>
+          <p className="mt-0.5 text-xs ml-1" style={{ color: '#847F8A' }}>
             {subtitle}
           </p>
         )}
