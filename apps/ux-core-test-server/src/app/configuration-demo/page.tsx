@@ -7,6 +7,7 @@ import {
   FormActions,
   EnhancedInput,
   EnhancedSelect,
+  EnhancedTextarea,
   ActiveIndicator,
 } from '@teamhub/ux-core'
 import {
@@ -184,22 +185,15 @@ export default function ConfigurationDemoPage() {
                 </div>
               }
             >
-              <div className="relative">
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="w-full h-32 p-3 border rounded-xl resize-none"
-                  style={{
-                    backgroundColor: '#F4F3F5',
-                    borderColor: 'rgba(195, 192, 198, 0.8)',
-                    color: '#2D1B2E',
-                  }}
-                  placeholder="Enter your prompt here..."
-                />
-                <div className="absolute bottom-2 right-2 text-xs text-gray-500">
-                  {prompt.length} / 4000
-                </div>
-              </div>
+              <EnhancedTextarea
+                value={prompt}
+                onChange={setPrompt}
+                placeholder="Enter your prompt here..."
+                maxLength={4000}
+                autoResize={true}
+                minHeight={128}
+                maxHeight={256}
+              />
             </FormCard>
 
             {/* Security & Access */}

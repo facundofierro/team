@@ -164,6 +164,110 @@ export function EnhancedInput({
   )
 }
 
+// Enhanced textarea component with auto-resize
+export interface EnhancedTextareaProps {
+  label?: string
+  subtitle?: string
+  placeholder?: string
+  value?: string
+  onChange?: (value: string) => void
+  error?: string
+  required?: boolean
+  disabled?: boolean
+  maxLength?: number
+  showCount?: boolean
+  autoResize?: boolean
+  minHeight?: number
+  maxHeight?: number
+  className?: string
+}
+
+export function EnhancedTextarea({
+  label,
+  subtitle,
+  placeholder,
+  value = '',
+  onChange,
+  error,
+  required = false,
+  disabled = false,
+  maxLength,
+  showCount = false,
+  autoResize = false,
+  minHeight = 128,
+  maxHeight = 256,
+  className,
+}: EnhancedTextareaProps) {
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+
+  // Auto-resize functionality
+  React.useEffect(() => {
+    if (autoResize && textareaRef.current) {
+      const textarea = textareaRef.current
+      textarea.style.height = 'auto'
+      const scrollHeight = textarea.scrollHeight
+      const newHeight = Math.max(minHeight, Math.min(maxHeight, scrollHeight))
+      textarea.style.height = `${newHeight}px`
+    }
+  }, [value, autoResize, minHeight, maxHeight])
+
+  return (
+    <div className={cn('space-y-2', className)}>
+      {(label || subtitle) && (
+        <div>
+          {label && (
+            <Label className="text-sm font-medium" style={{ color: '#2D1B2E' }}>
+              {label}
+              {required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+          )}
+          {subtitle && (
+            <p className="mt-1 text-xs" style={{ color: '#847F8A' }}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+      )}
+      <div className="relative">
+        <textarea
+          ref={textareaRef}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          disabled={disabled}
+          maxLength={maxLength}
+          className="w-full p-3 rounded-xl border text-sm resize-none leading-relaxed"
+          style={{
+            backgroundColor: '#F4F3F5',
+            borderColor: 'rgba(195, 192, 198, 0.8)',
+            color: '#2D1B2E',
+            minHeight: `${minHeight}px`,
+            maxHeight: `${maxHeight}px`,
+          }}
+        />
+      </div>
+      <div className="flex items-center justify-between">
+        {error && (
+          <p className="text-sm text-red-600 flex items-center space-x-1">
+            <AlertCircle className="h-4 w-4" />
+            <span>{error}</span>
+          </p>
+        )}
+        {showCount && maxLength && (
+          <span
+            className={cn(
+              'text-sm',
+              value.length > maxLength * 0.9 ? 'text-red-500' : 'text-gray-500'
+            )}
+          >
+            {value.length} / {maxLength}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Enhanced select component
 export interface SelectOption {
   value: string

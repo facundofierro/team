@@ -35,11 +35,8 @@ export function FormCard({
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center space-x-3">
             {Icon && (
-              <div
-                className="p-2 rounded-xl"
-                style={{ backgroundColor: '#F4F3F5' }}
-              >
-                <Icon className="w-4 h-4 text-purple-600" />
+              <div className="p-2 rounded-xl">
+                <Icon className="w-4 h-4 text-purple-700" />
               </div>
             )}
             <div>
