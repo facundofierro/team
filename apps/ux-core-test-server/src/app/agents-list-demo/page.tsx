@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { AgentsList, type Agent } from '@teamhub/ux-core'
+import { AgentsList, type Agent, coreColors } from '@teamhub/ux-core'
 
 // Sample agents data that matches the design
 const sampleAgents: Agent[] = [
@@ -87,130 +87,183 @@ export default function AgentsListDemo() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            AgentsList Component Demo
-          </h1>
-          <p className="text-gray-600">
-            Demonstration of the AgentsList component with various features and
-            interactions.
-          </p>
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: coreColors.brand.primary }}
+    >
+      <div className="flex h-screen">
+        {/* Left side - AgentsList Component */}
+        <div className="w-[480px] p-6 flex items-center justify-center">
+          <AgentsList
+            agents={sampleAgents}
+            onAgentSelect={handleAgentSelect}
+            onAgentCreate={handleAgentCreate}
+            selectedAgentId={selectedAgent?.id}
+            showHierarchical={true}
+            showSearch={true}
+            showActionButtons={true}
+            className="w-full h-full"
+          />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Main Demo */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Full Featured AgentsList
-            </h2>
-            <AgentsList
-              agents={sampleAgents}
-              onAgentSelect={handleAgentSelect}
-              onAgentCreate={handleAgentCreate}
-              selectedAgentId={selectedAgent?.id}
-              showHierarchical={true}
-              showSearch={true}
-              showActionButtons={true}
-            />
-          </div>
+        {/* Right side - Explanatory Content */}
+        <div className="flex-1 p-8 bg-white">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">
+              AgentsList Component
+            </h1>
 
-          {/* Simplified Demo */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Simplified AgentsList
-            </h2>
-            <AgentsList
-              agents={sampleAgents.slice(0, 3)}
-              onAgentSelect={handleAgentSelect}
-              selectedAgentId={selectedAgent?.id}
-              showHierarchical={false}
-              showSearch={false}
-              showActionButtons={false}
-              className="max-h-80"
-            />
-          </div>
-        </div>
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                  Interactive Features
+                </h2>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-start">
+                    <span className="text-blue-500 mr-2">•</span>
+                    <span>
+                      <strong>Search/Filter Toggle:</strong> Switch between
+                      search mode and status filter mode
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-500 mr-2">•</span>
+                    <span>
+                      <strong>List/Tree View:</strong> Toggle between flat list
+                      and hierarchical tree view
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-500 mr-2">•</span>
+                    <span>
+                      <strong>Status Filtering:</strong> Filter agents by All,
+                      On, Idle, or Off status
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-500 mr-2">•</span>
+                    <span>
+                      <strong>Expand/Collapse:</strong> In tree mode, expand
+                      parent agents to see children
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-500 mr-2">•</span>
+                    <span>
+                      <strong>Agent Selection:</strong> Click any agent to
+                      select it
+                    </span>
+                  </li>
+                </ul>
+              </div>
 
-        {/* Selected Agent Info */}
-        {selectedAgent && (
-          <div className="mt-8 p-6 bg-white rounded-xl border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Selected Agent Details
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <p className="text-gray-900">{selectedAgent.name}</p>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                  Design System
+                </h2>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    <span>
+                      <strong>TeamHub Colors:</strong> Uses consistent color
+                      palette from light-theme-colors.ts
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    <span>
+                      <strong>Status Indicators:</strong> Green (active), Yellow
+                      (idle), Grey (offline)
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    <span>
+                      <strong>Responsive Design:</strong> Adapts to different
+                      screen sizes
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    <span>
+                      <strong>Accessibility:</strong> Keyboard navigation and
+                      ARIA labels
+                    </span>
+                  </li>
+                </ul>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <p
-                  className={`capitalize ${
-                    selectedAgent.status === 'active'
-                      ? 'text-green-600'
-                      : selectedAgent.status === 'idle'
-                      ? 'text-yellow-600'
-                      : 'text-gray-600'
-                  }`}
-                >
-                  {selectedAgent.status}
-                </p>
-              </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <p className="text-gray-900">{selectedAgent.description}</p>
-              </div>
-              {selectedAgent.children && selectedAgent.children.length > 0 && (
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Child Agents
-                  </label>
-                  <ul className="list-disc list-inside text-gray-900">
-                    {selectedAgent.children.map((child) => (
-                      <li key={child.id}>{child.name}</li>
-                    ))}
-                  </ul>
+
+              {selectedAgent && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                    Selected Agent
+                  </h3>
+                  <div className="space-y-2">
+                    <div>
+                      <span className="font-medium text-gray-700">Name:</span>
+                      <span className="ml-2 text-gray-900">
+                        {selectedAgent.name}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Status:</span>
+                      <span
+                        className={`ml-2 capitalize ${
+                          selectedAgent.status === 'active'
+                            ? 'text-green-600'
+                            : selectedAgent.status === 'idle'
+                            ? 'text-yellow-600'
+                            : 'text-gray-600'
+                        }`}
+                      >
+                        {selectedAgent.status}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">
+                        Description:
+                      </span>
+                      <span className="ml-2 text-gray-900">
+                        {selectedAgent.description}
+                      </span>
+                    </div>
+                    {selectedAgent.children &&
+                      selectedAgent.children.length > 0 && (
+                        <div>
+                          <span className="font-medium text-gray-700">
+                            Child Agents:
+                          </span>
+                          <ul className="ml-2 mt-1">
+                            {selectedAgent.children.map((child) => (
+                              <li key={child.id} className="text-gray-600">
+                                • {child.name}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                  </div>
                 </div>
               )}
-            </div>
-          </div>
-        )}
 
-        {/* Component Info */}
-        <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
-          <h3 className="text-lg font-semibold text-blue-800 mb-4">
-            Component Features
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <h4 className="font-medium text-blue-700 mb-2">Core Features:</h4>
-              <ul className="space-y-1 text-blue-600">
-                <li>• Agent filtering by status (All, On, Idle, Off)</li>
-                <li>• Real-time search functionality</li>
-                <li>• Hierarchical view with expand/collapse</li>
-                <li>• Status indicators with colored dots</li>
-                <li>• Selection state management</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-blue-700 mb-2">
-                UI/UX Features:
-              </h4>
-              <ul className="space-y-1 text-blue-600">
-                <li>• Smooth hover and transition effects</li>
-                <li>• Responsive design</li>
-                <li>• Accessible keyboard navigation</li>
-                <li>• TeamHub color system integration</li>
-                <li>• Configurable display options</li>
-              </ul>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                  Component Props
+                </h2>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <pre className="text-sm text-gray-700 overflow-x-auto">
+                    {`<AgentsList
+  agents={sampleAgents}
+  onAgentSelect={handleAgentSelect}
+  onAgentCreate={handleAgentCreate}
+  selectedAgentId={selectedAgent?.id}
+  showHierarchical={true}
+  showSearch={true}
+  showActionButtons={true}
+/>`}
+                  </pre>
+                </div>
+              </div>
             </div>
           </div>
         </div>

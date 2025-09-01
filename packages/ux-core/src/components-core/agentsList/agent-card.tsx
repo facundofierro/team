@@ -80,8 +80,8 @@ export const AgentCard: React.FC<{
           }
         }}
       >
-        {/* Expand/collapse button for parent agents */}
-        {hasChildren && (
+        {/* Expand/collapse button for parent agents - only show in tree mode */}
+        {hasChildren && onExpandToggle && (
           <button
             onClick={(e) => {
               e.stopPropagation()
