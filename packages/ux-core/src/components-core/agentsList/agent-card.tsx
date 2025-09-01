@@ -38,6 +38,7 @@ export const AgentCard: React.FC<{
   onExpandToggle?: (agent: Agent) => void
   isExpanded?: boolean
   selectedAgentId?: string
+  viewMode?: 'list' | 'hierarchical'
 }> = ({
   agent,
   isSelected,
@@ -46,6 +47,7 @@ export const AgentCard: React.FC<{
   onExpandToggle,
   isExpanded,
   selectedAgentId,
+  viewMode = 'hierarchical',
 }) => {
   const hasChildren = agent.children && agent.children.length > 0
 
@@ -53,7 +55,9 @@ export const AgentCard: React.FC<{
     <div className={`${isChild ? 'ml-6' : ''}`}>
       <button
         onClick={() => onSelect(agent)}
-        className="flex items-center px-4 py-3 space-x-3 w-full rounded-xl border shadow-sm transition-all duration-200"
+        className={`flex items-center px-4 py-3 space-x-3 w-full rounded-xl border shadow-sm transition-all duration-200 ${
+          isSelected ? 'ring-2 ring-offset-2' : ''
+        }`}
         style={{
           backgroundColor: isSelected
             ? coreColors.brand.primary
@@ -65,6 +69,7 @@ export const AgentCard: React.FC<{
           boxShadow: isSelected
             ? '0 4px 12px rgba(0, 0, 0, 0.15)'
             : '0 1px 3px rgba(0, 0, 0, 0.1)',
+          ringColor: isSelected ? coreColors.brand.primary : 'transparent',
         }}
         onMouseEnter={(e) => {
           if (!isSelected) {
@@ -153,8 +158,8 @@ export const AgentCard: React.FC<{
         </div>
       </button>
 
-      {/* Child agents */}
-      {hasChildren && isExpanded && (
+      {/* Child agents - only show in hierarchical mode */}
+      {hasChildren && isExpanded && viewMode === 'hierarchical' && (
         <div className="mt-1 space-y-1">
           {agent.children?.map((child) => (
             <AgentCard
@@ -164,6 +169,7 @@ export const AgentCard: React.FC<{
               isChild={true}
               onSelect={onSelect}
               selectedAgentId={selectedAgentId}
+              viewMode={viewMode}
             />
           ))}
         </div>

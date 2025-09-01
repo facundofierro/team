@@ -40,3 +40,4 @@ export {
 } from './select'
 export { Badge, badgeVariants } from './badge'
 export { Separator } from './separator'
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs'

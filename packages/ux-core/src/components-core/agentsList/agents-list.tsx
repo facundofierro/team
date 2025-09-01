@@ -94,7 +94,9 @@ export const AgentsList: React.FC<AgentsListProps> = ({
       const flattened: Agent[] = []
       const flattenAgents = (agentList: Agent[]) => {
         agentList.forEach((agent) => {
+          // Add the current agent
           flattened.push(agent)
+          // Then add all its children
           if (agent.children && agent.children.length > 0) {
             flattenAgents(agent.children)
           }
@@ -125,7 +127,7 @@ export const AgentsList: React.FC<AgentsListProps> = ({
 
   return (
     <div
-      className={`p-6 bg-white rounded-xl border shadow-sm ${className}`}
+      className={`p-6 bg-white rounded-xl border shadow-sm flex flex-col h-full ${className}`}
       style={{
         backgroundColor: coreColors.background.card,
         borderColor: coreColors.border.light,
@@ -186,7 +188,7 @@ export const AgentsList: React.FC<AgentsListProps> = ({
       )}
 
       {/* Agents list */}
-      <div className="overflow-y-auto space-y-3 max-h-96">
+      <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
         {filteredAgents.map((agent) => (
           <AgentCard
             key={agent.id}
@@ -200,13 +202,14 @@ export const AgentsList: React.FC<AgentsListProps> = ({
             }
             isExpanded={expandedAgents.has(agent.id)}
             selectedAgentId={selectedAgentId}
+            viewMode={viewMode}
           />
         ))}
       </div>
 
       {/* Separator line before footer */}
       <div
-        className="mt-6 mb-4 -mx-6"
+        className="mt-auto mb-4 -mx-6"
         style={{
           borderTop: `1px solid ${coreColors.border.light}`,
         }}
