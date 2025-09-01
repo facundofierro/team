@@ -137,7 +137,7 @@ export const AgentsList: React.FC<AgentsListProps> = ({
 
       {/* Separator line after header */}
       <div
-        className="mb-4"
+        className="mb-4 -mx-6"
         style={{
           borderBottom: `1px solid ${coreColors.border.light}`,
         }}
@@ -163,7 +163,7 @@ export const AgentsList: React.FC<AgentsListProps> = ({
       {/* Separator line after filter bar */}
       {showSearch && (
         <div
-          className="mb-4"
+          className="mb-4 -mx-6"
           style={{
             borderBottom: `1px solid ${coreColors.border.light}`,
           }}
@@ -184,11 +184,16 @@ export const AgentsList: React.FC<AgentsListProps> = ({
         ))}
       </div>
 
-      {/* Footer */}
+      {/* Separator line before footer */}
       <div
-        className="flex justify-between items-center pt-4 mt-6 border-t"
-        style={{ borderColor: coreColors.border.light }}
-      >
+        className="mt-6 mb-4 -mx-6"
+        style={{
+          borderTop: `1px solid ${coreColors.border.light}`,
+        }}
+      />
+
+      {/* Footer */}
+      <div className="flex justify-between items-center">
         <div
           className="flex items-center space-x-2 text-sm"
           style={{ color: coreColors.text.tertiary }}
