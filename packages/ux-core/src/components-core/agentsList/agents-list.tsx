@@ -89,8 +89,23 @@ export const AgentsList: React.FC<AgentsListProps> = ({
       filtered = filtered.filter((agent) => agent.status === activeTab)
     }
 
+    // In list mode, flatten the hierarchy to show all agents at the same level
+    if (viewMode === 'list') {
+      const flattened: Agent[] = []
+      const flattenAgents = (agentList: Agent[]) => {
+        agentList.forEach((agent) => {
+          flattened.push(agent)
+          if (agent.children && agent.children.length > 0) {
+            flattenAgents(agent.children)
+          }
+        })
+      }
+      flattenAgents(filtered)
+      return flattened
+    }
+
     return filtered
-  }, [agents, searchQuery, activeTab])
+  }, [agents, searchQuery, activeTab, viewMode])
 
   // Handle agent selection
   const handleAgentSelect = (agent: Agent) => {
@@ -178,8 +193,13 @@ export const AgentsList: React.FC<AgentsListProps> = ({
             agent={agent}
             isSelected={selectedAgentId === agent.id}
             onSelect={handleAgentSelect}
-            onExpandToggle={showHierarchical ? handleExpandToggle : undefined}
+            onExpandToggle={
+              showHierarchical && viewMode === 'hierarchical'
+                ? handleExpandToggle
+                : undefined
+            }
             isExpanded={expandedAgents.has(agent.id)}
+            selectedAgentId={selectedAgentId}
           />
         ))}
       </div>

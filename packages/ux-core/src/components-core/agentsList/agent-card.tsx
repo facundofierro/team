@@ -37,6 +37,7 @@ export const AgentCard: React.FC<{
   onSelect: (agent: Agent) => void
   onExpandToggle?: (agent: Agent) => void
   isExpanded?: boolean
+  selectedAgentId?: string
 }> = ({
   agent,
   isSelected,
@@ -44,6 +45,7 @@ export const AgentCard: React.FC<{
   onSelect,
   onExpandToggle,
   isExpanded,
+  selectedAgentId,
 }) => {
   const hasChildren = agent.children && agent.children.length > 0
 
@@ -158,9 +160,10 @@ export const AgentCard: React.FC<{
             <AgentCard
               key={child.id}
               agent={child}
-              isSelected={false}
+              isSelected={selectedAgentId === child.id}
               isChild={true}
               onSelect={onSelect}
+              selectedAgentId={selectedAgentId}
             />
           ))}
         </div>

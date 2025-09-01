@@ -1,5 +1,5 @@
 import React from 'react'
-import { Search, Filter, List, Grid3X3, Plus } from 'lucide-react'
+import { Search, Filter, List, TreePine, Plus } from 'lucide-react'
 import { coreColors } from '../light-theme-colors'
 import type { ViewMode } from './types'
 
@@ -141,7 +141,7 @@ export const ActionButtons: React.FC<{
             }
           }}
         >
-          <Grid3X3 className="w-4 h-4" />
+          <TreePine className="w-4 h-4" />
         </button>
       </div>
 
