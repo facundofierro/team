@@ -1,0 +1,46 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    '../../src/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // TeamHub design system colors
+        'bg-menu': '#1a1a1a',
+        'bg-menu2': '#2a2a2a',
+        'bg-background': '#0a0a0a',
+        'bg-card': '#1a1a1a',
+        'bg-popover': '#2a2a2a',
+        'bg-accent': '#3a3a3a',
+        'bg-muted': '#2a2a2a',
+        'bg-destructive': '#dc2626',
+        'bg-border': '#404040',
+        'bg-input': '#2a2a2a',
+        'bg-ring': '#3b82f6',
+        'bg-primary': '#3b82f6',
+        'bg-secondary': '#6b7280',
+        'bg-foreground': '#ffffff',
+        'bg-muted-foreground': '#9ca3af',
+        'bg-destructive-foreground': '#ffffff',
+        'bg-primary-foreground': '#ffffff',
+        'bg-secondary-foreground': '#ffffff',
+        'bg-accent-foreground': '#ffffff',
+        'bg-popover-foreground': '#ffffff',
+        'bg-card-foreground': '#ffffff',
+        'bg-elegant-success': '#10b981',
+        'bg-elegant-error': '#ef4444',
+        'bg-elegant-warning': '#f59e0b',
+        'bg-elegant-neutral': '#6b7280',
+        'bg-elegant-status-success-50': '#ecfdf5',
+        'bg-elegant-status-error-50': '#fef2f2',
+        'bg-elegant-status-warning-50': '#fffbeb',
+        'bg-elegant-neutral-50': '#f9fafb',
+      },
+    },
+  },
+  plugins: [],
+}

@@ -8,7 +8,12 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint src --ext .ts,.tsx",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "dev:test": "cd ../../apps/ux-core-test-server && pnpm dev",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -33,6 +38,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.40.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "eslint": "^8.0.0",
