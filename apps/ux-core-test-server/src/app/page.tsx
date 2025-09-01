@@ -27,6 +27,13 @@ const componentCategories = [
         description:
           'Interactive agents list with search, filtering, and hierarchical view',
       },
+      {
+        name: 'Tabs Demo',
+        path: '/tabs-demo',
+        implemented: true,
+        description:
+          'TeamHub tabs component with animated indicators and multiple variants',
+      },
     ],
   },
   {

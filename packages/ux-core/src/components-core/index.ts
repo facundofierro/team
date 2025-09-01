@@ -68,8 +68,4 @@ export {
 } from './agentsList'
 
 // Tabs Components
-export {
-  TeamHubTabs,
-  type TeamHubTabsProps,
-  type TeamHubTabItem,
-} from './tabs'
+export { TeamHubTabs, type TeamHubTabsProps, type TeamHubTabItem } from './tabs'
