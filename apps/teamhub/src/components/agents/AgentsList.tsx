@@ -144,8 +144,8 @@ export function AgentsList({ organizationId }: AgentsListProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full text-white bg-neutral-600">
-        <div className="flex-1 p-4">
+      <div className="flex flex-col h-full text-white bg-neutral-600 p-4">
+        <div className="flex-1">
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
@@ -162,8 +162,8 @@ export function AgentsList({ organizationId }: AgentsListProps) {
   // Show empty state if no agents exist
   if (agents.length === 0) {
     return (
-      <div className="flex flex-col h-full text-white bg-neutral-600">
-        <div className="flex flex-col flex-1 justify-center items-center p-4 text-center">
+      <div className="flex flex-col h-full text-white bg-neutral-600 p-4">
+        <div className="flex flex-col flex-1 justify-center items-center text-center">
           <div className="mb-6">
             <h3 className="mb-2 text-lg font-semibold text-white">
               No Agents Yet
@@ -195,7 +195,7 @@ export function AgentsList({ organizationId }: AgentsListProps) {
   }
 
   return (
-    <div className="flex flex-col h-full text-white bg-neutral-600">
+    <div className="flex flex-col h-full text-white bg-neutral-600 p-4">
       <UXAgentsList
         agents={uxAgents}
         onAgentSelect={handleAgentSelect}

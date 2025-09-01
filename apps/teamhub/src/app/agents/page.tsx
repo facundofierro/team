@@ -15,7 +15,7 @@ export default async function AgentsPage({ searchParams }: PageProps) {
       className="flex h-screen"
       style={{ backgroundColor: 'rgb(237, 234, 224)' }}
     >
-      <div className="border-r w-60">
+      <div className="w-[28rem] border-r">
         <AgentsList organizationId={organizationId} />
       </div>
       <div className="flex-1 h-full">
