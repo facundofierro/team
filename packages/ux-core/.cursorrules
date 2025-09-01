@@ -1,0 +1,258 @@
+# UX-Core Color System Rules
+
+## 🎨 **Color System Enforcement**
+
+This file enforces strict color usage rules for the `@teamhub/ux-core` package to maintain design consistency and prevent hardcoded colors.
+
+## 📋 **Core Rules**
+
+### **1. MANDATORY Color System Usage**
+
+**ALWAYS use colors from the defined color systems:**
+
+```tsx
+// ✅ CORRECT: Import and use defined colors
+import { coreColors, coreUtils } from '../light-theme-colors'
+import { componentColors, componentUtils } from '../dark-theme-colors'
+
+// Use color system
+style={{ color: coreColors.text.primary }}
+style={{ backgroundColor: componentColors.background.main }}
+```
+
+**❌ FORBIDDEN: Hardcoded colors**
+
+```tsx
+// ❌ WRONG: Never use hardcoded colors
+style={{ color: '#FFFFFF' }}
+style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+className="text-white bg-gray-100"
+```
+
+### **2. Theme-Specific Color Usage**
+
+**Light Theme Components** (buttons, forms, cards):
+
+- **MUST** import from `light-theme-colors.ts`
+- **MUST** use `coreColors` and `coreUtils`
+- **MUST** use for: buttons, forms, cards, inputs, selects, textareas
+
+**Dark Theme Components** (sidebar, navigation):
+
+- **MUST** import from `dark-theme-colors.ts`
+- **MUST** use `componentColors` and `componentUtils`
+- **MUST** use for: sidebar, navigation, dark modals, overlays
+
+### **3. Color System Structure**
+
+**Light Theme Colors** (`light-theme-colors.ts`):
+
+```tsx
+// Available color categories
+coreColors.background.*    // primary, secondary, tertiary, card, footer
+coreColors.text.*         // primary, secondary, tertiary, inverse, disabled
+coreColors.border.*       // light, medium, strong, focus
+coreColors.interactive.*  // button states, primary states, action states
+coreColors.focus.*        // ring, ringOffset
+coreColors.brand.*        // primary, secondary, accent
+coreColors.status.*       // success, warning, error, info
+
+// Utility functions
+coreUtils.getButtonDefault(type)
+coreUtils.getButtonHover(type)
+coreUtils.getFocusStyles()
+```
+
+**Dark Theme Colors** (`dark-theme-colors.ts`):
+
+```tsx
+// Available color categories
+componentColors.background.*  // main, header, footer, card, dropdown, modal, overlay
+componentColors.border.*      // main, header, footer, card, dropdown, submenu, focus
+componentColors.text.*        // primary, secondary, tertiary, inverse, brand, disabled
+componentColors.interactive.* // nav states, submenu states, button states, dropdown states
+componentColors.brand.*       // iconBackground, iconColor, primary, secondary
+componentColors.status.*      // success, warning, error, info
+componentColors.effects.*     // backdropFilter variants
+componentColors.shadows.*     // sm, md, lg, xl, 2xl
+
+// Utility functions
+componentUtils.getComponentShadow(size)
+componentUtils.getHoverTransform(direction)
+componentUtils.getTransition(duration)
+componentUtils.getFocusStyles(color)
+componentUtils.getGlassEffect(intensity)
+```
+
+## 🚫 **Strict Prohibitions**
+
+### **1. No Hardcoded Colors**
+
+- **NEVER** use hex colors: `#FFFFFF`, `#8A548C`, `#F4F3F5`
+- **NEVER** use rgba colors: `rgba(255, 255, 255, 0.1)`
+- **NEVER** use rgb colors: `rgb(255, 255, 255)`
+- **NEVER** use CSS color names: `white`, `black`, `gray`, `purple`
+
+### **2. No Tailwind Color Classes**
+
+- **NEVER** use Tailwind color classes: `text-white`, `bg-gray-100`, `border-red-500`
+- **NEVER** use Tailwind focus rings: `focus:ring-2`, `focus:ring-blue-500`
+- **ALWAYS** use `coreUtils.getFocusStyles()` for focus states
+
+### **3. No Mixed Theme Colors**
+
+- **NEVER** mix `coreColors` and `componentColors` in the same component
+- **NEVER** use light theme colors in dark components
+- **NEVER** use dark theme colors in light components
+
+## ✅ **Required Patterns**
+
+### **1. Component Color Imports**
+
+```tsx
+// For light theme components (buttons, forms, cards)
+import { coreColors, coreUtils } from '../light-theme-colors'
+
+// For dark theme components (sidebar, navigation)
+import { componentColors, componentUtils } from '../dark-theme-colors'
+```
+
+### **2. Style Object Usage**
+
+```tsx
+// ✅ CORRECT: Use style objects with color system
+<button
+  style={{
+    ...coreUtils.getButtonDefault('primary'),
+    ...coreUtils.getFocusStyles(),
+  }}
+>
+
+// ✅ CORRECT: Use color system in style objects
+<div style={{
+  backgroundColor: componentColors.background.main,
+  color: componentColors.text.primary,
+  borderColor: componentColors.border.main,
+}}>
+```
+
+### **3. Interactive States**
+
+```tsx
+// ✅ CORRECT: Use utility functions for states
+onMouseEnter={(e) => {
+  Object.assign(e.currentTarget.style, coreUtils.getButtonHover('primary'))
+}}
+onMouseLeave={(e) => {
+  Object.assign(e.currentTarget.style, coreUtils.getButtonDefault('primary'))
+}}
+```
+
+### **4. Focus States**
+
+```tsx
+// ✅ CORRECT: Use focus utilities (no blue focus rings!)
+onFocus={(e) => {
+  Object.assign(e.currentTarget.style, coreUtils.getFocusStyles())
+}}
+```
+
+## 🔧 **Component-Specific Rules**
+
+### **Button Components**
+
+- **MUST** use `coreUtils.getButtonDefault(type)` and `coreUtils.getButtonHover(type)`
+- **MUST** use `coreUtils.getFocusStyles()` for focus states
+- **MUST** import from `light-theme-colors.ts`
+
+### **Form Components**
+
+- **MUST** use `coreColors.text.*` for labels and text
+- **MUST** use `coreColors.border.*` for borders
+- **MUST** use `coreColors.background.*` for backgrounds
+- **MUST** import from `light-theme-colors.ts`
+
+### **Sidebar Components**
+
+- **MUST** use `componentColors.*` for all styling
+- **MUST** use `componentUtils.getGlassEffect()` for glass morphism
+- **MUST** use `componentUtils.getComponentShadow()` for shadows
+- **MUST** import from `dark-theme-colors.ts`
+
+### **Navigation Components**
+
+- **MUST** use `componentColors.interactive.*` for nav states
+- **MUST** use `componentUtils.getHoverTransform()` for hover effects
+- **MUST** import from `dark-theme-colors.ts`
+
+## 🎯 **Code Review Checklist**
+
+When reviewing ux-core components, ensure:
+
+1. **✅ Color Imports**: Component imports from correct color system
+2. **✅ No Hardcoded Colors**: No hex, rgba, rgb, or CSS color names
+3. **✅ No Tailwind Colors**: No Tailwind color classes
+4. **✅ Theme Consistency**: Uses appropriate theme colors
+5. **✅ Utility Functions**: Uses provided utility functions
+6. **✅ Focus States**: Uses `getFocusStyles()` instead of default focus rings
+7. **✅ Interactive States**: Uses proper hover/active state utilities
+
+## 🚨 **Common Violations to Fix**
+
+### **Fix Hardcoded Colors**
+
+```tsx
+// ❌ BEFORE: Hardcoded colors
+style={{ color: '#FFFFFF' }}
+style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+
+// ✅ AFTER: Color system
+style={{ color: componentColors.text.primary }}
+style={{ backgroundColor: componentColors.background.card }}
+```
+
+### **Fix Tailwind Color Classes**
+
+```tsx
+// ❌ BEFORE: Tailwind colors
+className="text-white bg-gray-100 border-red-500"
+
+// ✅ AFTER: Color system
+style={{
+  color: coreColors.text.primary,
+  backgroundColor: coreColors.background.secondary,
+  borderColor: coreColors.status.error,
+}}
+```
+
+### **Fix Focus States**
+
+```tsx
+// ❌ BEFORE: Default focus rings
+className="focus:ring-2 focus:ring-blue-500"
+
+// ✅ AFTER: Color system focus
+onFocus={(e) => {
+  Object.assign(e.currentTarget.style, coreUtils.getFocusStyles())
+}}
+```
+
+## 📚 **Reference Files**
+
+- **Light Theme**: `packages/ux-core/src/components-core/light-theme-colors.ts`
+- **Dark Theme**: `packages/ux-core/src/components-core/dark-theme-colors.ts`
+- **Color System Docs**: `packages/ux-core/src/components-core/COLOR_SYSTEM.md`
+
+## 🎨 **Design System Benefits**
+
+Following these rules ensures:
+
+- **Consistency**: All components use the same color palette
+- **Maintainability**: Color changes happen in one place
+- **Accessibility**: Proper contrast ratios and focus states
+- **Brand Compliance**: No blue colors, consistent purple theme
+- **Performance**: No CSS conflicts or overrides
+
+---
+
+**Remember**: The color system is designed to eliminate blue colors and maintain TeamHub's purple brand identity. Always use the provided color systems and utility functions.

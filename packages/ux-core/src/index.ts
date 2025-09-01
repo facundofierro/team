@@ -2,6 +2,12 @@
 export * from './types'
 export * from './utils'
 
+// Hooks
+export * from './hooks/use-mobile'
+
+// Styles and Design System
+export * from './styles/color-tokens'
+
 // Component library exports
 export * from './components/shadcn'
 export * from './components/tailark'
@@ -44,3 +50,9 @@ export {
   DialogTitle,
   DialogTrigger,
 } from './components/shadcn/dialog'
+export {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from './components/shadcn/tabs'

@@ -4,6 +4,7 @@
  */
 
 import type { QueryRegistry, HookState } from '../core/types'
+import { log } from '@repo/logger'
 
 export class ReactiveStorage {
   private storageKey = '@drizzle/reactive:registry'
@@ -79,7 +80,13 @@ export class ReactiveStorage {
       const registry = JSON.parse(stored) as QueryRegistry
       return registry
     } catch (error) {
-      console.warn('[ReactiveStorage] Failed to parse registry:', error)
+      log.drizzleReactive.client.warn(
+        'Failed to parse registry from localStorage',
+        undefined,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        }
+      )
       return null
     }
   }
@@ -91,15 +98,27 @@ export class ReactiveStorage {
     try {
       localStorage.setItem(this.indexKey, JSON.stringify(registry))
     } catch (error) {
-      console.warn('[ReactiveStorage] Failed to save registry:', error)
+      log.drizzleReactive.client.warn(
+        'Failed to save registry to localStorage',
+        undefined,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        }
+      )
       // Handle localStorage quota exceeded
       this.cleanupOldEntries()
       try {
         localStorage.setItem(this.indexKey, JSON.stringify(registry))
       } catch (retryError) {
-        console.error(
-          '[ReactiveStorage] Failed to save registry after cleanup:',
-          retryError
+        log.drizzleReactive.client.error(
+          'Failed to save registry after cleanup to localStorage',
+          undefined,
+          {
+            error:
+              retryError instanceof Error
+                ? retryError.message
+                : String(retryError),
+          }
         )
       }
     }
@@ -120,12 +139,17 @@ export class ReactiveStorage {
     const now = Date.now()
     const existingQuery = registry.queries[queryKey]
 
-    console.log(`💾 [ReactiveStorage] Registering query: ${queryKey}`, {
-      hasExistingData: !!existingQuery,
-      existingLastServerChange: existingQuery?.lastServerChange,
-      newDataExists: !!data,
-      timestamp: now,
-    })
+    log.drizzleReactive.client.debug(
+      'Registering query in storage',
+      undefined,
+      {
+        queryKey,
+        hasExistingData: !!existingQuery,
+        existingLastServerChange: existingQuery?.lastServerChange,
+        newDataExists: !!data,
+        timestamp: now,
+      }
+    )
 
     // Check if data actually changed
     const dataChanged =
@@ -149,7 +173,9 @@ export class ReactiveStorage {
       const entryPayload = JSON.stringify({ name, input, queryKey, data })
       localStorage.setItem(entryKey, entryPayload)
     } catch (e) {
-      console.warn('[ReactiveStorage] Failed to write entry for', queryKey, e)
+      log.drizzleReactive.client.warn('Failed to write entry for', undefined, {
+        error: e instanceof Error ? e.message : String(e),
+      })
     }
 
     // Store only metadata in the index
@@ -165,7 +191,8 @@ export class ReactiveStorage {
     registry.session.lastSync = now
 
     this.saveRegistry(registry)
-    console.log(`✅ [ReactiveStorage] Query registered: ${queryKey}`, {
+    log.drizzleReactive.client.debug('Query registered in storage', undefined, {
+      queryKey,
       dataChanged,
       isStale: false, // Fresh data is never stale
     })
@@ -182,7 +209,13 @@ export class ReactiveStorage {
       // Keep the data but mark as needing revalidation
       registry.queries[queryKey].lastServerChange = Date.now()
       this.saveRegistry(registry)
-      console.log(`🔄 [ReactiveStorage] Query marked as stale: ${queryKey}`)
+      log.drizzleReactive.client.debug(
+        'Query marked as stale in storage',
+        undefined,
+        {
+          queryKey,
+        }
+      )
     }
   }
 
@@ -197,8 +230,12 @@ export class ReactiveStorage {
       // Simulate a server-side change by setting lastServerChange to future
       registry.queries[queryKey].lastServerChange = Date.now() + 1000 // 1 second in future
       this.saveRegistry(registry)
-      console.log(
-        `🧪 [ReactiveStorage] Query marked as stale for testing: ${queryKey}`
+      log.drizzleReactive.client.debug(
+        'Query marked as stale for testing in storage',
+        undefined,
+        {
+          queryKey,
+        }
       )
     }
   }
@@ -253,12 +290,17 @@ export class ReactiveStorage {
       queryData.lastServerChange !== undefined &&
       queryData.lastServerChange > queryData.lastRevalidated
 
-    console.log(`🔍 [ReactiveStorage] Getting cached data for: ${queryKey}`, {
-      isStale,
-      lastRevalidated: queryData.lastRevalidated,
-      lastServerChange: queryData.lastServerChange,
-      timestamp: Date.now(),
-    })
+    log.drizzleReactive.client.debug(
+      'Getting cached data from storage',
+      undefined,
+      {
+        queryKey,
+        isStale,
+        lastRevalidated: queryData.lastRevalidated,
+        lastServerChange: queryData.lastServerChange,
+        timestamp: Date.now(),
+      }
+    )
 
     // Read data from its own entry key
     let data: any = undefined
@@ -270,7 +312,14 @@ export class ReactiveStorage {
         data = parsed?.data
       }
     } catch (e) {
-      console.warn('[ReactiveStorage] Failed to read entry for', queryKey, e)
+      log.drizzleReactive.client.warn(
+        'Failed to read entry from localStorage',
+        undefined,
+        {
+          queryKey,
+          error: e instanceof Error ? e.message : String(e),
+        }
+      )
     }
 
     return {
@@ -436,8 +485,13 @@ export class ReactiveStorage {
     registry.queries = newQueries
     this.saveRegistry(registry)
 
-    console.log(
-      `[ReactiveStorage] Cleaned up old entries, keeping ${keepCount} of ${entries.length}`
+    log.drizzleReactive.client.debug(
+      'Cleaned up old entries from storage',
+      undefined,
+      {
+        keptCount: keepCount,
+        totalEntries: entries.length,
+      }
     )
   }
 
@@ -470,8 +524,17 @@ export class ReactiveStorage {
         })
       }
       localStorage.removeItem(this.indexKey)
+      log.drizzleReactive.client.debug(
+        'Cleared all registry data for organization',
+        undefined,
+        {
+          organizationId: this.organizationId,
+        }
+      )
     } catch (error) {
-      console.warn('[ReactiveStorage] Failed to clear registry:', error)
+      log.drizzleReactive.client.warn('Failed to clear registry', undefined, {
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
