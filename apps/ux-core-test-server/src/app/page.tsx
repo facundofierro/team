@@ -102,15 +102,11 @@ export default function HomePage() {
             </div>
             <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-gray-900">5</div>
-              <div className="text-sm text-gray-600">
-                Implemented
-              </div>
+              <div className="text-sm text-gray-600">Implemented</div>
             </div>
             <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-gray-900">7</div>
-              <div className="text-sm text-gray-600">
-                Total Components
-              </div>
+              <div className="text-sm text-gray-600">Total Components</div>
             </div>
             <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-green-600">71%</div>

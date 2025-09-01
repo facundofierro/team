@@ -100,12 +100,12 @@ export default function SidebarDemoPage() {
           activeNavItem={selectedItem}
           onNavItemChange={handleItemClick}
           logo={{
-            text: 'TeamHub',
+            text: 'Agelum',
             subtitle: 'AI Platform',
           }}
           user={{
             name: 'John Doe',
-            email: 'john@teamhub.com',
+            email: 'john@agelum.com',
             initials: 'JD',
           }}
           actions={{
@@ -183,14 +183,14 @@ export default function SidebarDemoPage() {
               {/* Default TeamHub Items */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">
-                  Default TeamHub Items
+                  Default Agelum Items
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  The sidebar can use predefined TeamHub navigation items
+                  The sidebar can use predefined Agelum navigation items
                 </p>
                 <div className="text-xs text-gray-500">
                   <pre className="bg-gray-50 p-3 rounded">
-                    {`defaultTeamHubItems = [
+                    {`defaultAgelumItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'agents', label: 'AI Agents', icon: Users },
   { id: 'workflows', label: 'Workflows', icon: Workflow },
@@ -250,7 +250,7 @@ export default function SidebarDemoPage() {
                   <div className="text-xs text-gray-500">
                     <pre className="bg-gray-50 p-3 rounded">
                       {`<Sidebar
-  items={defaultTeamHubItems}
+  items={defaultAgelumItems}
   isCollapsed={false}
   onToggleCollapse={handleToggle}
   onItemClick={handleClick}

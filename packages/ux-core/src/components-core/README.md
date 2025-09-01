@@ -6,10 +6,24 @@ This package contains reusable UI components for TeamHub applications. All compo
 
 ### Color Management
 
-All components use the centralized color system from `component-colors.ts`:
+We have **two separate color systems** for different use cases. See [COLOR_SYSTEM.md](./COLOR_SYSTEM.md) for detailed information about our color organization.
+
+#### Light Theme Colors (for buttons, forms, cards)
 
 ```typescript
-import { componentColors, componentUtils } from './component-colors'
+import { coreColors, coreUtils } from '@teamhub/ux-core'
+
+// Usage examples:
+const styles = {
+  ...coreUtils.getButtonDefault('primary'),
+  ...coreUtils.getFocusStyles(), // Purple focus ring, no blue!
+}
+```
+
+#### Dark Theme Colors (for sidebar, navigation)
+
+```typescript
+import { componentColors, componentUtils } from '@teamhub/ux-core'
 
 // Usage examples:
 const styles = {
@@ -20,83 +34,63 @@ const styles = {
 }
 ```
 
-### Available Color Categories
+### Key Features
 
-- **Background**: `main`, `header`, `footer`, `card`, `dropdown`, `modal`, `overlay`
-- **Border**: `main`, `header`, `footer`, `card`, `dropdown`, `submenu`, `focus`, `focusStrong`
-- **Text**: `primary`, `secondary`, `tertiary`, `inverse`, `brand`, `brandSubtitle`, `disabled`
-- **Interactive**: Navigation, submenu, buttons, dropdowns, form elements
-- **Brand**: `iconBackground`, `iconColor`, `primary`, `secondary`
-- **Status**: `success`, `warning`, `error`, `info`
-- **Effects**: `backdropFilter`, `backdropFilterLight`, `backdropFilterDropdown`, `backdropFilterModal`
-- **Shadows**: `sm`, `md`, `lg`, `xl`, `2xl`
+- **No Blue Colors Policy**: Both systems eliminate blue colors from our design
+- **Purple Focus Rings**: Consistent purple focus states instead of default blue
+- **Theme Separation**: Clear distinction between light and dark themed components
+- **Utility Functions**: Pre-built styles for common patterns
 
-### Utility Functions
+For complete color system documentation, see [COLOR_SYSTEM.md](./COLOR_SYSTEM.md).
 
-```typescript
-// Shadow styles
-componentUtils.getComponentShadow('md')
+## 🧩 Available Components
 
-// Hover transforms
-componentUtils.getHoverTransform('up') // 'up', 'right', 'down', 'left'
+### Button Components (Light Theme)
 
-// Focus styles
-componentUtils.getFocusStyles()
+All button components use the light theme color system (`coreColors`, `coreUtils`):
 
-// Glass morphism effects
-componentUtils.getGlassEffect('medium') // 'light', 'medium', 'strong'
-```
+- **PrimaryButton** - Gradient background button with purple focus ring
+- **ActionButton** - Solid background button for primary actions
+- **TertiaryButton** - Outline button for secondary actions
+- **GhostButton** - Transparent button for header actions
+- **SaveButton** - Pre-configured save action button
+- **ResetButton** - Pre-configured reset action button
+- **AddButton** - Pre-configured add action button
 
-## 🧩 Component Structure
+### Sidebar Components (Dark Theme)
 
-### Basic Component Template
+Sidebar components use the dark theme color system (`componentColors`, `componentUtils`):
 
-```typescript
-'use client'
+- **Sidebar** - Main sidebar component with navigation
+- **defaultTeamHubItems** - Pre-configured navigation items
 
-import * as React from 'react'
-import { componentColors, componentUtils } from './component-colors'
+### User Components
 
-export interface ComponentNameProps {
-  // Props interface
-  className?: string
-  children?: React.ReactNode
-  // Add other props as needed
-}
+- **UserProfile** - User profile display component
+- **UserMenu** - User menu dropdown component
 
-export const ComponentName = ({
-  className,
-  children,
-  ...props
-}: ComponentNameProps) => {
-  // Component logic here
+### Form Components (Light Theme)
 
-  return (
-    <div
-      className={`component-name ${className || ''}`}
-      style={{
-        backgroundColor: componentColors.background.card,
-        borderColor: componentColors.border.card,
-        color: componentColors.text.primary,
-        ...componentUtils.getComponentShadow('sm'),
-      }}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-}
-```
+- **FormCard** - Card wrapper for form content
+
+### Typography Components
+
+- **TitleWithSubtitle** - Typography component for titles with subtitles
+
+### Switcher Components (Light Theme)
+
+- **ActiveIndicator** - Active state indicator component
 
 ### Component Guidelines
 
 1. **Always use `'use client'`** for interactive components
-2. **Import colors from `component-colors.ts`** - never use hardcoded colors
-3. **Define explicit prop interfaces** with TypeScript
-4. **Use semantic class names** with component prefix
-5. **Include proper event handlers** for interactive elements
-6. **Add data-testid attributes** for testing
-7. **Export components** from the main index file
+2. **Import the correct color system** - `coreColors` for light theme, `componentColors` for dark theme
+3. **Never use hardcoded colors** - always use the color system
+4. **Define explicit prop interfaces** with TypeScript
+5. **Use semantic class names** with component prefix
+6. **Include proper event handlers** for interactive elements
+7. **Add data-testid attributes** for testing
+8. **Export components** from the main index file
 
 ### Interactive Component Example
 
@@ -196,28 +190,40 @@ export const Button = ({
 
 ## 🎯 Adding New Colors
 
-When you need new colors for a component:
+When you need new colors for a component, follow the guidelines in [COLOR_SYSTEM.md](./COLOR_SYSTEM.md):
 
-1. **Add to `component-colors.ts`** in the appropriate category
-2. **Use semantic names** that describe the purpose, not the color
-3. **Reference the main elegant color system** when possible
-4. **Add TypeScript types** for new color categories
+1. **Choose the right color system**:
+
+   - Use `light-theme-colors.ts` for buttons, forms, cards (light backgrounds)
+   - Use `dark-theme-colors.ts` for sidebar, navigation (dark backgrounds)
+
+2. **Add to the appropriate color file** in the correct category
+3. **Use semantic names** that describe the purpose, not the color
+4. **Maintain the no-blue policy** - use purple for focus states
+5. **Add TypeScript types** for new color categories
 
 ```typescript
-// In component-colors.ts
-export const componentColors = {
+// For light theme components
+// In light-theme-colors.ts
+export const coreColors = {
   // ... existing colors
-
-  // New category for your component
   newComponent: {
-    background: elegantColors.background.dark,
-    text: elegantColors.text.primary,
-    accent: elegantColors.accent.lavender,
+    background: '#ffffff',
+    text: '#1a1a1a',
+    accent: '#8b5cf6', // Purple, not blue
   },
 } as const
 
-// Add type export
-export type ComponentNewComponentKey = keyof typeof componentColors.newComponent
+// For dark theme components
+// In dark-theme-colors.ts
+export const componentColors = {
+  // ... existing colors
+  newComponent: {
+    background: '#1a1a1a',
+    text: '#ffffff',
+    accent: '#8b5cf6', // Purple, not blue
+  },
+} as const
 ```
 
 ## 🧪 Testing Components
@@ -278,17 +284,32 @@ export default function YourComponentTestPage() {
 ```
 packages/ux-core/src/components-core/
 ├── README.md                    # This file
-├── component-colors.ts          # Centralized color system
+├── COLOR_SYSTEM.md              # Color system documentation
 ├── index.ts                     # Main exports
-├── sidebar.tsx                  # Sidebar component
-├── button.tsx                   # Button component
-├── card.tsx                     # Card component
-├── modal.tsx                    # Modal component
-├── dropdown.tsx                 # Dropdown component
-└── form/                        # Form components
-    ├── input.tsx
-    ├── select.tsx
-    └── checkbox.tsx
+├── light-theme-colors.ts        # Light theme color system
+├── dark-theme-colors.ts         # Dark theme color system
+├── buttons/                     # Button components (light theme)
+│   ├── index.ts
+│   ├── primary-button.tsx
+│   ├── action-button.tsx
+│   ├── tertiary-button.tsx
+│   └── ghost-button.tsx
+├── sidebar/                     # Sidebar components (dark theme)
+│   ├── index.ts
+│   ├── sidebar.tsx
+│   └── navigation-items.tsx
+├── user/                        # User components
+│   ├── index.ts
+│   └── user-profile.tsx
+├── form-card/                   # Form components (light theme)
+│   ├── index.ts
+│   └── form-card.tsx
+├── typography/                  # Typography components
+│   ├── index.ts
+│   └── title-with-subtitle.tsx
+└── switchers/                   # Switcher components (light theme)
+    ├── index.ts
+    └── active-indicator.tsx
 ```
 
 ## 🔄 Component Lifecycle
@@ -338,18 +359,35 @@ packages/ux-core/src/components-core/
 
 ## 📚 Examples
 
-See existing components like `sidebar.tsx` for complete examples of:
+See existing components for complete examples:
 
-- Color system usage
-- Interactive states
-- Event handling
-- Accessibility features
-- Responsive design
+### Light Theme Components
+
+- **PrimaryButton** (`buttons/primary-button.tsx`) - Shows light theme color usage
+- **FormCard** (`form-card/form-card.tsx`) - Form component with light theme
+- **ActiveIndicator** (`switchers/active-indicator.tsx`) - Switcher with light theme
+
+### Dark Theme Components
+
+- **Sidebar** (`sidebar/sidebar.tsx`) - Shows dark theme color usage and navigation
+
+All components demonstrate:
+
+- Proper color system usage
+- Interactive states and hover effects
+- Event handling patterns
+- Accessibility features (ARIA labels, keyboard navigation)
+- Responsive design principles
 
 ## 🤝 Contributing
 
-1. Follow the established patterns and color system
-2. Add comprehensive tests in the test server
-3. Update this README if adding new patterns
-4. Ensure all components work across different screen sizes
-5. Test with keyboard navigation and screen readers
+1. **Follow the established patterns and color system** - see [COLOR_SYSTEM.md](./COLOR_SYSTEM.md)
+2. **Choose the right color system** for your component:
+   - Light theme (`coreColors`) for buttons, forms, cards
+   - Dark theme (`componentColors`) for sidebar, navigation
+3. **Add comprehensive tests** in the test server (`apps/ux-core-test-server`)
+4. **Update this README** if adding new patterns or components
+5. **Ensure all components work** across different screen sizes
+6. **Test with keyboard navigation and screen readers**
+7. **Maintain the no-blue policy** - use purple for focus states
+8. **Export new components** from the appropriate index files
