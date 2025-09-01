@@ -27,18 +27,24 @@ export function TertiaryButton({
       onClick={onClick}
       disabled={disabled || loading}
       className={cn(
-        'px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200',
+        'px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200',
         'flex items-center space-x-2',
         'focus:outline-none focus:ring-2 focus:ring-offset-2',
-        disabled
-          ? 'opacity-50 cursor-not-allowed'
-          : 'hover:bg-gray-50 active:scale-95',
+        disabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-95',
         className
       )}
       style={{
-        backgroundColor: elegantColors.background.tertiary,
-        color: elegantColors.text.primary,
+        backgroundColor: 'transparent',
+        color: elegantColors.text.secondary,
       }}
+      onMouseEnter={(e) =>
+        !disabled &&
+        (e.currentTarget.style.backgroundColor =
+          elegantColors.interactive.ghostHover)
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.backgroundColor = 'transparent')
+      }
     >
       {loading ? (
         <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
