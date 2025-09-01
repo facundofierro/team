@@ -19,7 +19,57 @@ const componentCategories = [
     ],
   },
   {
-    name: 'Navigation Components',
+    name: 'Form Card',
+    components: [
+      {
+        name: 'Form Card',
+        path: '/components/form-card',
+        implemented: true,
+      },
+      {
+        name: 'Enhanced Input',
+        path: '/components/enhanced-input',
+        implemented: true,
+      },
+      {
+        name: 'Form Actions',
+        path: '/components/form-actions',
+        implemented: true,
+      },
+      {
+        name: 'Title With Subtitle',
+        path: '/components/title-with-subtitle',
+        implemented: true,
+      },
+    ],
+  },
+  {
+    name: 'Buttons',
+    components: [
+      {
+        name: 'Active Indicator',
+        path: '/components/active-indicator',
+        implemented: true,
+      },
+      {
+        name: 'Button Variants',
+        path: '/components/button-variants',
+        implemented: false,
+      },
+      {
+        name: 'Icon Button',
+        path: '/components/icon-button',
+        implemented: false,
+      },
+      {
+        name: 'Button Group',
+        path: '/components/button-group',
+        implemented: false,
+      },
+    ],
+  },
+  {
+    name: 'Sidebar',
     components: [
       { name: 'Sidebar', path: '/components/sidebar', implemented: true },
       {
@@ -36,23 +86,7 @@ const componentCategories = [
     ],
   },
   {
-    name: 'Layout Components',
-    components: [
-      { name: 'Layout', path: '/components/layout', implemented: false },
-      {
-        name: 'Page Header',
-        path: '/components/page-header',
-        implemented: false,
-      },
-      {
-        name: 'Content Container',
-        path: '/components/content-container',
-        implemented: false,
-      },
-    ],
-  },
-  {
-    name: 'Data Display Components',
+    name: 'Data Display',
     components: [
       {
         name: 'Status Indicator',
@@ -75,78 +109,6 @@ const componentCategories = [
         name: 'Empty State',
         path: '/components/empty-state',
         implemented: false,
-      },
-    ],
-  },
-  {
-    name: 'Form Components',
-    components: [
-      {
-        name: 'Form Section',
-        path: '/components/form-section',
-        implemented: false,
-      },
-      {
-        name: 'Enhanced Input',
-        path: '/components/enhanced-input',
-        implemented: true,
-      },
-      {
-        name: 'Enhanced Select',
-        path: '/components/enhanced-select',
-        implemented: false,
-      },
-      { name: 'Toggle', path: '/components/toggle', implemented: false },
-      {
-        name: 'Schedule Item',
-        path: '/components/schedule-item',
-        implemented: false,
-      },
-      { name: 'Tool Item', path: '/components/tool-item', implemented: false },
-      {
-        name: 'Form Actions',
-        path: '/components/form-actions',
-        implemented: false,
-      },
-    ],
-  },
-  {
-    name: 'Configuration Components',
-    components: [
-      {
-        name: 'Title With Subtitle',
-        path: '/components/title-with-subtitle',
-        implemented: true,
-      },
-      {
-        name: 'Configuration Card',
-        path: '/components/configuration-card',
-        implemented: true,
-      },
-      {
-        name: 'Basic Settings Card',
-        path: '/components/basic-settings-card',
-        implemented: true,
-      },
-      {
-        name: 'Prompt Card',
-        path: '/components/prompt-card',
-        implemented: true,
-      },
-      {
-        name: 'Scheduled Executions Card',
-        path: '/components/scheduled-executions-card',
-        implemented: true,
-      },
-      {
-        name: 'Tool Assignment Card',
-        path: '/components/tool-assignment-card',
-        implemented: true,
-      },
-      {
-        name: 'Security Access Card',
-        path: '/components/security-access-card',
-        implemented: true,
       },
     ],
   },

@@ -3,13 +3,16 @@
 import React, { useState } from 'react'
 import {
   TitleWithSubtitle,
-  BasicSettingsCard,
-  PromptCard,
-  ScheduledExecutionsCard,
-  ToolAssignmentCard,
-  SecurityAccessCard,
+  FormCard,
   FormActions,
+  EnhancedInput,
+  ActiveIndicator,
 } from '@teamhub/ux-core'
+import {
+  ConfigurationCard,
+  ScheduledExecutionItem,
+  ToolAssignmentItem,
+} from '@/components/configuration'
 
 // Sample data matching the screenshot
 const defaultSchedules = [
@@ -181,15 +184,14 @@ export default function DesignsDemoPage() {
       >
         {/* Header Section */}
         <div
-          className="p-6 border-b"
+          className="p-6 border-b flex items-center justify-between"
           style={{ borderColor: 'rgba(215, 213, 217, 0.6)' }}
         >
           <TitleWithSubtitle
             title={agentName}
             subtitle="Manages materials sourcing, supplier negotiations, and cost analysis for construction projects."
-            status={status}
-            onStatusChange={setStatus}
           />
+          <ActiveIndicator isActive={status === 'active'} />
         </div>
 
         {/* Main Content - matching the reference layout */}
@@ -199,47 +201,135 @@ export default function DesignsDemoPage() {
             {/* Left Column - Basic Settings, Prompt, Security */}
             <div className="space-y-4">
               {/* Basic Settings */}
-              <BasicSettingsCard
-                agentName={agentName}
-                onAgentNameChange={setAgentName}
-                roleType={roleType}
-                onRoleTypeChange={setRoleType}
-              />
+              <ConfigurationCard title="Basic Settings">
+                <div className="space-y-4">
+                  <EnhancedInput
+                    label="Agent Name*"
+                    value={agentName}
+                    onChange={setAgentName}
+                    placeholder="Enter agent name"
+                  />
+                  <EnhancedInput
+                    label="Role/Type*"
+                    value={roleType}
+                    onChange={setRoleType}
+                    placeholder="Enter role or type"
+                  />
+                </div>
+              </ConfigurationCard>
 
               {/* Prompt Card */}
-              <PromptCard
-                value={prompt}
-                onChange={setPrompt}
-                maxLength={4000}
-                placeholder="Define the agent's primary instructions, role, and constraints..."
-              />
+              <ConfigurationCard
+                title="Prompt"
+                headerContent={
+                  <div className="flex space-x-2">
+                    <button className="flex items-center space-x-1 px-3 py-1 text-sm border border-border rounded-md hover:bg-accent">
+                      <span>AI</span>
+                    </button>
+                    <button className="flex items-center space-x-1 px-3 py-1 text-sm border border-border rounded-md hover:bg-accent">
+                      <span>Templates</span>
+                    </button>
+                  </div>
+                }
+              >
+                <div className="space-y-3">
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="Define the agent's primary instructions, role, and constraints..."
+                    className="w-full h-32 p-3 border rounded-md resize-none"
+                    style={{
+                      backgroundColor: '#F4F3F5',
+                      borderColor: 'rgba(195, 192, 198, 0.8)',
+                      color: '#2D1B2E',
+                    }}
+                  />
+                  <div className="text-right">
+                    <span className="text-xs" style={{ color: '#847F8A' }}>
+                      {prompt.length} / 4000
+                    </span>
+                  </div>
+                </div>
+              </ConfigurationCard>
 
               {/* Security & Access */}
-              <SecurityAccessCard
-                value={securityLevel}
-                onChange={setSecurityLevel}
-                options={securityOptions}
-              />
+              <ConfigurationCard title="Security & Access">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div>
+                      <h4 className="text-sm font-medium">
+                        User Role Permissions
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Define which user roles can manage this agent.
+                      </p>
+                    </div>
+                  </div>
+                  <button className="flex items-center justify-between w-full p-3 border border-border rounded-md hover:bg-accent">
+                    <span className="text-sm">Admins Only</span>
+                  </button>
+                </div>
+              </ConfigurationCard>
             </div>
 
             {/* Right Column - Scheduled Executions and Tool Assignment */}
             <div className="space-y-4">
               {/* Scheduled Executions */}
-              <ScheduledExecutionsCard
-                schedules={schedules}
-                onAddSchedule={handleAddSchedule}
-                onEditSchedule={handleEditSchedule}
-                onDeleteSchedule={handleDeleteSchedule}
-                onToggleSchedule={handleToggleSchedule}
-              />
+              <ConfigurationCard
+                title="Scheduled Executions"
+                headerAction={
+                  <button
+                    onClick={handleAddSchedule}
+                    className="flex items-center space-x-1 px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                  >
+                    <span>Add Schedule</span>
+                  </button>
+                }
+              >
+                <div className="space-y-3">
+                  {schedules.map((schedule) => (
+                    <ScheduledExecutionItem
+                      key={schedule.id}
+                      id={schedule.id}
+                      name={schedule.title}
+                      description={schedule.description}
+                      schedule={schedule.frequency}
+                      nextExecution={schedule.nextExecution}
+                      status={schedule.status}
+                      onToggle={(id, status) => handleToggleSchedule(id)}
+                      onEdit={handleEditSchedule}
+                      onDelete={handleDeleteSchedule}
+                    />
+                  ))}
+                </div>
+              </ConfigurationCard>
 
               {/* Tool Assignment */}
-              <ToolAssignmentCard
-                tools={tools}
-                onAddTool={handleAddTool}
-                onToggleTool={handleToggleTool}
-                onRemoveTool={handleRemoveTool}
-              />
+              <ConfigurationCard
+                title="Tool Assignment"
+                headerAction={
+                  <button
+                    onClick={handleAddTool}
+                    className="flex items-center space-x-1 px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                  >
+                    <span>Add Tool</span>
+                  </button>
+                }
+              >
+                <div className="space-y-3">
+                  {tools.map((tool) => (
+                    <ToolAssignmentItem
+                      key={tool.id}
+                      id={tool.id}
+                      name={tool.name}
+                      description={tool.description}
+                      enabled={tool.enabled}
+                      onToggle={handleToggleTool}
+                      onRemove={handleRemoveTool}
+                    />
+                  ))}
+                </div>
+              </ConfigurationCard>
             </div>
           </div>
         </main>

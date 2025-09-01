@@ -2,9 +2,15 @@
 // These are custom components built with our design system
 // They use external components as building blocks but have TeamHub styling
 
-// Navigation Components
-export { Sidebar, defaultTeamHubItems, type SidebarItem } from './sidebar'
+// Sidebar Components
+export {
+  Sidebar,
+  defaultTeamHubItems,
+  type SidebarProps,
+  type SidebarItem,
+} from './sidebar'
 
+// Navigation Components
 export {
   SidebarNavigationMenu,
   Breadcrumbs,
@@ -12,14 +18,7 @@ export {
   type NavigationMenuItem,
   type BreadcrumbItem,
   type TabItem,
-} from './navigation-menu'
-
-export {
-  UserProfile,
-  UserMenu,
-  type UserProfileProps,
-  type UserMenuProps,
-} from './user-profile'
+} from './navigation'
 
 export {
   Search,
@@ -27,8 +26,17 @@ export {
   type SearchProps,
   type SearchResult,
   type GlobalSearchProps,
-} from './search'
+} from './navigation'
 
+// User Components
+export {
+  UserProfile,
+  UserMenu,
+  type UserProfileProps,
+  type UserMenuProps,
+} from './user'
+
+// Layout Components
 export {
   Layout,
   PageHeader,
@@ -38,7 +46,7 @@ export {
   type ContentContainerProps,
 } from './layout'
 
-// Data Display Components (Phase 2)
+// Data Display Components
 export {
   StatusIndicator,
   AgentCard,
@@ -55,7 +63,7 @@ export {
   type EmptyStateProps,
 } from './data-display'
 
-// Form Components (Phase 2)
+// Form Components
 export {
   FormSection,
   EnhancedInput,
@@ -74,40 +82,11 @@ export {
   type FormActionsProps,
 } from './forms'
 
-// Configuration Components (Phase 3)
-export {
-  TitleWithSubtitle,
-  ConfigurationCard,
-  ConfigButton,
-  ScheduledExecutionItem,
-  ToolAssignmentItem,
-  PromptEditor,
-  SecurityAccess,
-  type TitleWithSubtitleProps,
-  type ConfigurationCardProps,
-  type ConfigButtonProps,
-  type ScheduledExecutionItemProps,
-  type ToolAssignmentItemProps,
-  type PromptEditorProps,
-  type SecurityAccessProps,
-} from './configuration-cards'
+// Form Card Components
+export { FormCard, type FormCardProps } from './form-card'
 
-// Specialized Card Components
-export {
-  BasicSettingsCard,
-  PromptCard,
-  ScheduledExecutionsCard,
-  ToolAssignmentCard,
-  SecurityAccessCard,
-  type BasicSettingsCardProps,
-  type PromptCardProps,
-  type ScheduledExecutionsCardProps,
-  type ToolAssignmentCardProps,
-  type SecurityAccessCardProps,
-} from './cards'
+// Typography Components
+export { TitleWithSubtitle, type TitleWithSubtitleProps } from './typography'
 
-// Example Pages
-export {
-  AgentConfigurationPage,
-  type AgentConfigurationPageProps,
-} from './agent-configuration-page'
+// Status Components
+export { ActiveIndicator, type ActiveIndicatorProps } from './status'
