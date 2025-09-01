@@ -191,7 +191,7 @@ export default function DesignsDemoPage() {
             title={agentName}
             subtitle="Manages materials sourcing, supplier negotiations, and cost analysis for construction projects."
           />
-          <ActiveIndicator isActive={status === 'active'} />
+          <ActiveIndicator isActive={status === 'active'} onToggle={() => {}} />
         </div>
 
         {/* Main Content - matching the reference layout */}

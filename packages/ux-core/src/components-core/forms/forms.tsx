@@ -330,7 +330,7 @@ export function EnhancedSelect({
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
           className={cn(
-            'w-full px-3 py-2 text-left border rounded-md bg-white',
+            'w-full px-3 py-2 text-left border rounded-xl',
             'focus:outline-none focus:ring-2 focus:ring-offset-2',
             error
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
@@ -338,6 +338,10 @@ export function EnhancedSelect({
             disabled && 'bg-gray-50 cursor-not-allowed',
             'flex items-center justify-between'
           )}
+          style={{
+            backgroundColor: '#F4F3F5',
+            borderColor: 'rgba(195, 192, 198, 0.8)',
+          }}
         >
           <div className="flex items-center space-x-2">
             {Icon && <Icon className="h-4 w-4 text-gray-400" />}
@@ -363,7 +367,7 @@ export function EnhancedSelect({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg">
             <div className="p-2 border-b border-gray-200">
               <Input
                 placeholder="Search options..."

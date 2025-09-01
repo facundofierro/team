@@ -30,11 +30,7 @@ export default function ActiveIndicatorPage() {
             </div>
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Dot Indicator</h3>
-              <ActiveIndicator
-                isActive={isActive2}
-                variant="dot"
-                onToggle={setIsActive2}
-              />
+              <ActiveIndicator isActive={isActive2} onToggle={setIsActive2} />
             </div>
           </div>
         </div>
@@ -68,11 +64,7 @@ export default function ActiveIndicatorPage() {
                     Simple dot with text
                   </p>
                 </div>
-                <ActiveIndicator
-                  isActive={isActive2}
-                  variant="dot"
-                  onToggle={setIsActive2}
-                />
+                <ActiveIndicator isActive={isActive2} onToggle={setIsActive2} />
               </div>
               <div className="text-sm text-muted-foreground">
                 Status:{' '}
@@ -90,15 +82,15 @@ export default function ActiveIndicatorPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Small</h3>
-              <ActiveIndicator isActive={true} size="sm" />
+              <ActiveIndicator isActive={true} onToggle={() => {}} />
             </div>
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Medium (Default)</h3>
-              <ActiveIndicator isActive={true} size="md" />
+              <ActiveIndicator isActive={true} onToggle={() => {}} />
             </div>
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Large</h3>
-              <ActiveIndicator isActive={true} size="lg" />
+              <ActiveIndicator isActive={true} onToggle={() => {}} />
             </div>
           </div>
         </div>
@@ -109,19 +101,11 @@ export default function ActiveIndicatorPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Custom Active Text</h3>
-              <ActiveIndicator
-                isActive={true}
-                activeText="Running"
-                inactiveText="Stopped"
-              />
+              <ActiveIndicator isActive={true} onToggle={() => {}} />
             </div>
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Custom Inactive Text</h3>
-              <ActiveIndicator
-                isActive={false}
-                activeText="Online"
-                inactiveText="Offline"
-              />
+              <ActiveIndicator isActive={false} onToggle={() => {}} />
             </div>
           </div>
         </div>
@@ -132,15 +116,11 @@ export default function ActiveIndicatorPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Toggle Only</h3>
-              <ActiveIndicator isActive={true} showText={false} />
+              <ActiveIndicator isActive={true} onToggle={() => {}} />
             </div>
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Dot Only</h3>
-              <ActiveIndicator
-                isActive={false}
-                showText={false}
-                variant="dot"
-              />
+              <ActiveIndicator isActive={false} onToggle={() => {}} />
             </div>
           </div>
         </div>
@@ -153,11 +133,11 @@ export default function ActiveIndicatorPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Active Toggle</h3>
-              <ActiveIndicator isActive={true} />
+              <ActiveIndicator isActive={true} onToggle={() => {}} />
             </div>
             <div className="p-4 border border-border rounded-lg">
               <h3 className="text-sm font-medium mb-2">Inactive Toggle</h3>
-              <ActiveIndicator isActive={false} />
+              <ActiveIndicator isActive={false} onToggle={() => {}} />
             </div>
           </div>
         </div>
@@ -174,11 +154,7 @@ export default function ActiveIndicatorPage() {
                     PostgreSQL main cluster
                   </p>
                 </div>
-                <ActiveIndicator
-                  isActive={true}
-                  activeText="Connected"
-                  inactiveText="Disconnected"
-                />
+                <ActiveIndicator isActive={true} onToggle={() => {}} />
               </div>
             </div>
 
@@ -190,11 +166,7 @@ export default function ActiveIndicatorPage() {
                     External API service
                   </p>
                 </div>
-                <ActiveIndicator
-                  isActive={false}
-                  activeText="Healthy"
-                  inactiveText="Unhealthy"
-                />
+                <ActiveIndicator isActive={false} onToggle={() => {}} />
               </div>
             </div>
 
@@ -206,11 +178,7 @@ export default function ActiveIndicatorPage() {
                     Email processing queue
                   </p>
                 </div>
-                <ActiveIndicator
-                  isActive={true}
-                  activeText="Processing"
-                  inactiveText="Idle"
-                />
+                <ActiveIndicator isActive={true} onToggle={() => {}} />
               </div>
             </div>
           </div>

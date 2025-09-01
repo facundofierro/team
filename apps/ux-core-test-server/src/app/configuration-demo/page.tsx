@@ -1,14 +1,17 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
   TitleWithSubtitle,
   FormCard,
-  FormActions,
   EnhancedInput,
   EnhancedSelect,
   EnhancedTextarea,
   ActiveIndicator,
+  SaveButton,
+  ResetButton,
+  AddButton,
+  GhostButton,
 } from '@teamhub/ux-core'
 import {
   ScheduledExecutionItem,
@@ -21,12 +24,54 @@ import {
   Plus,
   Database,
   Calendar,
+  ChevronDown,
 } from 'lucide-react'
 import { elegantColors } from '@teamhub/ux-core'
 
 export default function ConfigurationDemoPage() {
   const [agentName, setAgentName] = useState('Procurement Manager')
   const [roleType, setRoleType] = useState('Manager')
+  const [showTemplates, setShowTemplates] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Prompt templates
+  const promptTemplates = [
+    {
+      id: 'general',
+      name: 'General Assistant',
+      content: 'You are a helpful general-purpose AI assistant.',
+    },
+    {
+      id: 'code',
+      name: 'Code Helper',
+      content: 'You are an expert programmer. Provide only code solutions.',
+    },
+    {
+      id: 'creative',
+      name: 'Creative Writer',
+      content:
+        'You are a creative writer. Generate imaginative and engaging content.',
+    },
+  ]
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowTemplates(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleTemplateSelect = (content: string) => {
+    setPrompt(content)
+    setShowTemplates(false)
+  }
   const [prompt, setPrompt] = useState(
     'You are an expert AI assistant for construction procurement. Your primary goal is to analyze material costs, manage supplier relationships, and ensure legal compliance in all contracts. You must be precise, data-driven, and proactive in identifying cost-saving opportunities.'
   )
@@ -126,14 +171,12 @@ export default function ConfigurationDemoPage() {
             <FormCard title="Basic Settings">
               <EnhancedInput
                 label="Agent Name"
-                subtitle="The display name for your AI agent"
                 value={agentName}
                 onChange={setAgentName}
                 placeholder="Enter agent name"
               />
               <EnhancedInput
                 label="Role/Type"
-                subtitle="The role or type of agent (e.g., Manager, Assistant, Specialist)"
                 value={roleType}
                 onChange={setRoleType}
                 placeholder="Enter role or type"
@@ -143,45 +186,56 @@ export default function ConfigurationDemoPage() {
             {/* Prompt */}
             <FormCard
               title="Prompt"
-              icon={Sparkles}
               headerContent={
                 <div className="flex space-x-2">
-                  <button
-                    className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all"
-                    style={{
-                      color: '#847F8A',
-                      backgroundColor: 'transparent',
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor =
-                        'rgba(244, 243, 245, 0.8)')
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = 'transparent')
-                    }
-                  >
-                    <Sparkles
-                      className="w-3 h-3"
-                      style={{ color: '#8A548C' }}
-                    />
-                    <span>AI</span>
-                  </button>
-                  <button
-                    className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all"
-                    style={{
-                      color: '#847F8A',
-                      backgroundColor: 'transparent',
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor =
-                        'rgba(244, 243, 245, 0.8)')
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = 'transparent')
-                    }
-                  >
-                    <span>Templates</span>
-                  </button>
+                  <GhostButton icon={Sparkles}>AI</GhostButton>
+                  <div className="relative" ref={dropdownRef}>
+                    <GhostButton
+                      onClick={() => setShowTemplates(!showTemplates)}
+                      icon={FileText}
+                    >
+                      Templates
+                      <ChevronDown
+                        className={`w-3 h-3 transition-transform ${
+                          showTemplates ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </GhostButton>
+                    {showTemplates && (
+                      <div
+                        className="absolute top-full right-0 mt-2 w-56 rounded-xl border overflow-hidden z-10"
+                        style={{
+                          backgroundColor: '#FFFFFF',
+                          borderColor: 'rgba(195, 192, 198, 0.8)',
+                          boxShadow:
+                            '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        }}
+                      >
+                        {promptTemplates.map((template) => (
+                          <button
+                            key={template.id}
+                            onClick={() =>
+                              handleTemplateSelect(template.content)
+                            }
+                            className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+                            style={{
+                              color: '#2D1B2E',
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.backgroundColor =
+                                'rgba(244, 243, 245, 0.8)')
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.backgroundColor =
+                                'transparent')
+                            }
+                          >
+                            {template.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               }
             >
@@ -245,18 +299,8 @@ export default function ConfigurationDemoPage() {
             {/* Scheduled Executions */}
             <FormCard
               title="Scheduled Executions"
-              icon={Calendar}
               headerAction={
-                <button
-                  onClick={handleAddSchedule}
-                  className="px-3 py-1 text-sm rounded-md font-medium"
-                  style={{
-                    backgroundColor: '#8A548C',
-                    color: '#FFFFFF',
-                  }}
-                >
-                  + Add Schedule
-                </button>
+                <AddButton onClick={handleAddSchedule}>Add Schedule</AddButton>
               }
             >
               <div className="space-y-3">
@@ -284,18 +328,8 @@ export default function ConfigurationDemoPage() {
             {/* Tool Assignment */}
             <FormCard
               title="Tool Assignment"
-              icon={Database}
               headerAction={
-                <button
-                  onClick={handleAddTool}
-                  className="px-3 py-1 text-sm rounded-md font-medium"
-                  style={{
-                    backgroundColor: '#8A548C',
-                    color: '#FFFFFF',
-                  }}
-                >
-                  + Add Tool
-                </button>
+                <AddButton onClick={handleAddTool}>Add Tool</AddButton>
               }
             >
               <div className="space-y-3">
@@ -326,12 +360,10 @@ export default function ConfigurationDemoPage() {
           borderColor: 'rgba(215, 213, 217, 0.6)',
         }}
       >
-        <FormActions
-          onReset={() => console.log('Resetting...')}
-          onSave={() => console.log('Saving...')}
-          resetLabel="Reset"
-          saveLabel="Save All Changes"
-        />
+        <div className="flex justify-end space-x-3">
+          <ResetButton onClick={() => console.log('Resetting...')} />
+          <SaveButton onClick={() => console.log('Saving...')} />
+        </div>
       </div>
     </div>
   )
