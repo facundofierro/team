@@ -41,7 +41,7 @@ export function ActionButton({
       }}
     >
       {loading ? (
-        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        <div className="w-3 h-3 rounded-full border-2 border-white animate-spin border-t-transparent" />
       ) : (
         Icon && <Icon className="w-3 h-3" />
       )}

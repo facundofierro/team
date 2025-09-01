@@ -37,9 +37,7 @@ export function TertiaryButton({
       )}
       style={{
         backgroundColor: elegantColors.background.tertiary,
-        borderColor: elegantColors.neutral[300],
         color: elegantColors.text.primary,
-        border: '1px solid',
       }}
     >
       {loading ? (
