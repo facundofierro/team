@@ -144,12 +144,34 @@ export default function AgentCardTestPage() {
             </h2>
             <div className="max-w-md">
               <AgentCard
-                agent={selectedAgent}
-                showMetrics={showMetrics}
-                compact={compact}
-                onEdit={() => console.log('Edit agent:', selectedAgent.id)}
-                onDelete={() => console.log('Delete agent:', selectedAgent.id)}
-                onToggle={() => console.log('Toggle agent:', selectedAgent.id)}
+                id={selectedAgent.id}
+                title={selectedAgent.name}
+                description={selectedAgent.description}
+                status={selectedAgent.status}
+                type={selectedAgent.type}
+                lastActive={selectedAgent.lastActive}
+                metrics={{
+                  cost:
+                    selectedAgent.metrics.conversations?.toString() ||
+                    selectedAgent.metrics.reports?.toString() ||
+                    selectedAgent.metrics.articles?.toString() ||
+                    selectedAgent.metrics.reviews?.toString(),
+                  responseTime:
+                    selectedAgent.metrics.responseTime ||
+                    selectedAgent.metrics.processingTime ||
+                    selectedAgent.metrics.averageTime,
+                  successRate:
+                    selectedAgent.metrics.satisfaction?.toString() ||
+                    selectedAgent.metrics.accuracy?.toString() ||
+                    selectedAgent.metrics.quality?.toString(),
+                }}
+                actions={{
+                  onEdit: () => console.log('Edit agent:', selectedAgent.id),
+                  onDelete: () =>
+                    console.log('Delete agent:', selectedAgent.id),
+                  onToggle: () =>
+                    console.log('Toggle agent:', selectedAgent.id),
+                }}
               />
             </div>
           </div>
@@ -163,12 +185,32 @@ export default function AgentCardTestPage() {
               {sampleAgents.map((agent) => (
                 <AgentCard
                   key={agent.id}
-                  agent={agent}
-                  showMetrics={true}
-                  compact={false}
-                  onEdit={() => console.log('Edit agent:', agent.id)}
-                  onDelete={() => console.log('Delete agent:', agent.id)}
-                  onToggle={() => console.log('Toggle agent:', agent.id)}
+                  id={agent.id}
+                  title={agent.name}
+                  description={agent.description}
+                  status={agent.status}
+                  type={agent.type}
+                  lastActive={agent.lastActive}
+                  metrics={{
+                    cost:
+                      agent.metrics.conversations?.toString() ||
+                      agent.metrics.reports?.toString() ||
+                      agent.metrics.articles?.toString() ||
+                      agent.metrics.reviews?.toString(),
+                    responseTime:
+                      agent.metrics.responseTime ||
+                      agent.metrics.processingTime ||
+                      agent.metrics.averageTime,
+                    successRate:
+                      agent.metrics.satisfaction?.toString() ||
+                      agent.metrics.accuracy?.toString() ||
+                      agent.metrics.quality?.toString(),
+                  }}
+                  actions={{
+                    onEdit: () => console.log('Edit agent:', agent.id),
+                    onDelete: () => console.log('Delete agent:', agent.id),
+                    onToggle: () => console.log('Toggle agent:', agent.id),
+                  }}
                 />
               ))}
             </div>
@@ -183,12 +225,32 @@ export default function AgentCardTestPage() {
               {sampleAgents.map((agent) => (
                 <AgentCard
                   key={agent.id}
-                  agent={agent}
-                  showMetrics={false}
-                  compact={true}
-                  onEdit={() => console.log('Edit agent:', agent.id)}
-                  onDelete={() => console.log('Delete agent:', agent.id)}
-                  onToggle={() => console.log('Toggle agent:', agent.id)}
+                  id={agent.id}
+                  title={agent.name}
+                  description={agent.description}
+                  status={agent.status}
+                  type={agent.type}
+                  lastActive={agent.lastActive}
+                  metrics={{
+                    cost:
+                      agent.metrics.conversations?.toString() ||
+                      agent.metrics.reports?.toString() ||
+                      agent.metrics.articles?.toString() ||
+                      agent.metrics.reviews?.toString(),
+                    responseTime:
+                      agent.metrics.responseTime ||
+                      agent.metrics.processingTime ||
+                      agent.metrics.averageTime,
+                    successRate:
+                      agent.metrics.satisfaction?.toString() ||
+                      agent.metrics.accuracy?.toString() ||
+                      agent.metrics.quality?.toString(),
+                  }}
+                  actions={{
+                    onEdit: () => console.log('Edit agent:', agent.id),
+                    onDelete: () => console.log('Delete agent:', agent.id),
+                    onToggle: () => console.log('Toggle agent:', agent.id),
+                  }}
                 />
               ))}
             </div>

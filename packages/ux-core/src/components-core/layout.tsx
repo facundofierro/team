@@ -112,7 +112,7 @@ export function Layout({
       {/* Sidebar */}
       <Sidebar
         items={items}
-        activeItem={activeItem}
+        activeNavItem={activeItem}
         collapsed={collapsed}
         onToggleCollapse={onToggleCollapse}
         user={user}
@@ -246,7 +246,7 @@ export function Layout({
           <div className="fixed left-0 top-0 h-full w-80 bg-gradient-to-b from-[#3B2146] to-[#8A548C] z-50">
             <Sidebar
               items={items}
-              activeItem={activeItem}
+              activeNavItem={activeItem}
               user={user}
               actions={{
                 region: 'spb',

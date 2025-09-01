@@ -1,52 +1,55 @@
 'use client'
 
-import React from 'react'
-import { cn } from '../utils/cn'
-import { Button } from '../components/shadcn/button'
-import { Card } from '../components/shadcn/card'
-import { Separator } from '../components/shadcn/separator'
+import * as React from 'react'
+import { useState } from 'react'
 import {
   LayoutDashboard,
-  CheckSquare,
   Users,
-  Infinity,
+  Workflow,
   Database,
   FileText,
-  Wrench,
   Settings,
   Globe,
   LogOut,
+  Sparkles,
   ChevronRight,
 } from 'lucide-react'
+import { componentColors, componentUtils } from './component-colors'
 
 export interface SidebarItem {
   id: string
-  label: string
-  icon: React.ComponentType<{ className?: string }>
-  href?: string
-  onClick?: () => void
-  badge?: string
-  disabled?: boolean
+  name: string
+  icon?: React.ComponentType<{ className?: string }>
+  active?: boolean
+  submenu?: {
+    id: string
+    name: string
+    active?: boolean
+  }[]
 }
 
 export interface SidebarProps {
   className?: string
   items: SidebarItem[]
-  activeItem?: string
-  logo?: {
-    src?: string
-    alt?: string
+  activeNavItem: string
+  onNavItemChange: (item: string) => void
+  logo: {
     text: string
     subtitle?: string
   }
-  user?: {
+  user: {
     name: string
     email: string
-    avatar?: string
     initials?: string
   }
-  actions?: {
+  actions: {
     region?: string
+    organizations?: Array<{
+      id: string
+      name: string
+      region?: string
+    }>
+    onOrganizationChange?: (organizationId: string) => void
     onRegionClick?: () => void
     onGlobeClick?: () => void
     onLogoutClick?: () => void
@@ -55,221 +58,492 @@ export interface SidebarProps {
   onToggleCollapse?: () => void
 }
 
-export function Sidebar({
+const defaultItems: SidebarItem[] = []
+
+export const Sidebar = ({
   className,
   items,
-  activeItem,
-  logo = { text: 'TeamHub', subtitle: 'AI Agent Network' },
+  activeNavItem,
+  onNavItemChange,
+  logo,
   user,
   actions,
   collapsed = false,
   onToggleCollapse,
-}: SidebarProps) {
+}: SidebarProps) => {
+  const [showOrgDropdown, setShowOrgDropdown] = useState(false)
+  const [showLangDropdown, setShowLangDropdown] = useState(false)
+  const [activeSubmenu, setActiveSubmenu] = useState('chat')
+
+  // Close dropdowns when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (
+        !target.closest('[data-dropdown="org"]') &&
+        !target.closest('[data-dropdown="lang"]')
+      ) {
+        setShowOrgDropdown(false)
+        setShowLangDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleNavItemChange = (itemId: string) => {
+    onNavItemChange(itemId)
+  }
+
+  // Utility function to get initials from organization name
+  const getOrganizationInitials = (name: string): string => {
+    return name
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase())
+      .join('')
+      .slice(0, 3) // Limit to 3 characters max
+  }
+
   return (
-    <div
+    <aside
       data-testid="sidebar"
-      className={cn(
-        'flex h-full flex-col bg-gradient-to-b from-[#3B2146] to-[#8A548C] text-white',
-        collapsed ? 'w-16' : 'w-64',
-        className
-      )}
+      className={`${collapsed ? 'w-16' : 'w-56'} flex flex-col border-r ${
+        className || ''
+      }`}
+      style={{
+        backgroundColor: componentColors.background.main,
+        borderColor: componentColors.border.main,
+      }}
     >
-      {/* Header */}
-      <div className="flex justify-between items-center px-4 h-16">
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#F45584] to-[#A091DA]">
-            <div className="w-6 h-6 text-white">
-              {/* Logo icon - you can replace this with your actual logo */}
-              <div className="w-full h-full bg-white rounded-sm opacity-90" />
-            </div>
+      {/* Brand Header */}
+      <div
+        className="px-6 py-6 border-b"
+        style={{
+          backgroundColor: componentColors.background.header,
+          borderColor: componentColors.border.header,
+          backdropFilter: componentColors.effects.backdropFilter,
+        }}
+      >
+        <div className="flex items-center space-x-4">
+          <div
+            className="flex justify-center items-center w-12 h-12 rounded-xl"
+            style={{
+              background: componentColors.brand.iconBackground,
+              ...componentUtils.getComponentShadow('md'),
+            }}
+          >
+            <Sparkles
+              className="w-6 h-6"
+              style={{
+                color: componentColors.brand.iconColor,
+              }}
+            />
           </div>
           {!collapsed && (
-            <div className="flex flex-col">
-              <h1 className="text-lg font-bold text-white">{logo.text}</h1>
-              <p className="text-xs text-white/70">{logo.subtitle}</p>
+            <div>
+              <h1
+                className="text-xl font-bold"
+                style={{
+                  color: '#FFFFFF',
+                }}
+              >
+                <span>{logo.text}</span>
+              </h1>
+              <p
+                className="text-sm"
+                style={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                }}
+              >
+                <span>{logo.subtitle}</span>
+              </p>
             </div>
           )}
         </div>
-        {onToggleCollapse && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleCollapse}
-            className="p-0 w-8 h-8 text-white/70 hover:text-white hover:bg-white/10"
-          >
-            <ChevronRight
-              className={cn(
-                'h-4 w-4 transition-transform',
-                collapsed && 'rotate-180'
-              )}
-            />
-          </Button>
-        )}
       </div>
 
-      <Separator className="bg-white/20" />
-
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-4 py-6 space-y-2">
         {items.map((item) => {
           const Icon = item.icon
-          const isActive = activeItem === item.id
-
+          const isActive = activeNavItem === item.id
           return (
-            <Button
-              key={item.id}
-              data-testid={`sidebar-item-${item.id}`}
-              variant="ghost"
-              className={cn(
-                'w-full justify-start space-x-3 px-3 py-2 h-auto',
-                'text-white/80 hover:text-white hover:bg-white/10',
-                'transition-colors duration-200',
-                isActive && 'bg-white/20 text-white',
-                item.disabled && 'opacity-50 cursor-not-allowed',
-                collapsed && 'justify-center px-2'
-              )}
-              onClick={item.onClick}
-              disabled={item.disabled}
-            >
-              <Icon
-                className={cn(
-                  'h-5 w-5 flex-shrink-0',
-                  isActive && 'text-[#F45584]'
+            <div key={item.id}>
+              <button
+                onClick={() => handleNavItemChange(item.id)}
+                className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 group"
+                style={{
+                  backgroundColor: isActive
+                    ? 'rgba(255, 255, 255, 0.1)'
+                    : 'transparent',
+                  borderColor: 'transparent',
+                  color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
+                  border: 'none',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor =
+                      'rgba(255, 255, 255, 0.05)'
+                    e.currentTarget.style.color = '#FFFFFF'
+                    e.currentTarget.style.transform = 'translateX(4px)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'
+                    e.currentTarget.style.transform = 'translateX(0px)'
+                  }
+                }}
+                data-testid={`sidebar-item-${item.id}`}
+              >
+                <div className="flex items-center space-x-3">
+                  {Icon && <Icon className="w-5 h-5" />}
+                  {!collapsed && <span>{item.name}</span>}
+                </div>
+                {item.submenu && !collapsed && (
+                  <ChevronRight
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      isActive ? 'rotate-90' : 'group-hover:translate-x-1'
+                    }`}
+                  />
                 )}
-              />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 text-left">{item.label}</span>
-                  {item.badge && (
-                    <span className="ml-auto rounded-full bg-[#F45584] px-2 py-1 text-xs font-medium text-white">
-                      {item.badge}
-                    </span>
-                  )}
-                </>
-              )}
-            </Button>
+              </button>
+
+              {/* Submenu for Agents */}
+              {item.id === 'agents' &&
+                isActive &&
+                item.submenu &&
+                !collapsed && (
+                  <div
+                    className="pl-4 mt-3 ml-6 space-y-1 border-l"
+                    style={{
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                    }}
+                  >
+                    {item.submenu.map((subItem) => (
+                      <button
+                        key={subItem.id}
+                        onClick={() => setActiveSubmenu(subItem.id)}
+                        className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 border"
+                        style={{
+                          backgroundColor:
+                            activeSubmenu === subItem.id
+                              ? componentColors.interactive.submenuActive
+                              : 'transparent',
+                          borderColor:
+                            activeSubmenu === subItem.id
+                              ? componentColors.interactive.submenuActive
+                              : 'transparent',
+                          color:
+                            activeSubmenu === subItem.id
+                              ? '#FFFFFF'
+                              : 'rgba(255, 255, 255, 0.6)',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (activeSubmenu !== subItem.id) {
+                            e.currentTarget.style.backgroundColor =
+                              'rgba(255, 255, 255, 0.05)'
+                            e.currentTarget.style.color =
+                              'rgba(255, 255, 255, 0.8)'
+                            e.currentTarget.style.transform = 'translateX(4px)'
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (activeSubmenu !== subItem.id) {
+                            e.currentTarget.style.backgroundColor =
+                              'transparent'
+                            e.currentTarget.style.color =
+                              'rgba(255, 255, 255, 0.6)'
+                            e.currentTarget.style.transform = 'translateX(0px)'
+                          }
+                        }}
+                      >
+                        <span>{subItem.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+            </div>
           )
         })}
       </nav>
 
-      {/* User Profile & Actions */}
-      {user && (
-        <>
-          <Separator className="bg-white/20" />
-          <div className="p-4 space-y-3">
-            {/* User Profile Card */}
-            <Card className="text-white bg-white/10 border-white/20">
-              <div className="flex items-center p-3 space-x-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#F45584] to-[#A091DA] text-white font-semibold">
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="object-cover w-full h-full rounded-lg"
-                    />
-                  ) : (
-                    user.initials || user.name.charAt(0).toUpperCase()
-                  )}
-                </div>
-                {!collapsed && (
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">
-                      {user.name}
-                    </p>
-                    <p className="text-xs truncate text-white/70">
-                      {user.email}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            {/* Action Buttons */}
-            {!collapsed && actions && (
-              <div className="flex space-x-2">
-                {actions.region && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={actions.onRegionClick}
-                    className="flex-1 h-8 text-xs border-white/20 text-white/80 hover:text-white hover:border-white/40"
-                  >
-                    {actions.region}
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={actions.onGlobeClick}
-                  className="p-0 w-8 h-8 border-white/20 text-white/80 hover:text-white hover:border-white/40"
+      {/* Bottom Section */}
+      <div
+        className="p-6 space-y-4 border-t"
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          borderColor: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
+        {/* User Profile */}
+        {user && (
+          <div
+            className="flex items-center p-4 space-x-3 rounded-xl border"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+              ...componentUtils.getComponentShadow('sm'),
+            }}
+          >
+            <div
+              className="flex justify-center items-center w-11 h-11 rounded-xl"
+              style={{
+                background: componentColors.brand.iconBackground,
+                ...componentUtils.getComponentShadow('sm'),
+              }}
+            >
+              <span
+                className="text-sm font-semibold"
+                style={{
+                  color: '#FFFFFF',
+                }}
+              >
+                {user.initials ||
+                  user.name
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase()}
+              </span>
+            </div>
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-sm font-semibold truncate"
+                  style={{
+                    color: '#FFFFFF',
+                  }}
                 >
-                  <Globe className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={actions.onLogoutClick}
-                  className="p-0 w-8 h-8 border-white/20 text-white/80 hover:text-white hover:border-white/40"
+                  <span>{user.name}</span>
+                </p>
+                <p
+                  className="text-xs truncate"
+                  style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                  }}
                 >
-                  <LogOut className="w-4 h-4" />
-                </Button>
+                  <span>{user.email}</span>
+                </p>
               </div>
             )}
           </div>
-        </>
-      )}
-    </div>
+        )}
+
+        {/* Action Buttons Row */}
+        {actions && (
+          <div className="flex items-center space-x-3">
+            {/* Organization Selector */}
+            {actions.organizations &&
+              actions.organizations.length > 0 &&
+              !collapsed && (
+                <div className="relative flex-1" data-dropdown="org">
+                  <button
+                    onClick={() => setShowOrgDropdown(!showOrgDropdown)}
+                    className="px-4 py-3 w-full text-sm font-medium rounded-xl border transition-all duration-300"
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                      color: '#FFFFFF',
+                      ...componentUtils.getComponentShadow('sm'),
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        'rgba(255, 255, 255, 0.15)'
+                      e.currentTarget.style.transform = 'translateY(-1px)'
+                      e.currentTarget.style.boxShadow =
+                        componentUtils.getComponentShadow('md').boxShadow
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        'rgba(255, 255, 255, 0.1)'
+                      e.currentTarget.style.transform = 'translateY(0px)'
+                      e.currentTarget.style.boxShadow =
+                        componentUtils.getComponentShadow('sm').boxShadow
+                    }}
+                  >
+                    <span>
+                      {getOrganizationInitials(
+                        actions.region || actions.organizations[0]?.name || ''
+                      )}
+                    </span>
+                  </button>
+
+                  {showOrgDropdown && (
+                    <div
+                      className="overflow-hidden absolute right-0 left-0 bottom-full mb-2 rounded-xl border"
+                      style={{
+                        backgroundColor: 'rgba(68, 51, 122, 0.95)',
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        backdropFilter: 'blur(16px)',
+                        ...componentUtils.getComponentShadow('xl'),
+                        minWidth: '200px',
+                        zIndex: 1000,
+                      }}
+                    >
+                      {actions.organizations.map((org) => (
+                        <button
+                          key={org.id}
+                          onClick={() => {
+                            actions.onOrganizationChange?.(org.id)
+                            setShowOrgDropdown(false)
+                          }}
+                          className="px-4 py-3 w-full text-sm text-left transition-colors duration-200 hover:bg-white/10"
+                          style={{
+                            color:
+                              actions.region === org.name
+                                ? '#FFFFFF'
+                                : 'rgba(255, 255, 255, 0.7)',
+                            backgroundColor:
+                              actions.region === org.name
+                                ? 'rgba(255, 255, 255, 0.1)'
+                                : 'transparent',
+                          }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">{org.name}</span>
+                            {org.region && (
+                              <span className="text-xs opacity-60">
+                                {org.region}
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+            {/* Language Selector */}
+            <div className="relative" data-dropdown="lang">
+              <button
+                onClick={() => {
+                  setShowLangDropdown(!showLangDropdown)
+                  actions.onGlobeClick?.()
+                }}
+                className="flex justify-center items-center w-11 h-11 rounded-xl border transition-all duration-300"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  ...componentUtils.getComponentShadow('sm'),
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    'rgba(255, 255, 255, 0.15)'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.boxShadow =
+                    componentUtils.getComponentShadow('md').boxShadow
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    'rgba(255, 255, 255, 0.1)'
+                  e.currentTarget.style.transform = 'translateY(0px)'
+                  e.currentTarget.style.boxShadow =
+                    componentUtils.getComponentShadow('sm').boxShadow
+                }}
+              >
+                <Globe className="w-4 h-4" />
+              </button>
+
+              {showLangDropdown && (
+                <div
+                  className="absolute bottom-full mb-2 left-0 border rounded-xl min-w-[140px] overflow-hidden"
+                  style={{
+                    backgroundColor: 'rgba(68, 51, 122, 0.95)',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(16px)',
+                    ...componentUtils.getComponentShadow('xl'),
+                  }}
+                >
+                  <button
+                    className="px-4 py-3 w-full text-sm text-left transition-colors duration-200"
+                    style={{
+                      color: '#FFFFFF',
+                      backgroundColor: 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        'rgba(255, 255, 255, 0.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <span>English</span>
+                  </button>
+                  <button
+                    className="px-4 py-3 w-full text-sm text-left transition-colors duration-200"
+                    style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      backgroundColor: 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        'rgba(255, 255, 255, 0.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <span>Español</span>
+                  </button>
+                  <button
+                    className="px-4 py-3 w-full text-sm text-left transition-colors duration-200"
+                    style={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      backgroundColor: 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor =
+                        'rgba(255, 255, 255, 0.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <span>Русский</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Logout Button */}
+            <button
+              className="flex justify-center items-center w-11 h-11 rounded-xl border transition-all duration-300"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                color: 'rgba(255, 255, 255, 0.7)',
+                ...componentUtils.getComponentShadow('sm'),
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  'rgba(255, 255, 255, 0.15)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow =
+                  componentUtils.getComponentShadow('md').boxShadow
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  'rgba(255, 255, 255, 0.1)'
+                e.currentTarget.style.transform = 'translateY(0px)'
+                e.currentTarget.style.boxShadow =
+                  componentUtils.getComponentShadow('sm').boxShadow
+              }}
+              onClick={actions.onLogoutClick}
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+    </aside>
   )
 }
 
-// Default navigation items for TeamHub
-export const defaultTeamHubItems: SidebarItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    href: '/dashboard',
-  },
-  {
-    id: 'tasks',
-    label: 'Tasks',
-    icon: CheckSquare,
-    href: '/tasks',
-  },
-  {
-    id: 'agents',
-    label: 'Agents',
-    icon: Users,
-    href: '/agents',
-  },
-  {
-    id: 'workflows',
-    label: 'Workflows',
-    icon: Infinity,
-    href: '/workflows',
-  },
-  {
-    id: 'data-hub',
-    label: 'Data Hub',
-    icon: Database,
-    href: '/data-hub',
-  },
-  {
-    id: 'documents',
-    label: 'Documents',
-    icon: FileText,
-    href: '/documents',
-  },
-  {
-    id: 'tools',
-    label: 'Tools',
-    icon: Wrench,
-    href: '/tools',
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    icon: Settings,
-    href: '/settings',
-  },
-]
+export { defaultItems as defaultTeamHubItems }

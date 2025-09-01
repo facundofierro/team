@@ -28,7 +28,7 @@ export default function EnhancedInputTestPage() {
                 label="Name"
                 placeholder="Enter your name"
                 value={textValue}
-                onChange={(e) => setTextValue(e.target.value)}
+                onChange={setTextValue}
                 required
               />
               <div className="text-sm text-bg-muted-foreground">
@@ -48,7 +48,7 @@ export default function EnhancedInputTestPage() {
                 type="email"
                 placeholder="Enter your email"
                 value={emailValue}
-                onChange={(e) => setEmailValue(e.target.value)}
+                onChange={setEmailValue}
                 required
                 error={
                   emailValue && !emailValue.includes('@')
@@ -73,9 +73,8 @@ export default function EnhancedInputTestPage() {
                 type="password"
                 placeholder="Enter your password"
                 value={passwordValue}
-                onChange={(e) => setPasswordValue(e.target.value)}
+                onChange={setPasswordValue}
                 required
-                helperText="Password must be at least 8 characters long"
               />
               <div className="text-sm text-bg-muted-foreground">
                 Current value: {passwordValue ? '••••••••' : '(empty)'}
@@ -94,9 +93,7 @@ export default function EnhancedInputTestPage() {
                 type="number"
                 placeholder="Enter your age"
                 value={numberValue}
-                onChange={(e) => setNumberValue(e.target.value)}
-                min={0}
-                max={120}
+                onChange={setNumberValue}
               />
               <div className="text-sm text-bg-muted-foreground">
                 Current value: {numberValue || '(empty)'}
@@ -112,11 +109,9 @@ export default function EnhancedInputTestPage() {
             <div className="space-y-4">
               <EnhancedInput
                 label="Description"
-                as="textarea"
                 placeholder="Enter a description"
                 value={textareaValue}
-                onChange={(e) => setTextareaValue(e.target.value)}
-                rows={4}
+                onChange={setTextareaValue}
               />
               <div className="text-sm text-bg-muted-foreground">
                 Current value: {textareaValue || '(empty)'}
@@ -147,7 +142,6 @@ export default function EnhancedInputTestPage() {
               placeholder="Search for something..."
               value=""
               onChange={() => {}}
-              icon="search"
             />
           </div>
 

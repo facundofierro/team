@@ -2,174 +2,161 @@
 
 import { useState } from 'react'
 import {
-  Sidebar,
-  defaultTeamHubItems,
-  type SidebarItem,
-} from '@teamhub/ux-core/src/components-core/sidebar'
-import {
   LayoutDashboard,
   CheckSquare,
   Users,
-  Infinity,
+  Workflow,
   Database,
   FileText,
   Wrench,
   Settings,
-  Globe,
-  LogOut,
-} from 'lucide-react'
+} from '@teamhub/ux-core/node_modules/lucide-react'
+import {
+  Sidebar,
+  type SidebarItem,
+} from '@teamhub/ux-core/src/components-core/sidebar'
 
 const customItems: SidebarItem[] = [
   {
     id: 'dashboard',
-    label: 'Dashboard',
+    name: 'Dashboard',
     icon: LayoutDashboard,
-    href: '/dashboard',
-  },
-  {
-    id: 'agents',
-    label: 'AI Agents',
-    icon: Infinity,
-    href: '/agents',
-    badge: '12',
+    active: false,
   },
   {
     id: 'tasks',
-    label: 'Tasks',
+    name: 'Tasks',
     icon: CheckSquare,
-    href: '/tasks',
-    badge: '3',
+    active: false,
   },
   {
-    id: 'users',
-    label: 'Users',
+    id: 'agents',
+    name: 'Agents',
     icon: Users,
-    href: '/users',
+    active: true,
   },
   {
-    id: 'database',
-    label: 'Database',
+    id: 'workflows',
+    name: 'Workflows',
+    icon: Workflow,
+    active: false,
+  },
+  {
+    id: 'data-hub',
+    name: 'Data Hub',
     icon: Database,
-    href: '/database',
+    active: false,
   },
   {
-    id: 'docs',
-    label: 'Documentation',
+    id: 'documents',
+    name: 'Documents',
     icon: FileText,
-    href: '/docs',
+    active: false,
   },
   {
     id: 'tools',
-    label: 'Tools',
+    name: 'Tools',
     icon: Wrench,
-    href: '/tools',
+    active: false,
   },
   {
     id: 'settings',
-    label: 'Settings',
+    name: 'Settings',
     icon: Settings,
-    href: '/settings',
+    active: false,
   },
 ]
 
 export default function SidebarTestPage() {
   const [collapsed, setCollapsed] = useState(false)
   const [activeItem, setActiveItem] = useState('dashboard')
+  const [selectedOrg, setSelectedOrg] = useState('org-1')
+
+  const handleNavItemChange = (itemId: string) => {
+    setActiveItem(itemId)
+    console.log('Item clicked:', itemId)
+  }
+
+  const handleOrganizationChange = (organizationId: string) => {
+    setSelectedOrg(organizationId)
+    console.log('Organization changed to:', organizationId)
+  }
+
+  const organizations = [
+    { id: 'org-1', name: 'Saint Petersburg Hub', region: 'Saint Petersburg' },
+    { id: 'org-2', name: 'Moscow Central', region: 'Moscow' },
+    { id: 'org-3', name: 'New York Office', region: 'New York' },
+  ]
+
+  const selectedOrganization = organizations.find(
+    (org) => org.id === selectedOrg
+  )
 
   return (
-    <div className="min-h-screen bg-bg-background">
+    <div className="min-h-screen bg-gray-100">
       <div className="flex h-screen">
         <Sidebar
           items={customItems}
-          activeItem={activeItem}
+          activeNavItem={activeItem}
+          onNavItemChange={handleNavItemChange}
           collapsed={collapsed}
           onToggleCollapse={() => setCollapsed(!collapsed)}
           logo={{
-            text: 'TeamHub',
+            text: 'AgentHub',
             subtitle: 'AI Agent Network',
           }}
           user={{
-            name: 'John Doe',
-            email: 'john@teamhub.com',
-            initials: 'JD',
+            name: 'Facundo F.',
+            email: 'facundofierro@yandex.com',
+            initials: 'FF',
           }}
           actions={{
-            region: 'US East',
+            region: selectedOrganization?.name,
+            organizations: organizations,
+            onOrganizationChange: handleOrganizationChange,
             onRegionClick: () => console.log('Region clicked'),
             onGlobeClick: () => console.log('Globe clicked'),
             onLogoutClick: () => console.log('Logout clicked'),
           }}
         />
 
+        {/* Main content area */}
         <div className="flex-1 p-8">
           <div className="max-w-4xl">
-            <h1 className="text-3xl font-bold text-bg-foreground mb-6">
-              Sidebar Component Test
+            <h1 className="mb-6 text-3xl font-bold text-gray-900">
+              Main Application Content
             </h1>
-
-            <div className="space-y-8">
-              <div className="bg-bg-card border border-bg-border rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-bg-foreground mb-4">
-                  Interactive Controls
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-bg-foreground mb-2">
-                      Active Item
-                    </label>
-                    <select
-                      value={activeItem}
-                      onChange={(e) => setActiveItem(e.target.value)}
-                      className="w-full p-2 border border-bg-border rounded-md bg-bg-input text-bg-foreground"
-                    >
-                      {customItems.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <button
-                      onClick={() => setCollapsed(!collapsed)}
-                      className="px-4 py-2 bg-bg-primary text-bg-primary-foreground rounded-md hover:bg-bg-primary/90"
-                    >
-                      {collapsed ? 'Expand' : 'Collapse'} Sidebar
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-bg-card border border-bg-border rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-bg-foreground mb-4">
-                  Component Features
-                </h2>
-                <ul className="space-y-2 text-bg-muted-foreground">
-                  <li>
-                    • Responsive design with collapse/expand functionality
-                  </li>
-                  <li>• Active item highlighting</li>
-                  <li>• Badge support for notifications</li>
-                  <li>• User profile section with avatar</li>
-                  <li>• Region selector and logout actions</li>
-                  <li>• Custom logo and branding</li>
-                  <li>• Gradient background with TeamHub styling</li>
-                </ul>
-              </div>
-
-              <div className="bg-bg-card border border-bg-border rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-bg-foreground mb-4">
-                  Test Scenarios
-                </h2>
-                <div className="space-y-2 text-sm text-bg-muted-foreground">
-                  <div>• Click on different navigation items</div>
-                  <div>• Toggle sidebar collapse state</div>
-                  <div>• Test responsive behavior on mobile</div>
-                  <div>• Verify badge display and positioning</div>
-                  <div>• Check user profile interactions</div>
-                  <div>• Test action button functionality</div>
-                </div>
+            <p className="mb-4 text-gray-600">
+              This is how the sidebar would look in a real application. The
+              sidebar is on the left, and your main content area is on the
+              right.
+            </p>
+            <div className="p-6 bg-white rounded-lg shadow-sm">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">
+                Current Active Section: {activeItem}
+              </h2>
+              <p className="mb-4 text-gray-600">
+                The sidebar navigation is working! Click on different items to
+                see the active state change.
+              </p>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="mb-2 text-lg font-medium text-gray-900">
+                  Current Organization: {selectedOrganization?.name}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Display Initials:{' '}
+                  {selectedOrganization?.name
+                    ?.split(' ')
+                    .map((word) => word.charAt(0).toUpperCase())
+                    .join('')
+                    .slice(0, 3)}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Region: {selectedOrganization?.region}
+                </p>
+                <p className="text-sm text-gray-600">
+                  ID: {selectedOrganization?.id}
+                </p>
               </div>
             </div>
           </div>
