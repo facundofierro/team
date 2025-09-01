@@ -17,7 +17,8 @@ const componentCategories = [
         name: 'Sidebar Demo',
         path: '/sidebar-demo',
         implemented: true,
-        description: 'Interactive sidebar with navigation and collapsible sections',
+        description:
+          'Interactive sidebar with navigation and collapsible sections',
       },
     ],
   },
@@ -29,36 +30,6 @@ const componentCategories = [
         path: '/components/form-card',
         implemented: true,
         description: 'Main container for form sections with header and footer',
-      },
-      {
-        name: 'Enhanced Input',
-        path: '/components/enhanced-input',
-        implemented: true,
-        description: 'Styled input with label and optional subtitle',
-      },
-      {
-        name: 'Enhanced Select',
-        path: '/components/enhanced-select',
-        implemented: false,
-        description: 'Styled select dropdown with label and optional subtitle',
-      },
-      {
-        name: 'Enhanced Textarea',
-        path: '/components/enhanced-textarea',
-        implemented: false,
-        description: 'Styled textarea with auto-resize and character count',
-      },
-      {
-        name: 'Form Section',
-        path: '/components/form-section',
-        implemented: false,
-        description: 'Grouped form fields with section title',
-      },
-      {
-        name: 'Form Actions',
-        path: '/components/form-actions',
-        implemented: false,
-        description: 'Action buttons for forms (Save, Reset, etc.)',
       },
     ],
   },
@@ -88,73 +59,9 @@ const componentCategories = [
         implemented: true,
         description: 'Page headers with title and subtitle',
       },
-      {
-        name: 'Sidebar',
-        path: '/components/sidebar',
-        implemented: true,
-        description: 'Navigation sidebar with collapsible sections',
-      },
-      {
-        name: 'Layout',
-        path: '/components/layout',
-        implemented: false,
-        description: 'Main layout container with header and sidebar',
-      },
-      {
-        name: 'Page Header',
-        path: '/components/page-header',
-        implemented: false,
-        description: 'Standardized page header component',
-      },
-      {
-        name: 'Content Container',
-        path: '/components/content-container',
-        implemented: false,
-        description: 'Main content area wrapper',
-      },
     ],
   },
-  {
-    name: 'Data Display',
-    components: [
-      {
-        name: 'Status Indicator',
-        path: '/components/status-indicator',
-        implemented: true,
-        description: 'Status badges and indicators',
-      },
-      {
-        name: 'Agent Card',
-        path: '/components/agent-card',
-        implemented: true,
-        description: 'Card component for displaying agent information',
-      },
-      {
-        name: 'Metric Card',
-        path: '/components/metric-card',
-        implemented: false,
-        description: 'Cards for displaying metrics and statistics',
-      },
-      {
-        name: 'Data Table',
-        path: '/components/data-table',
-        implemented: false,
-        description: 'Sortable and filterable data tables',
-      },
-      {
-        name: 'List Item',
-        path: '/components/list-item',
-        implemented: false,
-        description: 'Individual list item components',
-      },
-      {
-        name: 'Empty State',
-        path: '/components/empty-state',
-        implemented: false,
-        description: 'Empty state illustrations and messages',
-      },
-    ],
-  },
+
   {
     name: 'Navigation & User',
     components: [
@@ -169,35 +76,6 @@ const componentCategories = [
         path: '/components/user-profile',
         implemented: false,
         description: 'User profile display and menu',
-      },
-      {
-        name: 'Search',
-        path: '/components/search',
-        implemented: false,
-        description: 'Global search component',
-      },
-    ],
-  },
-  {
-    name: 'Specialized Components',
-    components: [
-      {
-        name: 'Schedule Item',
-        path: '/components/schedule-item',
-        implemented: false,
-        description: 'Scheduled execution item with toggle',
-      },
-      {
-        name: 'Tool Item',
-        path: '/components/tool-item',
-        implemented: false,
-        description: 'Tool assignment item with checkbox',
-      },
-      {
-        name: 'Toggle',
-        path: '/components/toggle',
-        implemented: false,
-        description: 'Simple toggle switch component',
       },
     ],
   },
@@ -223,19 +101,19 @@ export default function HomePage() {
               <div className="text-sm text-bg-muted-foreground">Demo Pages</div>
             </div>
             <div className="bg-bg-card border border-bg-border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-bg-foreground">8</div>
+              <div className="text-2xl font-bold text-bg-foreground">5</div>
               <div className="text-sm text-bg-muted-foreground">
                 Implemented
               </div>
             </div>
             <div className="bg-bg-card border border-bg-border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-bg-foreground">25</div>
+              <div className="text-2xl font-bold text-bg-foreground">7</div>
               <div className="text-sm text-bg-muted-foreground">
                 Total Components
               </div>
             </div>
             <div className="bg-bg-card border border-bg-border rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">32%</div>
+              <div className="text-2xl font-bold text-green-600">71%</div>
               <div className="text-sm text-bg-muted-foreground">Complete</div>
             </div>
           </div>

@@ -4,9 +4,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import {
   TitleWithSubtitle,
   FormCard,
-  EnhancedInput,
-  EnhancedSelect,
-  EnhancedTextarea,
   ActiveIndicator,
   SaveButton,
   ResetButton,
@@ -170,18 +167,32 @@ export default function ConfigurationDemoPage() {
           <div className="space-y-6">
             {/* Basic Settings */}
             <FormCard title="Basic Settings">
-              <EnhancedInput
-                label="Agent Name"
-                value={agentName}
-                onChange={setAgentName}
-                placeholder="Enter agent name"
-              />
-              <EnhancedInput
-                label="Role/Type"
-                value={roleType}
-                onChange={setRoleType}
-                placeholder="Enter role or type"
-              />
+              <div className="space-y-4">
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Agent Name
+                  </label>
+                  <input
+                    type="text"
+                    value={agentName}
+                    onChange={(e) => setAgentName(e.target.value)}
+                    placeholder="Enter agent name"
+                    className="px-3 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Role/Type
+                  </label>
+                  <input
+                    type="text"
+                    value={roleType}
+                    onChange={(e) => setRoleType(e.target.value)}
+                    placeholder="Enter role or type"
+                    className="px-3 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
             </FormCard>
 
             {/* Prompt */}
@@ -270,57 +281,61 @@ export default function ConfigurationDemoPage() {
                 </div>
               }
             >
-              <EnhancedTextarea
+              <textarea
                 value={prompt}
-                onChange={setPrompt}
+                onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Enter your prompt here..."
                 maxLength={4000}
-                autoResize={true}
-                minHeight={128}
-                maxHeight={256}
+                rows={6}
+                className="px-3 py-2 w-full rounded-md border border-gray-300 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </FormCard>
 
             {/* Security & Access */}
             <FormCard title="Security & Access" icon={Shield}>
               <div className="space-y-4">
-                <EnhancedSelect
-                  label="User Role Permissions"
-                  subtitle="Define which user roles can manage this agent"
-                  options={[
-                    { value: 'admins', label: 'Admins Only' },
-                    { value: 'all', label: 'All Users' },
-                    { value: 'specific', label: 'Specific Roles' },
-                  ]}
-                  value="admins"
-                  onChange={() => {}}
-                />
-                <EnhancedSelect
-                  label="Chat Access Control"
-                  subtitle="Specify who can initiate conversations with this agent"
-                  options={[
-                    {
-                      value: 'specific-groups',
-                      label: 'Users in Specific Groups',
-                    },
-                    { value: 'all', label: 'All Users' },
-                    { value: 'none', label: 'No Access' },
-                  ]}
-                  value="specific-groups"
-                  onChange={() => {}}
-                />
-                <EnhancedSelect
-                  label="Configuration Access"
-                  subtitle="Control who can view or edit this agent's configuration"
-                  options={[
-                    { value: '', label: 'Select access level...' },
-                    { value: 'full', label: 'Full Access' },
-                    { value: 'read-only', label: 'Read Only' },
-                    { value: 'none', label: 'No Access' },
-                  ]}
-                  value=""
-                  onChange={() => {}}
-                />
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    User Role Permissions
+                  </label>
+                  <p className="mb-2 text-xs text-gray-500">
+                    Define which user roles can manage this agent
+                  </p>
+                  <select className="px-3 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="admins">Admins Only</option>
+                    <option value="all">All Users</option>
+                    <option value="specific">Specific Roles</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Chat Access Control
+                  </label>
+                  <p className="mb-2 text-xs text-gray-500">
+                    Specify who can initiate conversations with this agent
+                  </p>
+                  <select className="px-3 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="specific-groups">
+                      Users in Specific Groups
+                    </option>
+                    <option value="all">All Users</option>
+                    <option value="none">No Access</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Configuration Access
+                  </label>
+                  <p className="mb-2 text-xs text-gray-500">
+                    Control who can view or edit this agent's configuration
+                  </p>
+                  <select className="px-3 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select access level...</option>
+                    <option value="full">Full Access</option>
+                    <option value="read-only">Read Only</option>
+                    <option value="none">No Access</option>
+                  </select>
+                </div>
               </div>
             </FormCard>
           </div>

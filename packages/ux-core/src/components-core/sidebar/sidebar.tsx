@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { componentColors, componentUtils } from '../dark-theme-colors'
+import { defaultTeamHubItems } from './navigation-items'
 
 export interface SidebarItem {
   id: string
@@ -58,7 +59,7 @@ export interface SidebarProps {
   onToggleCollapse?: () => void
 }
 
-const defaultItems: SidebarItem[] = []
+const defaultItems: SidebarItem[] = defaultTeamHubItems
 
 export const Sidebar = ({
   className,
