@@ -244,7 +244,7 @@ export const Sidebar = ({
                         onMouseEnter={(e) => {
                           if (activeSubmenu !== subItem.id) {
                             e.currentTarget.style.backgroundColor =
-                              'rgba(255, 255, 255, 0.05)'
+                              'rgba(255, 255, 255,maye  0.05)'
                             e.currentTarget.style.color =
                               'rgba(255, 255, 255, 0.8)'
                             e.currentTarget.style.transform = 'translateX(4px)'

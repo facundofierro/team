@@ -73,3 +73,41 @@ export {
   type ToolItemProps,
   type FormActionsProps,
 } from './forms'
+
+// Configuration Components (Phase 3)
+export {
+  TitleWithSubtitle,
+  ConfigurationCard,
+  ConfigButton,
+  ScheduledExecutionItem,
+  ToolAssignmentItem,
+  PromptEditor,
+  SecurityAccess,
+  type TitleWithSubtitleProps,
+  type ConfigurationCardProps,
+  type ConfigButtonProps,
+  type ScheduledExecutionItemProps,
+  type ToolAssignmentItemProps,
+  type PromptEditorProps,
+  type SecurityAccessProps,
+} from './configuration-cards'
+
+// Specialized Card Components
+export {
+  BasicSettingsCard,
+  PromptCard,
+  ScheduledExecutionsCard,
+  ToolAssignmentCard,
+  SecurityAccessCard,
+  type BasicSettingsCardProps,
+  type PromptCardProps,
+  type ScheduledExecutionsCardProps,
+  type ToolAssignmentCardProps,
+  type SecurityAccessCardProps,
+} from './cards'
+
+// Example Pages
+export {
+  AgentConfigurationPage,
+  type AgentConfigurationPageProps,
+} from './agent-configuration-page'

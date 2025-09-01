@@ -16,6 +16,7 @@ export interface LayoutProps {
     activeItem?: string
     collapsed?: boolean
     onToggleCollapse?: () => void
+    onNavItemChange?: (item: string) => void
   }
   header?: {
     title?: string
@@ -64,6 +65,7 @@ export function Layout({
     activeItem,
     collapsed = false,
     onToggleCollapse,
+    onNavItemChange = () => {},
   } = sidebar
 
   const {
@@ -112,16 +114,21 @@ export function Layout({
       {/* Sidebar */}
       <Sidebar
         items={items}
-        activeNavItem={activeItem}
-        collapsed={collapsed}
-        onToggleCollapse={onToggleCollapse}
-        user={user}
+        activeNavItem={activeItem || ''}
+        onNavItemChange={onNavItemChange}
+        logo={{
+          text: 'TeamHub',
+          subtitle: 'AI Agent Platform',
+        }}
+        user={user || { name: 'User', email: 'user@example.com' }}
         actions={{
           region: 'spb',
           onRegionClick: actions?.onRegionClick,
           onGlobeClick: actions?.onGlobeClick,
           onLogoutClick: actions?.onLogoutClick,
         }}
+        collapsed={collapsed}
+        onToggleCollapse={onToggleCollapse}
       />
 
       {/* Main Content */}
@@ -246,8 +253,13 @@ export function Layout({
           <div className="fixed left-0 top-0 h-full w-80 bg-gradient-to-b from-[#3B2146] to-[#8A548C] z-50">
             <Sidebar
               items={items}
-              activeNavItem={activeItem}
-              user={user}
+              activeNavItem={activeItem || ''}
+              onNavItemChange={onNavItemChange}
+              logo={{
+                text: 'TeamHub',
+                subtitle: 'AI Agent Platform',
+              }}
+              user={user || { name: 'User', email: 'user@example.com' }}
               actions={{
                 region: 'spb',
                 onRegionClick: actions?.onRegionClick,
