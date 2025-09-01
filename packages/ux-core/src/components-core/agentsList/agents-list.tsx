@@ -51,19 +51,23 @@ const StatusIndicator: React.FC<{ status: Agent['status'] }> = ({ status }) => {
   const getStatusColor = () => {
     switch (status) {
       case 'active':
-        return 'bg-green-500'
+        return coreColors.status.success
       case 'idle':
-        return 'bg-yellow-500'
+        return coreColors.status.warning
       case 'offline':
-        return 'bg-gray-400'
+        return coreColors.text.disabled
       default:
-        return 'bg-gray-400'
+        return coreColors.text.disabled
     }
   }
 
   return (
     <div
-      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getStatusColor()}`}
+      className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2"
+      style={{
+        backgroundColor: getStatusColor(),
+        borderColor: coreColors.background.card,
+      }}
     />
   )
 }
@@ -90,11 +94,32 @@ const AgentCard: React.FC<{
     <div className={`${isChild ? 'ml-6' : ''}`}>
       <button
         onClick={() => onSelect(agent)}
-        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 border ${
-          isSelected
-            ? 'text-white bg-gradient-to-r from-purple-500 to-purple-600 border-purple-500 shadow-md'
-            : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
-        }`}
+        className="flex items-center px-4 py-3 space-x-3 w-full rounded-xl border shadow-sm transition-all duration-200"
+        style={{
+          backgroundColor: isSelected
+            ? coreColors.brand.primary
+            : coreColors.background.card,
+          borderColor: isSelected
+            ? coreColors.brand.primary
+            : coreColors.border.light,
+          color: isSelected ? coreColors.text.inverse : coreColors.text.primary,
+          boxShadow: isSelected
+            ? '0 4px 12px rgba(0, 0, 0, 0.15)'
+            : '0 1px 3px rgba(0, 0, 0, 0.1)',
+        }}
+        onMouseEnter={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.backgroundColor =
+              coreColors.background.secondary
+            e.currentTarget.style.borderColor = coreColors.border.medium
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.backgroundColor = coreColors.background.card
+            e.currentTarget.style.borderColor = coreColors.border.light
+          }
+        }}
       >
         {/* Expand/collapse button for parent agents */}
         {hasChildren && (
@@ -103,22 +128,25 @@ const AgentCard: React.FC<{
               e.stopPropagation()
               onExpandToggle?.(agent)
             }}
-            className={`flex-shrink-0 p-0.5 rounded transition-colors ${
-              isSelected ? 'hover:bg-white/20' : 'hover:bg-gray-200'
-            }`}
+            className="flex-shrink-0 p-0.5 rounded-lg transition-colors"
+            style={{
+              color: isSelected
+                ? coreColors.text.inverse
+                : coreColors.text.secondary,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isSelected
+                ? 'rgba(255, 255, 255, 0.2)'
+                : coreColors.background.secondary
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }}
           >
             {isExpanded ? (
-              <ChevronDown
-                className={`w-4 h-4 ${
-                  isSelected ? 'text-white' : 'text-gray-600'
-                }`}
-              />
+              <ChevronDown className="w-4 h-4" />
             ) : (
-              <ChevronRight
-                className={`w-4 h-4 ${
-                  isSelected ? 'text-white' : 'text-gray-600'
-                }`}
-              />
+              <ChevronRight className="w-4 h-4" />
             )}
           </button>
         )}
@@ -126,11 +154,15 @@ const AgentCard: React.FC<{
         {/* Agent avatar */}
         <div className="relative flex-shrink-0">
           <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-              isSelected
-                ? 'text-white bg-white/20'
-                : 'text-gray-700 bg-gray-100'
-            }`}
+            className="flex justify-center items-center w-8 h-8 text-xs font-medium rounded-full"
+            style={{
+              backgroundColor: isSelected
+                ? 'rgba(255, 255, 255, 0.2)'
+                : coreColors.background.secondary,
+              color: isSelected
+                ? coreColors.text.inverse
+                : coreColors.text.secondary,
+            }}
           >
             {agent.avatar || agent.name.charAt(0).toUpperCase()}
           </div>
@@ -140,16 +172,22 @@ const AgentCard: React.FC<{
         {/* Agent info */}
         <div className="flex-1 min-w-0 text-left">
           <p
-            className={`text-sm font-medium truncate ${
-              isSelected ? 'text-white' : 'text-gray-900'
-            }`}
+            className="text-sm font-medium truncate"
+            style={{
+              color: isSelected
+                ? coreColors.text.inverse
+                : coreColors.text.primary,
+            }}
           >
             {agent.name}
           </p>
           <p
-            className={`text-xs truncate ${
-              isSelected ? 'text-white/80' : 'text-gray-500'
-            }`}
+            className="text-xs truncate"
+            style={{
+              color: isSelected
+                ? 'rgba(255, 255, 255, 0.8)'
+                : coreColors.text.tertiary,
+            }}
           >
             {agent.description}
           </p>
@@ -193,25 +231,46 @@ const StatusTabs: React.FC<{
         <button
           key={tab.key}
           onClick={() => onTabChange(tab.key)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center space-x-1 ${
-            activeTab === tab.key
-              ? 'bg-purple-100 text-purple-700 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-          }`}
+          className="flex items-center px-4 py-2 space-x-1 text-sm font-medium rounded-full transition-all duration-200"
+          style={{
+            backgroundColor:
+              activeTab === tab.key ? coreColors.brand.accent : 'transparent',
+            color:
+              activeTab === tab.key
+                ? coreColors.brand.primary
+                : coreColors.text.secondary,
+            boxShadow:
+              activeTab === tab.key ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (activeTab !== tab.key) {
+              e.currentTarget.style.backgroundColor =
+                coreColors.background.secondary
+              e.currentTarget.style.color = coreColors.text.primary
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (activeTab !== tab.key) {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = coreColors.text.secondary
+            }
+          }}
         >
           {tab.key !== 'all' && (
             <div
-              className={`w-2 h-2 rounded-full ${
-                tab.key === 'active'
-                  ? 'bg-green-400'
-                  : tab.key === 'idle'
-                  ? 'bg-yellow-400'
-                  : 'bg-gray-400'
-              }`}
+              className="w-2 h-2 rounded-full"
+              style={{
+                backgroundColor:
+                  tab.key === 'active'
+                    ? coreColors.status.success
+                    : tab.key === 'idle'
+                    ? coreColors.status.warning
+                    : coreColors.text.disabled,
+              }}
             />
           )}
           <span>{tab.label}</span>
-          <span className="text-xs opacity-75">({tab.count})</span>
+          <span style={{ opacity: 0.75 }}>({tab.count})</span>
         </button>
       ))}
     </div>
@@ -226,18 +285,29 @@ const SearchBar: React.FC<{
 }> = ({ value, onChange, placeholder = 'Search agents...' }) => {
   return (
     <div className="relative mb-4">
-      <Search className="absolute left-3 top-1/2 w-4 h-4 text-gray-400 transform -translate-y-1/2" />
+      <Search
+        className="absolute left-3 top-1/2 w-4 h-4 transform -translate-y-1/2"
+        style={{ color: coreColors.text.tertiary }}
+      />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="py-2 pr-4 pl-10 w-full text-sm rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2"
+        className="py-2 pr-4 pl-10 w-full text-sm rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
         style={{
           backgroundColor: coreColors.background.card,
           borderColor: coreColors.border.light,
           color: coreColors.text.primary,
-          focusRing: coreColors.focus.ring,
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = coreColors.border.focus
+          e.target.style.boxShadow = `0 0 0 2px ${coreColors.focus.ring}`
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = coreColors.border.light
+          e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
         }}
       />
     </div>
@@ -261,48 +331,126 @@ const ActionButtons: React.FC<{
   return (
     <div className="flex items-center space-x-3">
       {/* Search/Filter Mode Switcher */}
-      <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+      <div
+        className="flex items-center rounded-xl p-0.5"
+        style={{ backgroundColor: coreColors.background.secondary }}
+      >
         <button
           onClick={() => onSearchModeChange('search')}
-          className={`p-1.5 rounded transition-colors ${
-            searchMode === 'search'
-              ? 'bg-white shadow-sm text-gray-700'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className="p-1.5 rounded-lg transition-colors"
+          style={{
+            backgroundColor:
+              searchMode === 'search'
+                ? coreColors.background.card
+                : 'transparent',
+            color:
+              searchMode === 'search'
+                ? coreColors.text.primary
+                : coreColors.text.tertiary,
+            boxShadow:
+              searchMode === 'search' ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (searchMode !== 'search') {
+              e.currentTarget.style.color = coreColors.text.secondary
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (searchMode !== 'search') {
+              e.currentTarget.style.color = coreColors.text.tertiary
+            }
+          }}
         >
           <Search className="w-4 h-4" />
         </button>
         <button
           onClick={() => onSearchModeChange('filter')}
-          className={`p-1.5 rounded transition-colors ${
-            searchMode === 'filter'
-              ? 'bg-white shadow-sm text-gray-700'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className="p-1.5 rounded-lg transition-colors"
+          style={{
+            backgroundColor:
+              searchMode === 'filter'
+                ? coreColors.background.card
+                : 'transparent',
+            color:
+              searchMode === 'filter'
+                ? coreColors.text.primary
+                : coreColors.text.tertiary,
+            boxShadow:
+              searchMode === 'filter' ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (searchMode !== 'filter') {
+              e.currentTarget.style.color = coreColors.text.secondary
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (searchMode !== 'filter') {
+              e.currentTarget.style.color = coreColors.text.tertiary
+            }
+          }}
         >
           <Filter className="w-4 h-4" />
         </button>
       </div>
 
       {/* View Mode Switcher */}
-      <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+      <div
+        className="flex items-center rounded-xl p-0.5"
+        style={{ backgroundColor: coreColors.background.secondary }}
+      >
         <button
           onClick={() => onViewModeChange('list')}
-          className={`p-1.5 rounded transition-colors ${
-            viewMode === 'list'
-              ? 'bg-white shadow-sm text-gray-700'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className="p-1.5 rounded-lg transition-colors"
+          style={{
+            backgroundColor:
+              viewMode === 'list' ? coreColors.background.card : 'transparent',
+            color:
+              viewMode === 'list'
+                ? coreColors.text.primary
+                : coreColors.text.tertiary,
+            boxShadow:
+              viewMode === 'list' ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (viewMode !== 'list') {
+              e.currentTarget.style.color = coreColors.text.secondary
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (viewMode !== 'list') {
+              e.currentTarget.style.color = coreColors.text.tertiary
+            }
+          }}
         >
           <List className="w-4 h-4" />
         </button>
         <button
           onClick={() => onViewModeChange('hierarchical')}
-          className={`p-1.5 rounded transition-colors ${
-            viewMode === 'hierarchical'
-              ? 'bg-white shadow-sm text-gray-700'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
+          className="p-1.5 rounded-lg transition-colors"
+          style={{
+            backgroundColor:
+              viewMode === 'hierarchical'
+                ? coreColors.background.card
+                : 'transparent',
+            color:
+              viewMode === 'hierarchical'
+                ? coreColors.text.primary
+                : coreColors.text.tertiary,
+            boxShadow:
+              viewMode === 'hierarchical'
+                ? '0 1px 3px rgba(0, 0, 0, 0.1)'
+                : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (viewMode !== 'hierarchical') {
+              e.currentTarget.style.color = coreColors.text.secondary
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (viewMode !== 'hierarchical') {
+              e.currentTarget.style.color = coreColors.text.tertiary
+            }
+          }}
         >
           <Grid3X3 className="w-4 h-4" />
         </button>
@@ -312,7 +460,7 @@ const ActionButtons: React.FC<{
       {onNew && (
         <button
           onClick={onNew}
-          className="flex items-center px-4 py-2 space-x-2 text-sm font-medium rounded-lg shadow-sm transition-all duration-200"
+          className="flex items-center px-4 py-2 space-x-2 text-sm font-medium rounded-xl shadow-sm transition-all duration-200"
           style={{
             backgroundColor: coreColors.interactive.actionDefault,
             color: coreColors.interactive.actionText,
@@ -410,8 +558,8 @@ export const AgentsList: React.FC<AgentsListProps> = ({
         )}
       </div>
 
-      {/* Search bar */}
-      {showSearch && (
+      {/* Search bar or Filter bar based on mode */}
+      {showSearch && searchMode === 'search' && (
         <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
@@ -419,12 +567,13 @@ export const AgentsList: React.FC<AgentsListProps> = ({
         />
       )}
 
-      {/* Status tabs */}
-      <StatusTabs
-        stats={stats}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+      {showSearch && searchMode === 'filter' && (
+        <StatusTabs
+          stats={stats}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+      )}
 
       {/* Agents list */}
       <div className="overflow-y-auto space-y-3 max-h-96">
@@ -441,7 +590,10 @@ export const AgentsList: React.FC<AgentsListProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="flex justify-between items-center pt-4 mt-6 border-t">
+      <div
+        className="flex justify-between items-center pt-4 mt-6 border-t"
+        style={{ borderColor: coreColors.border.light }}
+      >
         <div
           className="flex items-center space-x-2 text-sm"
           style={{ color: coreColors.text.tertiary }}
@@ -450,7 +602,10 @@ export const AgentsList: React.FC<AgentsListProps> = ({
           <span>•</span>
           <span>{stats.active} active</span>
         </div>
-        <div className="flex items-center space-x-2 text-sm text-green-600">
+        <div
+          className="flex items-center space-x-2 text-sm"
+          style={{ color: coreColors.status.success }}
+        >
           <Wifi className="w-4 h-4" />
           <span>Connected</span>
         </div>
