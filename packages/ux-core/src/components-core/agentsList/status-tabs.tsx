@@ -24,7 +24,9 @@ export const StatusTabs: React.FC<{
           className="flex items-center px-4 py-2 space-x-1 text-sm font-medium rounded-full transition-all duration-200"
           style={{
             backgroundColor:
-              activeTab === tab.key ? coreColors.background.secondary : 'transparent',
+              activeTab === tab.key
+                ? coreColors.background.secondary
+                : 'transparent',
             color:
               activeTab === tab.key
                 ? coreColors.brand.primary
@@ -46,19 +48,6 @@ export const StatusTabs: React.FC<{
             }
           }}
         >
-          {tab.key !== 'all' && (
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{
-                backgroundColor:
-                  tab.key === 'active'
-                    ? coreColors.status.success
-                    : tab.key === 'idle'
-                    ? coreColors.status.warning
-                    : coreColors.text.disabled,
-              }}
-            />
-          )}
           <span>{tab.label}</span>
           <span style={{ opacity: 0.75 }}>({tab.count})</span>
         </button>

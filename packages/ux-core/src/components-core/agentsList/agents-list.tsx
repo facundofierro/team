@@ -137,7 +137,7 @@ export const AgentsList: React.FC<AgentsListProps> = ({
 
       {/* Separator line after header */}
       <div
-        className="mb-6"
+        className="mb-4"
         style={{
           borderBottom: `1px solid ${coreColors.border.light}`,
         }}
