@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { AgentsList, type Agent, coreColors } from '@teamhub/ux-core'
+import { elegantColors } from '@teamhub/ux-core'
 
 // Sample agents data that matches the design
 const sampleAgents: Agent[] = [
@@ -89,7 +90,7 @@ export default function AgentsListDemo() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: coreColors.brand.primary }}
+      style={{ backgroundColor: elegantColors.primary[300] }}
     >
       <div className="flex h-screen">
         {/* Left side - AgentsList Component */}
@@ -109,46 +110,46 @@ export default function AgentsListDemo() {
         {/* Right side - Explanatory Content */}
         <div className="flex-1 p-8 bg-white">
           <div className="max-w-2xl">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            <h1 className="mb-6 text-3xl font-bold text-gray-900">
               AgentsList Component
             </h1>
 
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                <h2 className="mb-3 text-xl font-semibold text-gray-800">
                   Interactive Features
                 </h2>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="mr-2 text-blue-500">•</span>
                     <span>
                       <strong>Search/Filter Toggle:</strong> Switch between
                       search mode and status filter mode
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="mr-2 text-blue-500">•</span>
                     <span>
                       <strong>List/Tree View:</strong> Toggle between flat list
                       and hierarchical tree view
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="mr-2 text-blue-500">•</span>
                     <span>
                       <strong>Status Filtering:</strong> Filter agents by All,
                       On, Idle, or Off status
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="mr-2 text-blue-500">•</span>
                     <span>
                       <strong>Expand/Collapse:</strong> In tree mode, expand
                       parent agents to see children
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="mr-2 text-blue-500">•</span>
                     <span>
                       <strong>Agent Selection:</strong> Click any agent to
                       select it
@@ -158,33 +159,33 @@ export default function AgentsListDemo() {
               </div>
 
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                <h2 className="mb-3 text-xl font-semibold text-gray-800">
                   Design System
                 </h2>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">•</span>
+                    <span className="mr-2 text-green-500">•</span>
                     <span>
                       <strong>TeamHub Colors:</strong> Uses consistent color
                       palette from light-theme-colors.ts
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">•</span>
+                    <span className="mr-2 text-green-500">•</span>
                     <span>
                       <strong>Status Indicators:</strong> Green (active), Yellow
                       (idle), Grey (offline)
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">•</span>
+                    <span className="mr-2 text-green-500">•</span>
                     <span>
                       <strong>Responsive Design:</strong> Adapts to different
                       screen sizes
                     </span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">•</span>
+                    <span className="mr-2 text-green-500">•</span>
                     <span>
                       <strong>Accessibility:</strong> Keyboard navigation and
                       ARIA labels
@@ -194,8 +195,8 @@ export default function AgentsListDemo() {
               </div>
 
               {selectedAgent && (
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800">
                     Selected Agent
                   </h3>
                   <div className="space-y-2">
@@ -233,7 +234,7 @@ export default function AgentsListDemo() {
                           <span className="font-medium text-gray-700">
                             Child Agents:
                           </span>
-                          <ul className="ml-2 mt-1">
+                          <ul className="mt-1 ml-2">
                             {selectedAgent.children.map((child) => (
                               <li key={child.id} className="text-gray-600">
                                 • {child.name}
@@ -247,11 +248,11 @@ export default function AgentsListDemo() {
               )}
 
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                <h2 className="mb-3 text-xl font-semibold text-gray-800">
                   Component Props
                 </h2>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <pre className="text-sm text-gray-700 overflow-x-auto">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <pre className="overflow-x-auto text-sm text-gray-700">
                     {`<AgentsList
   agents={sampleAgents}
   onAgentSelect={handleAgentSelect}
