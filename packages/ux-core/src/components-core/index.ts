@@ -66,3 +66,10 @@ export {
   type ViewMode,
   type StatusTab,
 } from './agentsList'
+
+// Tabs Components
+export {
+  TeamHubTabs,
+  type TeamHubTabsProps,
+  type TeamHubTabItem,
+} from './tabs'

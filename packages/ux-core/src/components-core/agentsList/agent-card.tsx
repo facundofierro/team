@@ -69,7 +69,6 @@ export const AgentCard: React.FC<{
           boxShadow: isSelected
             ? '0 4px 12px rgba(0, 0, 0, 0.15)'
             : '0 1px 3px rgba(0, 0, 0, 0.1)',
-          ringColor: isSelected ? coreColors.brand.primary : 'transparent',
         }}
         onMouseEnter={(e) => {
           if (!isSelected) {

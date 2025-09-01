@@ -50,3 +50,9 @@ export {
   DialogTitle,
   DialogTrigger,
 } from './components/shadcn/dialog'
+export {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from './components/shadcn/tabs'
