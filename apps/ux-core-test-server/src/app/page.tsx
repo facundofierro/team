@@ -20,6 +20,13 @@ const componentCategories = [
         description:
           'Interactive sidebar with navigation and collapsible sections',
       },
+      {
+        name: 'Agents List Demo',
+        path: '/agents-list-demo',
+        implemented: true,
+        description:
+          'Interactive agents list with search, filtering, and hierarchical view',
+      },
     ],
   },
   {

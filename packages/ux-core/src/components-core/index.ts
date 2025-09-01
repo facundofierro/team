@@ -51,3 +51,18 @@ export {
 
 // Switcher Components
 export { ActiveIndicator, type ActiveIndicatorProps } from './switchers'
+
+// AgentsList Components
+export {
+  AgentsList,
+  type Agent,
+  type AgentStats,
+  type AgentsListProps,
+  type StatusTabsProps,
+  type AgentCardProps,
+  type SearchBarProps,
+  type ActionButtonsProps,
+  type AgentStatus,
+  type ViewMode,
+  type StatusTab,
+} from './agentsList'
