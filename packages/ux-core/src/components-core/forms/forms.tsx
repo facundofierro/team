@@ -630,8 +630,8 @@ export function FormActions({
           disabled={disabled || loading}
           className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
           style={{
-            background: elegantColors.background.primaryGradient,
-            color: elegantColors.text.inverse,
+            backgroundColor: '#8A548C',
+            color: '#FFFFFF',
             boxShadow:
               '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           }}

@@ -122,11 +122,7 @@ export default function ConfigurationDemoPage() {
           {/* Left Column */}
           <div className="space-y-6">
             {/* Basic Settings */}
-            <FormCard
-              title="Basic Settings"
-              subtitle="Configure the basic information for your AI agent"
-              icon={Shield}
-            >
+            <FormCard title="Basic Settings">
               <EnhancedInput
                 label="Agent Name"
                 subtitle="The display name for your AI agent"
@@ -146,27 +142,44 @@ export default function ConfigurationDemoPage() {
             {/* Prompt */}
             <FormCard
               title="Prompt"
-              subtitle="Define the AI agent's behavior and capabilities"
               icon={Sparkles}
               headerContent={
                 <div className="flex space-x-2">
                   <button
-                    className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50"
+                    className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all"
                     style={{
-                      borderColor: elegantColors.border.medium,
-                      color: elegantColors.text.secondary,
+                      color: '#847F8A',
+                      backgroundColor: 'transparent',
                     }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor =
+                        'rgba(244, 243, 245, 0.8)')
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = 'transparent')
+                    }
                   >
-                    AI
+                    <Sparkles
+                      className="w-3 h-3"
+                      style={{ color: '#8A548C' }}
+                    />
+                    <span>AI</span>
                   </button>
                   <button
-                    className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50"
+                    className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all"
                     style={{
-                      borderColor: elegantColors.border.medium,
-                      color: elegantColors.text.secondary,
+                      color: '#847F8A',
+                      backgroundColor: 'transparent',
                     }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.backgroundColor =
+                        'rgba(244, 243, 245, 0.8)')
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.backgroundColor = 'transparent')
+                    }
                   >
-                    Templates
+                    <span>Templates</span>
                   </button>
                 </div>
               }
@@ -190,11 +203,7 @@ export default function ConfigurationDemoPage() {
             </FormCard>
 
             {/* Security & Access */}
-            <FormCard
-              title="Security & Access"
-              subtitle="Manage permissions and access controls"
-              icon={Shield}
-            >
+            <FormCard title="Security & Access" icon={Shield}>
               <div className="space-y-4">
                 <EnhancedSelect
                   label="User Role Permissions"
@@ -242,15 +251,14 @@ export default function ConfigurationDemoPage() {
             {/* Scheduled Executions */}
             <FormCard
               title="Scheduled Executions"
-              subtitle="Set up automated tasks and recurring actions"
               icon={Calendar}
               headerAction={
                 <button
                   onClick={handleAddSchedule}
-                  className="px-3 py-1 text-sm rounded-md"
+                  className="px-3 py-1 text-sm rounded-md font-medium"
                   style={{
-                    background: elegantColors.background.primaryGradient,
-                    color: elegantColors.text.inverse,
+                    backgroundColor: '#8A548C',
+                    color: '#FFFFFF',
                   }}
                 >
                   + Add Schedule
@@ -282,15 +290,14 @@ export default function ConfigurationDemoPage() {
             {/* Tool Assignment */}
             <FormCard
               title="Tool Assignment"
-              subtitle="Assign tools and capabilities to your agent"
               icon={Database}
               headerAction={
                 <button
                   onClick={handleAddTool}
-                  className="px-3 py-1 text-sm rounded-md"
+                  className="px-3 py-1 text-sm rounded-md font-medium"
                   style={{
-                    background: elegantColors.background.primaryGradient,
-                    color: elegantColors.text.inverse,
+                    backgroundColor: '#8A548C',
+                    color: '#FFFFFF',
                   }}
                 >
                   + Add Tool

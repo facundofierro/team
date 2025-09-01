@@ -38,11 +38,7 @@ export default function FormCardPage() {
         </FormCard>
 
         {/* Form Card with Icon */}
-        <FormCard
-          title="Security Settings"
-          subtitle="Configure access permissions"
-          icon={Shield}
-        >
+        <FormCard title="Security Settings" icon={Shield}>
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <input type="checkbox" id="admin" />
