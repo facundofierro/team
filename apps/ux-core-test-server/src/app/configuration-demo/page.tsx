@@ -9,7 +9,6 @@ import {
   ActiveIndicator,
 } from '@teamhub/ux-core'
 import {
-  ConfigurationCard,
   ScheduledExecutionItem,
   ToolAssignmentItem,
 } from '@/components/configuration'
@@ -19,7 +18,7 @@ import {
   Shield,
   Plus,
   Database,
-  FileText as FileTextIcon,
+  Calendar,
 } from 'lucide-react'
 
 export default function ConfigurationDemoPage() {
@@ -28,7 +27,7 @@ export default function ConfigurationDemoPage() {
   const [prompt, setPrompt] = useState(
     'You are an expert AI assistant for construction procurement. Your primary goal is to analyze material costs, manage supplier relationships, and ensure legal compliance in all contracts. You must be precise, data-driven, and proactive in identifying cost-saving opportunities.'
   )
-  const [status, setStatus] = useState<'active' | 'inactive'>('active')
+  const [isActive, setIsActive] = useState(true)
   const [schedules, setSchedules] = useState([
     {
       id: '1',
@@ -37,7 +36,7 @@ export default function ConfigurationDemoPage() {
         'Generate daily cost analysis report for all active projects',
       schedule: 'Daily at 9:00 AM',
       nextExecution: '2024-01-15 09:00',
-      status: 'active' as const,
+      isActive: true,
     },
     {
       id: '2',
@@ -45,7 +44,7 @@ export default function ConfigurationDemoPage() {
       description: 'Check supplier inventory levels and alert if low',
       schedule: 'Weekly on Monday at 2:00 PM',
       nextExecution: '2024-01-16 14:00',
-      status: 'inactive' as const,
+      isActive: false,
     },
   ])
   const [tools, setTools] = useState([
@@ -63,13 +62,8 @@ export default function ConfigurationDemoPage() {
     },
   ])
 
-  const handleToggleSchedule = (
-    id: string,
-    newStatus: 'active' | 'inactive'
-  ) => {
-    setSchedules(
-      schedules.map((s) => (s.id === id ? { ...s, status: newStatus } : s))
-    )
+  const handleToggleSchedule = (id: string, isActive: boolean) => {
+    setSchedules(schedules.map((s) => (s.id === id ? { ...s, isActive } : s)))
   }
 
   const handleToggleTool = (id: string, enabled: boolean) => {
@@ -83,7 +77,7 @@ export default function ConfigurationDemoPage() {
       description: 'Add description here',
       schedule: 'Daily at 12:00 PM',
       nextExecution: '2024-01-20 12:00',
-      status: 'active' as const,
+      isActive: true,
     }
     setSchedules([...schedules, newSchedule])
   }
@@ -100,172 +94,220 @@ export default function ConfigurationDemoPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F4F3F5' }}>
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div
-          className="flex items-center justify-between p-4 rounded-lg border"
-          style={{
-            backgroundColor: '#F4F3F5',
-            borderColor: 'rgba(215, 213, 217, 0.6)',
-          }}
-        >
+      {/* Header - Full width, not a card */}
+      <div
+        className="px-6 py-4 border-b"
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderColor: 'rgba(215, 213, 217, 0.6)',
+        }}
+      >
+        <div className="flex items-center justify-between">
           <TitleWithSubtitle
-            title={agentName}
+            title="Procurement Manager"
             subtitle="Manages materials sourcing, supplier negotiations, and cost analysis for construction projects."
-            titleClassName="text-xl font-bold"
-            subtitleClassName="text-xs mt-0.5"
           />
-          <ActiveIndicator isActive={status === 'active'} />
+          <ActiveIndicator isActive={isActive} onToggle={setIsActive} />
         </div>
+      </div>
 
-        {/* Configuration Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Basic Settings */}
-          <ConfigurationCard title="Basic Settings" icon={Shield}>
-            <div className="space-y-4">
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Basic Settings */}
+            <FormCard title="Basic Settings" icon={Shield}>
               <EnhancedInput
-                label="Agent Name*"
+                label="Agent Name"
                 value={agentName}
                 onChange={setAgentName}
                 placeholder="Enter agent name"
               />
               <EnhancedInput
-                label="Role/Type*"
+                label="Role/Type"
                 value={roleType}
                 onChange={setRoleType}
                 placeholder="Enter role or type"
               />
-            </div>
-          </ConfigurationCard>
+            </FormCard>
 
-          {/* Scheduled Executions */}
-          <ConfigurationCard
-            title="Scheduled Executions"
-            icon={Shield}
-            headerAction={
-              <button
-                onClick={handleAddSchedule}
-                className="flex items-center space-x-1 px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Schedule</span>
-              </button>
-            }
-          >
-            <div className="space-y-3">
-              {schedules.map((schedule) => (
-                <ScheduledExecutionItem
-                  key={schedule.id}
-                  {...schedule}
-                  onToggle={handleToggleSchedule}
-                  onEdit={() => {}}
-                  onDelete={(id) =>
-                    setSchedules(schedules.filter((s) => s.id !== id))
-                  }
-                />
-              ))}
-            </div>
-          </ConfigurationCard>
-
-          {/* Prompt */}
-          <div className="lg:col-span-2">
-            <ConfigurationCard
+            {/* Prompt */}
+            <FormCard
               title="Prompt"
+              icon={Sparkles}
               headerContent={
                 <div className="flex space-x-2">
-                  <button className="flex items-center space-x-1 px-3 py-1 text-sm border border-border rounded-md hover:bg-accent">
-                    <Sparkles className="w-4 h-4" />
-                    <span>AI</span>
+                  <button className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50">
+                    AI
                   </button>
-                  <button className="flex items-center space-x-1 px-3 py-1 text-sm border border-border rounded-md hover:bg-accent">
-                    <FileText className="w-4 h-4" />
-                    <span>Templates</span>
+                  <button className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50">
+                    Templates
                   </button>
                 </div>
               }
             >
-              <div className="space-y-3">
+              <div className="relative">
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Define the agent's primary instructions, role, and constraints..."
                   className="w-full h-32 p-3 border rounded-md resize-none"
                   style={{
                     backgroundColor: '#F4F3F5',
                     borderColor: 'rgba(195, 192, 198, 0.8)',
                     color: '#2D1B2E',
                   }}
+                  placeholder="Enter your prompt here..."
                 />
-                <div className="text-right">
-                  <span className="text-xs" style={{ color: '#847F8A' }}>
-                    {prompt.length} / 4000
-                  </span>
+                <div className="absolute bottom-2 right-2 text-xs text-gray-500">
+                  {prompt.length} / 4000
                 </div>
               </div>
-            </ConfigurationCard>
+            </FormCard>
           </div>
 
-          {/* Tool Assignment */}
-          <ConfigurationCard
-            title="Tool Assignment"
-            icon={Shield}
-            headerAction={
-              <button
-                onClick={handleAddTool}
-                className="flex items-center space-x-1 px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Tool</span>
-              </button>
-            }
-          >
-            <div className="space-y-3">
-              {tools.map((tool) => (
-                <ToolAssignmentItem
-                  key={tool.id}
-                  {...tool}
-                  onToggle={handleToggleTool}
-                  onRemove={(id) => setTools(tools.filter((t) => t.id !== id))}
-                />
-              ))}
-            </div>
-          </ConfigurationCard>
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Scheduled Executions */}
+            <FormCard
+              title="Scheduled Executions"
+              icon={Calendar}
+              headerAction={
+                <button
+                  onClick={handleAddSchedule}
+                  className="px-3 py-1 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                >
+                  + Add Schedule
+                </button>
+              }
+            >
+              <div className="space-y-3">
+                {schedules.map((schedule) => (
+                  <ScheduledExecutionItem
+                    key={schedule.id}
+                    id={schedule.id}
+                    name={schedule.name}
+                    description={schedule.description}
+                    schedule={schedule.schedule}
+                    nextExecution={schedule.nextExecution}
+                    status={schedule.isActive ? 'active' : 'inactive'}
+                    onToggle={(id, status) =>
+                      handleToggleSchedule(id, status === 'active')
+                    }
+                    onEdit={() => {}}
+                    onDelete={(id) =>
+                      setSchedules(schedules.filter((s) => s.id !== id))
+                    }
+                  />
+                ))}
+              </div>
+            </FormCard>
 
-          {/* Security & Access */}
-          <ConfigurationCard title="Security & Access" icon={Shield}>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Shield className="w-5 h-5 text-muted-foreground" />
+            {/* Tool Assignment */}
+            <FormCard
+              title="Tool Assignment"
+              icon={Database}
+              headerAction={
+                <button
+                  onClick={handleAddTool}
+                  className="px-3 py-1 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                >
+                  + Add Tool
+                </button>
+              }
+            >
+              <div className="space-y-3">
+                {tools.map((tool) => (
+                  <ToolAssignmentItem
+                    key={tool.id}
+                    id={tool.id}
+                    name={tool.name}
+                    description={tool.description}
+                    enabled={tool.enabled}
+                    onToggle={(id, enabled) => handleToggleTool(id, enabled)}
+                    onRemove={(id) =>
+                      setTools(tools.filter((t) => t.id !== id))
+                    }
+                  />
+                ))}
+              </div>
+            </FormCard>
+
+            {/* Security & Access */}
+            <FormCard title="Security & Access" icon={Shield}>
+              <div className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-medium">User Role Permissions</h4>
-                  <p className="text-xs text-muted-foreground">
-                    Define which user roles can manage this agent.
-                  </p>
+                  <label className="block text-sm font-medium mb-2">
+                    User Role Permissions
+                  </label>
+                  <select
+                    className="w-full p-3 border rounded-md"
+                    style={{
+                      backgroundColor: '#F4F3F5',
+                      borderColor: 'rgba(195, 192, 198, 0.8)',
+                      color: '#2D1B2E',
+                    }}
+                  >
+                    <option>Admins Only</option>
+                    <option>All Users</option>
+                    <option>Specific Roles</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Chat Access Control
+                  </label>
+                  <select
+                    className="w-full p-3 border rounded-md"
+                    style={{
+                      backgroundColor: '#F4F3F5',
+                      borderColor: 'rgba(195, 192, 198, 0.8)',
+                      color: '#2D1B2E',
+                    }}
+                  >
+                    <option>Users in Specific Groups</option>
+                    <option>All Users</option>
+                    <option>No Access</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Configuration Access
+                  </label>
+                  <select
+                    className="w-full p-3 border rounded-md"
+                    style={{
+                      backgroundColor: '#F4F3F5',
+                      borderColor: 'rgba(195, 192, 198, 0.8)',
+                      color: '#2D1B2E',
+                    }}
+                  >
+                    <option>Select access level...</option>
+                    <option>Full Access</option>
+                    <option>Read Only</option>
+                    <option>No Access</option>
+                  </select>
                 </div>
               </div>
-              <button className="flex items-center justify-between w-full p-3 border border-border rounded-md hover:bg-accent">
-                <span className="text-sm">Admins Only</span>
-                <Database className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </div>
-          </ConfigurationCard>
+            </FormCard>
+          </div>
         </div>
+      </div>
 
-        {/* Form Actions */}
-        <div
-          className="flex items-center justify-between p-4 rounded-lg border"
-          style={{
-            backgroundColor: '#FFFFFF',
-            borderColor: 'rgba(215, 213, 217, 0.6)',
-          }}
-        >
-          <FormActions
-            onSave={() => console.log('Saving...')}
-            onReset={() => console.log('Resetting...')}
-            saveLabel="Save All Changes"
-            resetLabel="Reset"
-          />
-        </div>
+      {/* Footer */}
+      <div
+        className="px-6 py-4 border-t"
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderColor: 'rgba(215, 213, 217, 0.6)',
+        }}
+      >
+        <FormActions
+          onReset={() => console.log('Resetting...')}
+          onSave={() => console.log('Saving...')}
+          resetLabel="Reset"
+          saveLabel="Save All Changes"
+        />
       </div>
     </div>
   )

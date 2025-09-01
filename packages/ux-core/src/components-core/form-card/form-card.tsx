@@ -37,7 +37,7 @@ export function FormCard({
           <div className="flex items-center space-x-3">
             {Icon && (
               <div className="p-2 bg-gray-50 rounded-lg">
-                <Icon className="w-5 h-5" style={{ color: '#8A548C' }} />
+                <Icon className="w-5 h-5 text-purple-600" />
               </div>
             )}
             <div>
