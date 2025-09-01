@@ -31,8 +31,16 @@ export function GhostButton({
       )}
       style={{
         ...coreUtils.getButtonDefault('ghost'),
-        ...coreUtils.getFocusStyles(),
       }}
+      onFocus={(e) =>
+        Object.assign(e.currentTarget.style, coreUtils.getFocusStyles())
+      }
+      onBlur={(e) =>
+        Object.assign(
+          e.currentTarget.style,
+          coreUtils.getButtonDefault('ghost')
+        )
+      }
       onMouseEnter={(e) =>
         !disabled &&
         Object.assign(e.currentTarget.style, coreUtils.getButtonHover('ghost'))

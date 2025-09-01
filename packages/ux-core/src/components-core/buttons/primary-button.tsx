@@ -37,8 +37,19 @@ export function PrimaryButton({
       )}
       style={{
         ...coreUtils.getButtonDefault('primary'),
-        ...coreUtils.getFocusStyles(),
       }}
+      onFocus={(e) =>
+        Object.assign(e.currentTarget.style, {
+          ...coreUtils.getButtonDefault('primary'),
+          ...coreUtils.getFocusStyles(),
+        })
+      }
+      onBlur={(e) =>
+        Object.assign(
+          e.currentTarget.style,
+          coreUtils.getButtonDefault('primary')
+        )
+      }
     >
       {loading ? (
         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

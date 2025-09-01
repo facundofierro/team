@@ -37,8 +37,19 @@ export function ActionButton({
       )}
       style={{
         ...coreUtils.getButtonDefault('action'),
-        ...coreUtils.getFocusStyles(),
       }}
+      onFocus={(e) =>
+        Object.assign(e.currentTarget.style, {
+          ...coreUtils.getButtonDefault('action'),
+          ...coreUtils.getFocusStyles(),
+        })
+      }
+      onBlur={(e) =>
+        Object.assign(
+          e.currentTarget.style,
+          coreUtils.getButtonDefault('action')
+        )
+      }
     >
       {loading ? (
         <div className="w-3 h-3 rounded-full border-2 border-white animate-spin border-t-transparent" />
