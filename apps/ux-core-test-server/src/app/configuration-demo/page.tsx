@@ -143,18 +143,18 @@ export default function ConfigurationDemoPage() {
 
   return (
     <div
-      className="h-screen flex flex-col"
+      className="flex flex-col h-screen"
       style={{ backgroundColor: '#F4F3F5' }}
     >
       {/* Header - Full width, not a card */}
       <div
-        className="px-6 py-4 border-b flex-shrink-0"
+        className="flex-shrink-0 px-6 py-4 border-b"
         style={{
           backgroundColor: '#FFFFFF',
           borderColor: 'rgba(215, 213, 217, 0.6)',
         }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex justify-between items-center">
           <TitleWithSubtitle
             title="Procurement Manager"
             subtitle="Manages materials sourcing, supplier negotiations, and cost analysis for construction projects."
@@ -164,7 +164,7 @@ export default function ConfigurationDemoPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="overflow-auto flex-1 p-6">
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Left Column */}
           <div className="space-y-6">
@@ -198,7 +198,10 @@ export default function ConfigurationDemoPage() {
                         ...coreUtils.getButtonDefault('ghost'),
                       }}
                       onFocus={(e) => {
-                        Object.assign(e.currentTarget.style, coreUtils.getFocusStyles())
+                        Object.assign(
+                          e.currentTarget.style,
+                          coreUtils.getFocusStyles()
+                        )
                         setTimeout(() => {
                           e.currentTarget.blur()
                         }, 150)
@@ -210,7 +213,10 @@ export default function ConfigurationDemoPage() {
                         )
                       }
                       onMouseEnter={(e) =>
-                        Object.assign(e.currentTarget.style, coreUtils.getButtonHover('ghost'))
+                        Object.assign(
+                          e.currentTarget.style,
+                          coreUtils.getButtonHover('ghost')
+                        )
                       }
                       onMouseLeave={(e) =>
                         Object.assign(
@@ -223,13 +229,12 @@ export default function ConfigurationDemoPage() {
                       <span>Templates</span>
                       <ChevronDown
                         className={`w-3 h-3 transition-transform ${
-                          showTemplates ? 'rotate-180' : ''
-                        }`}
+                          showTemplates ? 'rotate-180' : ''}`}
                       />
                     </button>
                     {showTemplates && (
                       <div
-                        className="absolute top-full right-0 mt-2 w-56 rounded-xl border overflow-hidden z-10"
+                        className="overflow-hidden absolute right-0 top-full z-10 mt-2 w-56 rounded-xl border"
                         style={{
                           backgroundColor: '#FFFFFF',
                           borderColor: 'rgba(195, 192, 198, 0.8)',
@@ -380,7 +385,7 @@ export default function ConfigurationDemoPage() {
 
       {/* Footer - Fixed at bottom */}
       <div
-        className="px-6 py-4 border-t flex-shrink-0"
+        className="flex-shrink-0 px-6 py-4 border-t"
         style={{
           backgroundColor: '#FFFFFF',
           borderColor: 'rgba(215, 213, 217, 0.6)',
