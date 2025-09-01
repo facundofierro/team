@@ -69,8 +69,14 @@ export function TitleWithSubtitle({
   return (
     <div className={cn('flex items-center justify-between', className)}>
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-        {subtitle && <p className="text-sm text-gray-600 mt-1">{subtitle}</p>}
+        <h1 className="text-xl font-bold" style={{ color: '#2D1B2E' }}>
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="text-xs mt-0.5" style={{ color: '#5A365C' }}>
+            {subtitle}
+          </p>
+        )}
       </div>
       {status && (
         <div className="flex items-center space-x-3">
@@ -137,8 +143,8 @@ export function ConfigurationCard({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-3">
           {Icon && (
-            <div className="p-2 rounded-lg bg-gray-50 text-gray-600">
-              <Icon className="h-5 w-5" />
+            <div className="p-2 rounded-lg bg-gray-50">
+              <Icon className="h-5 w-5" style={{ color: '#8A548C' }} />
             </div>
           )}
           <div>
@@ -269,58 +275,90 @@ export function ScheduledExecutionItem({
 
   return (
     <div
-      className={cn(
-        'flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50',
-        className
-      )}
+      className={cn('p-3 rounded-lg border transition-all', className)}
+      style={{
+        backgroundColor:
+          status === 'active' ? 'rgba(138, 84, 140, 0.12)' : '#F4F3F5',
+        borderColor:
+          status === 'active'
+            ? 'rgba(138, 84, 140, 0.3)'
+            : 'rgba(215, 213, 217, 0.6)',
+      }}
     >
-      <div className="flex items-center space-x-3">
-        <div className={cn('w-2 h-2 rounded-full', getStatusColor(status))} />
-        <div className="flex-1">
-          <h4 className="font-medium text-gray-900 text-sm">{title}</h4>
-          <p className="text-xs text-gray-600 mt-1">{description}</p>
-          <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
-            <span className="flex items-center space-x-1">
-              <Clock className="h-3 w-3" />
-              <span>{frequency}</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <Calendar className="h-3 w-3" />
-              <span>Next: {nextExecution}</span>
-            </span>
-          </div>
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <div
+            className={cn(
+              'w-2 h-2 rounded-full',
+              status === 'active' ? 'animate-pulse' : ''
+            )}
+            style={{
+              backgroundColor: status === 'active' ? '#22C55E' : '#9B8FA7',
+            }}
+          />
+          <span className="text-xs font-medium" style={{ color: '#5A365C' }}>
+            {frequency}
+          </span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={onToggle}
+            className="p-1 rounded transition-colors"
+            style={{ color: '#847F8A' }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor =
+                'rgba(244, 243, 245, 0.8)')
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = 'transparent')
+            }
+          >
+            {status === 'active' ? (
+              <Pause className="w-3 h-3" />
+            ) : (
+              <Play className="w-3 h-3" />
+            )}
+          </button>
+          <button
+            onClick={onEdit}
+            className="p-1 rounded transition-colors"
+            style={{ color: '#847F8A' }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor =
+                'rgba(244, 243, 245, 0.8)')
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = 'transparent')
+            }
+          >
+            <Edit3 className="w-3 h-3" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="p-1 rounded transition-colors"
+            style={{ color: '#847F8A' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#FEF2F2'
+              e.currentTarget.style.color = '#DC2626'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = '#847F8A'
+            }}
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
         </div>
       </div>
-
-      <div className="flex items-center space-x-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggle}
-          className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
-        >
-          {status === 'active' ? (
-            <Pause className="h-3 w-3" />
-          ) : (
-            <Play className="h-3 w-3" />
-          )}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onEdit}
-          className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
-        >
-          <Edit3 className="h-3 w-3" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onDelete}
-          className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
-        >
-          <Trash2 className="h-3 w-3" />
-        </Button>
+      <p className="text-xs leading-relaxed mb-2" style={{ color: '#2D1B2E' }}>
+        {description}
+      </p>
+      <div
+        className="flex items-center space-x-2 text-xs"
+        style={{ color: '#847F8A' }}
+      >
+        <Calendar className="w-3 h-3" />
+        <span>Next: {nextExecution}</span>
       </div>
     </div>
   )
@@ -365,35 +403,52 @@ export function ToolAssignmentItem({
 
   return (
     <div
-      className={cn(
-        'flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50',
-        className
-      )}
+      className={cn('flex items-start space-x-2.5 p-2.5 rounded-lg', className)}
+      style={{
+        backgroundColor: 'rgba(138, 84, 140, 0.12)',
+      }}
     >
-      <div className="flex items-center space-x-3">
-        <input
-          type="checkbox"
-          checked={enabled}
-          onChange={(e) => onToggle(e.target.checked)}
-          className="rounded border-gray-300 text-[#8A548C] focus:ring-[#8A548C]"
-        />
-        <div className="p-2 rounded-lg bg-white text-gray-600 border border-gray-200">
-          {getToolIcon(type)}
-        </div>
-        <div className="flex-1">
-          <h4 className="font-medium text-gray-900 text-sm">{name}</h4>
-          <p className="text-xs text-gray-600 mt-1">{description}</p>
-        </div>
-      </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onRemove}
-        className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600"
+      <div
+        className="w-4 h-4 mt-0.5 flex-shrink-0 rounded border-2 flex items-center justify-center"
+        style={{
+          borderColor: '#8A548C',
+          backgroundColor: '#8A548C',
+        }}
       >
-        <X className="h-3 w-3" />
-      </Button>
+        <Check className="w-2.5 h-2.5 text-white" />
+      </div>
+      <div className="flex-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1.5">
+            <div className="p-1.5 rounded-lg" style={{ color: '#5A365C' }}>
+              {getToolIcon(type)}
+            </div>
+            <p className="text-xs font-medium" style={{ color: '#2D1B2E' }}>
+              {name}
+            </p>
+          </div>
+          <button
+            onClick={onRemove}
+            className="p-1 rounded transition-colors"
+            style={{ color: '#847F8A' }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor =
+                'rgba(244, 243, 245, 0.8)')
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = 'transparent')
+            }
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+        <p
+          className="text-xs mt-0.5 leading-relaxed"
+          style={{ color: '#847F8A' }}
+        >
+          {description}
+        </p>
+      </div>
     </div>
   )
 }
@@ -423,7 +478,7 @@ export function PromptEditor({
         maxLength={maxLength}
         className="w-full min-h-32 p-3 rounded-lg border text-sm resize-none leading-relaxed"
         style={{
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#F4F3F5',
           borderColor: 'rgba(195, 192, 198, 0.8)',
           color: '#2D1B2E',
           height: Math.max(128, Math.min(256, value.length * 0.5 + 80)) + 'px',

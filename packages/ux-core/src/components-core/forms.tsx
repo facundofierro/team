@@ -126,7 +126,7 @@ export function EnhancedInput({
           maxLength={maxLength}
           className={cn(Icon && 'pl-10', 'px-3 py-2 rounded-lg border text-sm')}
           style={{
-            backgroundColor: '#FFFFFF',
+            backgroundColor: '#F4F3F5',
             borderColor: 'rgba(195, 192, 198, 0.8)',
             color: '#2D1B2E',
           }}
