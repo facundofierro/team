@@ -36,6 +36,7 @@
     "@tanstack/react-virtual": "^3.13.12",
     "@teamhub/ai": "workspace:*",
     "@teamhub/db": "workspace:*",
+    "@teamhub/ux-core": "workspace:*",
     "@trpc/client": "^10.45.2",
     "@trpc/react-query": "^10.45.2",
     "@trpc/server": "^10.45.2",
