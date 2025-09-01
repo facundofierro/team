@@ -1,132 +1,160 @@
 'use client'
 
-import { FormCard } from '@teamhub/ux-core'
-import { Sparkles, FileText, Settings, Shield } from 'lucide-react'
+import { FormCard, GhostButton, ActionButton } from '@teamhub/ux-core'
+import { Sparkles, FileText, Settings, Shield, Plus, Save } from 'lucide-react'
 
 export default function FormCardPage() {
   return (
-    <div className="container mx-auto p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Form Card Component</h1>
-        <p className="text-muted-foreground">
-          A flexible card component for forms with header, content, and footer
-          sections.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Form Card Component
+          </h1>
+          <p className="text-gray-600">
+            A flexible card component for forms with header, content, and footer
+            sections. Showcases different header configurations with buttons and
+            icons.
+          </p>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Basic Form Card */}
-        <FormCard title="Basic Settings">
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Basic Form Card - No Header Options */}
+          <FormCard title="Basic Settings">
+            <div className="text-gray-500 text-sm">
+              This card has a simple title with no additional header options.
+            </div>
+          </FormCard>
+
+          {/* Form Card with Icon Only */}
+          <FormCard title="Security Settings" icon={Shield}>
+            <div className="text-gray-500 text-sm">
+              This card includes an icon in the header alongside the title.
+            </div>
+          </FormCard>
+
+          {/* Form Card with Header Buttons */}
+          <FormCard
+            title="AI Configuration"
+            headerContent={
+              <div className="flex space-x-2">
+                <GhostButton icon={Sparkles}>AI</GhostButton>
+                <GhostButton icon={FileText}>Templates</GhostButton>
+              </div>
+            }
+          >
+            <div className="text-gray-500 text-sm">
+              This card has header buttons using our GhostButton components.
+            </div>
+          </FormCard>
+
+          {/* Form Card with Icon and Header Button */}
+          <FormCard
+            title="Advanced Settings"
+            icon={Settings}
+            headerContent={<ActionButton icon={Plus}>Add Setting</ActionButton>}
+          >
+            <div className="text-gray-500 text-sm">
+              This card combines an icon with a header action button.
+            </div>
+          </FormCard>
+
+          {/* Form Card with Multiple Header Options */}
+          <FormCard
+            title="Tool Configuration"
+            icon={Shield}
+            headerContent={
+              <div className="flex space-x-2">
+                <GhostButton icon={FileText}>Templates</GhostButton>
+                <ActionButton icon={Plus}>Add Tool</ActionButton>
+              </div>
+            }
+          >
+            <div className="text-gray-500 text-sm">
+              This card demonstrates multiple header options: icon + multiple
+              buttons.
+            </div>
+          </FormCard>
+
+          {/* Form Card with Footer */}
+          <FormCard
+            title="Settings with Footer"
+            footerContent={
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-500">
+                  Last updated: 2 hours ago
+                </span>
+                <ActionButton icon={Save}>Save Changes</ActionButton>
+              </div>
+            }
+          >
+            <div className="text-gray-500 text-sm">
+              This card includes a footer section with additional information
+              and actions.
+            </div>
+          </FormCard>
+        </div>
+
+        {/* Usage Examples */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Usage Examples
+          </h2>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Name</label>
-              <input
-                type="text"
-                className="w-full mt-1 px-3 py-2 border border-border rounded-md"
-                placeholder="Enter name"
-              />
+              <h3 className="font-medium text-gray-900 mb-2">
+                Basic Form Card
+              </h3>
+              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                <pre>{`<FormCard title="Basic Settings">
+  {/* Your form content */}
+</FormCard>`}</pre>
+              </div>
             </div>
             <div>
-              <label className="text-sm font-medium">Description</label>
-              <textarea
-                className="w-full mt-1 px-3 py-2 border border-border rounded-md"
-                rows={3}
-                placeholder="Enter description"
-              />
+              <h3 className="font-medium text-gray-900 mb-2">With Icon</h3>
+              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                <pre>{`<FormCard title="Security Settings" icon={Shield}>
+  {/* Your form content */}
+</FormCard>`}</pre>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-900 mb-2">
+                With Header Buttons
+              </h3>
+              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                <pre>{`<FormCard
+  title="AI Configuration"
+  headerContent={
+    <div className="flex space-x-2">
+      <GhostButton icon={Sparkles}>AI</GhostButton>
+      <GhostButton icon={FileText}>Templates</GhostButton>
+    </div>
+  }
+>
+  {/* Your form content */}
+</FormCard>`}</pre>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-900 mb-2">With Footer</h3>
+              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                <pre>{`<FormCard
+  title="Settings"
+  footerContent={
+    <div className="flex justify-between items-center">
+      <span className="text-sm text-gray-500">Last updated: 2 hours ago</span>
+      <ActionButton icon={Save}>Save Changes</ActionButton>
+    </div>
+  }
+>
+  {/* Your form content */}
+</FormCard>`}</pre>
+              </div>
             </div>
           </div>
-        </FormCard>
-
-        {/* Form Card with Icon */}
-        <FormCard title="Security Settings" icon={Shield}>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <input type="checkbox" id="admin" />
-              <label htmlFor="admin" className="text-sm">
-                Admin access only
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input type="checkbox" id="public" />
-              <label htmlFor="public" className="text-sm">
-                Public access
-              </label>
-            </div>
-          </div>
-        </FormCard>
-
-        {/* Form Card with Header Content */}
-        <FormCard
-          title="AI Configuration"
-          headerContent={
-            <div className="flex space-x-2">
-              <button className="flex items-center space-x-1 px-3 py-1 text-sm border border-border rounded-md hover:bg-accent">
-                <Sparkles className="w-4 h-4" />
-                <span>AI</span>
-              </button>
-              <button className="flex items-center space-x-1 px-3 py-1 text-sm border border-border rounded-md hover:bg-accent">
-                <FileText className="w-4 h-4" />
-                <span>Templates</span>
-              </button>
-            </div>
-          }
-        >
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Model</label>
-              <select className="w-full mt-1 px-3 py-2 border border-border rounded-md">
-                <option>GPT-4</option>
-                <option>GPT-3.5</option>
-                <option>Claude</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Temperature</label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                className="w-full mt-1"
-              />
-            </div>
-          </div>
-        </FormCard>
-
-        {/* Form Card with Footer */}
-        <FormCard
-          title="Advanced Settings"
-          icon={Settings}
-          footerContent={
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                Last updated: 2 hours ago
-              </span>
-              <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                Save Changes
-              </button>
-            </div>
-          }
-        >
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Cache Duration</label>
-              <input
-                type="number"
-                className="w-full mt-1 px-3 py-2 border border-border rounded-md"
-                placeholder="300"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Max Retries</label>
-              <input
-                type="number"
-                className="w-full mt-1 px-3 py-2 border border-border rounded-md"
-                placeholder="3"
-              />
-            </div>
-          </div>
-        </FormCard>
+        </div>
       </div>
     </div>
   )

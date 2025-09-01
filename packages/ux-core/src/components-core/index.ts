@@ -95,7 +95,7 @@ export {
 } from './forms'
 
 // Form Card Components
-export { FormCard, type FormCardProps } from './form-card'
+export { FormCard, type FormCardProps } from './form-card/form-card'
 
 // Typography Components
 export { TitleWithSubtitle, type TitleWithSubtitleProps } from './typography'
