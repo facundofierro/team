@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { elegantColors } from '../../styles/color-tokens'
+import { coreColors } from '../light-theme-colors'
 
 export interface ActiveIndicatorProps {
   isActive: boolean
@@ -21,7 +21,7 @@ export function ActiveIndicator({
     <div className={`flex items-center space-x-3 ${className || ''}`}>
       <span
         className="text-sm font-medium"
-        style={{ color: elegantColors.text.primary }}
+        style={{ color: coreColors.text.primary }}
       >
         {isActive ? 'Active' : 'Inactive'}
       </span>
@@ -35,8 +35,8 @@ export function ActiveIndicator({
         `}
         style={{
           backgroundColor: isActive
-            ? elegantColors.status.success[500]
-            : elegantColors.neutral[300],
+            ? coreColors.status.success
+            : coreColors.text.disabled,
         }}
       >
         <motion.div

@@ -1,6 +1,8 @@
 /**
- * Components Core Color System
- * Centralized colors for all components-core components using the main elegant color system
+ * Dark Theme Color System
+ * Colors for components-core components that use dark backgrounds
+ * Used by: sidebar, navigation, and other dark-themed components
+ * Based on elegantColors but optimized for dark backgrounds
  */
 
 import { elegantColors, elegantUtils } from '../styles/color-tokens'

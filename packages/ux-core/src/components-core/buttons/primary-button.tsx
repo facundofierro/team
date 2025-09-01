@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { cn } from '../../utils/cn'
-import { elegantColors } from '../../styles/color-tokens'
+import { coreColors, coreUtils } from '../light-theme-colors'
 import { Save } from 'lucide-react'
 
 export interface PrimaryButtonProps {
@@ -29,15 +29,15 @@ export function PrimaryButton({
       className={cn(
         'px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200',
         'flex items-center space-x-2',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2',
+        'focus:outline-none',
         disabled
           ? 'opacity-50 cursor-not-allowed'
           : 'hover:shadow-lg active:scale-95',
         className
       )}
       style={{
-        background: elegantColors.background.primaryGradient,
-        color: elegantColors.text.inverse,
+        ...coreUtils.getButtonDefault('primary'),
+        ...coreUtils.getFocusStyles(),
       }}
     >
       {loading ? (

@@ -14,7 +14,7 @@ import {
   Sparkles,
   ChevronRight,
 } from 'lucide-react'
-import { componentColors, componentUtils } from '../component-colors'
+import { componentColors, componentUtils } from '../dark-theme-colors'
 
 export interface SidebarItem {
   id: string

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { cn } from '../../utils/cn'
-import { elegantColors } from '../../styles/color-tokens'
+import { coreColors } from '../light-theme-colors'
 import { Input } from '../../components/shadcn/input'
 import { Label } from '../../components/shadcn/label'
 import { Button } from '../../components/shadcn/button'
@@ -113,13 +113,16 @@ export function EnhancedInput({
       <div>
         <Label
           className="text-xs font-medium ml-1"
-          style={{ color: '#2D1B2E' }}
+          style={{ color: coreColors.text.primary }}
         >
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
         {subtitle && (
-          <p className="mt-0.5 text-xs ml-1" style={{ color: '#847F8A' }}>
+          <p
+            className="mt-0.5 text-xs ml-1"
+            style={{ color: coreColors.text.tertiary }}
+          >
             {subtitle}
           </p>
         )}
@@ -141,7 +144,7 @@ export function EnhancedInput({
           style={{
             backgroundColor: '#F4F3F5',
             borderColor: 'rgba(195, 192, 198, 0.8)',
-            color: '#2D1B2E',
+            color: coreColors.text.primary,
           }}
         />
       </div>
@@ -221,14 +224,17 @@ export function EnhancedTextarea({
           {label && (
             <Label
               className="text-xs font-medium ml-1"
-              style={{ color: '#2D1B2E' }}
+              style={{ color: coreColors.text.primary }}
             >
               {label}
               {required && <span className="text-red-500 ml-1">*</span>}
             </Label>
           )}
           {subtitle && (
-            <p className="mt-0.5 text-xs ml-1" style={{ color: '#847F8A' }}>
+            <p
+              className="mt-0.5 text-xs ml-1"
+              style={{ color: coreColors.text.tertiary }}
+            >
               {subtitle}
             </p>
           )}
@@ -246,7 +252,7 @@ export function EnhancedTextarea({
           style={{
             backgroundColor: '#F4F3F5',
             borderColor: 'rgba(195, 192, 198, 0.8)',
-            color: '#2D1B2E',
+            color: coreColors.text.primary,
             minHeight: `${minHeight}px`,
             maxHeight: `${maxHeight}px`,
           }}
@@ -322,13 +328,16 @@ export function EnhancedSelect({
       <div>
         <Label
           className="text-xs font-medium ml-1"
-          style={{ color: '#2D1B2E' }}
+          style={{ color: coreColors.text.primary }}
         >
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
         {subtitle && (
-          <p className="mt-0.5 text-xs ml-1" style={{ color: '#847F8A' }}>
+          <p
+            className="mt-0.5 text-xs ml-1"
+            style={{ color: coreColors.text.tertiary }}
+          >
             {subtitle}
           </p>
         )}
@@ -708,11 +717,12 @@ export function FormActions({
           disabled={loading}
           className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
           style={{
-            color: elegantColors.primary[800],
+            color: coreColors.brand.primary,
             backgroundColor: 'transparent',
           }}
           onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = elegantColors.primary[50])
+            (e.currentTarget.style.backgroundColor =
+              coreColors.background.secondary)
           }
           onMouseLeave={(e) =>
             (e.currentTarget.style.backgroundColor = 'transparent')
@@ -728,11 +738,12 @@ export function FormActions({
           disabled={loading}
           className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
           style={{
-            color: elegantColors.primary[800],
+            color: coreColors.brand.primary,
             backgroundColor: 'transparent',
           }}
           onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = elegantColors.primary[50])
+            (e.currentTarget.style.backgroundColor =
+              coreColors.background.secondary)
           }
           onMouseLeave={(e) =>
             (e.currentTarget.style.backgroundColor = 'transparent')

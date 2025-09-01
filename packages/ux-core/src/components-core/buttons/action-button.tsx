@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { cn } from '../../utils/cn'
-import { elegantColors } from '../../styles/color-tokens'
+import { coreColors, coreUtils } from '../light-theme-colors'
 import { Plus } from 'lucide-react'
 
 export interface ActionButtonProps {
@@ -29,15 +29,15 @@ export function ActionButton({
       className={cn(
         'px-3 py-1 rounded-md font-medium text-sm transition-all duration-200',
         'flex items-center space-x-1.5',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2',
+        'focus:outline-none',
         disabled
           ? 'opacity-50 cursor-not-allowed'
           : 'hover:shadow-md active:scale-95',
         className
       )}
       style={{
-        backgroundColor: elegantColors.primary[500],
-        color: elegantColors.text.inverse,
+        ...coreUtils.getButtonDefault('action'),
+        ...coreUtils.getFocusStyles(),
       }}
     >
       {loading ? (

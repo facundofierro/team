@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { cn } from '../../utils/cn'
-import { elegantColors } from '../../styles/color-tokens'
+import { coreColors, coreUtils } from '../light-theme-colors'
 import { RotateCcw } from 'lucide-react'
 
 export interface TertiaryButtonProps {
@@ -29,21 +29,23 @@ export function TertiaryButton({
       className={cn(
         'px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200',
         'flex items-center space-x-2',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2',
+        'focus:outline-none',
         disabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-95',
         className
       )}
       style={{
-        backgroundColor: 'transparent',
-        color: elegantColors.text.secondary,
+        ...coreUtils.getButtonDefault('ghost'),
+        ...coreUtils.getFocusStyles(),
       }}
       onMouseEnter={(e) =>
         !disabled &&
-        (e.currentTarget.style.backgroundColor =
-          elegantColors.interactive.ghostHover)
+        Object.assign(e.currentTarget.style, coreUtils.getButtonHover('ghost'))
       }
       onMouseLeave={(e) =>
-        (e.currentTarget.style.backgroundColor = 'transparent')
+        Object.assign(
+          e.currentTarget.style,
+          coreUtils.getButtonDefault('ghost')
+        )
       }
     >
       {loading ? (

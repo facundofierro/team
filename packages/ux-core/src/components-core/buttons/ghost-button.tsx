@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { cn } from '../../utils/cn'
-import { elegantColors } from '../../styles/color-tokens'
+import { coreColors, coreUtils } from '../light-theme-colors'
 
 export interface GhostButtonProps {
   children: React.ReactNode
@@ -30,16 +30,18 @@ export function GhostButton({
         className
       )}
       style={{
-        color: elegantColors.text.secondary,
-        backgroundColor: 'transparent',
+        ...coreUtils.getButtonDefault('ghost'),
+        ...coreUtils.getFocusStyles(),
       }}
       onMouseEnter={(e) =>
         !disabled &&
-        (e.currentTarget.style.backgroundColor =
-          elegantColors.interactive.ghostHover)
+        Object.assign(e.currentTarget.style, coreUtils.getButtonHover('ghost'))
       }
       onMouseLeave={(e) =>
-        (e.currentTarget.style.backgroundColor = 'transparent')
+        Object.assign(
+          e.currentTarget.style,
+          coreUtils.getButtonDefault('ghost')
+        )
       }
     >
       {Icon && <Icon className="w-3 h-3" />}

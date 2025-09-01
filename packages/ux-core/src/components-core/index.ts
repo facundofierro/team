@@ -2,6 +2,16 @@
 // These are custom components built with our design system
 // They use external components as building blocks but have TeamHub styling
 
+// Color Systems
+export { coreColors, coreUtils } from './light-theme-colors'
+export type { CoreColorKey, CoreInteractiveKey } from './light-theme-colors'
+
+export { componentColors, componentUtils } from './dark-theme-colors'
+export type {
+  ComponentColorKey,
+  ComponentInteractiveKey,
+} from './dark-theme-colors'
+
 // Sidebar Components
 export {
   Sidebar,
