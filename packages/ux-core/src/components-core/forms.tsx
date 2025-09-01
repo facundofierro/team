@@ -31,6 +31,8 @@ import {
   AlertCircle,
   Pause,
   Play,
+  Save,
+  RotateCcw,
 } from 'lucide-react'
 
 // Form section component
@@ -105,7 +107,7 @@ export function EnhancedInput({
 }: EnhancedInputProps) {
   return (
     <div className={cn('space-y-2', className)}>
-      <Label className="text-sm font-medium text-gray-700">
+      <Label className="text-xs font-medium" style={{ color: '#5A365C' }}>
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </Label>
@@ -122,11 +124,12 @@ export function EnhancedInput({
           onChange={(e) => onChange?.(e.target.value)}
           disabled={disabled}
           maxLength={maxLength}
-          className={cn(
-            Icon && 'pl-10',
-            error && 'border-red-300 focus:border-red-500 focus:ring-red-500',
-            'border-gray-300 focus:border-[#8A548C] focus:ring-[#8A548C]'
-          )}
+          className={cn(Icon && 'pl-10', 'px-3 py-2 rounded-lg border text-sm')}
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderColor: 'rgba(195, 192, 198, 0.8)',
+            color: '#2D1B2E',
+          }}
         />
       </div>
       <div className="flex items-center justify-between">
@@ -562,46 +565,62 @@ export function FormActions({
   className,
 }: FormActionsProps) {
   return (
-    <div
-      className={cn(
-        'flex items-center justify-between pt-6 border-t border-gray-200',
-        className
+    <div className={cn('flex items-center justify-end space-x-3', className)}>
+      {onReset && (
+        <button
+          onClick={onReset}
+          disabled={loading}
+          className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+          style={{
+            color: '#5A365C',
+            backgroundColor: 'transparent',
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = 'rgba(244, 243, 245, 0.8)')
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = 'transparent')
+          }
+        >
+          <RotateCcw className="w-4 h-4" />
+          <span>{resetLabel}</span>
+        </button>
       )}
-    >
-      <div className="flex items-center space-x-3">
-        {onReset && (
-          <Button
-            variant="outline"
-            onClick={onReset}
-            disabled={loading}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            {resetLabel}
-          </Button>
-        )}
-      </div>
-
-      <div className="flex items-center space-x-3">
-        {onCancel && (
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            disabled={loading}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            {cancelLabel}
-          </Button>
-        )}
-        {onSave && (
-          <Button
-            onClick={onSave}
-            disabled={disabled || loading}
-            className="bg-[#8A548C] hover:bg-[#7A448C] text-white"
-          >
-            {saveLabel}
-          </Button>
-        )}
-      </div>
+      {onCancel && (
+        <button
+          onClick={onCancel}
+          disabled={loading}
+          className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+          style={{
+            color: '#5A365C',
+            backgroundColor: 'transparent',
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = 'rgba(244, 243, 245, 0.8)')
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = 'transparent')
+          }
+        >
+          <span>{cancelLabel}</span>
+        </button>
+      )}
+      {onSave && (
+        <button
+          onClick={onSave}
+          disabled={disabled || loading}
+          className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+          style={{
+            background: 'linear-gradient(135deg, #8A548C 0%, #A091DA 100%)',
+            color: '#F4F3F5',
+            boxShadow:
+              '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          }}
+        >
+          <Save className="w-4 h-4" />
+          <span>{saveLabel}</span>
+        </button>
+      )}
     </div>
   )
 }

@@ -76,7 +76,9 @@ export default function DesignsDemoPage() {
   const [schedules, setSchedules] = useState(defaultSchedules)
   const [tools, setTools] = useState(defaultTools)
   const [securityLevel, setSecurityLevel] = useState('admins-only')
-  const [status, setStatus] = useState<'active' | 'inactive' | 'paused'>('active')
+  const [status, setStatus] = useState<'active' | 'inactive' | 'paused'>(
+    'active'
+  )
   const [isLoading, setIsLoading] = useState(false)
 
   // Event handlers
@@ -171,11 +173,17 @@ export default function DesignsDemoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#F4F3F5' }}>
       {/* Main Container - matching the 800px max-width from the reference */}
-      <div className="max-w-[800px] mx-auto bg-white min-h-screen flex flex-col">
+      <div
+        className="max-w-[800px] mx-auto min-h-screen flex flex-col"
+        style={{ backgroundColor: '#F4F3F5' }}
+      >
         {/* Header Section */}
-        <div className="p-6 border-b border-gray-200">
+        <div
+          className="p-6 border-b"
+          style={{ borderColor: 'rgba(215, 213, 217, 0.6)' }}
+        >
           <TitleWithSubtitle
             title={agentName}
             subtitle="Manages materials sourcing, supplier negotiations, and cost analysis for construction projects."
@@ -198,15 +206,13 @@ export default function DesignsDemoPage() {
                 onRoleTypeChange={setRoleType}
               />
 
-              {/* Prompt Card - spans full width */}
-              <div className="md:col-span-2">
-                <PromptCard
-                  value={prompt}
-                  onChange={setPrompt}
-                  maxLength={4000}
-                  placeholder="Enter your prompt here..."
-                />
-              </div>
+              {/* Prompt Card */}
+              <PromptCard
+                value={prompt}
+                onChange={setPrompt}
+                maxLength={4000}
+                placeholder="Define the agent's primary instructions, role, and constraints..."
+              />
 
               {/* Security & Access */}
               <SecurityAccessCard
@@ -239,7 +245,13 @@ export default function DesignsDemoPage() {
         </main>
 
         {/* Footer with Actions - matching the reference */}
-        <footer className="px-4 py-3 border-t border-gray-200 bg-white">
+        <footer
+          className="px-4 py-3 border-t"
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderColor: 'rgba(215, 213, 217, 0.6)',
+          }}
+        >
           <FormActions
             onSave={handleSave}
             onReset={handleReset}

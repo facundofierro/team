@@ -109,6 +109,7 @@ export interface ConfigurationCardProps {
   icon?: React.ComponentType<{ className?: string }>
   children: React.ReactNode
   headerAction?: React.ReactNode
+  headerContent?: React.ReactNode
   footer?: React.ReactNode
   className?: string
 }
@@ -119,41 +120,54 @@ export function ConfigurationCard({
   icon: Icon,
   children,
   headerAction,
+  headerContent,
   footer,
   className,
 }: ConfigurationCardProps) {
   return (
-    <Card className={cn('bg-white border-gray-200 shadow-sm', className)}>
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {Icon && (
-              <div className="p-2 rounded-lg bg-gray-50 text-gray-600">
-                <Icon className="h-5 w-5" />
-              </div>
-            )}
-            <div>
-              <CardTitle className="text-base font-semibold text-gray-900">
-                {title}
-              </CardTitle>
-              {subtitle && (
-                <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
-              )}
+    <div
+      className={cn('p-4 rounded-xl border', className)}
+      style={{
+        backgroundColor: '#FFFFFF',
+        borderColor: 'rgba(215, 213, 217, 0.6)',
+        boxShadow:
+          '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+      }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center space-x-3">
+          {Icon && (
+            <div className="p-2 rounded-lg bg-gray-50 text-gray-600">
+              <Icon className="h-5 w-5" />
             </div>
-          </div>
-          {headerAction && (
-            <div className="flex items-center space-x-2">{headerAction}</div>
           )}
+          <div>
+            <h3
+              className="text-base font-semibold"
+              style={{ color: '#2D1B2E' }}
+            >
+              {title}
+            </h3>
+            {subtitle && (
+              <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+            )}
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">{children}</CardContent>
+        {headerAction && (
+          <div className="flex items-center space-x-2">{headerAction}</div>
+        )}
+        {headerContent && <div>{headerContent}</div>}
+      </div>
+      <div className="space-y-3">{children}</div>
       {footer && (
-        <>
-          <Separator />
-          <div className="px-6 py-4">{footer}</div>
-        </>
+        <div
+          className="mt-4 pt-3 border-t"
+          style={{ borderColor: 'rgba(215, 213, 217, 0.6)' }}
+        >
+          {footer}
+        </div>
       )}
-    </Card>
+    </div>
   )
 }
 
@@ -402,42 +416,23 @@ export function PromptEditor({
 }: PromptEditorProps) {
   return (
     <div className={cn('space-y-3', className)}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 text-gray-600 hover:text-gray-900"
-          >
-            <Sparkles className="h-4 w-4 mr-1" />
-            AI
-          </Button>
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-gray-600 hover:text-gray-900"
-            >
-              <FileText className="h-4 w-4 mr-1" />
-              Templates
-              <ChevronDown className="h-3 w-3 ml-1" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative">
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          rows={6}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[#8A548C] focus:border-[#8A548C]"
-        />
-        <div className="absolute bottom-2 right-2 text-xs text-gray-500">
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        className="w-full min-h-32 p-3 rounded-lg border text-sm resize-none leading-relaxed"
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderColor: 'rgba(195, 192, 198, 0.8)',
+          color: '#2D1B2E',
+          height: Math.max(128, Math.min(256, value.length * 0.5 + 80)) + 'px',
+        }}
+      />
+      <div className="text-right text-xs" style={{ color: '#847F8A' }}>
+        <span>
           {value.length} / {maxLength}
-        </div>
+        </span>
       </div>
     </div>
   )
