@@ -20,10 +20,14 @@ export function getBlobServiceClient(): BlobServiceClient {
 
   if (connectionString) {
     // Use connection string if provided
-    _blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+    _blobServiceClient =
+      BlobServiceClient.fromConnectionString(connectionString)
   } else if (accountName && accountKey) {
     // Use account name and key
-    const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey)
+    const sharedKeyCredential = new StorageSharedKeyCredential(
+      accountName,
+      accountKey
+    )
     _blobServiceClient = new BlobServiceClient(
       `https://${accountName}.blob.core.windows.net`,
       sharedKeyCredential
@@ -141,7 +145,9 @@ export async function uploadToBlob(
   const uniqueKey = `${Date.now()}-${safeFileName}`
 
   const blobServiceClient = getBlobServiceClient()
-  const containerClient = blobServiceClient.getContainerClient(config.containerName)
+  const containerClient = blobServiceClient.getContainerClient(
+    config.containerName
+  )
   const blockBlobClient = containerClient.getBlockBlobClient(uniqueKey)
 
   await blockBlobClient.upload(file, fileSize, {
@@ -173,7 +179,9 @@ export async function uploadToBlob(
  */
 export async function getPresignedUrl(key: string, expiresIn = 3600) {
   const blobServiceClient = getBlobServiceClient()
-  const containerClient = blobServiceClient.getContainerClient(BLOB_CONFIG.containerName)
+  const containerClient = blobServiceClient.getContainerClient(
+    BLOB_CONFIG.containerName
+  )
   const blockBlobClient = containerClient.getBlockBlobClient(key)
 
   const sasOptions = {
@@ -190,7 +198,9 @@ export async function getPresignedUrl(key: string, expiresIn = 3600) {
       BLOB_CONFIG.accountName,
       BLOB_CONFIG.accountKey ??
         (() => {
-          throw new Error('AZURE_ACCOUNT_KEY is required when using account name authentication')
+          throw new Error(
+            'AZURE_ACCOUNT_KEY is required when using account name authentication'
+          )
         })()
     )
   ).toString()
@@ -213,7 +223,9 @@ export async function getPresignedUrlWithConfig(
   let tempBlobServiceClient: BlobServiceClient
 
   if (customConfig.connectionString) {
-    tempBlobServiceClient = BlobServiceClient.fromConnectionString(customConfig.connectionString)
+    tempBlobServiceClient = BlobServiceClient.fromConnectionString(
+      customConfig.connectionString
+    )
   } else if (customConfig.accountName && customConfig.accountKey) {
     const sharedKeyCredential = new StorageSharedKeyCredential(
       customConfig.accountName,
@@ -229,7 +241,9 @@ export async function getPresignedUrlWithConfig(
     )
   }
 
-  const containerClient = tempBlobServiceClient.getContainerClient(customConfig.containerName)
+  const containerClient = tempBlobServiceClient.getContainerClient(
+    customConfig.containerName
+  )
   const blockBlobClient = containerClient.getBlockBlobClient(key)
 
   const sasOptions = {
@@ -246,7 +260,9 @@ export async function getPresignedUrlWithConfig(
       customConfig.accountName,
       customConfig.accountKey ??
         (() => {
-          throw new Error('Account key is required when using account name authentication')
+          throw new Error(
+            'Account key is required when using account name authentication'
+          )
         })()
     )
   ).toString()
@@ -267,7 +283,10 @@ export async function downloadFromBlob(key: string): Promise<Buffer>
  * @param customConfig Custom Blob configuration
  * @returns File buffer
  */
-export async function downloadFromBlob(key: string, customConfig: CustomBlobConfig): Promise<Buffer>
+export async function downloadFromBlob(
+  key: string,
+  customConfig: CustomBlobConfig
+): Promise<Buffer>
 
 export async function downloadFromBlob(
   key: string,
@@ -278,7 +297,9 @@ export async function downloadFromBlob(
 
   if (customConfig) {
     if (customConfig.connectionString) {
-      blobServiceClient = BlobServiceClient.fromConnectionString(customConfig.connectionString)
+      blobServiceClient = BlobServiceClient.fromConnectionString(
+        customConfig.connectionString
+      )
     } else if (customConfig.accountName && customConfig.accountKey) {
       const credential = new StorageSharedKeyCredential(
         customConfig.accountName,
@@ -304,7 +325,9 @@ export async function downloadFromBlob(
   if (!downloadBlockBlobResponse.readableStreamBody) {
     throw new Error('Failed to get readable stream from blob download')
   }
-  const downloaded = await streamToBuffer(downloadBlockBlobResponse.readableStreamBody)
+  const downloaded = await streamToBuffer(
+    downloadBlockBlobResponse.readableStreamBody
+  )
 
   return downloaded
 }
@@ -320,15 +343,23 @@ export async function deleteFromBlob(key: string): Promise<void>
  * @param key Blob name
  * @param customConfig Custom Blob configuration
  */
-export async function deleteFromBlob(key: string, customConfig: CustomBlobConfig): Promise<void>
+export async function deleteFromBlob(
+  key: string,
+  customConfig: CustomBlobConfig
+): Promise<void>
 
-export async function deleteFromBlob(key: string, customConfig?: CustomBlobConfig): Promise<void> {
+export async function deleteFromBlob(
+  key: string,
+  customConfig?: CustomBlobConfig
+): Promise<void> {
   let blobServiceClient: BlobServiceClient
   let containerName: string
 
   if (customConfig) {
     if (customConfig.connectionString) {
-      blobServiceClient = BlobServiceClient.fromConnectionString(customConfig.connectionString)
+      blobServiceClient = BlobServiceClient.fromConnectionString(
+        customConfig.connectionString
+      )
     } else if (customConfig.accountName && customConfig.accountKey) {
       const credential = new StorageSharedKeyCredential(
         customConfig.accountName,
@@ -356,7 +387,9 @@ export async function deleteFromBlob(key: string, customConfig?: CustomBlobConfi
 /**
  * Helper function to convert a readable stream to a Buffer
  */
-async function streamToBuffer(readableStream: NodeJS.ReadableStream): Promise<Buffer> {
+async function streamToBuffer(
+  readableStream: NodeJS.ReadableStream
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
     readableStream.on('data', (data) => {
@@ -407,7 +440,9 @@ export async function initiateMultipartUpload(
 
   if (customConfig) {
     if (customConfig.connectionString) {
-      blobServiceClient = BlobServiceClient.fromConnectionString(customConfig.connectionString)
+      blobServiceClient = BlobServiceClient.fromConnectionString(
+        customConfig.connectionString
+      )
     } else if (customConfig.accountName && customConfig.accountKey) {
       const credential = new StorageSharedKeyCredential(
         customConfig.accountName,
@@ -427,7 +462,9 @@ export async function initiateMultipartUpload(
   }
 
   // Create unique key for the blob
-  const safeFileName = fileName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9.-]/g, '_')
+  const safeFileName = fileName
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9.-]/g, '_')
   const { v4: uuidv4 } = await import('uuid')
   const uniqueKey = `kb/${uuidv4()}-${safeFileName}`
 
@@ -469,14 +506,18 @@ export async function getMultipartPartUrls(
 
   if (customConfig) {
     if (customConfig.connectionString) {
-      blobServiceClient = BlobServiceClient.fromConnectionString(customConfig.connectionString)
+      blobServiceClient = BlobServiceClient.fromConnectionString(
+        customConfig.connectionString
+      )
       // Extract account name from connection string
       const match = customConfig.connectionString.match(/AccountName=([^;]+)/)
-      if (!match) throw new Error('Cannot extract account name from connection string')
+      if (!match)
+        throw new Error('Cannot extract account name from connection string')
       accountName = match[1]
 
       const keyMatch = customConfig.connectionString.match(/AccountKey=([^;]+)/)
-      if (!keyMatch) throw new Error('Cannot extract account key from connection string')
+      if (!keyMatch)
+        throw new Error('Cannot extract account key from connection string')
       accountKey = keyMatch[1]
     } else if (customConfig.accountName && customConfig.accountKey) {
       const credential = new StorageSharedKeyCredential(
@@ -510,9 +551,9 @@ export async function getMultipartPartUrls(
   return partNumbers.map((partNumber) => {
     // Azure uses block IDs instead of part numbers
     // Block IDs must be base64 encoded and all the same length
-    const blockId = Buffer.from(`block-${partNumber.toString().padStart(6, '0')}`).toString(
-      'base64'
-    )
+    const blockId = Buffer.from(
+      `block-${partNumber.toString().padStart(6, '0')}`
+    ).toString('base64')
 
     // Generate SAS token for uploading this specific block
     const sasOptions = {
@@ -531,7 +572,9 @@ export async function getMultipartPartUrls(
     return {
       partNumber,
       blockId,
-      url: `${blockBlobClient.url}?comp=block&blockid=${encodeURIComponent(blockId)}&${sasToken}`,
+      url: `${blockBlobClient.url}?comp=block&blockid=${encodeURIComponent(
+        blockId
+      )}&${sasToken}`,
     }
   })
 }
@@ -550,7 +593,9 @@ export async function completeMultipartUpload(
 
   if (customConfig) {
     if (customConfig.connectionString) {
-      blobServiceClient = BlobServiceClient.fromConnectionString(customConfig.connectionString)
+      blobServiceClient = BlobServiceClient.fromConnectionString(
+        customConfig.connectionString
+      )
     } else if (customConfig.accountName && customConfig.accountKey) {
       const credential = new StorageSharedKeyCredential(
         customConfig.accountName,
@@ -608,7 +653,9 @@ export async function abortMultipartUpload(
 
   if (customConfig) {
     if (customConfig.connectionString) {
-      blobServiceClient = BlobServiceClient.fromConnectionString(customConfig.connectionString)
+      blobServiceClient = BlobServiceClient.fromConnectionString(
+        customConfig.connectionString
+      )
     } else if (customConfig.accountName && customConfig.accountKey) {
       const credential = new StorageSharedKeyCredential(
         customConfig.accountName,

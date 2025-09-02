@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
       })
     } catch (validationError) {
       if (validationError instanceof z.ZodError) {
-        const errorMessage = validationError.errors[0]?.message || 'Invalid request data'
+        const errorMessage = validationError.issues[0]?.message || 'Invalid request data'
         return createErrorResponse(errorMessage, 400, 'VALIDATION_ERROR')
       }
       throw validationError
