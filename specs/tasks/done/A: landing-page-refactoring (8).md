@@ -26,47 +26,47 @@ Refactor the existing landing page to extract all components and styling from `a
 
 ### Step 1: Extract Components to UX-Core
 
-- [ ] **Extract `landing-header.tsx` → `ux-core/src/components-site/navigation/`**
+- [x] **Extract `landing-header.tsx` → `ux-core/src/components-site/navigation/`**
 
-  - [ ] Move component to `packages/ux-core/src/components-site/navigation/landing-header.tsx`
-  - [ ] Keep current styling (will be modified later)
-  - [ ] Define props for text content and handlers
-  - [ ] Update landing-page to use extracted component
+  - [x] Move component to `packages/ux-core/src/components-site/navigation/landing-header.tsx`
+  - [x] Keep current styling (will be modified later)
+  - [x] Define props for text content and handlers
+  - [x] Update landing-page to use extracted component
 
-- [ ] **Extract `ai-chat-widget.tsx` → `ux-core/src/components-site/ai-widget/`**
+- [x] **Extract `ai-chat-widget.tsx` → `ux-core/src/components-site/ai-widget/`**
 
-  - [ ] Move component to `packages/ux-core/src/components-site/ai-widget/landing-chat-widget.tsx`
-  - [ ] Keep current styling (will be modified later)
-  - [ ] Define props for chat behavior and handlers
-  - [ ] Update landing-page to use extracted component
+  - [x] Move component to `packages/ux-core/src/components-site/ai-widget/landing-chat-widget.tsx`
+  - [x] Keep current styling (will be modified later)
+  - [x] Define props for chat behavior and handlers
+  - [x] Update landing-page to use extracted component
 
-- [ ] **Extract `language-switcher.tsx` → `ux-core/src/components-site/navigation/`**
+- [x] **Extract `language-switcher.tsx` → `ux-core/src/components-site/navigation/`**
 
-  - [ ] Move component to `packages/ux-core/src/components-site/navigation/language-switcher.tsx`
-  - [ ] Keep current styling (will be modified later)
-  - [ ] Define props for language options and handlers
-  - [ ] Update landing-page to use extracted component
+  - [x] Move component to `packages/ux-core/src/components-site/navigation/language-switcher.tsx`
+  - [x] Keep current styling (will be modified later)
+  - [x] Define props for language options and handlers
+  - [x] Update landing-page to use extracted component
 
-- [ ] **Extract all section components → `ux-core/src/components-site/`**
-  - [ ] Move `sections/hero-section.tsx` → `ux-core/src/components-site/hero/landing-hero.tsx`
-  - [ ] Move `sections/features-section.tsx` → `ux-core/src/components-site/features/landing-features.tsx`
-  - [ ] Move `sections/problem-section.tsx` → `ux-core/src/components-site/content/problem-section.tsx`
-  - [ ] Move `sections/solution-section.tsx` → `ux-core/src/components-site/content/solution-section.tsx`
-  - [ ] Move `sections/how-it-works-section.tsx` → `ux-core/src/components-site/features/how-it-works.tsx`
-  - [ ] Move `sections/social-proof-section.tsx` → `ux-core/src/components-site/content/social-proof.tsx`
-  - [ ] Move `sections/contact-section.tsx` → `ux-core/src/components-site/content/contact-section.tsx`
-  - [ ] Keep current styling from each component (will be modified later)
-  - [ ] Define props for content and handlers for each component
-  - [ ] Update landing-page to use all extracted components
+- [x] **Extract all section components → `ux-core/src/components-site/`**
+  - [x] Move `sections/hero-section.tsx` → `ux-core/src/components-site/hero/landing-hero.tsx`
+  - [x] Move `sections/features-section.tsx` → `ux-core/src/components-site/features/landing-features.tsx`
+  - [x] Move `sections/problem-section.tsx` → `ux-core/src/components-site/content/problem-section.tsx`
+  - [x] Move `sections/solution-section.tsx` → `ux-core/src/components-site/content/solution-section.tsx`
+  - [x] Move `sections/how-it-works-section.tsx` → `ux-core/src/components-site/features/how-it-works.tsx`
+  - [x] Move `sections/social-proof-section.tsx` → `ux-core/src/components-site/content/social-proof.tsx`
+  - [x] Move `sections/contact-section.tsx` → `ux-core/src/components-site/content/contact-section.tsx`
+  - [x] Keep current styling from each component (will be modified later)
+  - [x] Define props for content and handlers for each component
+  - [x] Update landing-page to use all extracted components
 
 ### Step 2: Update Landing Page App
 
-- [ ] **Simplify landing-page app**
-  - [ ] Remove extracted components from `apps/landing-page/src/components/`
-  - [ ] Update imports to use ux-core components
-  - [ ] Pass only content (texts) and handlers as props
-  - [ ] Keep landing-page focused on content only
-  - [ ] Test that all functionality works
+- [x] **Simplify landing-page app**
+  - [x] Remove extracted components from `apps/landing-page/src/components/`
+  - [x] Update imports to use ux-core components
+  - [x] Pass only content (texts) and handlers as props
+  - [x] Keep landing-page focused on content only
+  - [x] Test that all functionality works
 
 ## File Structure Changes
 
@@ -115,12 +115,12 @@ apps/landing-page/src/
 
 ## Acceptance Criteria
 
-- [ ] All components extracted from `apps/landing-page/src/components` to `packages/ux-core/src/components-site`
-- [ ] Current styling kept in extracted components (will be modified later)
-- [ ] Landing page app only passes content (texts) and handlers to components
-- [ ] Component props interfaces defined for content and handlers
-- [ ] All functionality works after extraction
-- [ ] Clean separation between content (landing-page) and presentation (ux-core)
+- [x] All components extracted from `apps/landing-page/src/components` to `packages/ux-core/src/components-site`
+- [x] Current styling kept in extracted components (will be modified later)
+- [x] Landing page app only passes content (texts) and handlers to components
+- [x] Component props interfaces defined for content and handlers
+- [x] All functionality works after extraction
+- [x] Clean separation between content (landing-page) and presentation (ux-core)
 
 ## Success Metrics
 

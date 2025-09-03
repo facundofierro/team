@@ -15,6 +15,16 @@ interface LandingHeaderProps {
     text: string
     onClick?: () => void
   }
+  languages?: Array<{
+    code: string
+    name: string
+    flag: string
+  }>
+  currentLanguage?: {
+    code: string
+    name: string
+    flag: string
+  }
   onLanguageChange?: (languageCode: string) => void
 }
 
@@ -31,6 +41,8 @@ export function LandingHeader({
   ctaButton = {
     text: 'Get Started',
   },
+  languages,
+  currentLanguage,
   onLanguageChange,
 }: LandingHeaderProps) {
   return (
@@ -68,7 +80,11 @@ export function LandingHeader({
             >
               {ctaButton.text}
             </button>
-            <LanguageSwitcher onLanguageChange={onLanguageChange} />
+            <LanguageSwitcher
+              languages={languages}
+              currentLanguage={currentLanguage}
+              onLanguageChange={onLanguageChange}
+            />
           </div>
         </div>
       </div>
