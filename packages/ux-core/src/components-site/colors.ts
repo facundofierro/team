@@ -31,11 +31,33 @@ export const siteColors = {
     dark: 'bg-gradient-to-br from-gray-900 via-gray-800 to-black',
     glass: 'bg-gray-800/60 backdrop-blur-sm',
     glassLight: 'bg-white/10 backdrop-blur-sm',
+    white10: 'bg-white/10',
+    white70: 'bg-white/70',
+  },
+
+  // Chat widget colors
+  chatWidget: {
+    container: 'bg-white/10 backdrop-blur-xl border-white/20',
+    header: 'bg-white/5 border-white/20',
+    messageUser: 'bg-white/20 backdrop-blur-sm border-white/10',
+    messageAI: 'bg-white/10 backdrop-blur-sm border-white/20',
+    input: 'bg-white/10 backdrop-blur-sm border-white/20',
+    quickReply:
+      'bg-white/10 backdrop-blur-sm border-white/30 hover:bg-white/20 hover:border-white/40',
+    sendButton:
+      'bg-gradient-to-r from-[#F45584] to-[#E91E63] hover:from-[#F45584]/90 hover:to-[#E91E63]/90',
+    typingDot1: 'animate-bounce',
+    typingDot2: 'animate-bounce [animation-delay:0.1s]',
+    typingDot3: 'animate-bounce [animation-delay:0.2s]',
   },
 
   // Text colors from reference design1 (converted to Tailwind notation)
   text: {
     white: 'text-white',
+    white70: 'text-white/70',
+    white60: 'text-white/60',
+    white50: 'text-white/50',
+    white80: 'text-white/80',
     gray300: 'text-gray-300',
     gray200: 'text-gray-200',
     gray400: 'text-gray-400',
@@ -81,6 +103,12 @@ export const siteUtils = {
     lightvibrant: `hover:text-[#ce4c76] hover:bg-[#ce4c76]/10`,
     darkvibrant: `hover:text-[#6c3350] hover:bg-[#6c3350]/10`,
     muted: `hover:text-[#74ac64] hover:bg-[#74ac64]/10`,
+    white10: `hover:bg-white/10`,
+  },
+
+  // Focus effects
+  focus: {
+    pink: `focus:ring-2 focus:ring-[#F45584] focus:border-transparent`,
   },
 
   // Status colors
@@ -91,8 +119,49 @@ export const siteUtils = {
   },
 
   // Utility functions for component usage
-  getBackgroundClasses: (variant: 'dark' | 'glass' | 'glassLight') => {
+  getBackgroundClasses: (
+    variant: 'dark' | 'glass' | 'glassLight' | 'white10' | 'white70'
+  ) => {
     return siteColors.backgrounds[variant]
+  },
+
+  getTextClasses: (
+    variant:
+      | 'white'
+      | 'white70'
+      | 'white60'
+      | 'white50'
+      | 'white80'
+      | 'gray300'
+      | 'gray200'
+      | 'gray400'
+      | 'red'
+      | 'pink'
+      | 'orange'
+      | 'darkmuted'
+      | 'lightvibrant'
+      | 'darkvibrant'
+      | 'muted'
+  ) => {
+    return siteColors.text[variant]
+  },
+
+  getHoverClasses: (
+    variant:
+      | 'red'
+      | 'pink'
+      | 'orange'
+      | 'darkmuted'
+      | 'lightvibrant'
+      | 'darkvibrant'
+      | 'muted'
+      | 'white10'
+  ) => {
+    return siteUtils.hover[variant]
+  },
+
+  getFocusClasses: (variant: 'pink') => {
+    return siteUtils.focus[variant]
   },
 
   getButtonClasses: (
@@ -105,6 +174,22 @@ export const siteUtils = {
     variant: 'primary' | 'cta' | 'blue' | 'blueToBlue' | 'orange' | 'green'
   ) => {
     return siteColors.gradients[variant]
+  },
+
+  getChatWidgetClasses: (
+    variant:
+      | 'container'
+      | 'header'
+      | 'messageUser'
+      | 'messageAI'
+      | 'input'
+      | 'quickReply'
+      | 'sendButton'
+      | 'typingDot1'
+      | 'typingDot2'
+      | 'typingDot3'
+  ) => {
+    return siteColors.chatWidget[variant]
   },
 } as const
 

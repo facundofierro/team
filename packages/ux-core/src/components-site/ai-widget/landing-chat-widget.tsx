@@ -128,22 +128,24 @@ export function LandingChatWidget({
       {/* Desktop Chat Widget */}
       <div className="hidden fixed left-4 top-16 z-40 lg:block">
         <div
-          className={`flex flex-col rounded-2xl border shadow-2xl backdrop-blur-xl w-[24rem] h-[calc(100vh-5rem)] max-h-[48rem]`}
-          style={{
-            height: '800px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-          }}
+          className={`flex flex-col rounded-2xl border shadow-2xl w-[24rem] h-[90vh] max-h-[900px] mt-[1vh] ${siteUtils.getChatWidgetClasses(
+            'container'
+          )}`}
         >
           {/* Header */}
           <div
-            className={`flex justify-between items-center p-4 border-b border-white/20`}
+            className={`flex justify-between items-center p-4 border-b rounded-t-2xl ${siteUtils.getChatWidgetClasses(
+              'header'
+            )}`}
           >
             <div className="flex items-center space-x-3">
-              <div className="flex justify-center items-center w-8 h-8 rounded-full border backdrop-blur-sm bg-white/10 border-white/20">
+              <div
+                className={`flex justify-center items-center w-8 h-8 rounded-full border backdrop-blur-sm ${siteUtils.getBackgroundClasses(
+                  'white10'
+                )} ${siteColors.borders.white20}`}
+              >
                 <svg
-                  className="w-4 h-4 text-white"
+                  className={`w-4 h-4 ${siteUtils.getTextClasses('white')}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -157,17 +159,27 @@ export function LandingChatWidget({
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white">{title}</h3>
-                <p className="text-xs text-white/70">{subtitle}</p>
+                <h3
+                  className={`text-sm font-semibold ${siteUtils.getTextClasses(
+                    'white'
+                  )}`}
+                >
+                  {title}
+                </h3>
+                <p className={`text-xs ${siteUtils.getTextClasses('white70')}`}>
+                  {subtitle}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={toggleMinimize}
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                className={`p-1.5 rounded-lg transition-colors ${siteUtils.getHoverClasses(
+                  'white10'
+                )}`}
               >
                 <svg
-                  className="w-4 h-4 text-white/80"
+                  className={`w-4 h-4 ${siteUtils.getTextClasses('white80')}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -198,10 +210,14 @@ export function LandingChatWidget({
                   }`}
                 >
                   <div
-                    className={`rounded-xl p-3 text-xs ${
+                    className={`rounded-xl p-3 text-xs ${siteUtils.getTextClasses(
+                      'white'
+                    )} ${
                       message.isUser
-                        ? 'bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/10'
-                        : 'bg-white/10 backdrop-blur-sm text-white border border-white/20'
+                        ? `${siteUtils.getChatWidgetClasses(
+                            'messageUser'
+                          )} shadow-lg`
+                        : siteUtils.getChatWidgetClasses('messageAI')
                     }`}
                   >
                     <p className="leading-relaxed">{message.text}</p>
@@ -213,16 +229,26 @@ export function LandingChatWidget({
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="p-3 rounded-xl border backdrop-blur-sm bg-white/10 border-white/20">
+                <div
+                  className={`p-3 rounded-xl border backdrop-blur-sm ${siteUtils.getChatWidgetClasses(
+                    'messageAI'
+                  )}`}
+                >
                   <div className="flex space-x-1">
-                    <div className="w-1.5 h-1.5 bg-white/70 rounded-full animate-bounce"></div>
                     <div
-                      className="w-1.5 h-1.5 bg-white/70 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
+                      className={`w-1.5 h-1.5 rounded-full ${siteUtils.getBackgroundClasses(
+                        'white70'
+                      )} ${siteUtils.getChatWidgetClasses('typingDot1')}`}
                     ></div>
                     <div
-                      className="w-1.5 h-1.5 bg-white/70 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
+                      className={`w-1.5 h-1.5 rounded-full ${siteUtils.getBackgroundClasses(
+                        'white70'
+                      )} ${siteUtils.getChatWidgetClasses('typingDot2')}`}
+                    ></div>
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full ${siteUtils.getBackgroundClasses(
+                        'white70'
+                      )} ${siteUtils.getChatWidgetClasses('typingDot3')}`}
                     ></div>
                   </div>
                 </div>
@@ -237,7 +263,9 @@ export function LandingChatWidget({
                   {quickReplies.map((reply, index) => (
                     <button
                       key={index}
-                      className="block w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-white/10 backdrop-blur-sm text-white border border-white/30 hover:bg-white/20 hover:border-white/40 shadow-sm"
+                      className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-all shadow-sm ${siteUtils.getTextClasses(
+                        'white'
+                      )} ${siteUtils.getChatWidgetClasses('quickReply')}`}
                       onClick={() => handleQuickReplyClick(reply.text)}
                     >
                       {reply.text}
@@ -250,7 +278,7 @@ export function LandingChatWidget({
           </div>
 
           {/* Input Section */}
-          <div className="p-4 border-t border-white/20">
+          <div className={`p-4 border-t ${siteColors.borders.white20}`}>
             <div className="flex space-x-2">
               <input
                 type="text"
@@ -258,12 +286,18 @@ export function LandingChatWidget({
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask about AI transformation..."
-                className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#F45584] focus:border-transparent text-sm"
+                className={`flex-1 rounded-lg px-3 py-2 focus:outline-none text-sm ${siteUtils.getTextClasses(
+                  'white'
+                )} placeholder-white/60 ${siteUtils.getFocusClasses(
+                  'pink'
+                )} ${siteUtils.getChatWidgetClasses('input')}`}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim()}
-                className="bg-gradient-to-r from-[#F45584] to-[#E91E63] text-white p-2 rounded-lg hover:from-[#F45584]/90 hover:to-[#E91E63]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+                className={`p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg ${siteUtils.getTextClasses(
+                  'white'
+                )} ${siteUtils.getChatWidgetClasses('sendButton')}`}
               >
                 <svg
                   className="w-4 h-4"
@@ -282,25 +316,35 @@ export function LandingChatWidget({
             </div>
 
             <div className="mt-2 text-center">
-              <p className="text-xs text-white/50">Powered by Agelum AI</p>
+              <p className={`text-xs ${siteUtils.getTextClasses('white50')}`}>
+                Powered by Agelum AI
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Mobile Chat Widget */}
-      <div className="fixed right-4 bottom-4 z-40 lg:hidden">
+      <div className="fixed right-4 bottom-4 z-60 lg:hidden">
         <div
-          className={`flex flex-col w-80 h-96 rounded-2xl border shadow-xl backdrop-blur-xl bg-white/10 border-white/20`}
+          className={`flex flex-col w-80 h-96 rounded-2xl border shadow-xl backdrop-blur-xl ${siteUtils.getBackgroundClasses(
+            'white10'
+          )} ${siteColors.borders.white20}`}
         >
           {/* Header */}
           <div
-            className={`flex justify-between items-center p-4 border-b border-white/20`}
+            className={`flex justify-between items-center p-4 border-b rounded-t-2xl ${siteUtils.getChatWidgetClasses(
+              'header'
+            )}`}
           >
             <div className="flex items-center space-x-3">
-              <div className="flex justify-center items-center w-8 h-8 rounded-full border backdrop-blur-sm bg-white/10 border-white/20">
+              <div
+                className={`flex justify-center items-center w-8 h-8 rounded-full border backdrop-blur-sm ${siteUtils.getBackgroundClasses(
+                  'white10'
+                )} ${siteColors.borders.white20}`}
+              >
                 <svg
-                  className="w-4 h-4 text-white"
+                  className={`w-4 h-4 ${siteUtils.getTextClasses('white')}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -314,8 +358,16 @@ export function LandingChatWidget({
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white">{title}</h3>
-                <p className="text-xs text-white/70">{subtitle}</p>
+                <h3
+                  className={`text-sm font-semibold ${siteUtils.getTextClasses(
+                    'white'
+                  )}`}
+                >
+                  {title}
+                </h3>
+                <p className={`text-xs ${siteUtils.getTextClasses('white70')}`}>
+                  {subtitle}
+                </p>
               </div>
             </div>
           </div>
@@ -335,10 +387,14 @@ export function LandingChatWidget({
                   }`}
                 >
                   <div
-                    className={`rounded-xl p-3 text-xs ${
+                    className={`rounded-xl p-3 text-xs ${siteUtils.getTextClasses(
+                      'white'
+                    )} ${
                       message.isUser
-                        ? 'bg-white/20 backdrop-blur-sm text-white shadow-lg border border-white/10'
-                        : 'bg-white/10 backdrop-blur-sm text-white border border-white/20'
+                        ? `${siteUtils.getChatWidgetClasses(
+                            'messageUser'
+                          )} shadow-lg`
+                        : siteUtils.getChatWidgetClasses('messageAI')
                     }`}
                   >
                     <p className="leading-relaxed">{message.text}</p>
@@ -350,16 +406,26 @@ export function LandingChatWidget({
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start">
-                <div className="p-3 rounded-xl border backdrop-blur-sm bg-white/10 border-white/20">
+                <div
+                  className={`p-3 rounded-xl border backdrop-blur-sm ${siteUtils.getChatWidgetClasses(
+                    'messageAI'
+                  )}`}
+                >
                   <div className="flex space-x-1">
-                    <div className="w-1.5 h-1.5 bg-white/70 rounded-full animate-bounce"></div>
                     <div
-                      className="w-1.5 h-1.5 bg-white/70 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
+                      className={`w-1.5 h-1.5 rounded-full ${siteUtils.getBackgroundClasses(
+                        'white70'
+                      )} ${siteUtils.getChatWidgetClasses('typingDot1')}`}
                     ></div>
                     <div
-                      className="w-1.5 h-1.5 bg-white/70 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
+                      className={`w-1.5 h-1.5 rounded-full ${siteUtils.getBackgroundClasses(
+                        'white70'
+                      )} ${siteUtils.getChatWidgetClasses('typingDot2')}`}
+                    ></div>
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full ${siteUtils.getBackgroundClasses(
+                        'white70'
+                      )} ${siteUtils.getChatWidgetClasses('typingDot3')}`}
                     ></div>
                   </div>
                 </div>
@@ -374,7 +440,9 @@ export function LandingChatWidget({
                   {quickReplies.map((reply, index) => (
                     <button
                       key={index}
-                      className="block w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-white/10 backdrop-blur-sm text-white border border-white/30 hover:bg-white/20 hover:border-white/40 shadow-sm"
+                      className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-all shadow-sm ${siteUtils.getTextClasses(
+                        'white'
+                      )} ${siteUtils.getChatWidgetClasses('quickReply')}`}
                       onClick={() => handleQuickReplyClick(reply.text)}
                     >
                       {reply.text}
@@ -387,7 +455,7 @@ export function LandingChatWidget({
           </div>
 
           {/* Input Section */}
-          <div className="p-4 border-t border-white/20">
+          <div className={`p-4 border-t ${siteColors.borders.white20}`}>
             <div className="flex space-x-2">
               <input
                 type="text"
@@ -395,12 +463,18 @@ export function LandingChatWidget({
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask about AI transformation..."
-                className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[#F45584] focus:border-transparent text-sm"
+                className={`flex-1 rounded-lg px-3 py-2 focus:outline-none text-sm ${siteUtils.getTextClasses(
+                  'white'
+                )} placeholder-white/60 ${siteUtils.getFocusClasses(
+                  'pink'
+                )} ${siteUtils.getChatWidgetClasses('input')}`}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim()}
-                className="bg-gradient-to-r from-[#F45584] to-[#E91E63] text-white p-2 rounded-lg hover:from-[#F45584]/90 hover:to-[#E91E63]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+                className={`p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg ${siteUtils.getTextClasses(
+                  'white'
+                )} ${siteUtils.getChatWidgetClasses('sendButton')}`}
               >
                 <svg
                   className="w-4 h-4"
@@ -419,7 +493,9 @@ export function LandingChatWidget({
             </div>
 
             <div className="mt-2 text-center">
-              <p className="text-xs text-white/50">Powered by Agelum AI</p>
+              <p className={`text-xs ${siteUtils.getTextClasses('white50')}`}>
+                Powered by Agelum AI
+              </p>
             </div>
           </div>
         </div>
