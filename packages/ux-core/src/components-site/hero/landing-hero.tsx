@@ -38,9 +38,9 @@ export function LandingHero({
   limitedTimeCallout,
 }: LandingHeroProps) {
   return (
-    <section className="relative py-32 sm:py-40 min-h-screen flex items-center justify-center">
-      <div className="text-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-white mb-8">
+    <section className="flex relative justify-center items-center py-32 min-h-screen sm:py-40">
+      <div className="px-4 mx-auto max-w-6xl text-center sm:px-6 lg:px-8">
+        <h1 className="mb-8 text-5xl font-bold tracking-tight leading-tight text-white sm:text-6xl lg:text-7xl">
           <span
             className={`text-transparent bg-clip-text ${siteColors.gradients.primary}`}
           >
@@ -55,9 +55,9 @@ export function LandingHero({
 
         {/* CTA Section */}
         <div
-          className={`mt-12 bg-gradient-to-r from-purple-900/60 to-blue-900/60 backdrop-blur-sm rounded-2xl p-8 border ${siteColors.borders.gray700} shadow-xl max-w-4xl mx-auto`}
+          className={`mt-12 bg-gradient-to-r ${siteColors.gradients.vibrantToMuted}  backdrop-blur-sm rounded-2xl p-8 border ${siteColors.borders.gray700} shadow-xl max-w-4xl mx-auto`}
         >
-          <h3 className="text-2xl font-bold text-white mb-4">
+          <h3 className="mb-4 text-2xl font-bold text-white">
             {ctaSection.title}
           </h3>
           <p className={`${siteColors.text.gray200} mb-6 text-lg`}>
@@ -75,14 +75,14 @@ export function LandingHero({
 
         {/* Enhanced Subsections */}
         {enhancedSubsections.length > 0 && (
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 gap-6 mx-auto mt-16 max-w-5xl md:grid-cols-2 lg:grid-cols-4">
             {enhancedSubsections.map((subsection, index) => (
               <div
                 key={index}
                 className={`bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 border ${siteColors.borders.gray700} shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-gray-800/80`}
               >
-                <div className="text-3xl mb-3">{subsection.icon}</div>
-                <h4 className="text-lg font-semibold text-white mb-2">
+                <div className="mb-3 text-3xl">{subsection.icon}</div>
+                <h4 className="mb-2 text-lg font-semibold text-white">
                   {subsection.title}
                 </h4>
                 <p className={`${siteColors.text.gray300} text-sm`}>
@@ -98,7 +98,7 @@ export function LandingHero({
           <div
             className={`mt-16 bg-gradient-to-r from-pink-600/20 to-purple-600/20 backdrop-blur-sm rounded-2xl p-8 border ${siteColors.borders.pink500} shadow-xl max-w-4xl mx-auto`}
           >
-            <h3 className="text-2xl font-bold text-white mb-4">
+            <h3 className="mb-4 text-2xl font-bold text-white">
               {limitedTimeCallout.title}
             </h3>
             <p className={`${siteColors.text.gray200} mb-6 text-lg`}>
@@ -112,7 +112,7 @@ export function LandingHero({
             >
               {limitedTimeCallout.buttonText}
             </button>
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
+            <div className="flex flex-wrap gap-6 justify-center text-sm">
               {limitedTimeCallout.trustIndicators.map((indicator, index) => (
                 <div
                   key={index}

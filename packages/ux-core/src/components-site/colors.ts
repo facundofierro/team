@@ -23,6 +23,7 @@ export const siteColors = {
     blueToBlue: 'bg-gradient-to-r from-[#303b58] to-[#303b58]', // Darkmuted to Darkmuted gradient
     orange: 'bg-gradient-to-r from-[#ff8c42] to-[#f45584]',
     green: 'bg-gradient-to-br from-[#74ac64] to-[#303b58]',
+    vibrantToMuted: 'bg-gradient-to-r from-[#6c3350] to-[#303b58]',
   },
 
   // Background colors from reference design1 (converted to Tailwind notation)
