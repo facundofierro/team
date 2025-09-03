@@ -1,5 +1,7 @@
 'use client'
 
+import { siteColors, siteUtils } from '../colors'
+
 interface Feature {
   title: string
   description: string
@@ -65,15 +67,19 @@ export function LandingFeatures({
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all"
+                className={`${siteColors.backgrounds.glass} backdrop-blur-sm rounded-2xl p-8 border ${siteColors.borders.gray700} shadow-xl hover:shadow-2xl transition-all`}
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg text-2xl">
+                <div
+                  className={`w-16 h-16 ${siteColors.gradients.primary} rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg text-2xl`}
+                >
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-4">
                   {feature.title}
                 </h3>
-                <p className="text-gray-300">{feature.description}</p>
+                <p className={`${siteColors.text.gray300}`}>
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>

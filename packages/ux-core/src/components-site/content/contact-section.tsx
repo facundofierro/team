@@ -1,5 +1,7 @@
 'use client'
 
+import { siteColors, siteUtils } from '../colors'
+
 interface ContactCard {
   title: string
   description: string
@@ -43,24 +45,28 @@ export function ContactSection({
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">
             {title}
           </h2>
-          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+          <p
+            className={`text-xl ${siteColors.text.gray300} mb-12 max-w-3xl mx-auto`}
+          >
             {subtitle}
           </p>
           <div className="grid md:grid-cols-2 gap-8">
             {cards.map((card, index) => (
               <div
                 key={index}
-                className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-xl"
+                className={`${siteColors.backgrounds.glass} backdrop-blur-sm rounded-2xl p-8 border ${siteColors.borders.gray700} shadow-xl`}
               >
                 <h3 className="text-2xl font-semibold text-white mb-4">
                   {card.title}
                 </h3>
-                <p className="text-gray-300 mb-6">{card.description}</p>
+                <p className={`${siteColors.text.gray300} mb-6`}>
+                  {card.description}
+                </p>
                 <button
                   className={`font-semibold px-6 py-3 rounded-xl transition-colors duration-200 ${
                     card.buttonColor === 'purple'
-                      ? 'bg-purple-600 hover:bg-purple-700'
-                      : 'bg-pink-500 hover:bg-pink-600'
+                      ? siteUtils.getButtonClasses('primary')
+                      : siteUtils.getButtonClasses('cta')
                   } text-white`}
                   onClick={card.onButtonClick}
                 >

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { siteColors, siteUtils } from '../colors'
 
 interface QuickReply {
   text: string
@@ -68,7 +69,9 @@ export function LandingChatWidget({
       <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40">
         <button
           onClick={handleExpand}
-          className="w-16 h-16 bg-pink-500 rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+          className={`w-16 h-16 rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-all duration-200 flex items-center justify-center ${siteUtils.getButtonClasses(
+            'cta'
+          )}`}
         >
           <svg
             className="w-8 h-8 text-white"
@@ -90,11 +93,19 @@ export function LandingChatWidget({
 
   return (
     <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40">
-      <div className="w-96 h-[28rem] bg-gray-800/90 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-xl">
+      <div
+        className={`w-96 h-[28rem] bg-gray-800/90 backdrop-blur-md rounded-2xl border ${siteColors.borders.gray700} shadow-xl`}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700/50">
+        <div
+          className={`flex items-center justify-between p-4 border-b ${siteColors.borders.gray700}`}
+        >
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+            <div
+              className={`w-8 h-8 rounded-lg flex items-center justify-center ${siteUtils.getButtonClasses(
+                'cta'
+              )}`}
+            >
               <svg
                 className="w-5 h-5 text-white"
                 fill="none"
@@ -111,7 +122,9 @@ export function LandingChatWidget({
             </div>
             <div>
               <div className="text-white font-semibold">{title}</div>
-              <div className="text-gray-400 text-sm">{subtitle}</div>
+              <div className={`${siteColors.text.gray400} text-sm`}>
+                {subtitle}
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -120,7 +133,7 @@ export function LandingChatWidget({
               className="p-1 hover:bg-gray-700/50 rounded transition-colors"
             >
               <svg
-                className="w-4 h-4 text-gray-400"
+                className={`w-4 h-4 ${siteColors.text.gray400}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -161,8 +174,8 @@ export function LandingChatWidget({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-700/50">
-          <div className="text-gray-400 text-xs text-center">
+        <div className={`p-4 border-t ${siteColors.borders.gray700}`}>
+          <div className={`${siteColors.text.gray400} text-xs text-center`}>
             Powered by TeamHub AI
           </div>
         </div>

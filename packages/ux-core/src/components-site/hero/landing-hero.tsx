@@ -1,5 +1,7 @@
 'use client'
 
+import { siteColors, siteUtils } from '../colors'
+
 interface LandingHeroProps {
   title?: string
   subtitle?: string
@@ -25,22 +27,32 @@ export function LandingHero({
     <section className="relative py-32 sm:py-40 min-h-screen flex items-center justify-center">
       <div className="text-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-white mb-8">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">
+          <span
+            className={`text-transparent bg-clip-text ${siteColors.gradients.primary}`}
+          >
             {title}
           </span>
         </h1>
-        <p className="text-xl sm:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+        <p
+          className={`text-xl sm:text-2xl ${siteColors.text.gray300} mb-12 max-w-4xl mx-auto leading-relaxed`}
+        >
           {subtitle}
         </p>
 
         {/* CTA Section */}
-        <div className="mt-12 bg-gradient-to-r from-purple-900/60 to-blue-900/60 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-xl max-w-4xl mx-auto">
+        <div
+          className={`mt-12 bg-gradient-to-r from-purple-900/60 to-blue-900/60 backdrop-blur-sm rounded-2xl p-8 border ${siteColors.borders.gray700} shadow-xl max-w-4xl mx-auto`}
+        >
           <h3 className="text-2xl font-bold text-white mb-4">
             {ctaSection.title}
           </h3>
-          <p className="text-gray-200 mb-6 text-lg">{ctaSection.description}</p>
+          <p className={`${siteColors.text.gray200} mb-6 text-lg`}>
+            {ctaSection.description}
+          </p>
           <button
-            className="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-8 py-4 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl"
+            className={`text-white font-semibold px-8 py-4 rounded-xl transition-colors duration-200 shadow-lg hover:shadow-xl ${siteUtils.getButtonClasses(
+              'cta'
+            )}`}
             onClick={ctaSection.onButtonClick}
           >
             {ctaSection.buttonText}

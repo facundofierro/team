@@ -1,5 +1,7 @@
 'use client'
 
+import { siteColors } from '../colors'
+
 interface Step {
   title: string
   description: string
@@ -43,16 +45,20 @@ export function HowItWorks({
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">
             {title}
           </h2>
-          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+          <p
+            className={`text-xl ${siteColors.text.gray300} mb-12 max-w-3xl mx-auto`}
+          >
             {subtitle}
           </p>
           <div className="grid md:grid-cols-3 gap-8">
             {steps.map((item, index) => (
               <div
                 key={index}
-                className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-xl"
+                className={`${siteColors.backgrounds.glass} backdrop-blur-sm rounded-2xl p-8 border ${siteColors.borders.gray700} shadow-xl`}
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
+                <div
+                  className={`w-16 h-16 ${siteColors.gradients.primary} rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg`}
+                >
                   <span className="text-white font-bold text-2xl">
                     {index + 1}
                   </span>
@@ -60,7 +66,9 @@ export function HowItWorks({
                 <h3 className="text-xl font-semibold text-white mb-4">
                   {item.title}
                 </h3>
-                <p className="text-gray-300">{item.description}</p>
+                <p className={`${siteColors.text.gray300}`}>
+                  {item.description}
+                </p>
               </div>
             ))}
           </div>

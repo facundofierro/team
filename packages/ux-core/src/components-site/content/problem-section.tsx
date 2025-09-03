@@ -1,5 +1,7 @@
 'use client'
 
+import { siteColors } from '../colors'
+
 interface ValueCardProps {
   title: string
   description: string
@@ -8,14 +10,18 @@ interface ValueCardProps {
 
 function ValueCard({ title, description, features }: ValueCardProps) {
   return (
-    <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-xl">
-      <h3 className="text-2xl font-semibold text-pink-500 mb-4">{title}</h3>
-      <p className="text-gray-300 mb-6">{description}</p>
+    <div
+      className={`${siteColors.backgrounds.glass} backdrop-blur-sm rounded-2xl p-8 border ${siteColors.borders.gray700} shadow-xl`}
+    >
+      <h3 className={`text-2xl font-semibold ${siteColors.text.pink} mb-4`}>
+        {title}
+      </h3>
+      <p className={`${siteColors.text.gray300} mb-6`}>{description}</p>
       <ul className="space-y-3">
         {features.map((feature, index) => (
           <li key={index} className="flex items-start space-x-3">
-            <div className="w-2 h-2 bg-pink-500 rounded-full mt-2 flex-shrink-0"></div>
-            <span className="text-gray-200">{feature}</span>
+            <div className="w-2 h-2 bg-[#F45584] rounded-full mt-2 flex-shrink-0"></div>
+            <span className={`${siteColors.text.gray200}`}>{feature}</span>
           </li>
         ))}
       </ul>
