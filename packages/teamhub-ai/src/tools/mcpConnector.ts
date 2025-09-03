@@ -87,7 +87,7 @@ export const mcpConnector: ToolTypeDefinition = {
       .optional()
       .describe('Name of the tool to call (required for call_tool operation)'),
     toolArguments: z
-      .record(z.unknown())
+      .record(z.string(), z.unknown())
       .optional()
       .describe('Arguments to pass to the MCP tool'),
   }),
@@ -102,7 +102,7 @@ export const mcpConnector: ToolTypeDefinition = {
           name: z.string().describe('Tool name'),
           description: z.string().optional().describe('Tool description'),
           inputSchema: z
-            .record(z.unknown())
+            .record(z.string(), z.unknown())
             .describe('Tool input schema definition'),
         })
       )
@@ -117,7 +117,7 @@ export const mcpConnector: ToolTypeDefinition = {
             z.object({
               name: z.string(),
               description: z.string().optional(),
-              inputSchema: z.record(z.unknown()),
+              inputSchema: z.record(z.string(), z.unknown()),
             })
           )
           .describe('List of available tools'),
