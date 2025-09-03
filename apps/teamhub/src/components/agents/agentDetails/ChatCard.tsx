@@ -24,7 +24,11 @@ import {
   buildOptimizedContext,
   formatOptimizationInfo,
 } from '@/lib/utils/contextOptimizer'
-import type { AgentToolPermissions, ConversationMemory, Agent } from '@teamhub/db'
+import type {
+  AgentToolPermissions,
+  ConversationMemory,
+  Agent,
+} from '@teamhub/db'
 
 type ChatCardProps = {
   scheduled?: {
@@ -42,7 +46,7 @@ const ChatCardComponent = ({
 }: ChatCardProps) => {
   // Get selected agent ID from simplified store
   const selectedAgentId = useAgentStore((state) => state.selectedAgentId)
-  
+
   // Get selected agent data from reactive cache
   const { data: selectedAgent } = useReactive<Agent | null>(
     'agents.getOne',
@@ -113,13 +117,20 @@ const ChatCardComponent = ({
   // Handle conversation loading from memory card double-click - prevent duplicates
   const conversationLoadRef = useRef<string | null>(null)
   const isLoadingMemoryRef = useRef<boolean>(false)
-  
+
   useEffect(() => {
-    if (conversationToLoad && switchToConversation && conversationToLoad !== conversationLoadRef.current) {
+    if (
+      conversationToLoad &&
+      switchToConversation &&
+      conversationToLoad !== conversationLoadRef.current
+    ) {
       conversationLoadRef.current = conversationToLoad
       isLoadingMemoryRef.current = true
-      console.log('💭 Loading memory:', conversationToLoad.substring(0, 12) + '...')
-      
+      console.log(
+        '💭 Loading memory:',
+        conversationToLoad.substring(0, 12) + '...'
+      )
+
       switchToConversation(conversationToLoad)
         .then(() => {
           console.log('✅ Memory loaded successfully')
@@ -274,7 +285,7 @@ const ChatCardComponent = ({
 
   // Memoize the lastMessages array to prevent unnecessary effect triggers
   const memoizedLastMessages = useMemo(() => lastMessages, [lastMessages])
-  
+
   // Memoize the loadFullConversation callback
   const memoizedLoadFullConversation = useCallback(
     (conversationId: string) => {
@@ -286,22 +297,36 @@ const ChatCardComponent = ({
   )
 
   // Track previous agent for proper cleanup
-  const [previousSelectedAgentId, setPreviousSelectedAgentId] = useState<string | null>(null)
-  
+  const [previousSelectedAgentId, setPreviousSelectedAgentId] = useState<
+    string | null
+  >(null)
+
   // Track the current conversation ID to detect conversation switches
-  const [previousConversationId, setPreviousConversationId] = useState<string | null>(null)
-  
+  const [previousConversationId, setPreviousConversationId] = useState<
+    string | null
+  >(null)
+
   // Clear messages when agent changes - only log meaningful changes
   useEffect(() => {
     // Only process if we have a valid agent ID and it's different from previous
     if (selectedAgent?.id && selectedAgent.id !== previousSelectedAgentId) {
       // Only log if we have a meaningful previous agent (not null/undefined transitions)
       if (previousSelectedAgentId) {
-        console.log('🔄 Agent switch:', previousSelectedAgentId.substring(0, 8) + '... -> ' + selectedAgent.id.substring(0, 8) + '...')
+        console.log(
+          '🔄 Agent switch:',
+          previousSelectedAgentId.substring(0, 8) +
+            '... -> ' +
+            selectedAgent.id.substring(0, 8) +
+            '...'
+        )
       }
-      
+
       // Clear messages and update tracking
-      console.log('🧹 [DEBUG] Clearing messages on agent change from', messages.length, 'to 0')
+      console.log(
+        '🧹 [DEBUG] Clearing messages on agent change from',
+        messages.length,
+        'to 0'
+      )
       setMessages([])
       setPreviousSelectedAgentId(selectedAgent.id)
       setPreviousConversationId(null)
@@ -320,21 +345,26 @@ const ChatCardComponent = ({
       })
       prevStateRef.current = currentState
     }
-  }, [selectedAgent?.id, selectedAgent?.name, activeConversationId, messages.length])
+  }, [
+    selectedAgent?.id,
+    selectedAgent?.name,
+    activeConversationId,
+    messages.length,
+  ])
 
   // Quick loading of last messages when switching agents
   const hasNoMessages = messages.length === 0
   const hasLastMessages = memoizedLastMessages.length > 0
   const hasActiveConversation = Boolean(activeConversationId)
-  
+
   // Track if we've already loaded quick messages to prevent reloading
   const [hasLoadedQuickMessages, setHasLoadedQuickMessages] = useState(false)
-  
+
   // Reset quick message tracking when agent changes
   useEffect(() => {
     setHasLoadedQuickMessages(false)
   }, [selectedAgent?.id])
-  
+
   // Quick load - but only if full conversation isn't already loaded
   useEffect(() => {
     if (
@@ -347,7 +377,12 @@ const ChatCardComponent = ({
       !isLoadingMemoryRef.current && // Skip if we're loading a specific memory conversation
       !currentConversation // NEW: Skip if full conversation is already loaded
     ) {
-      console.log('🚀 Quick loading last messages:', memoizedLastMessages.length, 'for agent:', selectedAgent.name)
+      console.log(
+        '🚀 Quick loading last messages:',
+        memoizedLastMessages.length,
+        'for agent:',
+        selectedAgent.name
+      )
 
       // Convert stored last messages to Message[] format
       const quickMessages: Message[] = memoizedLastMessages.map((msg: any) => ({
@@ -357,7 +392,10 @@ const ChatCardComponent = ({
         createdAt: new Date(msg.timestamp),
       }))
 
-      console.log('🧹 [DEBUG] Setting messages from quick load:', quickMessages.length)
+      console.log(
+        '🧹 [DEBUG] Setting messages from quick load:',
+        quickMessages.length
+      )
       setMessages(quickMessages)
       setHasLoadedQuickMessages(true) // Mark as loaded
 
@@ -385,8 +423,10 @@ const ChatCardComponent = ({
   // Safe message loading - when explicitly switching conversations
   useEffect(() => {
     // Check if this is a conversation switch (different conversation ID)
-    const isConversationSwitch = currentConversation?.id && currentConversation.id !== previousConversationId
-    
+    const isConversationSwitch =
+      currentConversation?.id &&
+      currentConversation.id !== previousConversationId
+
     // Load if we have a conversation with content and we're not actively chatting
     // OR if this is a conversation switch (even if there are existing messages)
     if (
@@ -399,7 +439,7 @@ const ChatCardComponent = ({
         currentConversation.id.substring(0, 8) + '...',
         isConversationSwitch ? '(SWITCH)' : '(INITIAL)'
       )
-      
+
       // Update the tracked conversation ID
       setPreviousConversationId(currentConversation.id)
 
@@ -431,7 +471,10 @@ const ChatCardComponent = ({
         }
       })
 
-      console.log('🧹 [DEBUG] Setting messages from conversation load:', chatMessages.length)
+      console.log(
+        '🧹 [DEBUG] Setting messages from conversation load:',
+        chatMessages.length
+      )
       setMessages(chatMessages)
       // Note: We'd need to update the tool call processor to handle loaded messages
 
@@ -445,13 +488,17 @@ const ChatCardComponent = ({
       !isActiveChatting &&
       messages.length > 0
     ) {
-      console.log('🧹 [DEBUG] Clearing messages for agent with no conversation data from', messages.length, 'to 0')
+      console.log(
+        '🧹 [DEBUG] Clearing messages for agent with no conversation data from',
+        messages.length,
+        'to 0'
+      )
       setMessages([])
       setHasLoadedQuickMessages(false) // Reset quick message tracking
     }
   }, [
-    currentConversation?.id,
-    currentConversation?.content,
+    currentConversation,
+    previousConversationId,
     selectedAgent?.id,
     hasActiveConversation,
     hasLastMessages,
@@ -473,7 +520,11 @@ const ChatCardComponent = ({
     resetToolCallState()
 
     // Clear UI messages immediately - this is intentional for new conversation
-    console.log('🧹 [DEBUG] Clearing messages for new conversation from', messages.length, 'to 0')
+    console.log(
+      '🧹 [DEBUG] Clearing messages for new conversation from',
+      messages.length,
+      'to 0'
+    )
     setMessages([])
 
     // Note: New conversation will be created when the first message is sent
