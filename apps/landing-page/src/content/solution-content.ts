@@ -1,5 +1,5 @@
 export const solutionContent = {
-  title: 'The TeamHub Guarantee',
+  title: 'The Agelum Guarantee',
   subtitle:
     "We don't just implement AI - we transform your entire operation into an intelligent, self-optimizing system that delivers measurable ROI from day one.",
   sectionId: 'solution',

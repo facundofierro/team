@@ -3,7 +3,7 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
-  transpilePackages: ['@teamhub/ux-core'],
+  transpilePackages: ['@agelum/ux-core'],
 }
 
 module.exports = nextConfig

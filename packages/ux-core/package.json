@@ -1,7 +1,7 @@
 {
-  "name": "@teamhub/ux-core",
+  "name": "@agelum/ux-core",
   "version": "0.1.0",
-  "description": "UX Core package for TeamHub - Component library and design system utilities",
+  "description": "UX Core package for Agelum - Component library and design system utilities",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
@@ -59,8 +59,8 @@
     "ux",
     "components",
     "design-system",
-    "teamhub"
+    "agelum"
   ],
-  "author": "TeamHub",
+  "author": "Agelum",
   "license": "MIT"
 }

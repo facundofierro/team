@@ -36,7 +36,7 @@
     }
   },
   "solution": {
-    "title": "La Garantía de TeamHub",
+    "title": "La Garantía de Agelum",
     "description": "No solo implementamos IA, transformamos toda tu operación en un sistema inteligente y auto-optimizador que entrega ROI medible desde el primer día.",
     "guarantees": [
       {
@@ -91,13 +91,13 @@
       { "value": "3x", "label": "ROI en el Primer Año" }
     ],
     "testimonial": {
-      "quote": "TeamHub transformó nuestras operaciones de IA de reactivas a predictivas. Ahora gestionamos más de 50 agentes de IA con entrega de proyectos 40% más rápida y 25% menos costos. La plataforma maneja todo desde el despliegue de agentes hasta el monitoreo del rendimiento.",
+      "quote": "Agelum transformó nuestras operaciones de IA de reactivas a predictivas. Ahora gestionamos más de 50 agentes de IA con entrega de proyectos 40% más rápida y 25% menos costos. La plataforma maneja todo desde el despliegue de agentes hasta el monitoreo del rendimiento.",
       "author": "Sarah Chen, CTO",
       "company": "Industrias TechCorp"
     }
   },
   "howItWorks": {
-    "title": "Cómo Funciona TeamHub",
+    "title": "Cómo Funciona Agelum",
     "description": "Comienza con agentes de IA en tres pasos simples",
     "steps": [
       {
@@ -124,20 +124,20 @@
     },
     "scheduleDemo": {
       "title": "Programar Demo",
-      "description": "Ve TeamHub en acción con una demo personalizada de las capacidades de nuestra plataforma.",
+      "description": "Ve Agelum en acción con una demo personalizada de las capacidades de nuestra plataforma.",
       "button": "Reservar Demo"
     }
   },
   "aiWidget": {
     "title": "Consultor de Negocios con IA",
     "subtitle": "En línea • Listo para ayudar",
-    "message": "¡Hola! Soy tu consultor de transformación de negocios con IA. Puedo ayudarte a entender cómo TeamHub puede revolucionar tus operaciones y entregar ROI garantizado. ¿Qué te gustaría explorar primero?",
+    "message": "¡Hola! Soy tu consultor de transformación de negocios con IA. Puedo ayudarte a entender cómo Agelum puede revolucionar tus operaciones y entregar ROI garantizado. ¿Qué te gustaría explorar primero?",
     "quickReplies": [
       "Analizar Mi Negocio",
       "Mostrarme Ejemplos",
       "Calcular Mis Ahorros",
       "Cómo Funciona"
     ],
-    "footer": "Impulsado por TeamHub AI"
+    "footer": "Impulsado por Agelum AI"
   }
 }

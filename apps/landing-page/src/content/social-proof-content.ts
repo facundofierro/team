@@ -9,7 +9,7 @@ export const socialProofContent = {
   ],
   testimonial: {
     quote:
-      "TeamHub transformed our AI operations from reactive to predictive. We're now managing 50+ AI agents with 40% faster project delivery and 25% lower costs. The platform handles everything from agent deployment to performance monitoring.",
+      "Agelum transformed our AI operations from reactive to predictive. We're now managing 50+ AI agents with 40% faster project delivery and 25% lower costs. The platform handles everything from agent deployment to performance monitoring.",
     author: 'Sarah Chen, CTO',
     company: 'TechCorp Industries',
   },

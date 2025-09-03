@@ -1,6 +1,6 @@
 # TeamHub UX Core - Playwright Test Suite
 
-This directory contains a comprehensive Playwright test suite for all components in the `@teamhub/ux-core` package.
+This directory contains a comprehensive Playwright test suite for all components in the `@agelum/ux-core` package.
 
 ## Overview
 
@@ -159,7 +159,7 @@ Create a new page at `test-server/src/app/components/{component-name}/page.tsx`:
 'use client'
 
 import { useState } from 'react'
-import { YourComponent } from '@teamhub/ux-core'
+import { YourComponent } from '@agelum/ux-core'
 
 export default function YourComponentTestPage() {
   const [value, setValue] = useState('')
@@ -259,7 +259,7 @@ const componentCategories = [
 
 2. **Component Not Rendering**
 
-   - Verify component is exported from `@teamhub/ux-core`
+   - Verify component is exported from `@agelum/ux-core`
    - Check for missing dependencies
    - Review component props and types
 

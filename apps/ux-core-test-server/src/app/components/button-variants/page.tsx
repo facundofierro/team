@@ -8,7 +8,7 @@ import {
   SaveButton,
   ResetButton,
   AddButton,
-} from '@teamhub/ux-core'
+} from '@agelum/ux-core'
 import { Sparkles, Plus, FileText, Settings } from 'lucide-react'
 
 export default function ButtonVariantsPage() {
@@ -17,7 +17,7 @@ export default function ButtonVariantsPage() {
       <div>
         <h1 className="text-3xl font-bold mb-2">Button Variants</h1>
         <p className="text-gray-600">
-          All button types available in the TeamHub UX Core library
+          All button types available in the Agelum UX Core library
         </p>
       </div>
 

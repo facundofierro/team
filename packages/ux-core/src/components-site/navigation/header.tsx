@@ -61,7 +61,7 @@ export function Header({
                 <span className="text-white font-bold text-xl">T</span>
               </div>
               <span className={cn('text-2xl font-bold', siteColors.text.white)}>
-                TeamHub
+                Agelum
               </span>
             </div>
           )}

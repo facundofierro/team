@@ -9,7 +9,7 @@ export function LayoutExample() {
         <Container size="lg">
           <div className="text-center">
             <h1 className="text-5xl sm:text-6xl font-bold mb-6">
-              Welcome to TeamHub
+              Welcome to Agelum
             </h1>
             <p className="text-xl sm:text-2xl opacity-90 max-w-3xl mx-auto">
               The ultimate AI agent management platform for enterprise teams
@@ -73,8 +73,8 @@ export function LayoutExample() {
               Ready to Get Started?
             </h2>
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Join thousands of teams already using TeamHub to transform their
-              AI operations
+              Join thousands of teams already using Agelum to transform their AI
+              operations
             </p>
             <button className="bg-teamhub-hot-pink hover:bg-teamhub-hot-pink/90 text-white font-semibold py-4 px-8 rounded-lg text-lg transition-colors">
               Start Free Trial

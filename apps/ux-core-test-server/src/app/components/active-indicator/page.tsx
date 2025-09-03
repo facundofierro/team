@@ -1,6 +1,6 @@
 'use client'
 
-import { ActiveIndicator } from '@teamhub/ux-core'
+import { ActiveIndicator } from '@agelum/ux-core'
 import { useState } from 'react'
 
 export default function ActiveIndicatorPage() {

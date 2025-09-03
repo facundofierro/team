@@ -14,7 +14,7 @@ export const contactContent = {
     {
       title: 'Schedule Demo',
       description:
-        'See TeamHub in action with a personalized demo of our platform capabilities.',
+        'See Agelum in action with a personalized demo of our platform capabilities.',
       buttonText: 'Book Demo',
       buttonColor: 'purple' as const,
     },

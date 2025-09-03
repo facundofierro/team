@@ -1,6 +1,6 @@
-# TeamHub
+# Agelum
 
-A powerful platform for creating and managing organizations with AI agents. TeamHub enables teams to leverage artificial intelligence through custom agents tailored to their specific organizational needs.
+A powerful platform for creating and managing organizations with AI agents. Agelum enables teams to leverage artificial intelligence through custom agents tailored to their specific organizational needs.
 
 ## 🌟 Features
 
@@ -47,7 +47,7 @@ A powerful platform for creating and managing organizations with AI agents. Team
 
 ## 🏗️ Architecture
 
-TeamHub is built as a modern monorepo with the following structure:
+Agelum is built as a modern monorepo with the following structure:
 
 ```
 ├── apps/
@@ -125,7 +125,7 @@ TeamHub is built as a modern monorepo with the following structure:
 
 ### Creating Your First Organization
 
-1. Sign in to TeamHub
+1. Sign in to Agelum
 2. Click "Create Organization" in the sidebar
 3. Enter your organization name
 4. Your organization will be created with its own isolated environment
@@ -187,16 +187,16 @@ TeamHub is built as a modern monorepo with the following structure:
 
 ```bash
 # Development
-pnpm dev:teamhub          # Start TeamHub in development mode
+pnpm dev:agelum          # Start Agelum in development mode
 pnpm dev                  # Start all apps in development mode
 
 # Building
-pnpm build:teamhub        # Build TeamHub for production
-pnpm build:teamhub:prod   # Build with production environment
+pnpm build:agelum        # Build Agelum for production
+pnpm build:agelum:prod   # Build with production environment
 pnpm build                # Build all apps
 
 # Starting
-pnpm start:teamhub        # Start TeamHub in production mode
+pnpm start:agelum        # Start Agelum in production mode
 pnpm start                # Start all apps in production mode
 
 # Utilities
@@ -255,7 +255,7 @@ See the [AI package documentation](../../packages/teamhub-ai/README.md) for deta
 
 ## 🐳 Docker Deployment
 
-TeamHub includes multiple Docker configurations:
+Agelum includes multiple Docker configurations:
 
 - `Dockerfile`: Standard Docker build
 - `Dockerfile.distroless`: Minimal distroless image

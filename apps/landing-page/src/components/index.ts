@@ -10,4 +10,4 @@ export {
   HowItWorks as HowItWorksSection,
   SocialProof as SocialProofSection,
   ContactSection,
-} from '@teamhub/ux-core'
+} from '@agelum/ux-core'

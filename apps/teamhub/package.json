@@ -1,5 +1,5 @@
 {
-  "name": "teamhub",
+  "name": "agelum",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -34,9 +34,9 @@
     "@repo/logger": "workspace:*",
     "@tanstack/react-query": "^4.36.1",
     "@tanstack/react-virtual": "^3.13.12",
-    "@teamhub/ai": "workspace:*",
+    "@agelum/ai": "workspace:*",
     "@teamhub/db": "workspace:*",
-    "@teamhub/ux-core": "workspace:*",
+    "@agelum/ux-core": "workspace:*",
     "@trpc/client": "^10.45.2",
     "@trpc/react-query": "^10.45.2",
     "@trpc/server": "^10.45.2",

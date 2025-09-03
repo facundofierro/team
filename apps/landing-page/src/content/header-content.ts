@@ -1,6 +1,6 @@
 export const headerContent = {
   logo: {
-    text: 'TeamHub',
+    text: 'Agelum',
     iconLetter: 'T',
   },
   navigation: [

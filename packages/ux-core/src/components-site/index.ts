@@ -1,4 +1,4 @@
-// TeamHub Site Components
+// Agelum Site Components
 // These are components specifically designed for site/landing page usage
 // They are more focused on marketing, presentation, and public-facing content
 

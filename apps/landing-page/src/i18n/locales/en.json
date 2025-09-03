@@ -36,7 +36,7 @@
     }
   },
   "solution": {
-    "title": "The TeamHub Guarantee",
+    "title": "The Agelum Guarantee",
     "description": "We don't just implement AI - we transform your entire operation into an intelligent, self-optimizing system that delivers measurable ROI from day one.",
     "guarantees": [
       {
@@ -91,13 +91,13 @@
       { "value": "3x", "label": "ROI in First Year" }
     ],
     "testimonial": {
-      "quote": "TeamHub transformed our AI operations from reactive to predictive. We're now managing 50+ AI agents with 40% faster project delivery and 25% lower costs. The platform handles everything from agent deployment to performance monitoring.",
+      "quote": "Agelum transformed our AI operations from reactive to predictive. We're now managing 50+ AI agents with 40% faster project delivery and 25% lower costs. The platform handles everything from agent deployment to performance monitoring.",
       "author": "Sarah Chen, CTO",
       "company": "TechCorp Industries"
     }
   },
   "howItWorks": {
-    "title": "How TeamHub Works",
+    "title": "How Agelum Works",
     "description": "Get started with AI agents in three simple steps",
     "steps": [
       {
@@ -124,20 +124,20 @@
     },
     "scheduleDemo": {
       "title": "Schedule Demo",
-      "description": "See TeamHub in action with a personalized demo of our platform capabilities.",
+      "description": "See Agelum in action with a personalized demo of our platform capabilities.",
       "button": "Book Demo"
     }
   },
   "aiWidget": {
     "title": "AI Business Consultant",
     "subtitle": "Online • Ready to help",
-    "message": "Hi! I'm your AI business transformation consultant. I can help you understand how TeamHub can revolutionize your operations and deliver guaranteed ROI. What would you like to explore first?",
+    "message": "Hi! I'm your AI business transformation consultant. I can help you understand how Agelum can revolutionize your operations and deliver guaranteed ROI. What would you like to explore first?",
     "quickReplies": [
       "Analyze My Business",
       "Show Me Examples",
       "Calculate My Savings",
       "How It Works"
     ],
-    "footer": "Powered by TeamHub AI"
+    "footer": "Powered by Agelum AI"
   }
 }

@@ -47,7 +47,7 @@ export function ChatWidget({
   onSendMessage,
   showInput = true,
   showFooter = true,
-  footerText = 'Powered by TeamHub AI',
+  footerText = 'Powered by Agelum AI',
   position = 'left',
   size = 'md',
 }: ChatWidgetProps) {

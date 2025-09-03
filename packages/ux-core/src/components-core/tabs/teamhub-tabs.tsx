@@ -10,7 +10,7 @@ import {
 import { coreColors } from '../light-theme-colors'
 import { cn } from '../../utils'
 
-export interface TeamHubTabItem {
+export interface AgelumTabItem {
   value: string
   label: string
   content: React.ReactNode
@@ -18,8 +18,8 @@ export interface TeamHubTabItem {
   icon?: React.ReactNode
 }
 
-export interface TeamHubTabsProps {
-  items: TeamHubTabItem[]
+export interface AgelumTabsProps {
+  items: AgelumTabItem[]
   defaultValue?: string
   value?: string
   onValueChange?: (value: string) => void
@@ -28,9 +28,9 @@ export interface TeamHubTabsProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const TeamHubTabs = React.forwardRef<
+const AgelumTabs = React.forwardRef<
   React.ElementRef<typeof Tabs>,
-  TeamHubTabsProps
+  AgelumTabsProps
 >(
   (
     {
@@ -203,6 +203,6 @@ const TeamHubTabs = React.forwardRef<
   }
 )
 
-TeamHubTabs.displayName = 'TeamHubTabs'
+AgelumTabs.displayName = 'AgelumTabs'
 
-export { TeamHubTabs }
+export { AgelumTabs }

@@ -22,7 +22,7 @@ interface LandingChatWidgetProps {
 export function LandingChatWidget({
   title = 'AI Business Consultant',
   subtitle = 'Online • Ready to help',
-  initialMessage = "Hi! I'm your AI business transformation consultant. I can help you understand how TeamHub can revolutionize your operations and deliver guaranteed ROI. What would you like to explore first?",
+  initialMessage = "Hi! I'm your AI business transformation consultant. I can help you understand how Agelum can revolutionize your operations and deliver guaranteed ROI. What would you like to explore first?",
   quickReplies = [
     { text: 'Analyze My Business' },
     { text: 'Show Me Examples' },
@@ -176,7 +176,7 @@ export function LandingChatWidget({
         {/* Footer */}
         <div className={`p-4 border-t ${siteColors.borders.gray700}`}>
           <div className={`${siteColors.text.gray400} text-xs text-center`}>
-            Powered by TeamHub AI
+            Powered by Agelum AI
           </div>
         </div>
       </div>

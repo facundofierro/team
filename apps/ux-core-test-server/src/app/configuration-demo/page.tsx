@@ -10,7 +10,7 @@ import {
   AddButton,
   GhostButton,
   coreUtils,
-} from '@teamhub/ux-core'
+} from '@agelum/ux-core'
 import {
   ScheduledExecutionItem,
   ToolAssignmentItem,
@@ -24,7 +24,7 @@ import {
   Calendar,
   ChevronDown,
 } from 'lucide-react'
-import { elegantColors } from '@teamhub/ux-core'
+import { elegantColors } from '@agelum/ux-core'
 
 export default function ConfigurationDemoPage() {
   const [agentName, setAgentName] = useState('Procurement Manager')
@@ -240,7 +240,8 @@ export default function ConfigurationDemoPage() {
                       <span>Templates</span>
                       <ChevronDown
                         className={`w-3 h-3 transition-transform ${
-                          showTemplates ? 'rotate-180' : ''}`}
+                          showTemplates ? 'rotate-180' : ''
+                        }`}
                       />
                     </button>
                     {showTemplates && (

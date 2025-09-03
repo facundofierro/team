@@ -1,6 +1,6 @@
 # Components Core Package
 
-This package contains reusable UI components for TeamHub applications. All components are built with a consistent design system, centralized color management, and focus on visual behavior and event handlers without business logic.
+This package contains reusable UI components for Agelum applications. All components are built with a consistent design system, centralized color management, and focus on visual behavior and event handlers without business logic.
 
 ## 🎨 Design System
 
@@ -11,7 +11,7 @@ We have **two separate color systems** for different use cases. See [COLOR_SYSTE
 #### Light Theme Colors (for buttons, forms, cards)
 
 ```typescript
-import { coreColors, coreUtils } from '@teamhub/ux-core'
+import { coreColors, coreUtils } from '@agelum/ux-core'
 
 // Usage examples:
 const styles = {
@@ -23,7 +23,7 @@ const styles = {
 #### Dark Theme Colors (for sidebar, navigation)
 
 ```typescript
-import { componentColors, componentUtils } from '@teamhub/ux-core'
+import { componentColors, componentUtils } from '@agelum/ux-core'
 
 // Usage examples:
 const styles = {
@@ -62,7 +62,7 @@ All button components use the light theme color system (`coreColors`, `coreUtils
 Sidebar components use the dark theme color system (`componentColors`, `componentUtils`):
 
 - **Sidebar** - Main sidebar component with navigation
-- **defaultTeamHubItems** - Pre-configured navigation items
+- **defaultAgelumItems** - Pre-configured navigation items
 
 ### User Components
 
@@ -245,7 +245,7 @@ Use the `apps/ux-core-test-server` to test your components:
 'use client'
 
 import { useState } from 'react'
-import { YourComponent } from '@teamhub/ux-core'
+import { YourComponent } from '@agelum/ux-core'
 
 export default function YourComponentTestPage() {
   const [state, setState] = useState('default')

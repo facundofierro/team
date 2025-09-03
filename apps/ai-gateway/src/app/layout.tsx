@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'TeamHub AI Gateway',
-  description: 'AI provider abstraction service for TeamHub',
+  title: 'Agelum AI Gateway',
+  description: 'AI provider abstraction service for Agelum',
 }
 
 // Log application startup

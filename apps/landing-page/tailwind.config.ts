@@ -51,7 +51,7 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-        // TeamHub specific colors
+        // Agelum specific colors
         menu: 'hsl(var(--menu))',
         menu2: 'hsl(var(--menu2))',
       },

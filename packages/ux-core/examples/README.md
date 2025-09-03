@@ -1,10 +1,11 @@
 # UX Core Examples
 
-This directory contains examples and usage patterns for components in the `@teamhub/ux-core` package.
+This directory contains examples and usage patterns for components in the `@agelum/ux-core` package.
 
 ## Available Examples
 
 ### Button Component
+
 - **File**: `button-usage.tsx`
 - **Description**: Demonstrates all Button component variants, sizes, and states
 - **Usage**: Import and use as a reference for implementing buttons in your application
@@ -12,27 +13,31 @@ This directory contains examples and usage patterns for components in the `@team
 ## Running Examples
 
 ### Prerequisites
+
 1. Install dependencies: `pnpm install`
 2. Ensure Tailwind CSS is configured in your project
-3. Import the global CSS: `import '@teamhub/ux-core/src/styles/globals.css'`
+3. Import the global CSS: `import '@agelum/ux-core/src/styles/globals.css'`
 
 ### Basic Usage
+
 ```tsx
-import { Button } from '@teamhub/ux-core';
+import { Button } from '@agelum/ux-core'
 
 function MyComponent() {
   return (
     <Button variant="primary" size="lg">
       Click me
     </Button>
-  );
+  )
 }
 ```
 
 ## Component Patterns
 
 ### Variants
+
 Most components support multiple variants for different use cases:
+
 - `default`: Primary action styling
 - `secondary`: Secondary action styling
 - `outline`: Bordered styling
@@ -40,14 +45,18 @@ Most components support multiple variants for different use cases:
 - `destructive`: Dangerous action styling
 
 ### Sizes
+
 Components typically support multiple sizes:
+
 - `sm`: Small (compact)
 - `default`: Standard size
 - `lg`: Large
 - `icon`: Square for icon-only content
 
 ### States
+
 Components handle various states:
+
 - `default`: Normal state
 - `hover`: Mouse hover
 - `focus`: Keyboard focus
@@ -57,7 +66,9 @@ Components handle various states:
 ## Customization
 
 ### CSS Variables
+
 The package provides CSS custom properties for theming:
+
 ```css
 :root {
   --color-primary: #0070f3;
@@ -68,11 +79,11 @@ The package provides CSS custom properties for theming:
 ```
 
 ### Tailwind Classes
+
 Components use Tailwind CSS utility classes that can be customized:
+
 ```tsx
-<Button className="bg-blue-500 hover:bg-blue-600">
-  Custom Button
-</Button>
+<Button className="bg-blue-500 hover:bg-blue-600">Custom Button</Button>
 ```
 
 ## Best Practices
@@ -86,6 +97,7 @@ Components use Tailwind CSS utility classes that can be customized:
 ## Contributing
 
 When adding new examples:
+
 1. Follow the existing naming conventions
 2. Include comprehensive usage patterns
 3. Document any special considerations

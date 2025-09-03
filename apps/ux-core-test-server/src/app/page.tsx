@@ -32,7 +32,7 @@ const componentCategories = [
         path: '/tabs-demo',
         implemented: true,
         description:
-          'TeamHub tabs component with animated indicators and multiple variants',
+          'Agelum tabs component with animated indicators and multiple variants',
       },
     ],
   },

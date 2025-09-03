@@ -1,5 +1,5 @@
 export const howItWorksContent = {
-  title: 'How TeamHub Works',
+  title: 'How Agelum Works',
   subtitle: 'Get started with AI agents in three simple steps',
   sectionId: 'how-it-works',
   steps: [

@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { AgentsList, type Agent, coreColors } from '@teamhub/ux-core'
-import { elegantColors } from '@teamhub/ux-core'
+import { AgentsList, type Agent, coreColors } from '@agelum/ux-core'
+import { elegantColors } from '@agelum/ux-core'
 
 // Sample agents data that matches the design
 const sampleAgents: Agent[] = [
@@ -166,7 +166,7 @@ export default function AgentsListDemo() {
                   <li className="flex items-start">
                     <span className="mr-2 text-green-500">•</span>
                     <span>
-                      <strong>TeamHub Colors:</strong> Uses consistent color
+                      <strong>Agelum Colors:</strong> Uses consistent color
                       palette from light-theme-colors.ts
                     </span>
                   </li>

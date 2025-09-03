@@ -1,5 +1,5 @@
-// TeamHub Tabs Components
+// Agelum Tabs Components
 // Custom tabs implementation with animated indicators
 
-export { TeamHubTabs } from './teamhub-tabs'
-export type { TeamHubTabsProps, TeamHubTabItem } from './teamhub-tabs'
+export { AgelumTabs } from './teamhub-tabs'
+export type { AgelumTabsProps, AgelumTabItem } from './teamhub-tabs'

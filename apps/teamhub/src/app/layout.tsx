@@ -13,8 +13,8 @@ import { ReactiveRootProvider } from '@/components/providers/ReactiveRootProvide
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'TeamHub',
-  description: 'TeamHub',
+  title: 'Agelum',
+  description: 'Agelum',
 }
 
 export default async function RootLayout({

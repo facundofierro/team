@@ -16,10 +16,10 @@ export * from './components/motion'
 export * from './components/ai-sdk'
 export * from './components/aceternity'
 
-// TeamHub custom components
+// Agelum custom components
 export * from './components-core'
 
-// TeamHub site components
+// Agelum site components
 export * from './components-site'
 
 // Re-export commonly used components for convenience

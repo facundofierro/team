@@ -9,8 +9,8 @@ import type { AgentStore } from '@/stores/agentStore'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import type { OrganizationStore } from '@/stores/organizationStore'
 import { useReactive } from '@drizzle/reactive/client'
-import { AgentsList as UXAgentsList } from '@teamhub/ux-core'
-import type { Agent as UXAgent } from '@teamhub/ux-core'
+import { AgentsList as UXAgentsList } from '@agelum/ux-core'
+import type { Agent as UXAgent } from '@agelum/ux-core'
 
 type AgentsListProps = {
   organizationId: string

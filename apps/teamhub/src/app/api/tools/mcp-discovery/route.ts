@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { MCPDiscoveryService, type MCPDiscoveryParameters } from '@teamhub/ai'
+import { MCPDiscoveryService, type MCPDiscoveryParameters } from '@agelum/ai'
 
 export async function GET(request: NextRequest) {
   try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { MCPContainerManager, type MCPInstallRequest } from '@teamhub/ai'
+import { MCPContainerManager, type MCPInstallRequest } from '@agelum/ai'
 
 // Simple validation function
 function validateInstallRequest(body: any): {

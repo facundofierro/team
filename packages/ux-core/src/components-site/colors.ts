@@ -20,6 +20,7 @@ export const siteColors = {
     primary: 'bg-gradient-to-br from-[#f45584] to-[#6c3350]',
     cta: 'bg-gradient-to-r from-[#f45584] to-[#ce4c76]',
     blue: 'bg-gradient-to-r from-[#f45584] to-[#303b58]',
+    blueToBlue: 'bg-gradient-to-r from-[#303b58] to-[#303b58]', // Blue to blue gradient
     orange: 'bg-gradient-to-r from-[#ff8c42] to-[#f45584]',
     green: 'bg-gradient-to-br from-[#74ac64] to-[#303b58]',
   },
@@ -38,6 +39,7 @@ export const siteColors = {
     gray200: 'text-gray-200',
     gray400: 'text-gray-400',
     red: 'text-[#f45584]',
+    pink: 'text-[#f45584]', // Alias for red color
     orange: 'text-[#ff8c42]',
     darkmuted: 'text-[#303b58]',
     lightvibrant: 'text-[#ce4c76]',
@@ -71,6 +73,7 @@ export const siteUtils = {
   // Hover effects
   hover: {
     red: `hover:text-[#f45584] hover:bg-[#f45584]/10`,
+    pink: `hover:text-[#f45584] hover:bg-[#f45584]/10`, // Alias for red hover
     orange: `hover:text-[#ff8c42] hover:bg-[#ff8c42]/10`,
     darkmuted: `hover:text-[#303b58] hover:bg-[#303b58]/10`,
     lightvibrant: `hover:text-[#ce4c76] hover:bg-[#ce4c76]/10`,
@@ -97,7 +100,7 @@ export const siteUtils = {
   },
 
   getGradientClasses: (
-    variant: 'primary' | 'cta' | 'blue' | 'orange' | 'green'
+    variant: 'primary' | 'cta' | 'blue' | 'blueToBlue' | 'orange' | 'green'
   ) => {
     return siteColors.gradients[variant]
   },

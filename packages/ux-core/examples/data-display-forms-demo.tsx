@@ -677,7 +677,7 @@ export default function DataDisplayFormsDemo() {
               <div>
                 <h4 className="font-semibold mb-2">Agent Card Usage</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-                  {`import { AgentCard } from '@teamhub/ux-core'
+                  {`import { AgentCard } from '@agelum/ux-core'
 
 <AgentCard
   id="1"
@@ -702,7 +702,7 @@ export default function DataDisplayFormsDemo() {
               <div>
                 <h4 className="font-semibold mb-2">Metrics Card Usage</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-                  {`import { MetricCard } from '@teamhub/ux-core'
+                  {`import { MetricCard } from '@agelum/ux-core'
 
 <MetricCard
   title="Total Cost"
@@ -717,7 +717,7 @@ export default function DataDisplayFormsDemo() {
               <div>
                 <h4 className="font-semibold mb-2">Form Section Usage</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-                  {`import { FormSection, EnhancedInput } from '@teamhub/ux-core'
+                  {`import { FormSection, EnhancedInput } from '@agelum/ux-core'
 
 <FormSection
   title="Basic Settings"

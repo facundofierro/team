@@ -11,7 +11,7 @@ import {
   processConversationBrief,
   enhanceConversationTitle,
   type ConversationProcessingOptions,
-} from '@teamhub/ai'
+} from '@agelum/ai'
 import { auth } from '@/auth'
 import { log } from '@repo/logger'
 

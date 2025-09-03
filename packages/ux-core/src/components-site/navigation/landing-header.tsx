@@ -31,7 +31,7 @@ interface LandingHeaderProps {
 
 export function LandingHeader({
   logo = {
-    text: 'TeamHub',
+    text: 'Agelum',
     iconLetter: 'T',
   },
   navigation = [

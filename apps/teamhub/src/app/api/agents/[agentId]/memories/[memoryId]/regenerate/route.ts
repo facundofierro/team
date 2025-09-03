@@ -7,7 +7,7 @@ import {
   generateDescriptionFromSummary,
   generateTitleFromDescription,
   type ConversationProcessingOptions,
-} from '@teamhub/ai'
+} from '@agelum/ai'
 import type { ConversationMessage } from '@teamhub/db'
 
 export async function POST(

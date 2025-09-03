@@ -1,4 +1,4 @@
-# TeamHub – Enterprise AI Agent Management Platform
+# Agelum – Enterprise AI Agent Management Platform
 
 <div align="center">
 
