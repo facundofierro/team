@@ -1,7 +1,7 @@
 export const headerContent = {
   logo: {
     text: 'Agelum',
-    iconLetter: 'T',
+    iconLetter: 'A',
   },
   navigation: [
     { label: 'Product', href: '#features' },

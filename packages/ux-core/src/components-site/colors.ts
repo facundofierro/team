@@ -53,6 +53,7 @@ export const siteColors = {
     gray600: 'border-gray-600/50',
     white20: 'border-white/20',
     white30: 'border-white/30',
+    pink500: 'border-pink-500/50',
   },
 } as const
 

@@ -28,4 +28,12 @@ export const interactionHandlers = {
     console.log('Chat expanded')
     // The widget handles its own expansion state
   },
+
+  // Limited time callout handler
+  onLimitedTimeCtaClick: () => {
+    console.log('Limited Time CTA clicked')
+    // TODO: Implement AI readiness assessment flow
+    // Could open a form, start a questionnaire, or navigate to assessment page
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+  },
 }

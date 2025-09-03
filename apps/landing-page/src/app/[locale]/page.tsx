@@ -71,6 +71,11 @@ export default function LandingPage() {
               ...heroContent.ctaSection,
               onButtonClick: interactionHandlers.onHeroCtaClick,
             }}
+            enhancedSubsections={heroContent.enhancedSubsections}
+            limitedTimeCallout={{
+              ...heroContent.limitedTimeCallout,
+              onButtonClick: interactionHandlers.onLimitedTimeCtaClick,
+            }}
           />
 
           <ProblemSection
