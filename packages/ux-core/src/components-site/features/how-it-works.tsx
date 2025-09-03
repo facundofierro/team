@@ -1,7 +1,23 @@
 'use client'
 
-export function HowItWorksSection() {
-  const steps = [
+interface Step {
+  title: string
+  description: string
+}
+
+interface HowItWorksProps {
+  title?: string
+  subtitle?: string
+  sectionId?: string
+  steps?: Step[]
+  className?: string
+}
+
+export function HowItWorks({
+  title = 'How TeamHub Works',
+  subtitle = 'Get started with AI agents in three simple steps',
+  sectionId = 'how-it-works',
+  steps = [
     {
       title: 'Connect & Configure',
       description:
@@ -17,17 +33,18 @@ export function HowItWorksSection() {
       description:
         'Scale your AI operations and continuously optimize performance based on insights.',
     },
-  ]
-
+  ],
+  className = 'py-20 px-6 lg:px-12 bg-gray-900/30',
+}: HowItWorksProps) {
   return (
-    <section id="how-it-works" className="py-20 px-6 lg:px-12 bg-gray-900/30">
+    <section id={sectionId} className={className}>
       <div className="max-w-7xl mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">
-            How TeamHub Works
+            {title}
           </h2>
           <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-            Get started with AI agents in three simple steps
+            {subtitle}
           </p>
           <div className="grid md:grid-cols-3 gap-8">
             {steps.map((item, index) => (

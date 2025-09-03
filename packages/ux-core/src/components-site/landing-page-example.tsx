@@ -187,11 +187,7 @@ export function LandingPageExample() {
       {/* Hero Section */}
       <HeroSection background="gradient" fullHeight padding="2xl">
         <ScrollTriggeredAnimation animation="fadeIn" delay={200}>
-          <Headline
-            size="2xl"
-            emphasis="highlight"
-            emphasisColor="teamhub-highlight"
-          >
+          <Headline size="2xl" emphasis="highlight" emphasisColor="pink">
             Transform Your Business with AI Automation
           </Headline>
         </ScrollTriggeredAnimation>

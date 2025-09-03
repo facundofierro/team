@@ -1,7 +1,13 @@
-// Main Components
-export { LandingHeader } from './landing-header'
-export { AIChatWidget } from './ai-chat-widget'
-export { LanguageSwitcher } from './language-switcher'
-
-// Section Components
-export * from './sections'
+// Import components from ux-core
+export {
+  LandingHeader,
+  LanguageSwitcher,
+  LandingChatWidget as AIChatWidget,
+  LandingHero as LandingHeroSection,
+  LandingFeatures as FeaturesSection,
+  ProblemSection,
+  SolutionSection,
+  HowItWorks as HowItWorksSection,
+  SocialProof as SocialProofSection,
+  ContactSection,
+} from '@teamhub/ux-core'

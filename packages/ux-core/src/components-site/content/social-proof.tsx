@@ -1,19 +1,45 @@
 'use client'
 
-export function SocialProofSection() {
-  const stats = [
+interface Stat {
+  value: string
+  label: string
+}
+
+interface Testimonial {
+  quote: string
+  author: string
+  company: string
+}
+
+interface SocialProofProps {
+  title?: string
+  sectionId?: string
+  stats?: Stat[]
+  testimonial?: Testimonial
+}
+
+export function SocialProof({
+  title = 'Proven Results Across Industries',
+  sectionId = 'social-proof',
+  stats = [
     { value: '40%', label: 'Faster Project Delivery' },
     { value: '25%', label: 'Cost Reduction' },
     { value: '90%', label: 'Process Automation' },
     { value: '3x', label: 'ROI in First Year' },
-  ]
-
+  ],
+  testimonial = {
+    quote:
+      "TeamHub transformed our AI operations from reactive to predictive. We're now managing 50+ AI agents with 40% faster project delivery and 25% lower costs. The platform handles everything from agent deployment to performance monitoring.",
+    author: 'Sarah Chen, CTO',
+    company: 'TechCorp Industries',
+  },
+}: SocialProofProps) {
   return (
-    <section id="social-proof" className="py-20 px-6 lg:px-12">
+    <section id={sectionId} className="py-20 px-6 lg:px-12">
       <div className="max-w-7xl mx-auto">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl lg:text-5xl font-bold text-white text-center mb-16">
-            Proven Results Across Industries
+            {title}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             {stats.map((item, index) => (
@@ -27,14 +53,13 @@ export function SocialProofSection() {
           </div>
           <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 shadow-xl">
             <blockquote className="text-xl text-gray-200 text-center italic mb-6">
-              "TeamHub transformed our AI operations from reactive to
-              predictive. We're now managing 50+ AI agents with 40% faster
-              project delivery and 25% lower costs. The platform handles
-              everything from agent deployment to performance monitoring."
+              "{testimonial.quote}"
             </blockquote>
             <div className="text-center">
-              <div className="text-white font-semibold">Sarah Chen, CTO</div>
-              <div className="text-gray-400">TechCorp Industries</div>
+              <div className="text-white font-semibold">
+                {testimonial.author}
+              </div>
+              <div className="text-gray-400">{testimonial.company}</div>
             </div>
           </div>
         </div>

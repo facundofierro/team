@@ -77,6 +77,23 @@ export const siteUtils = {
     warning: 'text-yellow-500',
     error: 'text-red-500',
   },
+
+  // Utility functions for component usage
+  getBackgroundClasses: (variant: 'dark' | 'glass' | 'glassLight') => {
+    return siteColors.backgrounds[variant]
+  },
+
+  getButtonClasses: (
+    variant: 'primary' | 'secondary' | 'cta' | 'outline' | 'ghost'
+  ) => {
+    return siteUtils.button[variant]
+  },
+
+  getGradientClasses: (
+    variant: 'primary' | 'cta' | 'blue' | 'orange' | 'blueToBlue'
+  ) => {
+    return siteColors.gradients[variant]
+  },
 } as const
 
 // Type exports for reference design1 colors

@@ -2,14 +2,72 @@
 
 import { useState } from 'react'
 
-export function AIChatWidget() {
-  const [isMinimized, setIsMinimized] = useState(false)
+interface QuickReply {
+  text: string
+  action?: () => void
+}
+
+interface LandingChatWidgetProps {
+  title?: string
+  subtitle?: string
+  initialMessage?: string
+  quickReplies?: QuickReply[]
+  onQuickReplyClick?: (reply: string) => void
+  onMinimize?: () => void
+  onExpand?: () => void
+  isMinimized?: boolean
+}
+
+export function LandingChatWidget({
+  title = 'AI Business Consultant',
+  subtitle = 'Online • Ready to help',
+  initialMessage = "Hi! I'm your AI business transformation consultant. I can help you understand how TeamHub can revolutionize your operations and deliver guaranteed ROI. What would you like to explore first?",
+  quickReplies = [
+    { text: 'Analyze My Business' },
+    { text: 'Show Me Examples' },
+    { text: 'Calculate My Savings' },
+    { text: 'How It Works' },
+  ],
+  onQuickReplyClick,
+  onMinimize,
+  onExpand,
+  isMinimized: controlledMinimized,
+}: LandingChatWidgetProps) {
+  const [internalMinimized, setInternalMinimized] = useState(false)
+
+  // Use controlled prop if provided, otherwise use internal state
+  const isMinimized =
+    controlledMinimized !== undefined ? controlledMinimized : internalMinimized
+
+  const handleMinimize = () => {
+    if (onMinimize) {
+      onMinimize()
+    } else {
+      setInternalMinimized(true)
+    }
+  }
+
+  const handleExpand = () => {
+    if (onExpand) {
+      onExpand()
+    } else {
+      setInternalMinimized(false)
+    }
+  }
+
+  const handleQuickReplyClick = (reply: string) => {
+    if (onQuickReplyClick) {
+      onQuickReplyClick(reply)
+    } else {
+      console.log('Reply clicked:', reply)
+    }
+  }
 
   if (isMinimized) {
     return (
       <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40">
         <button
-          onClick={() => setIsMinimized(false)}
+          onClick={handleExpand}
           className="w-16 h-16 bg-pink-500 rounded-full shadow-lg cursor-pointer hover:shadow-xl transition-all duration-200 flex items-center justify-center"
         >
           <svg
@@ -52,17 +110,13 @@ export function AIChatWidget() {
               </svg>
             </div>
             <div>
-              <div className="text-white font-semibold">
-                AI Business Consultant
-              </div>
-              <div className="text-gray-400 text-sm">
-                Online • Ready to help
-              </div>
+              <div className="text-white font-semibold">{title}</div>
+              <div className="text-gray-400 text-sm">{subtitle}</div>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => setIsMinimized(true)}
+              onClick={handleMinimize}
               className="p-1 hover:bg-gray-700/50 rounded transition-colors"
             >
               <svg
@@ -85,25 +139,22 @@ export function AIChatWidget() {
         {/* Chat Content */}
         <div className="flex-1 p-4 space-y-4">
           <div className="bg-gray-700/60 rounded-lg p-4 text-white text-sm">
-            Hi! I'm your AI business transformation consultant. I can help you
-            understand how TeamHub can revolutionize your operations and deliver
-            guaranteed ROI. What would you like to explore first?
+            {initialMessage}
           </div>
 
           {/* Quick Replies */}
           <div className="space-y-2">
-            {[
-              'Analyze My Business',
-              'Show Me Examples',
-              'Calculate My Savings',
-              'How It Works',
-            ].map((reply, index) => (
+            {quickReplies.map((reply, index) => (
               <button
                 key={index}
                 className="w-full text-left p-3 bg-gray-700/40 hover:bg-gray-700/60 rounded-lg text-white text-sm transition-colors duration-200"
-                onClick={() => console.log('Reply clicked:', reply)}
+                onClick={() =>
+                  reply.action
+                    ? reply.action()
+                    : handleQuickReplyClick(reply.text)
+                }
               >
-                {reply}
+                {reply.text}
               </button>
             ))}
           </div>

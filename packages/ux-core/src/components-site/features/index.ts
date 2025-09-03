@@ -13,3 +13,5 @@ export {
   AutomationIndustrySelector,
   CompactIndustrySelector,
 } from './industry-tab-selector'
+export { LandingFeatures } from './landing-features'
+export { HowItWorks } from './how-it-works'

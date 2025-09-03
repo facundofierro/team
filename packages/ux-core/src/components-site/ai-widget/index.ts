@@ -9,3 +9,4 @@ export {
   QuickReplyGroup,
 } from './quick-replies'
 export { AIWidgetExample } from './ai-widget-example'
+export { LandingChatWidget } from './landing-chat-widget'

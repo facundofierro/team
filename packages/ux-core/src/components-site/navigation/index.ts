@@ -4,3 +4,5 @@
 export { Header } from './header'
 export { NavigationMenu } from './navigation-menu'
 export { NavigationExample } from './navigation-example'
+export { LandingHeader } from './landing-header'
+export { LanguageSwitcher } from './language-switcher'

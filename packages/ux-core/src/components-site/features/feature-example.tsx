@@ -83,7 +83,7 @@ export function FeatureExample() {
       ),
       title: 'Quality Control Automation',
       metric: '60% fewer defects',
-      metricColor: 'teamhub-success' as const,
+      metricColor: 'success' as const,
       description:
         'AI-powered inspections and compliance monitoring reduce errors.',
       features: [
@@ -110,7 +110,7 @@ export function FeatureExample() {
       ),
       title: 'Workforce Planning',
       metric: '30% efficiency gain',
-      metricColor: 'teamhub-accent' as const,
+      metricColor: 'blue' as const,
       description:
         'Intelligent scheduling and skill matching for optimal team deployment.',
       features: [
@@ -137,7 +137,7 @@ export function FeatureExample() {
       ),
       title: 'Cost Analysis & Reporting',
       metric: 'Live ROI tracking',
-      metricColor: 'teamhub-highlight' as const,
+      metricColor: 'pink' as const,
       description:
         'Real-time project profitability tracking and predictive cost modeling.',
       features: [
@@ -164,7 +164,7 @@ export function FeatureExample() {
       ),
       title: 'Client Communication',
       metric: '50% time savings',
-      metricColor: 'teamhub-success' as const,
+      metricColor: 'success' as const,
       description:
         'Automated progress updates and intelligent client query handling.',
       features: [

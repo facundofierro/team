@@ -11,3 +11,4 @@ export {
   SecondaryButton,
   OutlineButton,
 } from './gradient-button'
+export { LandingHero } from './landing-hero'
