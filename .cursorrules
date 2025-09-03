@@ -622,4 +622,289 @@ When helping with TeamHub development:
 17. **Implement responsive design** patterns in all components
 18. **Ensure accessibility compliance** in component suggestions
 
-Remember: TeamHub is an enterprise platform - prioritize security, performance, maintainability, **reactive real-time features**, and **milestone-driven development** in all decisions.
+## Landing Page Component Architecture
+
+### Component Separation of Concerns
+
+TeamHub follows a strict separation of concerns for landing page components to ensure maintainability, reusability, and clear responsibility boundaries.
+
+#### Architecture Overview
+
+```
+apps/landing-page/          # Content & Logic Layer
+├── src/
+│   ├── content/           # All text content, copy, and messaging
+│   ├── handlers/          # Event handlers and business logic
+│   ├── stores/            # State management (Zustand)
+│   └── app/               # Next.js app structure
+
+packages/ux-core/src/components-site/  # Presentation Layer
+├── navigation/            # Header, menu, language switcher
+├── hero/                  # Hero sections and CTAs
+├── features/              # Feature showcases and grids
+├── content/               # Content sections (problem, solution, etc.)
+├── ai-widget/             # AI chat widgets and interactions
+├── layout/                # Layout components and containers
+└── colors.ts              # Site-specific color definitions
+```
+
+#### Color System Rules
+
+**CRITICAL: All colors MUST be defined in color files, never hardcoded**
+
+1. **Site Colors** (`packages/ux-core/src/components-site/colors.ts`)
+
+   - **ONLY** for landing page and public-facing sites
+   - Contains `siteColors` and `siteUtils` exports
+   - Based on reference design color palette
+   - Includes gradients, backgrounds, text colors, and borders
+
+2. **Core Colors** (`packages/ux-core/src/components-core/light-theme-colors.ts`)
+
+   - **ONLY** for TeamHub application components
+   - Contains `coreColors` and `coreUtils` exports
+   - Used in buttons, forms, cards, and internal UI
+
+3. **Dark Theme Colors** (`packages/ux-core/src/components-core/dark-theme-colors.ts`)
+   - **ONLY** for dark-themed components (sidebar, navigation)
+   - Contains `componentColors` and `componentUtils` exports
+
+#### Component Development Rules
+
+**1. Visual Components (UX-Core Package)**
+
+```typescript
+// ✅ CORRECT: Component in ux-core with no content
+// packages/ux-core/src/components-site/hero/landing-hero.tsx
+interface LandingHeroProps {
+  title: string
+  subtitle: string
+  ctaText: string
+  onCtaClick: () => void
+  backgroundImage?: string
+}
+
+export const LandingHero = ({
+  title,
+  subtitle,
+  ctaText,
+  onCtaClick,
+  backgroundImage,
+}: LandingHeroProps) => {
+  return (
+    <section className={`${siteColors.gradients.primary} min-h-screen`}>
+      <h1 className={siteColors.text.white}>{title}</h1>
+      <p className={siteColors.text.gray300}>{subtitle}</p>
+      <button
+        className={siteUtils.getButtonClasses('primary')}
+        onClick={onCtaClick}
+      >
+        {ctaText}
+      </button>
+    </section>
+  )
+}
+```
+
+**2. Content & Logic (Landing Page App)**
+
+```typescript
+// ✅ CORRECT: Content and handlers in landing page app
+// apps/landing-page/src/content/hero-content.ts
+export const heroContent = {
+  title: 'Transform Your Business with AI Agents',
+  subtitle:
+    'Deploy intelligent agents that work 24/7 to automate your workflows',
+  ctaText: 'Get Started Free',
+}
+
+// apps/landing-page/src/handlers/navigation-handlers.ts
+export const navigationHandlers = {
+  onCtaClick: () => {
+    // Business logic for CTA click
+    analytics.track('hero_cta_clicked')
+    router.push('/signup')
+  },
+}
+
+// apps/landing-page/src/app/page.tsx
+import { LandingHero } from '@teamhub/ux-core'
+import { heroContent } from '../content/hero-content'
+import { navigationHandlers } from '../handlers/navigation-handlers'
+
+export default function LandingPage() {
+  return (
+    <LandingHero
+      title={heroContent.title}
+      subtitle={heroContent.subtitle}
+      ctaText={heroContent.ctaText}
+      onCtaClick={navigationHandlers.onCtaClick}
+    />
+  )
+}
+```
+
+#### Strict Rules for Component Development
+
+**❌ NEVER DO:**
+
+1. **Hardcode colors in components**
+
+```typescript
+// ❌ WRONG: Hardcoded colors
+<div className="bg-[#f45584] text-white">
+```
+
+2. **Include content/text in ux-core components**
+
+```typescript
+// ❌ WRONG: Content in component
+export const LandingHero = () => {
+  return (
+    <section>
+      <h1>Transform Your Business with AI Agents</h1> {/* NO! */}
+    </section>
+  )
+}
+```
+
+3. **Include business logic in ux-core components**
+
+```typescript
+// ❌ WRONG: Business logic in component
+export const LandingHero = ({ onCtaClick }: Props) => {
+  const handleClick = () => {
+    analytics.track('cta_clicked') // NO! This belongs in handlers
+    router.push('/signup') // NO! This belongs in handlers
+  }
+}
+```
+
+4. **Use different color systems in wrong contexts**
+
+```typescript
+// ❌ WRONG: Using site colors in core components
+import { siteColors } from '@teamhub/ux-core'
+// This should use coreColors instead
+
+// ❌ WRONG: Using core colors in site components
+import { coreColors } from '@teamhub/ux-core'
+// This should use siteColors instead
+```
+
+**✅ ALWAYS DO:**
+
+1. **Use defined color systems**
+
+```typescript
+// ✅ CORRECT: Using site colors for landing page
+import { siteColors, siteUtils } from '@teamhub/ux-core'
+
+<div className={siteColors.gradients.primary}>
+<button className={siteUtils.getButtonClasses('primary')}>
+```
+
+2. **Pass content as props**
+
+```typescript
+// ✅ CORRECT: Content passed as props
+<LandingHero
+  title="Transform Your Business"
+  subtitle="Deploy intelligent agents"
+  ctaText="Get Started Free"
+/>
+```
+
+3. **Pass handlers as props**
+
+```typescript
+// ✅ CORRECT: Handlers passed as props
+<LandingHero
+  onCtaClick={navigationHandlers.onCtaClick}
+  onScroll={interactionHandlers.onScroll}
+/>
+```
+
+4. **Keep components pure and reusable**
+
+```typescript
+// ✅ CORRECT: Pure component with clear interface
+interface LandingHeroProps {
+  title: string
+  subtitle: string
+  ctaText: string
+  onCtaClick: () => void
+  className?: string
+}
+```
+
+#### File Organization Rules
+
+**UX-Core Components (`packages/ux-core/src/components-site/`)**
+
+- **NO content files** - only component definitions
+- **NO handler files** - only component logic
+- **NO business logic** - only presentation logic
+- **ALL styling** - colors, layouts, animations
+- **ALL responsive design** - mobile-first approach
+
+**Landing Page App (`apps/landing-page/src/`)**
+
+- **ALL content files** - text, copy, messaging
+- **ALL handler files** - event handlers, business logic
+- **ALL state management** - Zustand stores
+- **NO styling** - only imports from ux-core
+- **NO component definitions** - only component usage
+
+#### Import Patterns
+
+```typescript
+// ✅ CORRECT: Landing page imports
+import {
+  LandingHero,
+  LandingFeatures,
+  LandingHeader,
+  siteColors,
+  siteUtils,
+} from '@teamhub/ux-core'
+
+// ✅ CORRECT: Content imports
+import { heroContent } from '../content/hero-content'
+import { featuresContent } from '../content/features-content'
+
+// ✅ CORRECT: Handler imports
+import { navigationHandlers } from '../handlers/navigation-handlers'
+import { formHandlers } from '../handlers/form-handlers'
+```
+
+#### Testing & Validation
+
+**Component Testing Checklist:**
+
+1. **Colors**: All colors come from defined color systems
+2. **Content**: No hardcoded text in components
+3. **Logic**: No business logic in components
+4. **Props**: All content and handlers passed as props
+5. **Reusability**: Components work with different content
+6. **Responsive**: Mobile-first responsive design
+7. **Accessibility**: ARIA labels and keyboard navigation
+
+**Content Testing Checklist:**
+
+1. **Separation**: Content files contain only text/copy
+2. **Handlers**: Handler files contain only business logic
+3. **Imports**: Landing page only imports from ux-core
+4. **Props**: All content passed to components as props
+5. **State**: State management in dedicated store files
+
+#### Benefits of This Architecture
+
+1. **Maintainability**: Clear separation of concerns
+2. **Reusability**: Components can be used with different content
+3. **Consistency**: Unified color system and styling
+4. **Scalability**: Easy to add new landing pages
+5. **Testing**: Components and content can be tested separately
+6. **Performance**: Optimized bundle sizes with tree-shaking
+7. **Developer Experience**: Clear file organization and import patterns
+
+Remember: Agelum is an enterprise platform - prioritize security, performance, maintainability, **reactive real-time features**, and **milestone-driven development** in all decisions.
