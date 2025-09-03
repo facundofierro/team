@@ -90,10 +90,10 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       logger.error(`[${tracker.requestId}] Validation error:`, {
         duration,
-        errors: error.issues,
+        errors: error.errors,
       })
       return createBadRequestResponse(
-        `Invalid request data: ${error.issues.map((e) => e.message).join(', ')}`
+        `Invalid request data: ${error.errors.map((e) => e.message).join(', ')}`
       )
     }
 

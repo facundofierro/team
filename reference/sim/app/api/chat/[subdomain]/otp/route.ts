@@ -4,16 +4,9 @@ import { z } from 'zod'
 import { renderOTPEmail } from '@/components/emails/render-email'
 import { sendEmail } from '@/lib/email/mailer'
 import { createLogger } from '@/lib/logs/console/logger'
-import {
-  getRedisClient,
-  markMessageAsProcessed,
-  releaseLock,
-} from '@/lib/redis'
+import { getRedisClient, markMessageAsProcessed, releaseLock } from '@/lib/redis'
 import { addCorsHeaders, setChatAuthCookie } from '@/app/api/chat/utils'
-import {
-  createErrorResponse,
-  createSuccessResponse,
-} from '@/app/api/workflows/utils'
+import { createErrorResponse, createSuccessResponse } from '@/app/api/workflows/utils'
 import { db } from '@/db'
 import { chat } from '@/db/schema'
 
@@ -28,11 +21,7 @@ function generateOTP() {
 const OTP_EXPIRY = 15 * 60
 
 // Store OTP in Redis
-async function storeOTP(
-  email: string,
-  chatId: string,
-  otp: string
-): Promise<void> {
+async function storeOTP(email: string, chatId: string, otp: string): Promise<void> {
   const key = `otp:${email}:${chatId}`
   const redis = getRedisClient()
 
@@ -129,9 +118,7 @@ export async function POST(
   const requestId = crypto.randomUUID().slice(0, 8)
 
   try {
-    logger.debug(
-      `[${requestId}] Processing OTP request for subdomain: ${subdomain}`
-    )
+    logger.debug(`[${requestId}] Processing OTP request for subdomain: ${subdomain}`)
 
     // Parse request body
     let body
@@ -153,10 +140,7 @@ export async function POST(
 
       if (deploymentResult.length === 0) {
         logger.warn(`[${requestId}] Chat not found for subdomain: ${subdomain}`)
-        return addCorsHeaders(
-          createErrorResponse('Chat not found', 404),
-          request
-        )
+        return addCorsHeaders(createErrorResponse('Chat not found', 404), request)
       }
 
       const deployment = deploymentResult[0]
@@ -164,10 +148,7 @@ export async function POST(
       // Verify this is an email-protected chat
       if (deployment.authType !== 'email') {
         return addCorsHeaders(
-          createErrorResponse(
-            'This chat does not use email authentication',
-            400
-          ),
+          createErrorResponse('This chat does not use email authentication', 400),
           request
         )
       }
@@ -211,10 +192,7 @@ export async function POST(
       })
 
       if (!emailResult.success) {
-        logger.error(
-          `[${requestId}] Failed to send OTP email:`,
-          emailResult.message
-        )
+        logger.error(`[${requestId}] Failed to send OTP email:`, emailResult.message)
         return addCorsHeaders(
           createErrorResponse('Failed to send verification email', 500),
           request
@@ -225,20 +203,12 @@ export async function POST(
       // This helps with eventual consistency in distributed systems
       await new Promise((resolve) => setTimeout(resolve, 500))
 
-      logger.info(
-        `[${requestId}] OTP sent to ${email} for chat ${deployment.id}`
-      )
-      return addCorsHeaders(
-        createSuccessResponse({ message: 'Verification code sent' }),
-        request
-      )
+      logger.info(`[${requestId}] OTP sent to ${email} for chat ${deployment.id}`)
+      return addCorsHeaders(createSuccessResponse({ message: 'Verification code sent' }), request)
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         return addCorsHeaders(
-          createErrorResponse(
-            error.issues[0]?.message || 'Invalid request',
-            400
-          ),
+          createErrorResponse(error.errors[0]?.message || 'Invalid request', 400),
           request
         )
       }
@@ -282,10 +252,7 @@ export async function PUT(
 
       if (deploymentResult.length === 0) {
         logger.warn(`[${requestId}] Chat not found for subdomain: ${subdomain}`)
-        return addCorsHeaders(
-          createErrorResponse('Chat not found', 404),
-          request
-        )
+        return addCorsHeaders(createErrorResponse('Chat not found', 404), request)
       }
 
       const deployment = deploymentResult[0]
@@ -294,30 +261,21 @@ export async function PUT(
       const storedOTP = await getOTP(email, deployment.id)
       if (!storedOTP) {
         return addCorsHeaders(
-          createErrorResponse(
-            'No verification code found, request a new one',
-            400
-          ),
+          createErrorResponse('No verification code found, request a new one', 400),
           request
         )
       }
 
       // Check if OTP matches
       if (storedOTP !== otp) {
-        return addCorsHeaders(
-          createErrorResponse('Invalid verification code', 400),
-          request
-        )
+        return addCorsHeaders(createErrorResponse('Invalid verification code', 400), request)
       }
 
       // OTP is valid, clean up
       await deleteOTP(email, deployment.id)
 
       // Create success response with auth cookie
-      const response = addCorsHeaders(
-        createSuccessResponse({ authenticated: true }),
-        request
-      )
+      const response = addCorsHeaders(createSuccessResponse({ authenticated: true }), request)
 
       // Set authentication cookie
       setChatAuthCookie(response, deployment.id, deployment.authType)
@@ -326,10 +284,7 @@ export async function PUT(
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         return addCorsHeaders(
-          createErrorResponse(
-            error.issues[0]?.message || 'Invalid request',
-            400
-          ),
+          createErrorResponse(error.errors[0]?.message || 'Invalid request', 400),
           request
         )
       }

@@ -8,14 +8,12 @@ import { env } from './lib/env'
 import { isProd } from './lib/environment'
 import { createLogger } from './lib/logs/console/logger.ts'
 
-const Sentry = isProd
-  ? require('@sentry/nextjs')
-  : { captureRequestError: () => {} }
+const Sentry = isProd ? require('@sentry/nextjs') : { captureRequestError: () => {} }
 
 const logger = createLogger('OtelInstrumentation')
 
 const DEFAULT_TELEMETRY_CONFIG = {
-  endpoint: env.TELEMETRY_ENDPOINT,
+  endpoint: env.TELEMETRY_ENDPOINT || 'https://telemetry.simstudio.ai/v1/traces',
   serviceName: 'sim-studio',
   serviceVersion: '0.1.0',
   serverSide: { enabled: true },
@@ -44,22 +42,16 @@ async function initializeOpenTelemetry() {
     }
 
     if (telemetryConfig.serverSide?.enabled === false) {
-      logger.info(
-        'Server-side OpenTelemetry instrumentation is disabled in config'
-      )
+      logger.info('Server-side OpenTelemetry instrumentation is disabled in config')
       return
     }
 
     // Dynamic imports for server-side libraries
     const { NodeSDK } = await import('@opentelemetry/sdk-node')
     const { resourceFromAttributes } = await import('@opentelemetry/resources')
-    const { SemanticResourceAttributes } = await import(
-      '@opentelemetry/semantic-conventions'
-    )
+    const { SemanticResourceAttributes } = await import('@opentelemetry/semantic-conventions')
     const { BatchSpanProcessor } = await import('@opentelemetry/sdk-trace-node')
-    const { OTLPTraceExporter } = await import(
-      '@opentelemetry/exporter-trace-otlp-http'
-    )
+    const { OTLPTraceExporter } = await import('@opentelemetry/exporter-trace-otlp-http')
 
     const exporter = new OTLPTraceExporter({
       url: telemetryConfig.endpoint,
@@ -82,8 +74,7 @@ async function initializeOpenTelemetry() {
 
     const configResource = resourceFromAttributes({
       [SemanticResourceAttributes.SERVICE_NAME]: telemetryConfig.serviceName,
-      [SemanticResourceAttributes.SERVICE_VERSION]:
-        telemetryConfig.serviceVersion,
+      [SemanticResourceAttributes.SERVICE_VERSION]: telemetryConfig.serviceVersion,
       [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: env.NODE_ENV,
     })
 
@@ -98,17 +89,13 @@ async function initializeOpenTelemetry() {
       await sdk
         .shutdown()
         .then(() => logger.info('OpenTelemetry SDK shut down successfully'))
-        .catch((err) =>
-          logger.error('Error shutting down OpenTelemetry SDK', err)
-        )
+        .catch((err) => logger.error('Error shutting down OpenTelemetry SDK', err))
     }
 
     process.on('SIGTERM', shutdownHandler)
     process.on('SIGINT', shutdownHandler)
 
-    logger.info(
-      'OpenTelemetry instrumentation initialized for server-side telemetry'
-    )
+    logger.info('OpenTelemetry instrumentation initialized for server-side telemetry')
   } catch (error) {
     logger.error('Failed to initialize OpenTelemetry instrumentation', error)
   }

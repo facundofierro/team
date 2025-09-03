@@ -7,10 +7,7 @@ import { createLogger } from '@/lib/logs/console/logger'
 import { getEmailDomain } from '@/lib/urls/utils'
 import { encryptSecret } from '@/lib/utils'
 import { checkChatAccess } from '@/app/api/chat/utils'
-import {
-  createErrorResponse,
-  createSuccessResponse,
-} from '@/app/api/workflows/utils'
+import { createErrorResponse, createSuccessResponse } from '@/app/api/workflows/utils'
 import { db } from '@/db'
 import { chat } from '@/db/schema'
 
@@ -24,10 +21,7 @@ const chatUpdateSchema = z.object({
   subdomain: z
     .string()
     .min(1, 'Subdomain is required')
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Subdomain can only contain lowercase letters, numbers, and hyphens'
-    )
+    .regex(/^[a-z0-9-]+$/, 'Subdomain can only contain lowercase letters, numbers, and hyphens')
     .optional(),
   title: z.string().min(1, 'Title is required').optional(),
   description: z.string().optional(),
@@ -54,10 +48,7 @@ const chatUpdateSchema = z.object({
 /**
  * GET endpoint to fetch a specific chat deployment by ID
  */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const chatId = id
 
@@ -69,10 +60,7 @@ export async function GET(
     }
 
     // Check if user has access to view this chat
-    const { hasAccess, chat: chatRecord } = await checkChatAccess(
-      chatId,
-      session.user.id
-    )
+    const { hasAccess, chat: chatRecord } = await checkChatAccess(chatId, session.user.id)
 
     if (!hasAccess || !chatRecord) {
       return createErrorResponse('Chat not found or access denied', 404)
@@ -94,20 +82,14 @@ export async function GET(
     return createSuccessResponse(result)
   } catch (error: any) {
     logger.error('Error fetching chat deployment:', error)
-    return createErrorResponse(
-      error.message || 'Failed to fetch chat deployment',
-      500
-    )
+    return createErrorResponse(error.message || 'Failed to fetch chat deployment', 500)
   }
 }
 
 /**
  * PATCH endpoint to update an existing chat deployment
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const chatId = id
 
@@ -124,10 +106,7 @@ export async function PATCH(
       const validatedData = chatUpdateSchema.parse(body)
 
       // Check if user has access to edit this chat
-      const { hasAccess, chat: existingChatRecord } = await checkChatAccess(
-        chatId,
-        session.user.id
-      )
+      const { hasAccess, chat: existingChatRecord } = await checkChatAccess(chatId, session.user.id)
 
       if (!hasAccess || !existingChatRecord) {
         return createErrorResponse('Chat not found or access denied', 404)
@@ -156,10 +135,7 @@ export async function PATCH(
           .where(eq(chat.subdomain, subdomain))
           .limit(1)
 
-        if (
-          existingSubdomain.length > 0 &&
-          existingSubdomain[0].id !== chatId
-        ) {
+        if (existingSubdomain.length > 0 && existingSubdomain[0].id !== chatId) {
           return createErrorResponse('Subdomain already in use', 400)
         }
       }
@@ -175,15 +151,9 @@ export async function PATCH(
       } else if (authType === 'password' && !password) {
         // If switching to password auth but no password provided,
         // check if there's an existing password
-        if (
-          existingChat[0].authType !== 'password' ||
-          !existingChat[0].password
-        ) {
+        if (existingChat[0].authType !== 'password' || !existingChat[0].password) {
           // If there's no existing password to reuse, return an error
-          return createErrorResponse(
-            'Password is required when using password protection',
-            400
-          )
+          return createErrorResponse('Password is required when using password protection', 400)
         }
         logger.info('Keeping existing password')
       }
@@ -237,9 +207,7 @@ export async function PATCH(
         authType: updateData.authType,
         hasPassword: updateData.password !== undefined,
         emailCount: updateData.allowedEmails?.length,
-        outputConfigsCount: updateData.outputConfigs
-          ? updateData.outputConfigs.length
-          : undefined,
+        outputConfigsCount: updateData.outputConfigs ? updateData.outputConfigs.length : undefined,
       })
 
       // Update the chat deployment
@@ -260,18 +228,14 @@ export async function PATCH(
       })
     } catch (validationError) {
       if (validationError instanceof z.ZodError) {
-        const errorMessage =
-          validationError.issues[0]?.message || 'Invalid request data'
+        const errorMessage = validationError.errors[0]?.message || 'Invalid request data'
         return createErrorResponse(errorMessage, 400, 'VALIDATION_ERROR')
       }
       throw validationError
     }
   } catch (error: any) {
     logger.error('Error updating chat deployment:', error)
-    return createErrorResponse(
-      error.message || 'Failed to update chat deployment',
-      500
-    )
+    return createErrorResponse(error.message || 'Failed to update chat deployment', 500)
   }
 }
 
@@ -309,9 +273,6 @@ export async function DELETE(
     })
   } catch (error: any) {
     logger.error('Error deleting chat deployment:', error)
-    return createErrorResponse(
-      error.message || 'Failed to delete chat deployment',
-      500
-    )
+    return createErrorResponse(error.message || 'Failed to delete chat deployment', 500)
   }
 }

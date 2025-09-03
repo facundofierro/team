@@ -2,38 +2,10 @@ import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 import { env, isTruthy } from './lib/env'
 import { isDev, isHosted, isProd } from './lib/environment'
-import {
-  getMainCSPPolicy,
-  getWorkflowExecutionCSPPolicy,
-} from './lib/security/csp'
+import { getMainCSPPolicy, getWorkflowExecutionCSPPolicy } from './lib/security/csp'
 
 const nextConfig: NextConfig = {
   devIndicators: false,
-  webpack: (config, { isServer }) => {
-    // Ignore problematic Playwright files
-    config.module.rules.push({
-      test: /\.(ttf|html)$/,
-      include: /playwright-core/,
-      use: 'ignore-loader',
-    })
-
-    // Ignore specific Playwright recorder files
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'playwright-core/lib/vite/recorder': false,
-    }
-
-    // Ignore Node.js built-in modules in client bundle
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        dns: false,
-        util: false,
-      }
-    }
-
-    return config
-  },
   images: {
     remotePatterns: [
       {
@@ -155,8 +127,7 @@ const nextConfig: NextConfig = {
       },
       {
         // Exclude Vercel internal resources and static assets from strict COEP, Google Drive Picker to prevent 'refused to connect' issue
-        source:
-          '/((?!_next|_vercel|api|favicon.ico|w/.*|workspace/.*|api/tools/drive).*)',
+        source: '/((?!_next|_vercel|api|favicon.ico|w/.*|workspace/.*|api/tools/drive).*)',
         headers: [
           {
             key: 'Cross-Origin-Embedder-Policy',

@@ -17,7 +17,7 @@ const logger = createLogger('CopilotConfirmAPI')
 const ConfirmationSchema = z.object({
   toolCallId: z.string().min(1, 'Tool call ID is required'),
   status: z.enum(['success', 'error', 'accepted', 'rejected', 'background'] as const, {
-    message: 'Invalid notification status',
+    errorMap: () => ({ message: 'Invalid notification status' }),
   }),
   message: z.string().optional(), // Optional message for background moves or additional context
 })
