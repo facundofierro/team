@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
-import { siteUtils } from '../colors'
+import { siteColors, siteUtils } from '../colors'
 
 interface GradientButtonProps {
   children: React.ReactNode
@@ -15,10 +15,10 @@ interface GradientButtonProps {
 }
 
 const buttonVariants = {
-  primary: siteUtils.getButtonClasses('primary'),
-  secondary: siteUtils.getButtonClasses('secondary'),
-  outline: siteUtils.getButtonClasses('outline'),
-  ghost: siteUtils.getButtonClasses('ghost'),
+  primary: siteUtils.button.primary,
+  secondary: siteUtils.button.secondary,
+  outline: siteUtils.button.outline,
+  ghost: siteUtils.button.ghost,
 }
 
 const buttonSizes = {
@@ -54,7 +54,7 @@ export function GradientButton({
     >
       {/* Background gradient overlay for better text contrast */}
       {variant === 'primary' && (
-        <div className="absolute inset-0 bg-gradient-to-r from-teamhub-highlight to-teamhub-accent rounded-lg opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F45584] to-[#8B5CF6] rounded-lg opacity-90" />
       )}
 
       {/* Content */}

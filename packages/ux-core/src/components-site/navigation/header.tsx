@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { Container } from '../layout'
-import { siteUtils } from '../colors'
+import { siteColors, siteUtils } from '../colors'
 
 interface HeaderProps {
   className?: string
@@ -55,17 +55,12 @@ export function Header({
               <div
                 className={cn(
                   'w-10 h-10 rounded-lg flex items-center justify-center',
-                  siteUtils.getGradientClasses('primary')
+                  siteColors.gradients.primary
                 )}
               >
                 <span className="text-white font-bold text-xl">T</span>
               </div>
-              <span
-                className={cn(
-                  'text-2xl font-bold',
-                  siteUtils.getTextClasses('white')
-                )}
-              >
+              <span className={cn('text-2xl font-bold', siteColors.text.white)}>
                 TeamHub
               </span>
             </div>
@@ -81,7 +76,7 @@ export function Header({
                   'transition-colors font-medium',
                   transparent
                     ? 'text-white hover:text-gray-300'
-                    : 'text-gray-700 hover:text-[#F45584]'
+                    : `text-gray-700 ${siteUtils.hover.pink}`
                 )}
                 {...(item.external && {
                   target: '_blank',
@@ -102,7 +97,7 @@ export function Header({
                   'px-6 py-2 rounded-lg font-semibold transition-all duration-200',
                   transparent
                     ? 'bg-white text-gray-700 hover:bg-gray-100'
-                    : siteUtils.getButtonClasses('cta')
+                    : siteUtils.button.cta
                 )}
               >
                 {ctaText}
@@ -114,7 +109,7 @@ export function Header({
                   'px-6 py-2 rounded-lg font-semibold transition-all duration-200',
                   transparent
                     ? 'bg-white text-gray-700 hover:bg-gray-100'
-                    : siteUtils.getButtonClasses('cta')
+                    : siteUtils.button.cta
                 )}
               >
                 {ctaText}
@@ -162,7 +157,7 @@ export function Header({
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-gray-700 hover:text-[#F45584] transition-colors font-medium"
+                  className={`text-gray-700 ${siteUtils.hover.pink} transition-colors font-medium`}
                   onClick={() => setIsMobileMenuOpen(false)}
                   {...(item.external && {
                     target: '_blank',

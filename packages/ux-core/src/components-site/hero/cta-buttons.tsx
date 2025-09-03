@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '../../utils'
-import { siteUtils } from '../colors'
+import { siteColors, siteUtils } from '../colors'
 import {
   GradientButton,
   SecondaryButton,
@@ -26,10 +26,10 @@ interface CTAButtonsProps {
 }
 
 const buttonVariants = {
-  primary: siteUtils.getButtonClasses('cta'),
-  secondary: siteUtils.getButtonClasses('primary'),
-  outline: siteUtils.getButtonClasses('outline'),
-  ghost: siteUtils.getButtonClasses('ghost'),
+  primary: siteUtils.button.cta,
+  secondary: siteUtils.button.primary,
+  outline: siteUtils.button.outline,
+  ghost: siteUtils.button.ghost,
 }
 
 const buttonSizes = {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
-import { siteUtils } from '../colors'
+import { siteColors, siteUtils } from '../colors'
 
 interface ContentOption {
   id: string
@@ -66,8 +66,8 @@ export function ContentSelector({
             'flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200',
             selectorSizes[size],
             isActive
-              ? siteUtils.getButtonClasses('primary')
-              : 'text-gray-700 hover:text-[#F45584] hover:bg-gray-50'
+              ? siteUtils.button.primary
+              : `${siteColors.text.gray300} ${siteUtils.hover.pink}`
           )}
         >
           <div
@@ -88,8 +88,8 @@ export function ContentSelector({
             'flex flex-col items-center space-y-2 p-4 rounded-lg border-2 transition-all duration-200',
             selectorSizes[size],
             isActive
-              ? 'border-[#F45584] bg-[#F45584]/5 text-[#F45584]'
-              : 'border-gray-200 hover:border-[#F45584]/40 hover:bg-gray-50'
+              ? `border-[#F45584] bg-[#F45584]/5 text-[#F45584]`
+              : `${siteColors.borders.gray700} hover:border-[#F45584]/40 hover:bg-gray-50`
           )}
         >
           <div
@@ -110,8 +110,8 @@ export function ContentSelector({
             'flex flex-col items-center space-y-3 p-6 rounded-xl border-2 transition-all duration-200 text-center',
             selectorSizes[size],
             isActive
-              ? 'border-[#F45584] bg-[#F45584]/5 text-[#F45584] shadow-lg'
-              : 'border-gray-200 hover:border-[#F45584]/40 hover:bg-gray-50'
+              ? `border-[#F45584] bg-[#F45584]/5 text-[#F45584] shadow-lg`
+              : `${siteColors.borders.gray700} hover:border-[#F45584]/40 hover:bg-gray-50`
           )}
         >
           <div
@@ -120,7 +120,7 @@ export function ContentSelector({
           />
           <span className="font-semibold">{option.name}</span>
           {showDescription && option.description && (
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <p className="text-sm leading-relaxed text-gray-500">
               {option.description}
             </p>
           )}
@@ -140,23 +140,25 @@ export function ContentSelector({
 
       {/* Content Features */}
       {showFeatures && currentOption && (
-        <div className="bg-white border border-teamhub-border/20 rounded-xl p-6 shadow-sm">
+        <div className={siteUtils.card}>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-teamhub-secondary mb-2">
+            <h3
+              className={`mb-2 text-lg font-semibold ${siteColors.text.gray300}`}
+            >
               {currentOption.name} Features
             </h3>
             {currentOption.description && (
-              <p className="text-sm text-teamhub-muted">
+              <p className={`text-sm ${siteColors.text.gray400}`}>
                 {currentOption.description}
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {currentOption.features.map((feature, index) => (
               <div key={index} className="flex items-start space-x-2">
                 <svg
-                  className="w-4 h-4 text-teamhub-success flex-shrink-0 mt-0.5"
+                  className={`w-4 h-4 ${siteUtils.status.success} flex-shrink-0 mt-0.5`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -168,7 +170,7 @@ export function ContentSelector({
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span className="text-sm text-teamhub-secondary">
+                <span className={`text-sm ${siteColors.text.gray300}`}>
                   {feature}
                 </span>
               </div>

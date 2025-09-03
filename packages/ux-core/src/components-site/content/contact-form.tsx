@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
+import { siteColors, siteUtils } from '../colors'
 
 interface FormField {
   id: string
@@ -152,11 +153,11 @@ export function ContactForm({
         >
       ) => handleInputChange(field.id, e.target.value, field),
       className: cn(
-        'w-full border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-teamhub-primary focus:border-transparent',
+        'w-full border rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#F45584] focus:border-transparent',
         inputSizes[size],
         fieldError
-          ? 'border-teamhub-warning'
-          : 'border-teamhub-border/20 hover:border-teamhub-border/40'
+          ? 'border-red-500'
+          : `${siteColors.borders.gray700} hover:border-gray-600/50`
       ),
       placeholder: field.placeholder,
       required: field.required,
@@ -166,17 +167,17 @@ export function ContactForm({
       <label
         htmlFor={field.id}
         className={cn(
-          'block font-medium text-teamhub-secondary mb-2',
+          `block font-medium ${siteColors.text.gray300} mb-2`,
           sizeClasses[size]
         )}
       >
         {field.label}
-        {field.required && <span className="text-teamhub-warning ml-1">*</span>}
+        {field.required && <span className="ml-1 text-red-500">*</span>}
       </label>
     )
 
     const errorMessage = fieldError && (
-      <p className="text-sm text-teamhub-warning mt-1">{fieldError}</p>
+      <p className="mt-1 text-sm text-red-500">{fieldError}</p>
     )
 
     switch (field.type) {
@@ -222,16 +223,16 @@ export function ContactForm({
               onChange={(e) =>
                 handleInputChange(field.id, e.target.checked, field)
               }
-              className="w-4 h-4 text-teamhub-primary border-teamhub-border/20 rounded focus:ring-teamhub-primary focus:ring-2"
+              className="w-4 h-4 text-[#F45584] border-gray-700/20 rounded focus:ring-[#F45584] focus:ring-2"
             />
             {showLabels && (
               <label
                 htmlFor={field.id}
-                className="text-sm text-teamhub-secondary"
+                className={`text-sm ${siteColors.text.gray300}`}
               >
                 {field.label}
                 {field.required && (
-                  <span className="text-teamhub-warning ml-1">*</span>
+                  <span className="ml-1 text-red-500">*</span>
                 )}
               </label>
             )}
@@ -255,11 +256,11 @@ export function ContactForm({
                     onChange={(e) =>
                       handleInputChange(field.id, e.target.value, field)
                     }
-                    className="w-4 h-4 text-teamhub-primary border-teamhub-border/20 focus:ring-teamhub-primary focus:ring-2"
+                    className="w-4 h-4 text-[#F45584] border-gray-700/20 focus:ring-[#F45584] focus:ring-2"
                   />
                   <label
                     htmlFor={`${field.id}-${option.value}`}
-                    className="text-sm text-teamhub-secondary"
+                    className={`text-sm ${siteColors.text.gray300}`}
                   >
                     {option.label}
                   </label>
@@ -284,13 +285,13 @@ export function ContactForm({
   return (
     <div className={className}>
       {(title || subtitle) && (
-        <div className="text-center mb-8">
+        <div className="mb-8 text-center">
           {title && (
-            <h2 className="text-2xl font-bold text-teamhub-secondary mb-2">
+            <h2 className={`text-2xl font-bold ${siteColors.text.gray300} mb-2`}>
               {title}
             </h2>
           )}
-          {subtitle && <p className="text-teamhub-muted">{subtitle}</p>}
+          {subtitle && <p className={siteColors.text.gray400}>{subtitle}</p>}
         </div>
       )}
 
@@ -302,7 +303,7 @@ export function ContactForm({
             type="submit"
             disabled={isSubmitting}
             className={cn(
-              'w-full bg-teamhub-primary hover:bg-teamhub-primary/90 disabled:bg-teamhub-muted disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors',
+              `w-full ${siteColors.gradients.primary} hover:from-[#F45584]/90 hover:to-[#8B5CF6]/90 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors`,
               inputSizes[size]
             )}
           >

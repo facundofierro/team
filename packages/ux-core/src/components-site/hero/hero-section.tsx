@@ -1,7 +1,7 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
 import { Container } from '../layout'
-import { siteUtils } from '../colors'
+import { siteColors, siteUtils } from '../colors'
 
 interface HeroSectionProps {
   children: React.ReactNode
@@ -16,10 +16,10 @@ interface HeroSectionProps {
 
 const backgroundClasses = {
   none: '',
-  dark: siteUtils.getBackgroundClasses('dark'),
-  gradient: siteUtils.getGradientClasses('primary'),
-  primary: siteUtils.getGradientClasses('primary'),
-  secondary: siteUtils.getGradientClasses('blue'),
+  dark: siteColors.backgrounds.dark,
+  gradient: siteColors.gradients.primary,
+  primary: siteColors.gradients.primary,
+  secondary: siteColors.gradients.blue,
 }
 
 const paddingClasses = {

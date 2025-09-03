@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
-import { siteUtils } from '../colors'
+import { siteColors, siteUtils } from '../colors'
 
 interface NavigationMenuItem {
   label: string
@@ -48,8 +48,8 @@ export function NavigationMenu({
             className={cn(
               'flex items-center space-x-1 px-3 py-2 rounded-md transition-colors',
               sizeClasses[size],
-              'text-gray-700 hover:text-[#F45584] hover:bg-gray-50',
-              isActive && 'text-[#F45584] bg-gray-50'
+              `text-gray-700 ${siteUtils.hover.pink}`,
+              isActive && `text-[#F45584] bg-[#F45584]/10`
             )}
           >
             <span>{item.label}</span>
@@ -132,7 +132,7 @@ export function NavigationMenu({
         className={cn(
           'px-3 py-2 rounded-md transition-colors',
           sizeClasses[size],
-          'text-gray-700 hover:text-[#F45584] hover:bg-gray-50',
+          `text-gray-700 ${siteUtils.hover.pink}`,
           item.external && 'group'
         )}
         {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}

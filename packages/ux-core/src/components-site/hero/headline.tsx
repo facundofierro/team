@@ -1,6 +1,6 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
-import { siteUtils } from '../colors'
+import { siteColors, siteUtils } from '../colors'
 
 interface HeadlineProps {
   children: React.ReactNode
@@ -22,10 +22,10 @@ const headlineSizes = {
 }
 
 const headlineColors = {
-  white: 'text-white',
+  white: siteColors.text.white,
   gray: 'text-gray-800',
-  pink: 'text-[#F45584]',
-  orange: 'text-[#FF8C42]',
+  pink: siteColors.text.pink,
+  orange: siteColors.text.orange,
 }
 
 const headlineAlign = {
@@ -119,9 +119,9 @@ const subHeadlineSizes = {
 }
 
 const subHeadlineColors = {
-  white: 'text-white',
-  gray300: 'text-gray-300',
-  gray200: 'text-gray-200',
+  white: siteColors.text.white,
+  gray300: siteColors.text.gray300,
+  gray200: siteColors.text.gray200,
 }
 
 export function SubHeadline({
