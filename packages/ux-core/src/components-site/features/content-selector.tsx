@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
+import { siteUtils } from '../colors'
 
 interface ContentOption {
   id: string
@@ -65,8 +66,8 @@ export function ContentSelector({
             'flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200',
             selectorSizes[size],
             isActive
-              ? 'bg-teamhub-primary text-white shadow-md'
-              : 'text-teamhub-secondary hover:text-teamhub-primary hover:bg-teamhub-background'
+              ? siteUtils.getButtonClasses('primary')
+              : 'text-gray-700 hover:text-[#F45584] hover:bg-gray-50'
           )}
         >
           <div
@@ -87,8 +88,8 @@ export function ContentSelector({
             'flex flex-col items-center space-y-2 p-4 rounded-lg border-2 transition-all duration-200',
             selectorSizes[size],
             isActive
-              ? 'border-teamhub-primary bg-teamhub-primary/5 text-teamhub-primary'
-              : 'border-teamhub-border/20 hover:border-teamhub-primary/40 hover:bg-teamhub-background'
+              ? 'border-[#F45584] bg-[#F45584]/5 text-[#F45584]'
+              : 'border-gray-200 hover:border-[#F45584]/40 hover:bg-gray-50'
           )}
         >
           <div
@@ -109,8 +110,8 @@ export function ContentSelector({
             'flex flex-col items-center space-y-3 p-6 rounded-xl border-2 transition-all duration-200 text-center',
             selectorSizes[size],
             isActive
-              ? 'border-teamhub-primary bg-teamhub-primary/5 text-teamhub-primary shadow-lg'
-              : 'border-teamhub-border/20 hover:border-teamhub-primary/40 hover:bg-teamhub-background'
+              ? 'border-[#F45584] bg-[#F45584]/5 text-[#F45584] shadow-lg'
+              : 'border-gray-200 hover:border-[#F45584]/40 hover:bg-gray-50'
           )}
         >
           <div
@@ -119,7 +120,7 @@ export function ContentSelector({
           />
           <span className="font-semibold">{option.name}</span>
           {showDescription && option.description && (
-            <p className="text-sm text-teamhub-muted leading-relaxed">
+            <p className="text-sm text-gray-500 leading-relaxed">
               {option.description}
             </p>
           )}

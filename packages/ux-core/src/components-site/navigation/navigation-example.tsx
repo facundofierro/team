@@ -1,5 +1,7 @@
 import React from 'react'
 import { Header, NavigationMenu } from './index'
+import { siteUtils } from '../colors'
+import { cn } from '../../utils/cn'
 
 export function NavigationExample() {
   const navigationItems = [
@@ -125,7 +127,7 @@ export function NavigationExample() {
   ]
 
   return (
-    <div className="min-h-screen bg-teamhub-background">
+    <div className="min-h-screen bg-gray-50">
       {/* Header with basic navigation */}
       <Header
         navigationItems={navigationItems}
@@ -136,36 +138,36 @@ export function NavigationExample() {
       {/* Content section to demonstrate sticky behavior */}
       <div className="pt-32 px-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-teamhub-secondary mb-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">
             Navigation Components Demo
           </h1>
 
           {/* Basic Navigation Menu */}
           <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-teamhub-secondary mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
               Basic Navigation Menu
             </h2>
-            <div className="bg-white p-6 rounded-lg shadow-md border border-teamhub-border">
+            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
               <NavigationMenu items={navigationItems} />
             </div>
           </div>
 
           {/* Advanced Navigation Menu with Dropdowns */}
           <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-teamhub-secondary mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
               Advanced Navigation Menu with Dropdowns
             </h2>
-            <div className="bg-white p-6 rounded-lg shadow-md border border-teamhub-border">
+            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
               <NavigationMenu items={advancedNavigationItems} />
             </div>
           </div>
 
           {/* Vertical Navigation Menu */}
           <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-teamhub-secondary mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
               Vertical Navigation Menu
             </h2>
-            <div className="bg-white p-6 rounded-lg shadow-md border border-teamhub-border">
+            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
               <NavigationMenu
                 items={navigationItems}
                 variant="vertical"
@@ -176,10 +178,15 @@ export function NavigationExample() {
 
           {/* Transparent Header Example */}
           <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-teamhub-secondary mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
               Transparent Header (for hero sections)
             </h2>
-            <div className="relative h-32 bg-gradient-to-r from-teamhub-primary to-teamhub-accent rounded-lg overflow-hidden">
+            <div
+              className={cn(
+                'relative h-32 rounded-lg overflow-hidden',
+                siteUtils.getGradientClasses('primary')
+              )}
+            >
               <Header
                 transparent
                 sticky={false}

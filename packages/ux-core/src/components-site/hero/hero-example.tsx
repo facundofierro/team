@@ -1,5 +1,7 @@
 import React from 'react'
 import { HeroSection, Headline, SubHeadline, CTAButtons } from './index'
+import { siteUtils } from '../colors'
+import { cn } from '../../utils/cn'
 
 export function HeroExample() {
   const ctaButtons = [
@@ -18,7 +20,7 @@ export function HeroExample() {
   ]
 
   return (
-    <div className="min-h-screen bg-teamhub-background">
+    <div className="min-h-screen bg-gray-50">
       {/* Main Hero Section */}
       <HeroSection
         background="dark"
@@ -33,7 +35,7 @@ export function HeroExample() {
             size="xl"
             color="white"
             emphasis="highlight"
-            emphasisColor="teamhub-highlight"
+            emphasisColor="pink"
             maxWidth="xl"
           >
             AI Is No Longer Optional For Success
@@ -62,7 +64,12 @@ export function HeroExample() {
       {/* Information Card Section */}
       <div className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-teamhub-secondary to-teamhub-secondary/80 rounded-2xl p-8 md:p-12 text-center text-white">
+          <div
+            className={cn(
+              'rounded-2xl p-8 md:p-12 text-center text-white',
+              siteUtils.getBackgroundClasses('dark')
+            )}
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               The Opportunity Window Is Narrowing
             </h2>
@@ -99,7 +106,7 @@ export function HeroExample() {
             size="lg"
             color="white"
             emphasis="highlight"
-            emphasisColor="teamhub-accent"
+            emphasisColor="orange"
             maxWidth="lg"
           >
             Transform Your Business with AI
@@ -128,19 +135,14 @@ export function HeroExample() {
         <div className="max-w-4xl">
           <Headline
             size="md"
-            color="teamhub-secondary"
+            color="gray"
             emphasis="none"
             align="left"
             maxWidth="lg"
           >
             Simple and Effective
           </Headline>
-          <SubHeadline
-            size="sm"
-            color="teamhub-muted"
-            align="left"
-            maxWidth="lg"
-          >
+          <SubHeadline size="sm" color="gray300" align="left" maxWidth="lg">
             Sometimes less is more. Clean, focused messaging that gets straight
             to the point.
           </SubHeadline>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { Container } from '../layout'
+import { siteUtils } from '../colors'
 
 interface HeaderProps {
   className?: string
@@ -42,7 +43,7 @@ export function Header({
         sticky && 'sticky top-0',
         transparent
           ? 'bg-transparent'
-          : 'bg-white/95 backdrop-blur-sm border-b border-teamhub-border/20',
+          : 'bg-white/95 backdrop-blur-sm border-b border-gray-700/20',
         className
       )}
     >
@@ -51,10 +52,20 @@ export function Header({
           {/* Logo */}
           {showLogo && (
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-teamhub-primary to-teamhub-accent rounded-lg flex items-center justify-center">
+              <div
+                className={cn(
+                  'w-10 h-10 rounded-lg flex items-center justify-center',
+                  siteUtils.getGradientClasses('primary')
+                )}
+              >
                 <span className="text-white font-bold text-xl">T</span>
               </div>
-              <span className="text-2xl font-bold text-teamhub-secondary">
+              <span
+                className={cn(
+                  'text-2xl font-bold',
+                  siteUtils.getTextClasses('white')
+                )}
+              >
                 TeamHub
               </span>
             </div>
@@ -67,8 +78,10 @@ export function Header({
                 key={item.label}
                 href={item.href}
                 className={cn(
-                  'text-teamhub-secondary hover:text-teamhub-primary transition-colors font-medium',
-                  transparent && 'text-white hover:text-teamhub-accent'
+                  'transition-colors font-medium',
+                  transparent
+                    ? 'text-white hover:text-gray-300'
+                    : 'text-gray-700 hover:text-[#F45584]'
                 )}
                 {...(item.external && {
                   target: '_blank',
@@ -88,8 +101,8 @@ export function Header({
                 className={cn(
                   'px-6 py-2 rounded-lg font-semibold transition-all duration-200',
                   transparent
-                    ? 'bg-white text-teamhub-secondary hover:bg-teamhub-accent hover:text-white'
-                    : 'bg-teamhub-primary text-white hover:bg-teamhub-primary/90'
+                    ? 'bg-white text-gray-700 hover:bg-gray-100'
+                    : siteUtils.getButtonClasses('cta')
                 )}
               >
                 {ctaText}
@@ -100,8 +113,8 @@ export function Header({
                 className={cn(
                   'px-6 py-2 rounded-lg font-semibold transition-all duration-200',
                   transparent
-                    ? 'bg-white text-teamhub-secondary hover:bg-teamhub-accent hover:text-white'
-                    : 'bg-teamhub-primary text-white hover:bg-teamhub-primary/90'
+                    ? 'bg-white text-gray-700 hover:bg-gray-100'
+                    : siteUtils.getButtonClasses('cta')
                 )}
               >
                 {ctaText}
@@ -118,23 +131,23 @@ export function Header({
             <div className="w-6 h-6 flex flex-col justify-center items-center">
               <span
                 className={cn(
-                  'w-5 h-0.5 bg-teamhub-secondary transition-all duration-300',
-                  isMobileMenuOpen && 'rotate-45 translate-y-1',
-                  transparent && 'bg-white'
+                  'w-5 h-0.5 transition-all duration-300',
+                  transparent ? 'bg-white' : 'bg-gray-700',
+                  isMobileMenuOpen && 'rotate-45 translate-y-1'
                 )}
               />
               <span
                 className={cn(
-                  'w-5 h-0.5 bg-teamhub-secondary mt-1 transition-all duration-300',
-                  isMobileMenuOpen && 'opacity-0',
-                  transparent && 'bg-white'
+                  'w-5 h-0.5 mt-1 transition-all duration-300',
+                  transparent ? 'bg-white' : 'bg-gray-700',
+                  isMobileMenuOpen && 'opacity-0'
                 )}
               />
               <span
                 className={cn(
-                  'w-5 h-0.5 bg-teamhub-secondary mt-1 transition-all duration-300',
-                  isMobileMenuOpen && '-rotate-45 -translate-y-1',
-                  transparent && 'bg-white'
+                  'w-5 h-0.5 mt-1 transition-all duration-300',
+                  transparent ? 'bg-white' : 'bg-gray-700',
+                  isMobileMenuOpen && '-rotate-45 -translate-y-1'
                 )}
               />
             </div>
@@ -143,13 +156,13 @@ export function Header({
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-teamhub-border/20">
+          <div className="md:hidden mt-4 pb-4 border-t border-gray-700/20">
             <nav className="flex flex-col space-y-4 pt-4">
               {navigationItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-teamhub-secondary hover:text-teamhub-primary transition-colors font-medium"
+                  className="text-gray-700 hover:text-[#F45584] transition-colors font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
                   {...(item.external && {
                     target: '_blank',
@@ -165,14 +178,20 @@ export function Header({
                     onCtaClick()
                     setIsMobileMenuOpen(false)
                   }}
-                  className="mt-4 px-6 py-2 bg-teamhub-primary text-white rounded-lg font-semibold hover:bg-teamhub-primary/90 transition-colors"
+                  className={cn(
+                    'mt-4 px-6 py-2 rounded-lg font-semibold transition-colors',
+                    siteUtils.getButtonClasses('cta')
+                  )}
                 >
                   {ctaText}
                 </button>
               ) : (
                 <a
                   href="#get-started"
-                  className="mt-4 px-6 py-2 bg-teamhub-primary text-white rounded-lg font-semibold hover:bg-teamhub-primary/90 transition-colors text-center"
+                  className={cn(
+                    'mt-4 px-6 py-2 rounded-lg font-semibold transition-colors text-center',
+                    siteUtils.getButtonClasses('cta')
+                  )}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {ctaText}

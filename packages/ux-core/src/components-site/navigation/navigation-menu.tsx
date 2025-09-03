@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { cn } from '../../utils/cn'
+import { siteUtils } from '../colors'
 
 interface NavigationMenuItem {
   label: string
@@ -47,8 +48,8 @@ export function NavigationMenu({
             className={cn(
               'flex items-center space-x-1 px-3 py-2 rounded-md transition-colors',
               sizeClasses[size],
-              'text-teamhub-secondary hover:text-teamhub-primary hover:bg-teamhub-background',
-              isActive && 'text-teamhub-primary bg-teamhub-background'
+              'text-gray-700 hover:text-[#F45584] hover:bg-gray-50',
+              isActive && 'text-[#F45584] bg-gray-50'
             )}
           >
             <span>{item.label}</span>
@@ -72,13 +73,13 @@ export function NavigationMenu({
 
           {/* Dropdown Menu */}
           {isActive && (
-            <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg border border-teamhub-border/20 py-2 z-50">
+            <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
               {item.children!.map((child, childIndex) => (
                 <a
                   key={childIndex}
                   href={child.href}
                   className={cn(
-                    'flex items-start space-x-3 px-4 py-3 hover:bg-teamhub-background transition-colors',
+                    'flex items-start space-x-3 px-4 py-3 hover:bg-gray-50 transition-colors',
                     child.external && 'group'
                   )}
                   {...(child.external && {
@@ -87,16 +88,16 @@ export function NavigationMenu({
                   })}
                 >
                   {child.icon && (
-                    <div className="flex-shrink-0 w-5 h-5 text-teamhub-muted group-hover:text-teamhub-primary transition-colors">
+                    <div className="flex-shrink-0 w-5 h-5 text-gray-400 group-hover:text-[#F45584] transition-colors">
                       {child.icon}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-teamhub-secondary font-medium group-hover:text-teamhub-primary transition-colors">
+                    <p className="text-gray-700 font-medium group-hover:text-[#F45584] transition-colors">
                       {child.label}
                       {child.external && (
                         <svg
-                          className="inline-block w-4 h-4 ml-1 text-teamhub-muted group-hover:text-teamhub-primary transition-colors"
+                          className="inline-block w-4 h-4 ml-1 text-gray-400 group-hover:text-[#F45584] transition-colors"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -111,7 +112,7 @@ export function NavigationMenu({
                       )}
                     </p>
                     {child.description && (
-                      <p className="text-sm text-teamhub-muted mt-1">
+                      <p className="text-sm text-gray-500 mt-1">
                         {child.description}
                       </p>
                     )}
@@ -131,21 +132,21 @@ export function NavigationMenu({
         className={cn(
           'px-3 py-2 rounded-md transition-colors',
           sizeClasses[size],
-          'text-teamhub-secondary hover:text-teamhub-primary hover:bg-teamhub-background',
+          'text-gray-700 hover:text-[#F45584] hover:bg-gray-50',
           item.external && 'group'
         )}
         {...(item.external && { target: '_blank', rel: 'noopener noreferrer' })}
       >
         <span className="flex items-center space-x-1">
           {item.icon && (
-            <span className="w-4 h-4 text-teamhub-muted group-hover:text-teamhub-primary transition-colors">
+            <span className="w-4 h-4 text-gray-400 group-hover:text-[#F45584] transition-colors">
               {item.icon}
             </span>
           )}
           <span>{item.label}</span>
           {item.external && (
             <svg
-              className="w-4 h-4 text-teamhub-muted group-hover:text-teamhub-primary transition-colors"
+              className="w-4 h-4 text-gray-400 group-hover:text-[#F45584] transition-colors"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
