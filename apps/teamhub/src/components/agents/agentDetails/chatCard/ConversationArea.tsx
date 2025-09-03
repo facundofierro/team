@@ -119,7 +119,7 @@ export const ConversationArea = memo(function ConversationArea({
     console.log('🔄 [ConversationArea] Processing messages:', {
       messages: messages.length,
       toolCallMessages: toolCallMessages.length,
-      total: allMessages.length
+      total: allMessages.length,
     })
 
     const sorted = allMessages.sort((a, b) => {
@@ -152,29 +152,30 @@ export const ConversationArea = memo(function ConversationArea({
   }, [messages, toolCallMessages])
 
   // Simple visible messages calculation
-  const { visibleMessages, hasMoreMessages, hiddenMessageCount } = useMemo(() => {
-    const totalMessages = sortedMessages.length
-    const hasMore = totalMessages > visibleMessageCount
+  const { visibleMessages, hasMoreMessages, hiddenMessageCount } =
+    useMemo(() => {
+      const totalMessages = sortedMessages.length
+      const hasMore = totalMessages > visibleMessageCount
 
-    // Show the most recent messages (last N messages)
-    const startIndex = Math.max(0, totalMessages - visibleMessageCount)
-    const visible = sortedMessages.slice(startIndex)
-    const hiddenCount = Math.max(0, totalMessages - visibleMessageCount)
+      // Show the most recent messages (last N messages)
+      const startIndex = Math.max(0, totalMessages - visibleMessageCount)
+      const visible = sortedMessages.slice(startIndex)
+      const hiddenCount = Math.max(0, totalMessages - visibleMessageCount)
 
-    console.log('📏 [ConversationArea] Simple pagination:', {
-      totalMessages,
-      visibleCount: visible.length,
-      startIndex,
-      hasMore,
-      hiddenCount
-    })
+      console.log('📏 [ConversationArea] Simple pagination:', {
+        totalMessages,
+        visibleCount: visible.length,
+        startIndex,
+        hasMore,
+        hiddenCount,
+      })
 
-    return {
-      visibleMessages: visible,
-      hasMoreMessages: hasMore,
-      hiddenMessageCount: hiddenCount,
-    }
-  }, [sortedMessages, visibleMessageCount])
+      return {
+        visibleMessages: visible,
+        hasMoreMessages: hasMore,
+        hiddenMessageCount: hiddenCount,
+      }
+    }, [sortedMessages, visibleMessageCount])
 
   // Simple load more handler
   const handleLoadMore = useCallback(() => {
@@ -187,9 +188,12 @@ export const ConversationArea = memo(function ConversationArea({
 
     // Calculate how many more messages to show
     const remaining = hiddenMessageCount
-    const batchSize = remaining <= 10 ? remaining : Math.min(LOAD_MORE_BATCH_SIZE, remaining)
+    const batchSize =
+      remaining <= 10 ? remaining : Math.min(LOAD_MORE_BATCH_SIZE, remaining)
 
-    setVisibleMessageCount((prev) => Math.min(prev + batchSize, sortedMessages.length))
+    setVisibleMessageCount((prev) =>
+      Math.min(prev + batchSize, sortedMessages.length)
+    )
 
     // Maintain scroll position after loading more messages
     setTimeout(() => {
@@ -310,12 +314,10 @@ export const ConversationArea = memo(function ConversationArea({
         {process.env.NODE_ENV === 'development' && (
           <div className="p-2 mt-2 text-xs text-gray-500 bg-gray-50 rounded">
             <div>
-              📊 Simple Pagination: {visibleMessages.length}/{sortedMessages.length}{' '}
-              messages visible
+              📊 Simple Pagination: {visibleMessages.length}/
+              {sortedMessages.length} messages visible
             </div>
-            <div>
-              🔧 Tool calls: {toolCallMessages.length} tool messages
-            </div>
+            <div>🔧 Tool calls: {toolCallMessages.length} tool messages</div>
             <div className="flex gap-2 mt-1">
               {isStreamingMode && (
                 <span className="px-1 bg-orange-100 rounded">
