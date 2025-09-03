@@ -20,7 +20,7 @@ export const siteColors = {
     primary: 'bg-gradient-to-br from-[#f45584] to-[#6c3350]',
     cta: 'bg-gradient-to-r from-[#f45584] to-[#ce4c76]',
     blue: 'bg-gradient-to-r from-[#f45584] to-[#303b58]',
-    blueToBlue: 'bg-gradient-to-r from-[#303b58] to-[#303b58]', // Blue to blue gradient
+    blueToBlue: 'bg-gradient-to-r from-[#303b58] to-[#303b58]', // Darkmuted to Darkmuted gradient
     orange: 'bg-gradient-to-r from-[#ff8c42] to-[#f45584]',
     green: 'bg-gradient-to-br from-[#74ac64] to-[#303b58]',
   },
