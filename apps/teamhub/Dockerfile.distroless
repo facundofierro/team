@@ -35,7 +35,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store \
 COPY . .
 
 # Build the application (creates standalone output)
-RUN pnpm build:teamhub:prod
+RUN pnpm build:agelum:prod
 
 # ===============================
 # Production stage - Distroless (smallest possible)
