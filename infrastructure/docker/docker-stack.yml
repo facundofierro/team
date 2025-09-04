@@ -156,7 +156,7 @@ services:
   #   ports:
   #     - '4000:4000'
   #   networks:
-  #     - teamhub_network
+  #     - agelum_network
 
 configs:
   nginx_config:

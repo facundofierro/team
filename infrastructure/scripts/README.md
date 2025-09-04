@@ -28,7 +28,7 @@ CONTAINER_REGISTRY=ghcr.io/user     # Required
 VERBOSE_DEPLOY=true                 # Show detailed analysis
 FORCE_REDEPLOY_ALL=true            # Force redeployment of all services
 FORCE_REDEPLOY_NGINX=true          # Force redeploy only nginx
-FORCE_REDEPLOY_TEAMHUB=true        # Force redeploy only TeamHub
+FORCE_REDEPLOY_AGELUM=true        # Force redeploy only Agelum
 FORCE_REDEPLOY_REMOTION=true       # Force redeploy only Remotion
 FORCE_REDEPLOY_INFRASTRUCTURE=true # Force redeploy only PostgreSQL/Redis
 FORCE_REDEPLOY_NEXTCLOUD=true      # Force redeploy only Nextcloud
@@ -126,5 +126,5 @@ docker login -u $DOCKER_USERNAME
 ## 📚 Related Documentation
 
 - [`docs/container-optimization.md`](../../docs/container-optimization.md) - Complete optimization guide
-- [`apps/teamhub/Dockerfile.optimized`](../../apps/teamhub/Dockerfile.optimized) - Optimized Dockerfile
-- [`apps/teamhub/Dockerfile.distroless`](../../apps/teamhub/Dockerfile.distroless) - Ultra-minimal Dockerfile
+- [`apps/agelum/Dockerfile.optimized`](../../apps/agelum/Dockerfile.optimized) - Optimized Dockerfile
+- [`apps/agelum/Dockerfile.distroless`](../../apps/agelum/Dockerfile.distroless) - Ultra-minimal Dockerfile

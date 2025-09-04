@@ -384,14 +384,14 @@ wait_for_services() {
         done
     fi
 
-    # Check teamhub service first (if being deployed)
+    # Check agelum service first (if being deployed)
     if [ "$FORCE_REDEPLOY_AGELUM" = "true" ] || ! check_service_status "agelum_agelum" "Agelum" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Agelum service...${NC}"
-        local teamhub_ready=false
+        local agelum_ready=false
         for i in {1..15}; do
             if docker service ls --filter name=agelum_agelum --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Agelum service is ready${NC}"
-                teamhub_ready=true
+                agelum_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
@@ -502,7 +502,7 @@ wait_for_services() {
 test_application() {
     echo -e "${BLUE}🧪 Testing application endpoints...${NC}"
 
-    # Test teamhub endpoint
+    # Test agelum endpoint
     if docker service ls --filter name=agelum_agelum --format "{{.Name}}" | grep -q agelum_agelum; then
         if curl -f --connect-timeout 5 --max-time 10 http://127.0.0.1:80/ >/dev/null 2>&1; then
             echo -e "${GREEN}✅ Agelum application is accessible${NC}"

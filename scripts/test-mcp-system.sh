@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TeamHub MCP System Integration Test
+# Agelum MCP System Integration Test
 # This script tests the complete MCP installation and management flow
 
 set -e  # Exit on any error
@@ -16,9 +16,9 @@ NC='\033[0m' # No Color
 TEST_ORG_ID="test-org-$(date +%s)"
 TEST_MCP_NAME="file-system-mcp"
 TEST_MCP_SOURCE="https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem"
-TEAMHUB_API_BASE="http://localhost:3000/api"
+AGELUM_API_BASE="http://localhost:3000/api"
 
-echo -e "${BLUE}🧪 Starting TeamHub MCP System Integration Test${NC}"
+echo -e "${BLUE}🧪 Starting Agelum MCP System Integration Test${NC}"
 echo -e "${BLUE}📋 Test Organization ID: ${TEST_ORG_ID}${NC}"
 echo ""
 
@@ -44,12 +44,12 @@ command_exists() {
 
 # Function to wait for API to be ready
 wait_for_api() {
-    log_step "Waiting for TeamHub API to be ready..."
+    log_step "Waiting for Agelum API to be ready..."
     local max_attempts=30
     local attempt=1
 
     while [ $attempt -le $max_attempts ]; do
-        if curl -s -o /dev/null -w "%{http_code}" "$TEAMHUB_API_BASE/test" | grep -q "200\|404"; then
+        if curl -s -o /dev/null -w "%{http_code}" "$AGELUM_API_BASE/test" | grep -q "200\|404"; then
             log_success "API is ready"
             return 0
         fi
@@ -75,17 +75,17 @@ test_api_endpoint() {
     local status
 
     if [ "$method" = "GET" ]; then
-        response=$(curl -s -w "HTTPSTATUS:%{http_code}" "$TEAMHUB_API_BASE$endpoint")
+        response=$(curl -s -w "HTTPSTATUS:%{http_code}" "$AGELUM_API_BASE$endpoint")
     elif [ "$method" = "POST" ]; then
         response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
             -X POST \
             -H "Content-Type: application/json" \
             -d "$data" \
-            "$TEAMHUB_API_BASE$endpoint")
+            "$AGELUM_API_BASE$endpoint")
     elif [ "$method" = "DELETE" ]; then
         response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
             -X DELETE \
-            "$TEAMHUB_API_BASE$endpoint")
+            "$AGELUM_API_BASE$endpoint")
     fi
 
     status=$(echo "$response" | grep -o 'HTTPSTATUS:[0-9]*' | cut -d: -f2)
@@ -255,7 +255,7 @@ test_security_constraints() {
     log_step "Testing security constraints..."
 
     # Check if container is running with correct security settings
-    local container_name="teamhub-mcp-$TEST_ORG_ID"
+    local container_name="agelum-mcp-$TEST_ORG_ID"
 
     # Verify container exists
     if ! docker ps -a --filter name="$container_name" --format "{{.Names}}" | grep -q "$container_name"; then

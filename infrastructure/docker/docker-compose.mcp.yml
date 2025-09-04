@@ -4,8 +4,8 @@ services:
   # Template service for MCP containers
   # This will be dynamically generated per organization
   mcp-template:
-    image: teamhub-mcp-runtime:latest
-    container_name: 'teamhub-mcp-${ORGANIZATION_ID}'
+    image: agelum-mcp-runtime:latest
+    container_name: 'agelum-mcp-${ORGANIZATION_ID}'
     restart: unless-stopped
 
     # Resource limits
@@ -29,7 +29,7 @@ services:
       - ORGANIZATION_ID=${ORGANIZATION_ID}
       - MCP_MEMORY_LIMIT=${MCP_MEMORY_LIMIT:-1G}
       - MCP_CPU_LIMIT=${MCP_CPU_LIMIT:-0.5}
-      - TEAMHUB_API_BASE=${TEAMHUB_API_BASE:-http://host.docker.internal:3000}
+      - AGELUM_API_BASE=${AGELUM_API_BASE:-http://host.docker.internal:3000}
       - NODE_ENV=production
 
     # Volumes for persistence
