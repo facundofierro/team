@@ -11,7 +11,7 @@ config({ path: resolve(__dirname, '../../.env') }) // Adjust path if needed
 const PG_HOST = process.env.PG_HOST
 const PG_USER = process.env.PG_USER
 const PG_PASSWORD = process.env.PG_PASSWORD
-const MAIN_DB_NAME = 'teamhub'
+const MAIN_DB_NAME = 'agelum'
 
 const MAIN_DB_URL = `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:5432/${MAIN_DB_NAME}`
 

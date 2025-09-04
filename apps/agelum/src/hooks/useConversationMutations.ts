@@ -49,7 +49,7 @@ interface UpdateConversationInput {
 export function useConversationMutations() {
   const { currentOrganization } = useOrganizationStore()
   const organizationId = currentOrganization?.id
-  const orgDatabaseName = currentOrganization?.databaseName || 'teamhub'
+  const orgDatabaseName = currentOrganization?.databaseName || 'agelum'
 
   // Loading states for manual mutations using server actions
   const [isStartingConversation, setIsStartingConversation] = useState(false)

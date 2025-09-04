@@ -42,7 +42,7 @@ export interface ContainerInfo {
 
 export class MCPContainerManager {
   private static instance: MCPContainerManager
-  private readonly imageTag = 'teamhub-mcp-runtime:latest'
+  private readonly imageTag = 'agelum-mcp-runtime:latest'
   private readonly networkName = 'mcp-isolated'
 
   // Default resource limits
@@ -68,7 +68,7 @@ export class MCPContainerManager {
    * Get container name for an organization
    */
   private getContainerName(organizationId: string): string {
-    return `teamhub-mcp-${organizationId}`
+    return `agelum-mcp-${organizationId}`
   }
 
   /**
@@ -186,9 +186,9 @@ export class MCPContainerManager {
         '--opt com.docker.network.bridge.enable_icc=false', // Disable inter-container communication
         '--opt com.docker.network.bridge.enable_ip_masquerade=true',
         '--opt com.docker.network.driver.mtu=1500',
-        `--label teamhub.network=mcp-isolated`,
-        `--label teamhub.security-profile=hardened`,
-        `--label teamhub.created=${new Date().toISOString()}`,
+        `--label agelum.network=mcp-isolated`,
+        `--label agelum.security-profile=hardened`,
+        `--label agelum.created=${new Date().toISOString()}`,
         this.networkName,
       ].join(' ')
 
@@ -305,10 +305,10 @@ export class MCPContainerManager {
         '--health-start-period=60s',
 
         // Labels for management and monitoring
-        `--label teamhub.organization=${config.organizationId}`,
-        '--label teamhub.service=mcp-container',
-        '--label teamhub.security-profile=hardened',
-        `--label teamhub.created=${new Date().toISOString()}`,
+        `--label agelum.organization=${config.organizationId}`,
+        '--label agelum.service=mcp-container',
+        '--label agelum.security-profile=hardened',
+        `--label agelum.created=${new Date().toISOString()}`,
 
         this.imageTag,
       ].join(' ')
@@ -704,7 +704,7 @@ export class MCPContainerManager {
     try {
       // Get all TeamHub MCP containers
       const { stdout } = await execAsync(
-        'docker ps -a --filter name=teamhub-mcp- --format "{{.Names}}"'
+        'docker ps -a --filter name=agelum-mcp- --format "{{.Names}}"'
       )
       const allContainers = stdout
         .trim()
@@ -712,7 +712,7 @@ export class MCPContainerManager {
         .filter((name) => name.trim())
 
       for (const containerName of allContainers) {
-        const orgId = containerName.replace('teamhub-mcp-', '')
+        const orgId = containerName.replace('agelum-mcp-', '')
 
         if (!activeOrganizations.includes(orgId)) {
           console.log(`Removing unused container for organization: ${orgId}`)

@@ -310,7 +310,7 @@ export const agentToAgent: ToolTypeDefinition = {
       )
 
       // Create or get the organization's database name for memory functions
-      const orgDatabaseName = targetAgent.organizationId || 'teamhub' // fallback
+      const orgDatabaseName = targetAgent.organizationId || 'agelum' // fallback
 
       // Start a new conversation for the target agent if this is a task/workflow
       let conversationId: string | undefined

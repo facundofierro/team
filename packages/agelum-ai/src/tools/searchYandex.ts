@@ -305,7 +305,7 @@ export const searchYandex: ToolTypeDefinition = {
           'Content-Type': 'application/json',
           Accept: 'application/json',
           'User-Agent':
-            'Mozilla/5.0 (compatible; TeamHub/1.0; +http://teamhub.ai)',
+            'Mozilla/5.0 (compatible; Agelum/1.0; +http://agelum.ai)',
         },
         body: JSON.stringify(cleanRequestParams),
       })

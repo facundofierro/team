@@ -48,7 +48,7 @@
     "trpc",
     "typescript"
   ],
-  "author": "TeamHub",
+  "author": "Agelum",
   "license": "MIT",
   "dependencies": {
     "@repo/logger": "workspace:*",
@@ -79,10 +79,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/teamhub/drizzle-reactive"
+    "url": "https://github.com/agelum/drizzle-reactive"
   },
-  "homepage": "https://github.com/teamhub/drizzle-reactive#readme",
+  "homepage": "https://github.com/agelum/drizzle-reactive#readme",
   "bugs": {
-    "url": "https://github.com/teamhub/drizzle-reactive/issues"
+    "url": "https://github.com/agelum/drizzle-reactive/issues"
   }
 }

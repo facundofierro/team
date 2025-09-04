@@ -51,9 +51,9 @@ Agelum is built as a modern monorepo with the following structure:
 
 ```
 ├── apps/
-│   └── teamhub/          # Main Next.js application
+│   └── agelum/           # Main Next.js application
 ├── packages/
-│   ├── teamhub-ai/       # AI functions and tools
+│   ├── agelum-ai/        # AI functions and tools
 │   └── agelum-db/       # Database schemas and functions
 ```
 
@@ -91,7 +91,7 @@ Agelum is built as a modern monorepo with the following structure:
    ```
 
 3. **Set up environment variables**
-   Create a `.env.local` file in `apps/teamhub/` with:
+   Create a `.env.local` file in `apps/agelum/` with:
 
    ```env
    # Database
@@ -115,7 +115,7 @@ Agelum is built as a modern monorepo with the following structure:
 4. **Start the development server**
 
    ```bash
-   pnpm dev:teamhub
+   pnpm dev:agelum
    ```
 
 5. **Open your browser**
@@ -208,7 +208,7 @@ pnpm clean                # Clean build artifacts
 ### Project Structure
 
 ```
-apps/teamhub/src/
+apps/agelum/src/
 ├── app/                  # Next.js App Router pages
 │   ├── agents/          # Agent management pages
 │   ├── dashboard/       # Dashboard pages
@@ -229,7 +229,7 @@ apps/teamhub/src/
 
 ### Core Functions
 
-The `@teamhub/ai` package provides several key functions:
+The `@agelum/ai` package provides several key functions:
 
 #### `sendChat(params)`
 
@@ -251,7 +251,7 @@ Send informational content to an agent.
 
 Retrieve all available tool types in the system.
 
-See the [AI package documentation](../../packages/teamhub-ai/README.md) for detailed API reference.
+See the [AI package documentation](../../packages/agelum-ai/README.md) for detailed API reference.
 
 ## 🐳 Docker Deployment
 
@@ -263,10 +263,10 @@ Agelum includes multiple Docker configurations:
 
 ```bash
 # Build the Docker image
-docker build -t teamhub -f Dockerfile .
+docker build -t agelum -f Dockerfile .
 
 # Run the container
-docker run -p 3000:3000 teamhub
+docker run -p 3000:3000 agelum
 ```
 
 ## 🤝 Contributing
@@ -286,7 +286,7 @@ This project is licensed under the MIT License - see the [LICENSE](../../LICENSE
 For support and questions:
 
 - Check the documentation in this README
-- Review the [AI package documentation](../../packages/teamhub-ai/README.md)
+- Review the [AI package documentation](../../packages/agelum-ai/README.md)
 - Open an issue in the repository
 
 ---

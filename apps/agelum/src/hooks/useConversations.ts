@@ -84,7 +84,7 @@ export function useConversations(agentId: string | null) {
         '@/lib/actions/conversation'
       )
       // Use the existing organization store
-      const orgDatabaseName = currentOrganization?.databaseName || 'teamhub'
+      const orgDatabaseName = currentOrganization?.databaseName || 'agelum'
 
       const result = await getRecentConversations(
         agentId,

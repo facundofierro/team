@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  # PostgreSQL database for teamhub
+  # PostgreSQL database for agelum
   postgres:
     image: ${POSTGRES_PGVECTOR_IMAGE:-ghcr.io/facundofierro/postgres-pgvector:latest}
     deploy:
@@ -11,17 +11,17 @@ services:
     ports:
       - '5432:5432'
     environment:
-      - POSTGRES_DB=teamhub
-      - POSTGRES_USER=teamhub
+      - POSTGRES_DB=agelum
+      - POSTGRES_USER=agelum
       - POSTGRES_PASSWORD=${PG_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      teamhub_network:
+      agelum_network:
         aliases:
           - postgres
 
-  # Redis cache for teamhub
+  # Redis cache for agelum
   redis:
     image: redis:7-alpine
     deploy:
@@ -32,7 +32,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      teamhub_network:
+      agelum_network:
         aliases:
           - redis
 
@@ -47,11 +47,11 @@ services:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
     networks:
-      teamhub_network:
+      agelum_network:
         aliases:
           - nginx
     depends_on:
-      - teamhub
+      - agelum
       - nextcloud
       - remotion
 
@@ -71,12 +71,12 @@ services:
       - NODE_ENV=production
       # Add any environment variables your remotion service needs
     networks:
-      teamhub_network:
+      agelum_network:
         aliases:
           - remotion
 
-  teamhub:
-    image: localhost:5000/teamhub:latest
+  agelum:
+    image: localhost:5000/agelum:latest
     deploy:
       replicas: 1
       update_config:
@@ -89,13 +89,13 @@ services:
     environment:
       - NODE_ENV=production
       - PG_PASSWORD=${PG_PASSWORD}
-      - POSTGRES_URL=postgresql://teamhub:${PG_PASSWORD}@postgres:5432/teamhub
+      - POSTGRES_URL=postgresql://agelum:${PG_PASSWORD}@postgres:5432/agelum
       - REDIS_URL=redis://redis:6379
       # Add other env vars here, or use secrets/configs
     networks:
-      teamhub_network:
+      agelum_network:
         aliases:
-          - teamhub
+          - agelum
     depends_on:
       - postgres
       - redis
@@ -118,7 +118,7 @@ services:
     volumes:
       - nextcloud_data:/var/www/html
     networks:
-      teamhub_network:
+      agelum_network:
         aliases:
           - nextcloud
     depends_on:
@@ -135,7 +135,7 @@ services:
     volumes:
       - nextcloud_db_data:/var/lib/postgresql/data
     networks:
-      teamhub_network:
+      agelum_network:
         aliases:
           - nextcloud_db
 
@@ -161,7 +161,7 @@ services:
 configs:
   nginx_config:
     external: true
-    name: ${NGINX_CONFIG_NAME:-teamhub_nginx_config_v1}
+    name: ${NGINX_CONFIG_NAME:-agelum_nginx_config_v1}
 
 volumes:
   postgres_data:
@@ -170,6 +170,6 @@ volumes:
   nextcloud_db_data:
 
 networks:
-  teamhub_network:
+  agelum_network:
     driver: overlay
     external: true
