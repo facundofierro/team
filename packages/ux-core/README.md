@@ -1,14 +1,14 @@
 # @agelum/ux-core
 
-UX Core package for TeamHub - Component library and design system utilities.
+UX Core package for Agelum - Component library and design system utilities.
 
 ## Overview
 
-This package provides a centralized collection of UI components, design system utilities, and UX patterns for the TeamHub platform. It serves as a bridge between various component libraries and our application needs, featuring a sophisticated purple-based design system.
+This package provides a centralized collection of UI components, design system utilities, and UX patterns for the Agelum platform. It serves as a bridge between various component libraries and our application needs, featuring a sophisticated purple-based design system.
 
 ## Design System
 
-TeamHub uses a carefully crafted color palette featuring:
+Agelum uses a carefully crafted color palette featuring:
 
 - **Primary Purple** (`#8A548C`) - Main brand color
 - **Secondary Purple** (`#3B2146`) - Dark purple for headers
@@ -38,12 +38,12 @@ ux-core/
 │   │   ├── motion/        # Motion/Animation components
 │   │   ├── ai-sdk/        # AI SDK components
 │   │   └── aceternity/    # Aceternity UI components
-│   ├── components-core/    # TeamHub custom design system components
-│   │   ├── teamhub-button.tsx
-│   │   ├── teamhub-card.tsx
-│   │   ├── teamhub-dialog.tsx
-│   │   ├── teamhub-form.tsx
-│   │   ├── teamhub-input.tsx
+│   ├── components-core/    # Agelum custom design system components
+│   │   ├── agelum-button.tsx
+│   │   ├── agelum-card.tsx
+│   │   ├── agelum-dialog.tsx
+│   │   ├── agelum-form.tsx
+│   │   ├── agelum-input.tsx
 │   │   └── index.ts
 │   ├── components-site/    # Site-specific components
 │   │   ├── hero-section.tsx
@@ -79,14 +79,14 @@ import { Button } from '@agelum/ux-core/components/shadcn/button'
 import { Card } from '@agelum/ux-core/components/shadcn/card'
 ```
 
-#### 2. TeamHub Core Components (Styled)
+#### 2. Agelum Core Components (Styled)
 
 ```typescript
-// Import TeamHub design system components
-import { TeamHubButton, TeamHubCard, TeamHubDialog } from '@agelum/ux-core'
+// Import Agelum design system components
+import { AgelumButton, AgelumCard, AgelumDialog } from '@agelum/ux-core'
 
 // Or import directly from core components
-import { TeamHubButton } from '@agelum/ux-core/components-core/teamhub-button'
+import { AgelumButton } from '@agelum/ux-core/components-core/agelum-button'
 ```
 
 #### 3. Site-Specific Components
@@ -129,13 +129,13 @@ import { Button, Card } from '@agelum/ux-core'
 
 export default function MyPage() {
   return (
-    <div className="bg-teamhub-background p-8">
-      <Card className="bg-white border-teamhub-border">
-        <CardHeader className="bg-teamhub-primary text-white">
-          <CardTitle>Welcome to TeamHub</CardTitle>
+    <div className="bg-agelum-background p-8">
+      <Card className="bg-white border-agelum-border">
+        <CardHeader className="bg-agelum-primary text-white">
+          <CardTitle>Welcome to Agelum</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button className="bg-teamhub-primary hover:bg-teamhub-primary/90">
+          <Button className="bg-agelum-primary hover:bg-agelum-primary/90">
             Get Started
           </Button>
         </CardContent>
@@ -170,14 +170,14 @@ When adding new components or libraries:
 1. Update the component catalog in `specs/libraries.md`
 2. Install components using their official CLI (e.g., `npx shadcn@latest add component-name`)
 3. Components will be placed in `src/components/[library-name]/`
-4. Apply TeamHub design system colors where appropriate
+4. Apply Agelum design system colors where appropriate
 5. Update the main `src/index.ts` to export new components
 
-### TeamHub Core Components (`src/components-core/`)
+### Agelum Core Components (`src/components-core/`)
 
 1. Create custom components in `src/components-core/`
 2. Use external components as building blocks
-3. Apply TeamHub design system styling
+3. Apply Agelum design system styling
 4. Update `src/components-core/index.ts` to export new components
 5. Add examples to the component showcase
 
@@ -191,7 +191,7 @@ When adding new components or libraries:
 ### General Guidelines
 
 1. Follow the established folder structure with three component directories
-2. Use TeamHub design system colors consistently
+2. Use Agelum design system colors consistently
 3. Update this README with any new sections or information
 4. Ensure all components have proper TypeScript types
 5. Test components across different scenarios

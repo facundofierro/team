@@ -46,7 +46,7 @@ export function useConversations(agentId: string | null) {
     if (!agentId || !organizationId) return null
 
     try {
-      log.teamhub.chat.debug(
+      log.agelum.chat.debug(
         'Loading active conversation for agent',
         undefined,
         { agentId }
@@ -55,13 +55,13 @@ export function useConversations(agentId: string | null) {
         agentId,
         organizationId,
       })
-      log.teamhub.chat.info('Active conversation loaded', undefined, {
+      log.agelum.chat.info('Active conversation loaded', undefined, {
         agentId,
         success: !!result,
       })
       return result
     } catch (error) {
-      log.teamhub.chat.error('Failed to load active conversation', undefined, {
+      log.agelum.chat.error('Failed to load active conversation', undefined, {
         error,
         agentId,
       })
@@ -74,7 +74,7 @@ export function useConversations(agentId: string | null) {
     if (!agentId || !organizationId) return []
 
     try {
-      log.teamhub.chat.debug(
+      log.agelum.chat.debug(
         'Loading recent conversations for agent (fallback)',
         undefined,
         { agentId }
@@ -91,14 +91,14 @@ export function useConversations(agentId: string | null) {
         orgDatabaseName,
         limit
       )
-      log.teamhub.chat.info(
+      log.agelum.chat.info(
         'Recent conversations loaded (fallback)',
         undefined,
         { agentId, count: result?.length || 0 }
       )
       return result || []
     } catch (error) {
-      log.teamhub.chat.error('Failed to load recent conversations', undefined, {
+      log.agelum.chat.error('Failed to load recent conversations', undefined, {
         error,
         agentId,
       })
@@ -111,20 +111,20 @@ export function useConversations(agentId: string | null) {
     if (!organizationId) return null
 
     try {
-      log.teamhub.chat.debug('Loading conversation', undefined, {
+      log.agelum.chat.debug('Loading conversation', undefined, {
         conversationId,
       })
       const result = await loadConversationById({
         conversationId,
         organizationId,
       })
-      log.teamhub.chat.info('Conversation loaded', undefined, {
+      log.agelum.chat.info('Conversation loaded', undefined, {
         conversationId,
         success: !!result,
       })
       return result
     } catch (error) {
-      log.teamhub.chat.error('Failed to load conversation', undefined, {
+      log.agelum.chat.error('Failed to load conversation', undefined, {
         error,
         conversationId,
       })

@@ -89,7 +89,7 @@ export class MCPContainerManager {
       await execAsync('docker --version')
       return true
     } catch (error) {
-      log.teamhubAi.main.error('Docker is not available', undefined, { error })
+      log.agelumAi.main.error('Docker is not available', undefined, { error })
       return false
     }
   }
@@ -102,7 +102,7 @@ export class MCPContainerManager {
       const { stdout } = await execAsync(`docker images -q ${this.imageTag}`)
       return stdout.trim().length > 0
     } catch (error) {
-      log.teamhubAi.main.error('Error checking runtime image', undefined, {
+      log.agelumAi.main.error('Error checking runtime image', undefined, {
         error,
       })
       return false
@@ -113,7 +113,7 @@ export class MCPContainerManager {
    * Build the MCP runtime image
    */
   async buildRuntimeImage(): Promise<void> {
-    log.teamhubAi.main.info('Building MCP runtime image')
+    log.agelumAi.main.info('Building MCP runtime image')
 
     const buildScript = path.join(
       process.cwd(),
@@ -131,24 +131,24 @@ export class MCPContainerManager {
 
       buildProcess.stdout?.on('data', (data) => {
         output += data.toString()
-        log.teamhubAi.main.debug('Build output', undefined, {
+        log.agelumAi.main.debug('Build output', undefined, {
           output: data.toString().trim(),
         })
       })
 
       buildProcess.stderr?.on('data', (data) => {
         errorOutput += data.toString()
-        log.teamhubAi.main.error('Build error output', undefined, {
+        log.agelumAi.main.error('Build error output', undefined, {
           error: data.toString().trim(),
         })
       })
 
       buildProcess.on('close', (code) => {
         if (code === 0) {
-          log.teamhubAi.main.info('MCP runtime image built successfully')
+          log.agelumAi.main.info('MCP runtime image built successfully')
           resolve()
         } else {
-          log.teamhubAi.main.error(
+          log.agelumAi.main.error(
             'Failed to build MCP runtime image',
             undefined,
             { code, errorOutput }
@@ -170,7 +170,7 @@ export class MCPContainerManager {
       )
 
       if (stdout.trim() === this.networkName) {
-        log.teamhubAi.main.info('Network already exists', undefined, {
+        log.agelumAi.main.info('Network already exists', undefined, {
           networkName: this.networkName,
         })
         return
@@ -193,11 +193,11 @@ export class MCPContainerManager {
       ].join(' ')
 
       await execAsync(networkCommand)
-      log.teamhubAi.main.info('Created hardened network', undefined, {
+      log.agelumAi.main.info('Created hardened network', undefined, {
         networkName: this.networkName,
       })
     } catch (error) {
-      log.teamhubAi.main.error('Error ensuring network', undefined, { error })
+      log.agelumAi.main.error('Error ensuring network', undefined, { error })
       throw error
     }
   }
@@ -448,8 +448,8 @@ export class MCPContainerManager {
     // Prepare config
     const config: MCPContainerConfig = {
       organizationId,
-      dataPath: `/var/lib/teamhub/mcp/data/${organizationId}`,
-      logsPath: `/var/lib/teamhub/mcp/logs/${organizationId}`,
+      dataPath: `/var/lib/agelum/mcp/data/${organizationId}`,
+      logsPath: `/var/lib/agelum/mcp/logs/${organizationId}`,
       ...this.defaultConfig,
       ...customConfig,
     }

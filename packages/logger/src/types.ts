@@ -34,8 +34,8 @@ export interface TypeLogger {
   off: LoggerFunction
 }
 
-// Main logger structure types for TeamHub Apps
-export interface TeamHubLoggers {
+// Main logger structure types for Agelum Apps
+export interface AgelumLoggers {
   main: TypeLogger
   auth: TypeLogger
   api: TypeLogger
@@ -56,15 +56,15 @@ export interface BrowserServiceLoggers {
   automation: TypeLogger
 }
 
-// Main logger structure types for TeamHub Packages
-export interface TeamHubDbLoggers {
+// Main logger structure types for Agelum Packages
+export interface AgelumDbLoggers {
   main: TypeLogger
   schema: TypeLogger
   query: TypeLogger
   migration: TypeLogger
 }
 
-export interface TeamHubAiLoggers {
+export interface AgelumAiLoggers {
   main: TypeLogger
   agent: TypeLogger
   tool: TypeLogger
@@ -97,14 +97,14 @@ export interface SystemLoggers {
 
 // Main logger interface
 export interface Logger {
-  // TeamHub Apps Loggers
-  teamhub: TeamHubLoggers
+  // Agelum Apps Loggers
+  agelum: AgelumLoggers
   aiGateway: AiGatewayLoggers
   browserService: BrowserServiceLoggers
 
-  // TeamHub Packages Loggers
-  teamhubDb: TeamHubDbLoggers
-  teamhubAi: TeamHubAiLoggers
+  // Agelum Packages Loggers
+  agelumDb: AgelumDbLoggers
+  agelumAi: AgelumAiLoggers
   aiServices: AiServicesLoggers
   drizzleReactive: DrizzleReactiveLoggers
 
@@ -112,9 +112,9 @@ export interface Logger {
   system: SystemLoggers
 
   // Legacy compatibility - these will be deprecated but maintained
-  db: TypeLogger // Alias for teamhubDb.main
-  'db-query': TypeLogger // Alias for teamhubDb.query
-  ai: TypeLogger // Alias for teamhubAi.main
+  db: TypeLogger // Alias for agelumDb.main
+  'db-query': TypeLogger // Alias for agelumDb.query
+  ai: TypeLogger // Alias for agelumAi.main
   auth: TypeLogger // Alias for system.auth
   api: TypeLogger // Alias for system.api
   startup: TypeLogger // Alias for system.startup

@@ -107,11 +107,11 @@ export const searchYandex: ToolTypeDefinition = {
     params: unknown,
     configuration: Record<string, string>
   ): Promise<unknown[]> => {
-    log.teamhubAi.tool.info('Yandex Search Tool: Starting execution')
-    log.teamhubAi.tool.debug('Yandex Search Tool: Received params', undefined, {
+    log.agelumAi.tool.info('Yandex Search Tool: Starting execution')
+    log.agelumAi.tool.debug('Yandex Search Tool: Received params', undefined, {
       params: JSON.stringify(params, null, 2),
     })
-    log.teamhubAi.tool.debug(
+    log.agelumAi.tool.debug(
       'Yandex Search Tool: Received configuration keys',
       undefined,
       {
@@ -136,7 +136,7 @@ export const searchYandex: ToolTypeDefinition = {
       language,
     } = params as SearchYandexParameters
 
-    log.teamhubAi.tool.info('Yandex Search Tool: Query details', undefined, {
+    log.agelumAi.tool.info('Yandex Search Tool: Query details', undefined, {
       query,
       numResults,
       searchType,
@@ -148,7 +148,7 @@ export const searchYandex: ToolTypeDefinition = {
     const YANDEX_USER_ID =
       process.env.YANDEX_USER_KEY || configuration.YANDEX_USER_KEY
 
-    log.teamhubAi.tool.debug(
+    log.agelumAi.tool.debug(
       'Yandex Search Tool: API Key available',
       undefined,
       {
@@ -157,7 +157,7 @@ export const searchYandex: ToolTypeDefinition = {
       }
     )
     if (YANDEX_API_KEY) {
-      log.teamhubAi.tool.debug(
+      log.agelumAi.tool.debug(
         'Yandex Search Tool: API Key details',
         undefined,
         {
@@ -167,7 +167,7 @@ export const searchYandex: ToolTypeDefinition = {
       )
     }
     if (YANDEX_USER_ID) {
-      log.teamhubAi.tool.debug(
+      log.agelumAi.tool.debug(
         'Yandex Search Tool: User ID details',
         undefined,
         {
@@ -179,16 +179,14 @@ export const searchYandex: ToolTypeDefinition = {
 
     try {
       if (!YANDEX_API_KEY) {
-        log.teamhubAi.tool.error(
-          'Yandex Search Tool: YANDEX_API_KEY is missing'
-        )
+        log.agelumAi.tool.error('Yandex Search Tool: YANDEX_API_KEY is missing')
         throw new Error(
           'YANDEX_API_KEY must be set in configuration or environment'
         )
       }
 
       if (!YANDEX_USER_ID) {
-        log.teamhubAi.tool.error(
+        log.agelumAi.tool.error(
           'Yandex Search Tool: YANDEX_USER_KEY (User ID) is missing'
         )
         throw new Error(
@@ -197,7 +195,7 @@ export const searchYandex: ToolTypeDefinition = {
       }
 
       // Test IAM token validity before making the search request
-      log.teamhubAi.tool.debug('Yandex API_KEY test', undefined, {
+      log.agelumAi.tool.debug('Yandex API_KEY test', undefined, {
         apiKeyPreview: YANDEX_API_KEY.substring(0, 8) + '...',
       })
       const tokenTestResponse = await fetch(

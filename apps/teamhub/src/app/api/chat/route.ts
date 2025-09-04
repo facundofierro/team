@@ -7,16 +7,16 @@ import { log } from '@repo/logger'
 
 export async function POST(req: NextRequest) {
   try {
-    log.teamhub.api.info('Received chat request')
+    log.agelum.api.info('Received chat request')
 
     // Get authenticated session
     const session = await auth()
     if (!session?.user?.id) {
-      log.teamhub.auth.error('Unauthorized chat request')
+      log.agelum.auth.error('Unauthorized chat request')
       return new Response('Unauthorized', { status: 401 })
     }
 
-    log.teamhub.auth.info('User authenticated for chat', session.user.id)
+    log.agelum.auth.info('User authenticated for chat', session.user.id)
 
     // Get user's organization
     const organizations = await getOrganizations.execute(
@@ -24,18 +24,18 @@ export async function POST(req: NextRequest) {
       reactiveDb
     )
     if (!organizations.length) {
-      log.teamhub.auth.error('No organization found for user', session.user.id)
+      log.agelum.auth.error('No organization found for user', session.user.id)
       return new Response('No organization found', { status: 403 })
     }
 
-    log.teamhub.auth.info('Organization found for chat', session.user.id, {
+    log.agelum.auth.info('Organization found for chat', session.user.id, {
       organizationId: organizations[0].id,
     })
 
     const { messages, summary, agentId, agentCloneId, memoryRules, storeRule } =
       await req.json()
 
-    log.teamhub.api.debug('Chat request data', session.user.id, {
+    log.agelum.api.debug('Chat request data', session.user.id, {
       messagesCount: messages?.length,
       agentId,
       agentCloneId,
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     // Validate required parameters
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      log.teamhub.api.error(
+      log.agelum.api.error(
         'Invalid or missing messages parameter',
         session.user.id
       )
@@ -54,24 +54,24 @@ export async function POST(req: NextRequest) {
     }
 
     if (!agentId || typeof agentId !== 'string') {
-      log.teamhub.api.error(
+      log.agelum.api.error(
         'Invalid or missing agentId parameter',
         session.user.id
       )
       return new Response('Agent ID is required', { status: 400 })
     }
 
-    log.teamhub.agent.debug('Getting agent details', session.user.id, {
+    log.agelum.agent.debug('Getting agent details', session.user.id, {
       agentId,
     })
     // Get agent with tool permissions
     const agent = await getAgent.execute({ id: agentId }, reactiveDb)
     if (!agent) {
-      log.teamhub.agent.error('Agent not found', session.user.id, { agentId })
+      log.agelum.agent.error('Agent not found', session.user.id, { agentId })
       return new Response('Agent not found', { status: 404 })
     }
 
-    log.teamhub.agent.info('Agent found', session.user.id, {
+    log.agelum.agent.info('Agent found', session.user.id, {
       agentId,
       agentName: agent.name,
     })
@@ -80,11 +80,11 @@ export async function POST(req: NextRequest) {
     const agentToolPermissions = agent.toolPermissions as AgentToolPermissions
     const toolPermissions = agentToolPermissions?.rules || []
 
-    log.teamhub.agent.debug('Agent tool permissions count', session.user.id, {
+    log.agelum.agent.debug('Agent tool permissions count', session.user.id, {
       agentId,
       count: toolPermissions.length,
     })
-    log.teamhub.agent.debug('Agent tool permissions', session.user.id, {
+    log.agelum.agent.debug('Agent tool permissions', session.user.id, {
       agentId,
       permissions: toolPermissions.map((permission) => ({
         toolId: permission.toolId,
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     // Get actual tools from toolIds and create extended tool permissions
     const activeTools = []
     if (toolPermissions.length > 0) {
-      log.teamhub.agent.debug('Fetching tool details', session.user.id, {
+      log.agelum.agent.debug('Fetching tool details', session.user.id, {
         agentId,
       })
 
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
             reactiveDb
           )
           if (tool && tool.isActive) {
-            log.teamhub.agent.info('Found active tool', session.user.id, {
+            log.agelum.agent.info('Found active tool', session.user.id, {
               agentId,
               toolId: tool.id,
               toolName: tool.name,
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
               isManaged: tool.isManaged,
             })
           } else {
-            log.teamhub.agent.warn(
+            log.agelum.agent.warn(
               'Tool not found or inactive',
               session.user.id,
               {
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
             )
           }
         } catch (error) {
-          log.teamhub.agent.error('Error fetching tool', session.user.id, {
+          log.agelum.agent.error('Error fetching tool', session.user.id, {
             agentId,
             toolId: permission.toolId,
             error,
@@ -142,13 +142,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    log.teamhub.agent.info('Active tools count', session.user.id, {
+    log.agelum.agent.info('Active tools count', session.user.id, {
       agentId,
       count: activeTools.length,
     })
 
     if (activeTools.length > 0) {
-      log.teamhub.agent.debug('Active tools details', session.user.id, {
+      log.agelum.agent.debug('Active tools details', session.user.id, {
         agentId,
         tools: activeTools.map((tool) => ({
           id: tool.id,
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    log.teamhub.api.info('Calling sendChat with tools', session.user.id, {
+    log.agelum.api.info('Calling sendChat with tools', session.user.id, {
       agentId,
       toolsCount: activeTools.length,
     })
@@ -178,8 +178,8 @@ export async function POST(req: NextRequest) {
       tools: activeTools,
     })
   } catch (error) {
-    log.teamhub.api.error('Error processing chat request', undefined, { error })
-    log.teamhub.api.error('Error stack trace', undefined, {
+    log.agelum.api.error('Error processing chat request', undefined, { error })
+    log.agelum.api.error('Error stack trace', undefined, {
       stack: error instanceof Error ? error.stack : 'No stack trace',
     })
     return new Response('Internal Server Error', { status: 500 })

@@ -1,8 +1,8 @@
-# TeamHub Cursor Rules
+# Agelum Cursor Rules
 
 ## Project Overview
 
-TeamHub is an enterprise AI agent management platform built with Next.js 14, TypeScript, and a modern monorepo structure. It provides multi-tenant environments for organizations to create, manage, and orchestrate AI agents at scale.
+Agelum is an enterprise AI agent management platform built with Next.js 14, TypeScript, and a modern monorepo structure. It provides multi-tenant environments for organizations to create, manage, and orchestrate AI agents at scale.
 
 ## Architecture Guidelines
 

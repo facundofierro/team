@@ -1,10 +1,10 @@
 # @agelum/ai
 
-A comprehensive AI library for TeamHub that provides various AI-powered functions for chat, task management, workflows, and tool integration.
+A comprehensive AI library for Agelum that provides various AI-powered functions for chat, task management, workflows, and tool integration.
 
 ## Installation
 
-This is a private package within the TeamHub monorepo. Install dependencies with:
+This is a private package within the Agelum monorepo. Install dependencies with:
 
 ```bash
 pnpm install
@@ -101,7 +101,7 @@ Sends multiple tasks as a workflow to an agent.
 **Example:**
 
 ```typescript
-import { sendWorkflow } from '@teamhub/ai'
+import { sendWorkflow } from '@agelum/ai'
 
 const messages = await sendWorkflow({
   tasks: [
@@ -134,7 +134,7 @@ Sends informational content to an agent.
 **Example:**
 
 ```typescript
-import { sendInfo } from '@teamhub/ai'
+import { sendInfo } from '@agelum/ai'
 
 const message = await sendInfo({
   infoType: 'document_update',
@@ -159,7 +159,7 @@ Executes a scheduled cron job by ID.
 **Example:**
 
 ```typescript
-import { cronExecute } from '@teamhub/ai'
+import { cronExecute } from '@agelum/ai'
 
 const message = await cronExecute('cron-123')
 ```
@@ -175,7 +175,7 @@ Retrieves all available tool types in the system.
 **Example:**
 
 ```typescript
-import { getToolTypes } from '@teamhub/ai'
+import { getToolTypes } from '@agelum/ai'
 
 const toolTypes = await getToolTypes()
 console.log(toolTypes) // Available tools: searchGoogle, searchDuckDuckGo, searchYandex
@@ -194,7 +194,7 @@ Gets a handler function for a specific tool.
 **Example:**
 
 ```typescript
-import { getToolHandler } from '@teamhub/ai'
+import { getToolHandler } from '@agelum/ai'
 
 const handler = await getToolHandler('search-google')
 const result = await handler({ query: 'AI technology trends' })
@@ -268,7 +268,7 @@ For detailed documentation on individual tools, see:
 
 - `@ai-sdk/deepseek` - DeepSeek AI integration
 - `@ai-sdk/openai` - OpenAI integration
-- `@teamhub/db` - TeamHub database layer
+- `@agelum/db` - Agelum database layer
 - `ai` - Vercel AI SDK
 - `zod` - TypeScript-first schema validation
 
@@ -280,4 +280,4 @@ Build the library:
 pnpm build
 ```
 
-The library is written in TypeScript and uses the TeamHub database layer for persistence and AI SDK for model interactions.
+The library is written in TypeScript and uses the Agelum database layer for persistence and AI SDK for model interactions.

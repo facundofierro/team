@@ -74,15 +74,15 @@ const createTypeLogger = (type: string): TypeLogger => ({
 
 // Main typed logger object organized by source
 export const createLogger = (): Logger => ({
-  // TeamHub Apps Loggers
-  teamhub: {
-    main: createTypeLogger('teamhub'),
-    auth: createTypeLogger('teamhub-auth'),
-    api: createTypeLogger('teamhub-api'),
-    ui: createTypeLogger('teamhub-ui'),
-    agent: createTypeLogger('teamhub-agent'),
-    chat: createTypeLogger('teamhub-chat'),
-    memory: createTypeLogger('teamhub-memory'),
+  // Agelum Apps Loggers
+  agelum: {
+    main: createTypeLogger('agelum'),
+    auth: createTypeLogger('agelum-auth'),
+    api: createTypeLogger('agelum-api'),
+    ui: createTypeLogger('agelum-ui'),
+    agent: createTypeLogger('agelum-agent'),
+    chat: createTypeLogger('agelum-chat'),
+    memory: createTypeLogger('agelum-memory'),
   },
 
   aiGateway: {
@@ -96,19 +96,19 @@ export const createLogger = (): Logger => ({
     automation: createTypeLogger('browser-service-automation'),
   },
 
-  // TeamHub Packages Loggers
-  teamhubDb: {
+  // Agelum Packages Loggers
+  agelumDb: {
     main: createTypeLogger('agelum-db'),
     schema: createTypeLogger('agelum-db-schema'),
     query: createTypeLogger('agelum-db-query'),
     migration: createTypeLogger('agelum-db-migration'),
   },
 
-  teamhubAi: {
-    main: createTypeLogger('teamhub-ai'),
-    agent: createTypeLogger('teamhub-ai-agent'),
-    tool: createTypeLogger('teamhub-ai-tool'),
-    memory: createTypeLogger('teamhub-ai-memory'),
+  agelumAi: {
+    main: createTypeLogger('agelum-ai'),
+    agent: createTypeLogger('agelum-ai-agent'),
+    tool: createTypeLogger('agelum-ai-tool'),
+    memory: createTypeLogger('agelum-ai-memory'),
   },
 
   aiServices: {
@@ -137,9 +137,9 @@ export const createLogger = (): Logger => ({
   },
 
   // Legacy compatibility - these will be deprecated but maintained
-  db: createTypeLogger('db'), // Alias for teamhubDb.main
-  'db-query': createTypeLogger('db-query'), // Alias for teamhubDb.query
-  ai: createTypeLogger('ai'), // Alias for teamhubAi.main
+  db: createTypeLogger('db'), // Alias for agelumDb.main
+  'db-query': createTypeLogger('db-query'), // Alias for agelumDb.query
+  ai: createTypeLogger('ai'), // Alias for agelumAi.main
   auth: createTypeLogger('auth'), // Alias for system.auth
   api: createTypeLogger('api'), // Alias for system.api
   startup: createTypeLogger('startup'), // Alias for system.startup

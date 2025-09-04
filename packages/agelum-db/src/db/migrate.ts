@@ -37,7 +37,7 @@ async function createDatabaseIfNotExists(
   } catch (err: any) {
     if (err.code === '3D000') {
       // Database does not exist, create it
-      log.teamhubDb.migration.info(
+      log.agelumDb.migration.info(
         'Database does not exist, creating...',
         undefined,
         {
@@ -47,7 +47,7 @@ async function createDatabaseIfNotExists(
         }
       )
       await client.query(`CREATE DATABASE "${dbName}"`)
-      log.teamhubDb.migration.info('Database created successfully', undefined, {
+      log.agelumDb.migration.info('Database created successfully', undefined, {
         database: dbName,
       })
     } else {
@@ -63,7 +63,7 @@ async function ensureSchemasExist(connectionString: string) {
   try {
     await pool.query('CREATE SCHEMA IF NOT EXISTS agency;')
     await pool.query('CREATE SCHEMA IF NOT EXISTS auth;')
-    log.teamhubDb.schema.info('Database schemas ensured', undefined, {
+    log.agelumDb.schema.info('Database schemas ensured', undefined, {
       schemas: ['agency', 'auth'],
     })
   } finally {
@@ -74,7 +74,7 @@ async function ensureSchemasExist(connectionString: string) {
 async function migrateDb(connectionString: string) {
   const pool = new Pool({ connectionString })
   const db = drizzle(pool, { schema: mainSchema })
-  log.teamhubDb.migration.info(
+  log.agelumDb.migration.info(
     'Starting main application database migration',
     undefined,
     {
@@ -91,7 +91,7 @@ async function main() {
       throw new Error('PG_HOST, PG_USER, or PG_PASSWORD is not set')
     }
 
-    log.teamhubDb.main.info('Starting database migration process', undefined, {
+    log.agelumDb.main.info('Starting database migration process', undefined, {
       host: PG_HOST,
       database: MAIN_DB_NAME,
       user: PG_USER,
@@ -101,7 +101,7 @@ async function main() {
     await ensureSchemasExist(MAIN_DB_URL)
     await migrateDb(MAIN_DB_URL)
 
-    log.teamhubDb.migration.info(
+    log.agelumDb.migration.info(
       'All migrations completed successfully',
       undefined,
       {
@@ -109,7 +109,7 @@ async function main() {
       }
     )
   } catch (error) {
-    log.teamhubDb.migration.error('Error performing migrations', undefined, {
+    log.agelumDb.migration.error('Error performing migrations', undefined, {
       error: error instanceof Error ? error.message : String(error),
       database: MAIN_DB_NAME,
     })

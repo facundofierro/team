@@ -1,10 +1,4 @@
-import {
-  db,
-  dbMemories,
-  createMessage,
-  getAgent,
-  reactiveDb,
-} from '@agelum/db'
+import { db, dbMemories, createMessage, getAgent, reactiveDb } from '@agelum/db'
 import type { AgentMemoryRule, AgentToolPermission } from '@agelum/db'
 import type { MemoryStoreRule } from '../types'
 import { generateStreamText } from '../ai/vercel/generateStreamText'
@@ -54,7 +48,7 @@ export async function sendChat(params: {
       agentCloneId,
     })
 
-    log.teamhubAi.main.debug(
+    log.agelumAi.main.debug(
       'Calling generateStreamText (without await)',
       undefined,
       { agentId }
@@ -96,7 +90,7 @@ export async function sendChat(params: {
             reactiveDb
           )
         } catch (error) {
-          log.teamhubAi.main.error(
+          log.agelumAi.main.error(
             'Background message store failed',
             undefined,
             { error, agentId }
@@ -105,10 +99,10 @@ export async function sendChat(params: {
       })
     }
 
-    log.teamhubAi.main.debug('Returning stream promise', undefined, { agentId })
+    log.agelumAi.main.debug('Returning stream promise', undefined, { agentId })
     return streamPromise
   } catch (error) {
-    log.teamhubAi.main.error('Error processing chat', undefined, {
+    log.agelumAi.main.error('Error processing chat', undefined, {
       error,
       agentId,
     })

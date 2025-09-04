@@ -26,7 +26,7 @@ export async function getActiveConversation(
     const memoryFunctions = await dbMemories(orgDatabaseName)
     return await memoryFunctions.getActiveConversation(agentId)
   } catch (error) {
-    log.teamhubDb.main.error('Failed to get active conversation', undefined, {
+    log.agelumDb.main.error('Failed to get active conversation', undefined, {
       error,
     })
     return null
@@ -45,7 +45,7 @@ export async function getRecentConversations(
     const memoryFunctions = await dbMemories(orgDatabaseName)
     return await memoryFunctions.getConversations(agentId, undefined, limit)
   } catch (error) {
-    log.teamhubDb.main.error('Failed to get recent conversations', undefined, {
+    log.agelumDb.main.error('Failed to get recent conversations', undefined, {
       error,
     })
     return []
@@ -100,7 +100,7 @@ export async function startNewConversation(
           await memoryFunctions.updateMemory(newConversation.id, {
             title: aiTitle,
           })
-          log.teamhub.main.info('Updated conversation title', undefined, {
+          log.agelum.main.info('Updated conversation title', undefined, {
             aiTitle,
           })
         }
@@ -181,26 +181,26 @@ export async function completeConversation(
         processingOptions
       )
         .then(() => {
-          log.teamhub.memory.info('Generated conversation brief', undefined, {
+          log.agelum.memory.info('Generated conversation brief', undefined, {
             conversationId,
           })
         })
         .catch((error) => {
-          log.teamhub.memory.error(
+          log.agelum.memory.error(
             'Failed to generate conversation brief',
             undefined,
             { error, conversationId }
           )
         })
     } else {
-      log.teamhub.memory.info(
+      log.agelum.memory.info(
         'Conversation completed without brief generation',
         undefined,
         { conversationId }
       )
     }
   } catch (error) {
-    log.teamhub.memory.error('Failed to complete conversation', undefined, {
+    log.agelum.memory.error('Failed to complete conversation', undefined, {
       error,
       conversationId,
     })
@@ -254,7 +254,7 @@ export async function switchToConversation(
       // Update existing active conversations to inactive
       for (const activeConv of existingActiveConversations) {
         if (activeConv.id !== conversationId && activeConv.isActive) {
-          log.teamhub.chat.info('Marking conversation as inactive', undefined, {
+          log.agelum.chat.info('Marking conversation as inactive', undefined, {
             conversationId: activeConv.id,
             action: 'switchToConversation',
           })
@@ -268,7 +268,7 @@ export async function switchToConversation(
       }
 
       // Mark the target conversation as active
-      log.teamhub.chat.info('Marking conversation as active', undefined, {
+      log.agelum.chat.info('Marking conversation as active', undefined, {
         conversationId,
         action: 'switchToConversation',
       })

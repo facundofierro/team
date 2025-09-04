@@ -19,12 +19,12 @@ The logger is organized into modular files for better maintainability:
 import { log } from '@repo/logger'
 
 // TeamHub Apps
-log.teamhub.main.info('Application started', 'user123')
-log.teamhub.auth.info('User logged in', 'user456')
-log.teamhub.api.info('API request received', 'user789')
-log.teamhub.agent.info('Agent created', 'user101')
-log.teamhub.chat.info('Chat message sent', 'user202')
-log.teamhub.memory.info('Memory stored', 'user303')
+log.agelum.main.info('Application started', 'user123')
+log.agelum.auth.info('User logged in', 'user456')
+log.agelum.api.info('API request received', 'user789')
+log.agelum.agent.info('Agent created', 'user101')
+log.agelum.chat.info('Chat message sent', 'user202')
+log.agelum.memory.info('Memory stored', 'user303')
 
 // AI Gateway
 log.aiGateway.main.info('Gateway initialized', 'user404')
@@ -36,14 +36,14 @@ log.browserService.main.info('Service started', 'user707')
 log.browserService.automation.info('Automation completed', 'user808')
 
 // TeamHub Packages
-log.teamhubDb.main.info('Database connected', 'user909')
-log.teamhubDb.query.info('Query executed', 'user101')
-log.teamhubDb.schema.info('Schema updated', 'user202')
+log.agelumDb.main.info('Database connected', 'user909')
+log.agelumDb.query.info('Query executed', 'user101')
+log.agelumDb.schema.info('Schema updated', 'user202')
 
-log.teamhubAi.main.info('AI service ready', 'user303')
-log.teamhubAi.agent.info('Agent processing', 'user404')
-log.teamhubAi.tool.info('Tool executed', 'user505')
-log.teamhubAi.memory.info('Memory retrieved', 'user606')
+log.agelumAi.main.info('AI service ready', 'user303')
+log.agelumAi.agent.info('Agent processing', 'user404')
+log.agelumAi.tool.info('Tool executed', 'user505')
+log.agelumAi.memory.info('Memory retrieved', 'user606')
 
 log.aiServices.main.info('AI services ready', 'user707')
 log.aiServices.provider.info('Provider configured', 'user808')
@@ -132,7 +132,7 @@ Enable detailed logging for specific users:
 
 ```bash
 # Format: userId:logType:logLevel,userId2:logType2:logLevel2
-USER_LOG_CONFIG="user123:teamhub-auth:DEBUG,user456:agelum-db-query:DEBUG"
+USER_LOG_CONFIG="user123:agelum-auth:DEBUG,user456:agelum-db-query:DEBUG"
 ```
 
 ## Adding New Log Types

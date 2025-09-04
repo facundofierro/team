@@ -160,8 +160,8 @@ export const agentToAgent: ToolTypeDefinition = {
     params: unknown,
     configuration: Record<string, string>
   ): Promise<A2AResult> => {
-    log.teamhubAi.tool.info('A2A Communication Tool: Starting execution')
-    log.teamhubAi.tool.debug('A2A Tool: Received params', undefined, {
+    log.agelumAi.tool.info('A2A Communication Tool: Starting execution')
+    log.agelumAi.tool.debug('A2A Tool: Received params', undefined, {
       params: JSON.stringify(params, null, 2),
     })
 
@@ -184,7 +184,7 @@ export const agentToAgent: ToolTypeDefinition = {
       }
 
       if (!targetAgent.isActive) {
-        log.teamhubAi.tool.warn(
+        log.agelumAi.tool.warn(
           'A2A Tool: Target agent is not active',
           undefined,
           {
@@ -204,7 +204,7 @@ export const agentToAgent: ToolTypeDefinition = {
         }
       }
 
-      log.teamhubAi.tool.info('A2A Tool: Target agent found', undefined, {
+      log.agelumAi.tool.info('A2A Tool: Target agent found', undefined, {
         targetAgentId,
         targetAgentName: targetAgent.name,
       })
@@ -221,7 +221,7 @@ export const agentToAgent: ToolTypeDefinition = {
       const isScheduled = scheduledFor && scheduledFor > new Date()
 
       if (isScheduled) {
-        log.teamhubAi.tool.info('A2A Tool: Scheduling message', undefined, {
+        log.agelumAi.tool.info('A2A Tool: Scheduling message', undefined, {
           targetAgentId,
           scheduledFor: scheduledFor.toISOString(),
         })
@@ -279,7 +279,7 @@ export const agentToAgent: ToolTypeDefinition = {
       }
 
       // For immediate delivery, create message and start conversation
-      log.teamhubAi.tool.info(
+      log.agelumAi.tool.info(
         'A2A Tool: Delivering immediate message',
         undefined,
         {
@@ -316,7 +316,7 @@ export const agentToAgent: ToolTypeDefinition = {
       let conversationId: string | undefined
 
       if (['task', 'workflow', 'request'].includes(messageType)) {
-        log.teamhubAi.tool.info(
+        log.agelumAi.tool.info(
           'A2A Tool: Creating new conversation',
           undefined,
           {
@@ -394,7 +394,7 @@ Please review and respond to this request.`
         )
 
         conversationId = newConversation.id
-        log.teamhubAi.tool.info('A2A Tool: Created conversation', undefined, {
+        log.agelumAi.tool.info('A2A Tool: Created conversation', undefined, {
           targetAgentId,
           conversationId,
           messageType,
@@ -417,7 +417,7 @@ Please review and respond to this request.`
         )
       } else {
         // For other message types (response, notification, status_update), just log them
-        log.teamhubAi.tool.info(
+        log.agelumAi.tool.info(
           'A2A Tool: Message delivered without conversation',
           undefined,
           {
@@ -427,7 +427,7 @@ Please review and respond to this request.`
         )
       }
 
-      log.teamhubAi.tool.info(
+      log.agelumAi.tool.info(
         'A2A Tool: Successfully delivered message',
         undefined,
         {
@@ -452,7 +452,7 @@ Please review and respond to this request.`
         }`,
       }
     } catch (error) {
-      log.teamhubAi.tool.error('A2A Tool: Error occurred', undefined, {
+      log.agelumAi.tool.error('A2A Tool: Error occurred', undefined, {
         error,
         targetAgentId,
       })
