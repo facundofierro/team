@@ -10,4 +10,7 @@ export {
   HowItWorks as HowItWorksSection,
   SocialProof as SocialProofSection,
   ContactSection,
+  IndustryShowcaseSection,
+  ImplementationTimelineSection,
+  EnhancedGuaranteeSection,
 } from '@agelum/ux-core'

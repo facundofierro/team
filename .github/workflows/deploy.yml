@@ -58,22 +58,6 @@ on:
         options:
           - 'false'
           - 'true'
-      force_redeploy_posthog:
-        description: 'Force redeploy PostHog service'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - 'false'
-          - 'true'
-      force_redeploy_clickhouse:
-        description: 'Force redeploy ClickHouse service (for PostHog)'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - 'false'
-          - 'true'
       force_redeploy_pinggy:
         description: 'Force redeploy Pinggy tunnel'
         required: false
@@ -193,8 +177,7 @@ jobs:
           echo "  🎬 Remotion:       ${{ github.event.inputs.force_redeploy_remotion || 'false' }}"
           echo "  🔧 Infrastructure: ${{ github.event.inputs.force_redeploy_infrastructure || 'false' }} (rebuilds DB image)"
           echo "  ☁️ Nextcloud:      ${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
-          echo "  📊 PostHog:        ${{ github.event.inputs.force_redeploy_posthog || 'false' }}"
-          echo "  🗄️  ClickHouse:     ${{ github.event.inputs.force_redeploy_clickhouse || 'false' }}"
+          # PostHog/ClickHouse disabled
           echo "  🚇 Pinggy:         ${{ github.event.inputs.force_redeploy_pinggy || 'false' }}"
 
       - name: Setup Pinggy tunnel
@@ -256,9 +239,9 @@ jobs:
           export FORCE_REDEPLOY_REMOTION="${{ github.event.inputs.force_redeploy_remotion || 'false' }}"
           export FORCE_REDEPLOY_INFRASTRUCTURE="${{ github.event.inputs.force_redeploy_infrastructure || 'false' }}"
           export FORCE_REDEPLOY_NEXTCLOUD="${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
-          export FORCE_REDEPLOY_POSTHOG="${{ github.event.inputs.force_redeploy_posthog || 'false' }}"
+          # PostHog disabled
           export FORCE_REDEPLOY_PINGGY="${{ github.event.inputs.force_redeploy_pinggy || 'false' }}"
-          export FORCE_REDEPLOY_CLICKHOUSE="${{ github.event.inputs.force_redeploy_clickhouse || 'false' }}"
+          # ClickHouse disabled
 
           infrastructure/scripts/deploy.sh ${{ needs.build-and-push.outputs.tag }}
 
@@ -273,7 +256,7 @@ jobs:
             echo "  - Main App: https://ukjhwjyazp.a.pinggy.link/"
             echo "  - Remotion: https://ukjhwjyazp.a.pinggy.link/remotion/"
             echo "  - Nextcloud: https://ukjhwjyazp.a.pinggy.link/nextcloud/"
-            echo "  - PostHog: https://ukjhwjyazp.a.pinggy.link/posthog/"
+            # PostHog disabled
             echo "  - Health Check: https://ukjhwjyazp.a.pinggy.link/health"
             echo "🔗 Recent tunnel logs:"
             docker logs --tail 5 pinggy-tunnel 2>/dev/null || true

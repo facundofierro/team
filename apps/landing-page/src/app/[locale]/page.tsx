@@ -10,6 +10,9 @@ import {
   SocialProofSection,
   HowItWorksSection,
   ContactSection,
+  IndustryShowcaseSection,
+  ImplementationTimelineSection,
+  EnhancedGuaranteeSection,
 } from '@/components'
 
 // Import content and handlers
@@ -23,6 +26,9 @@ import {
   socialProofContent,
   contactContent,
   chatWidgetContent,
+  industryShowcaseContent,
+  implementationTimelineContent,
+  enhancedGuaranteeContent,
 } from '@/content'
 
 import {
@@ -97,6 +103,15 @@ export default function LandingPage() {
             sectionId={featuresContent.sectionId}
           />
 
+          <IndustryShowcaseSection
+            title={industryShowcaseContent.title}
+            subtitle={industryShowcaseContent.subtitle}
+            industries={industryShowcaseContent.industries}
+            trustElements={industryShowcaseContent.trustElements}
+            ctaText={industryShowcaseContent.ctaText}
+            onCtaClick={interactionHandlers.onIndustryShowcaseCtaClick}
+          />
+
           <SocialProofSection
             title={socialProofContent.title}
             sectionId={socialProofContent.sectionId}
@@ -104,11 +119,29 @@ export default function LandingPage() {
             testimonial={socialProofContent.testimonial}
           />
 
+          <ImplementationTimelineSection
+            title={implementationTimelineContent.title}
+            subtitle={implementationTimelineContent.subtitle}
+            phases={implementationTimelineContent.phases}
+            milestones={implementationTimelineContent.milestones}
+            trustElements={implementationTimelineContent.trustElements}
+            ctaText={implementationTimelineContent.ctaText}
+            onCtaClick={interactionHandlers.onTimelineCtaClick}
+          />
+
           <HowItWorksSection
             title={howItWorksContent.title}
             subtitle={howItWorksContent.subtitle}
             sectionId={howItWorksContent.sectionId}
             steps={howItWorksContent.steps}
+          />
+
+          <EnhancedGuaranteeSection
+            title={enhancedGuaranteeContent.title}
+            guarantees={enhancedGuaranteeContent.guarantees}
+            ctaText={enhancedGuaranteeContent.ctaText}
+            ctaSubtext={enhancedGuaranteeContent.ctaSubtext}
+            onCtaClick={interactionHandlers.onEnhancedGuaranteeCtaClick}
           />
 
           <ContactSection

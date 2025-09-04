@@ -10,8 +10,9 @@ export FORCE_REDEPLOY_TEAMHUB="${FORCE_REDEPLOY_TEAMHUB:-false}"
 export FORCE_REDEPLOY_REMOTION="${FORCE_REDEPLOY_REMOTION:-false}"
 export FORCE_REDEPLOY_INFRASTRUCTURE="${FORCE_REDEPLOY_INFRASTRUCTURE:-false}"
 export FORCE_REDEPLOY_NEXTCLOUD="${FORCE_REDEPLOY_NEXTCLOUD:-false}"
-export FORCE_REDEPLOY_POSTHOG="${FORCE_REDEPLOY_POSTHOG:-false}"
-export FORCE_REDEPLOY_CLICKHOUSE="${FORCE_REDEPLOY_CLICKHOUSE:-false}"
+# PostHog/ClickHouse disabled
+export FORCE_REDEPLOY_POSTHOG="false"
+export FORCE_REDEPLOY_CLICKHOUSE="false"
 export FORCE_REDEPLOY_ALL="${FORCE_REDEPLOY_ALL:-false}"
 
 # Backwards compatibility with old FORCE_REDEPLOY
@@ -26,8 +27,7 @@ if [ "$FORCE_REDEPLOY_ALL" = "true" ]; then
     export FORCE_REDEPLOY_REMOTION="true"
     export FORCE_REDEPLOY_INFRASTRUCTURE="true"
     export FORCE_REDEPLOY_NEXTCLOUD="true"
-    export FORCE_REDEPLOY_POSTHOG="true"
-    export FORCE_REDEPLOY_CLICKHOUSE="true"
+    # PostHog/ClickHouse disabled – keep false
 fi
 
 # Colors for output
@@ -104,45 +104,9 @@ check_data_volumes() {
         echo -e "${YELLOW}⚠️  Nextcloud DB data volume not found - will be created${NC}"
     fi
 
-    # Check PostHog data
-    if docker volume ls --filter name=teamhub_posthog_data --format "{{.Name}}" | grep -q teamhub_posthog_data; then
-        local POSTHOG_SIZE=$(docker system df -v | grep teamhub_posthog_data | awk '{print $3}' || echo "Unknown")
-        echo -e "${GREEN}✅ PostHog data volume exists (${POSTHOG_SIZE})${NC}"
-    else
-        echo -e "${YELLOW}⚠️  PostHog data volume not found - will be created${NC}"
-    fi
+    # PostHog volumes disabled
 
-    # Check PostHog DB data
-    if docker volume ls --filter name=teamhub_posthog_db_data --format "{{.Name}}" | grep -q teamhub_posthog_db_data; then
-        local POSTHOG_DB_SIZE=$(docker system df -v | grep teamhub_posthog_db_data | awk '{print $3}' || echo "Unknown")
-        echo -e "${GREEN}✅ PostHog DB data volume exists (${POSTHOG_DB_SIZE})${NC}"
-    else
-        echo -e "${YELLOW}⚠️  PostHog DB data volume not found - will be created${NC}"
-    fi
-
-    # Check PostHog Redis data
-    if docker volume ls --filter name=teamhub_posthog_redis_data --format "{{.Name}}" | grep -q teamhub_posthog_redis_data; then
-        local POSTHOG_REDIS_SIZE=$(docker system df -v | grep teamhub_posthog_redis_data | awk '{print $3}' || echo "Unknown")
-        echo -e "${GREEN}✅ PostHog Redis data volume exists (${POSTHOG_REDIS_SIZE})${NC}"
-    else
-        echo -e "${YELLOW}⚠️  PostHog Redis data volume not found - will be created${NC}"
-    fi
-
-    # Check ClickHouse data
-    if docker volume ls --filter name=teamhub_clickhouse_data --format "{{.Name}}" | grep -q teamhub_clickhouse_data; then
-        local CLICKHOUSE_SIZE=$(docker system df -v | grep teamhub_clickhouse_data | awk '{print $3}' || echo "Unknown")
-        echo -e "${GREEN}✅ ClickHouse data volume exists (${CLICKHOUSE_SIZE})${NC}"
-    else
-        echo -e "${YELLOW}⚠️  ClickHouse data volume not found - will be created${NC}"
-    fi
-
-    # Check ClickHouse logs
-    if docker volume ls --filter name=teamhub_clickhouse_logs --format "{{.Name}}" | grep -q teamhub_clickhouse_logs; then
-        local CLICKHOUSE_LOGS_SIZE=$(docker system df -v | grep teamhub_clickhouse_logs | awk '{print $3}' || echo "Unknown")
-        echo -e "${GREEN}✅ ClickHouse logs volume exists (${CLICKHOUSE_LOGS_SIZE})${NC}"
-    else
-        echo -e "${YELLOW}⚠️  ClickHouse logs volume not found - will be created${NC}"
-    fi
+    # ClickHouse volumes disabled
 
     echo -e "${GREEN}💾 Data volumes are preserved during service redeployment${NC}"
     echo ""
@@ -272,8 +236,8 @@ check_individual_service_status() {
     local NGINX_OK=false
     local REMOTION_OK=false
     local NEXTCLOUD_OK=false
-    local POSTHOG_OK=false
-    local CLICKHOUSE_OK=false
+    local POSTHOG_OK=true
+    local CLICKHOUSE_OK=true
 
     if check_service_status "teamhub_teamhub" "TeamHub"; then
         TEAMHUB_OK=true
@@ -291,13 +255,7 @@ check_individual_service_status() {
         NEXTCLOUD_OK=true
     fi
 
-    if check_service_status "teamhub_posthog" "PostHog"; then
-        POSTHOG_OK=true
-    fi
-
-    if check_service_status "teamhub_clickhouse" "ClickHouse"; then
-        CLICKHOUSE_OK=true
-    fi
+    # PostHog/ClickHouse services disabled
 
     # Return status based on force redeploy flags
     local NEEDS_DEPLOYMENT=false
@@ -318,15 +276,7 @@ check_individual_service_status() {
         NEEDS_DEPLOYMENT=true
     fi
 
-    if [ "$FORCE_REDEPLOY_POSTHOG" = "true" ] || [ "$POSTHOG_OK" = false ]; then
-        NEEDS_DEPLOYMENT=true
-        # When PostHog is redeployed, also redeploy ClickHouse
-        export FORCE_REDEPLOY_CLICKHOUSE="true"
-    fi
-
-    if [ "$FORCE_REDEPLOY_CLICKHOUSE" = "true" ] || [ "$CLICKHOUSE_OK" = false ]; then
-        NEEDS_DEPLOYMENT=true
-    fi
+    # PostHog/ClickHouse redeploy disabled
 
     if [ "$NEEDS_DEPLOYMENT" = true ]; then
         echo -e "${YELLOW}⚠️  Services need deployment based on status/force flags${NC}"
@@ -371,9 +321,7 @@ deploy_full_stack() {
     export PG_PASSWORD="${PG_PASSWORD}"
     export REMOTION_IMAGE="${REMOTION_IMAGE}"
     export POSTGRES_PGVECTOR_IMAGE="${POSTGRES_PGVECTOR_IMAGE:-${CONTAINER_REGISTRY}/postgres-pgvector:latest}"
-    export POSTHOG_DB_PASSWORD="${POSTHOG_DB_PASSWORD:-posthog123}"
-    export POSTHOG_SECRET_KEY="${POSTHOG_SECRET_KEY:-your-secret-key-here}"
-    export POSTHOG_CLICKHOUSE_PASSWORD="${POSTHOG_CLICKHOUSE_PASSWORD:-clickhouse123}"
+    # PostHog/ClickHouse env disabled
 
     echo -e "${BLUE}🚀 Deploying application stack...${NC}"
     docker stack deploy -c ./docker-stack-temp.yml teamhub
@@ -524,27 +472,7 @@ wait_for_services() {
         done
     fi
 
-    # Check PostHog service (if being deployed)
-    if [ "$FORCE_REDEPLOY_POSTHOG" = "true" ] || ! check_service_status "teamhub_posthog" "PostHog" >/dev/null 2>&1; then
-        echo -e "${BLUE}⏳ Waiting for PostHog service...${NC}"
-        local posthog_ready=false
-        for i in {1..15}; do
-            if docker service ls --filter name=teamhub_posthog --format "{{.Replicas}}" | grep -q "1/1"; then
-                echo -e "${GREEN}✅ PostHog service is ready${NC}"
-                posthog_ready=true
-                break
-            fi
-            if [ $i -eq 15 ]; then
-                echo -e "${RED}❌ PostHog service failed to start after 15 attempts${NC}"
-                docker service logs teamhub_posthog --tail 20 || true
-                # PostHog is non-critical, don't count as critical failure
-                echo -e "${YELLOW}⚠️  PostHog failed but is non-critical${NC}"
-            else
-                echo "Waiting for PostHog service... (attempt $i/15)"
-                sleep 10
-            fi
-        done
-    fi
+    # PostHog wait disabled
 
         # Show complete service status before failing
     echo -e "${BLUE}📊 Complete Service Status Summary:${NC}"
@@ -604,12 +532,7 @@ test_application() {
         echo -e "${YELLOW}⚠️  Nextcloud service may still be starting up${NC}"
     fi
 
-    # Test PostHog endpoint
-    if curl -f --connect-timeout 5 --max-time 10 http://127.0.0.1:80/posthog/ >/dev/null 2>&1; then
-        echo -e "${GREEN}✅ PostHog service is accessible${NC}"
-    else
-        echo -e "${YELLOW}⚠️  PostHog service may still be starting up${NC}"
-    fi
+    # PostHog endpoint test disabled
 }
 
 # Enhanced cleanup function with disk space monitoring
@@ -694,33 +617,7 @@ show_deployment_summary() {
 }
 
 # PostHog deployment function
-deploy_posthog() {
-    echo -e "${BLUE}📊 Deploying PostHog Analytics Platform...${NC}"
-
-    # Deploy PostHog stack
-    docker stack deploy -c infrastructure/docker/docker-stack.yml teamhub
-
-    # Wait for PostHog to be ready
-    echo -e "${YELLOW}⏳ Waiting for PostHog to be ready...${NC}"
-    local max_attempts=30
-    local attempt=1
-
-    while [ $attempt -le $max_attempts ]; do
-        if curl -s http://localhost:8000/health >/dev/null 2>&1; then
-            echo -e "${GREEN}✅ PostHog is ready!${NC}"
-            break
-        fi
-
-        echo -e "${YELLOW}⏳ Attempt $attempt/$max_attempts - PostHog not ready yet...${NC}"
-        sleep 10
-        attempt=$((attempt + 1))
-    done
-
-    if [ $attempt -gt $max_attempts ]; then
-        echo -e "${RED}❌ PostHog failed to start within expected time${NC}"
-        return 1
-    fi
-}
+# deploy_posthog disabled
 
 # Main deployment function
 main() {
