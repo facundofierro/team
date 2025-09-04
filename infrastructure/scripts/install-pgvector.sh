@@ -14,11 +14,11 @@ echo "This script will automatically detect and install pgvector extension on da
 echo ""
 
 # Get the PostgreSQL container ID
-POSTGRES_CONTAINER=$(docker ps --filter "name=teamhub_postgres" --format "{{.ID}}")
+POSTGRES_CONTAINER=$(docker ps --filter "name=agelum_postgres" --format "{{.ID}}")
 
 if [ -z "$POSTGRES_CONTAINER" ]; then
-    echo -e "${RED}❌ PostgreSQL container not found. Make sure the TeamHub stack is running.${NC}"
-    echo "Run: docker service ls --filter name=teamhub_postgres"
+    echo -e "${RED}❌ PostgreSQL container not found. Make sure the Agelum stack is running.${NC}"
+    echo "Run: docker service ls --filter name=agelum_postgres"
     exit 1
 fi
 
@@ -30,18 +30,18 @@ install_pgvector_on_db() {
     echo -e "${BLUE}🔍 Checking pgvector extension for database: $dbname${NC}"
 
     # Check if extension already exists
-    if docker exec "$POSTGRES_CONTAINER" psql -U teamhub -d "$dbname" -t -c "SELECT 1 FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | grep -q 1; then
-        local version=$(docker exec "$POSTGRES_CONTAINER" psql -U teamhub -d "$dbname" -t -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | tr -d ' ')
+    if docker exec "$POSTGRES_CONTAINER" psql -U agelum -d "$dbname" -t -c "SELECT 1 FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | grep -q 1; then
+        local version=$(docker exec "$POSTGRES_CONTAINER" psql -U agelum -d "$dbname" -t -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | tr -d ' ')
         echo -e "${GREEN}✅ pgvector extension already installed on $dbname (version: $version)${NC}"
         return 0
     fi
 
     # Try to install the extension
     echo -e "${YELLOW}🚀 Installing pgvector extension on $dbname...${NC}"
-    if docker exec "$POSTGRES_CONTAINER" psql -U teamhub -d "$dbname" -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>/dev/null; then
+    if docker exec "$POSTGRES_CONTAINER" psql -U agelum -d "$dbname" -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>/dev/null; then
         # Verify installation
-        if docker exec "$POSTGRES_CONTAINER" psql -U teamhub -d "$dbname" -t -c "SELECT 1 FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | grep -q 1; then
-            local version=$(docker exec "$POSTGRES_CONTAINER" psql -U teamhub -d "$dbname" -t -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | tr -d ' ')
+        if docker exec "$POSTGRES_CONTAINER" psql -U agelum -d "$dbname" -t -c "SELECT 1 FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | grep -q 1; then
+            local version=$(docker exec "$POSTGRES_CONTAINER" psql -U agelum -d "$dbname" -t -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | tr -d ' ')
             echo -e "${GREEN}✅ pgvector extension successfully installed on $dbname (version: $version)${NC}"
             return 0
         else
@@ -62,7 +62,7 @@ install_pgvector_on_db() {
         fi
 
         # Check database permissions
-        local is_superuser=$(docker exec "$POSTGRES_CONTAINER" psql -U teamhub -d "$dbname" -t -c "SELECT usesuper FROM pg_user WHERE usename = 'teamhub';" 2>/dev/null | tr -d ' ')
+        local is_superuser=$(docker exec "$POSTGRES_CONTAINER" psql -U agelum -d "$dbname" -t -c "SELECT usesuper FROM pg_user WHERE usename = 'agelum';" 2>/dev/null | tr -d ' ')
         if [ "$is_superuser" = "t" ]; then
             echo -e "${GREEN}  ✅ Database user has superuser privileges${NC}"
         else
@@ -77,7 +77,7 @@ install_pgvector_on_db() {
 # Function to get list of databases
 get_databases() {
     echo -e "${BLUE}🔍 Discovering databases...${NC}"
-    local databases=$(docker exec "$POSTGRES_CONTAINER" psql -U teamhub -d postgres -t -c "SELECT datname FROM pg_database WHERE datname NOT IN ('postgres', 'template0', 'template1');" 2>/dev/null | tr -d ' ' | grep -v '^$')
+    local databases=$(docker exec "$POSTGRES_CONTAINER" psql -U agelum -d postgres -t -c "SELECT datname FROM pg_database WHERE datname NOT IN ('postgres', 'template0', 'template1');" 2>/dev/null | tr -d ' ' | grep -v '^$')
     echo "$databases"
 }
 
@@ -127,7 +127,7 @@ if [ ${#failed_databases[@]} -gt 0 ]; then
     echo "  2. Check that the database user has sufficient privileges"
     echo "  3. Verify the PostgreSQL version is compatible with pgvector"
     echo "  4. Check PostgreSQL logs for detailed error messages:"
-    echo "     docker service logs teamhub_postgres"
+    echo "     docker service logs agelum_postgres"
     exit 1
 fi
 

@@ -5,7 +5,7 @@ set -e
 # Health Check Script Version
 HEALTH_CHECK_VERSION="v2.1.1-debug-enhanced"
 echo "🏥 Running post-deployment health check..."
-echo "=== Health Check for TeamHub Application Stack ==="
+echo "=== Health Check for Agelum Application Stack ==="
 echo "📋 Health Check Version: $HEALTH_CHECK_VERSION"
 echo ""
 
@@ -105,7 +105,7 @@ echo "=== Infrastructure Services ==="
 echo -e "${BLUE}🔍 Checking PostgreSQL Database...${NC}"
 POSTGRES_STATUS=1
 for attempt in {1..3}; do
-    if check_service "teamhub_postgres" "PostgreSQL Database"; then
+    if check_service "agelum_postgres" "PostgreSQL Database"; then
         POSTGRES_STATUS=0
         break
     else
@@ -120,7 +120,7 @@ done
 echo -e "${BLUE}🔍 Checking Redis Cache...${NC}"
 REDIS_STATUS=1
 for attempt in {1..3}; do
-    if check_service "teamhub_redis" "Redis Cache"; then
+    if check_service "agelum_redis" "Redis Cache"; then
         REDIS_STATUS=0
         break
     else
@@ -134,28 +134,28 @@ done
 # Application services
 echo ""
 echo "=== Application Services ==="
-check_service "teamhub_teamhub" "TeamHub Application"
-TEAMHUB_STATUS=$?
+check_service "agelum_agelum" "Agelum Application"
+AGELUM_STATUS=$?
 
-check_service "teamhub_nginx" "Nginx Reverse Proxy"
+check_service "agelum_nginx" "Nginx Reverse Proxy"
 NGINX_STATUS=$?
 
-check_service "teamhub_remotion" "Remotion Rendering Service"
+check_service "agelum_remotion" "Remotion Rendering Service"
 REMOTION_STATUS=$?
 
-check_service "teamhub_nextcloud" "Nextcloud"
+check_service "agelum_nextcloud" "Nextcloud"
 NEXTCLOUD_STATUS=$?
 
-check_service "teamhub_nextcloud_db" "Nextcloud Database"
+check_service "agelum_nextcloud_db" "Nextcloud Database"
 NEXTCLOUD_DB_STATUS=$?
 
-check_service "teamhub_posthog" "PostHog Analytics"
+check_service "agelum_posthog" "PostHog Analytics"
 POSTHOG_STATUS=$?
 
-check_service "teamhub_posthog_db" "PostHog Database"
+check_service "agelum_posthog_db" "PostHog Database"
 POSTHOG_DB_STATUS=$?
 
-check_service "teamhub_posthog_redis" "PostHog Redis"
+check_service "agelum_posthog_redis" "PostHog Redis"
 POSTHOG_REDIS_STATUS=$?
 
 # Wait a bit for services to stabilize after confirming they're running
@@ -166,13 +166,13 @@ if [ $NGINX_STATUS -eq 0 ]; then
     # Additional debugging for nginx
     echo -e "${BLUE}🔍 Nginx debugging information:${NC}"
     echo -e "${BLUE}  Docker service details:${NC}"
-    docker service inspect teamhub_nginx --format '{{.Spec.Name}}: {{.Endpoint.Ports}}' 2>/dev/null || echo "    Could not inspect nginx service"
+    docker service inspect agelum_nginx --format '{{.Spec.Name}}: {{.Endpoint.Ports}}' 2>/dev/null || echo "    Could not inspect nginx service"
 
     echo -e "${BLUE}  Running nginx containers:${NC}"
-    docker ps --filter label=com.docker.swarm.service.name=teamhub_nginx --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "    No nginx containers found"
+    docker ps --filter label=com.docker.swarm.service.name=agelum_nginx --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "    No nginx containers found"
 
     echo -e "${BLUE}  Network connectivity test:${NC}"
-    if timeout 5 docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=teamhub_nginx | head -1) wget -q -O- http://localhost:80/health 2>/dev/null; then
+    if timeout 5 docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=agelum_nginx | head -1) wget -q -O- http://localhost:80/health 2>/dev/null; then
         echo -e "${GREEN}    ✅ Internal health check successful${NC}"
     else
         echo -e "${YELLOW}    ⚠️  Internal health check failed${NC}"
@@ -180,7 +180,7 @@ if [ $NGINX_STATUS -eq 0 ]; then
 
     echo -e "${BLUE}  Docker networking diagnosis:${NC}"
     echo -e "${BLUE}    Published ports:${NC}"
-    docker service inspect teamhub_nginx --format '{{range .Endpoint.Ports}}{{.PublishedPort}}:{{.TargetPort}}/{{.Protocol}} {{end}}' 2>/dev/null || echo "      Could not get port info"
+    docker service inspect agelum_nginx --format '{{range .Endpoint.Ports}}{{.PublishedPort}}:{{.TargetPort}}/{{.Protocol}} {{end}}' 2>/dev/null || echo "      Could not get port info"
 
     echo -e "${BLUE}    Host port usage:${NC}"
     ss -tuln | grep ":80 " || echo "      Port 80 not found in ss output"
@@ -244,7 +244,7 @@ echo "🔍 Debug: Calculating service health status..."
 
 [ $POSTGRES_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ PostgreSQL: healthy"
 [ $REDIS_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Redis: healthy"
-[ $TEAMHUB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ TeamHub: healthy"
+[ $AGELUM_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Agelum: healthy"
 [ $NGINX_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nginx: healthy"
 [ $REMOTION_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Remotion: healthy"
 [ $NEXTCLOUD_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nextcloud: healthy"
