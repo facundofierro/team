@@ -75,7 +75,7 @@ export function Sidebar({ organizations, session }: SidebarProps) {
   return (
     <div className="flex flex-col w-48 h-screen text-gray-200 border-r bg-menu">
       <div className="p-4 border-b">
-        <h1 className="ml-4 text-xl font-bold text-gray-200">TeamHub</h1>
+        <h1 className="ml-4 text-xl font-bold text-gray-200">Agelum</h1>
       </div>
 
       <ScrollArea className="flex-1">

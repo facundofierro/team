@@ -16,7 +16,7 @@ export async function generateMetadata({
   const resolvedParams = await params
 
   return {
-    title: 'TeamHub - AI Agent Management Platform',
+    title: 'Agelum - AI Agent Management Platform',
     description:
       'Enterprise AI agent management platform for organizations to create, manage, and orchestrate AI agents at scale.',
     keywords: [
@@ -26,22 +26,22 @@ export async function generateMetadata({
       'automation',
       'AI orchestration',
     ],
-    authors: [{ name: 'TeamHub' }],
-    creator: 'TeamHub',
-    publisher: 'TeamHub',
+    authors: [{ name: 'Agelum' }],
+    creator: 'Agelum',
+    publisher: 'Agelum',
     robots: 'index, follow',
     openGraph: {
       type: 'website',
       locale: resolvedParams.locale,
       url: `https://teamhub.ai/${resolvedParams.locale}`,
-      title: 'TeamHub - AI Agent Management Platform',
+      title: 'Agelum - AI Agent Management Platform',
       description:
         'Enterprise AI agent management platform for organizations to create, manage, and orchestrate AI agents at scale.',
-      siteName: 'TeamHub',
+      siteName: 'Agelum',
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'TeamHub - AI Agent Management Platform',
+      title: 'Agelum - AI Agent Management Platform',
       description:
         'Enterprise AI agent management platform for organizations to create, manage, and orchestrate AI agents at scale.',
     },

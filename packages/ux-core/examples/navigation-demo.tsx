@@ -317,7 +317,7 @@ export default function NavigationDemo() {
               <div>
                 <h4 className="font-semibold mb-2">Basic Sidebar Usage</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-                  {`import { Sidebar, defaultTeamHubItems } from '@teamhub/ux-core'
+                  {`import { Sidebar, defaultTeamHubItems } from '@agelum/ux-core'
 
 <Sidebar
   items={defaultTeamHubItems}
@@ -331,7 +331,7 @@ export default function NavigationDemo() {
               <div>
                 <h4 className="font-semibold mb-2">Search with Results</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-                  {`import { Search } from '@teamhub/ux-core'
+                  {`import { Search } from '@agelum/ux-core'
 
 <Search
   value={searchValue}
@@ -346,7 +346,7 @@ export default function NavigationDemo() {
               <div>
                 <h4 className="font-semibold mb-2">Complete Layout</h4>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-                  {`import { Layout } from '@teamhub/ux-core'
+                  {`import { Layout } from '@agelum/ux-core'
 
 <Layout
   sidebar={{ items: defaultTeamHubItems, activeItem: 'agents' }}

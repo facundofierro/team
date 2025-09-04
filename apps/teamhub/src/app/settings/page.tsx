@@ -1,9 +1,16 @@
 import { SettingsDetails } from '@/components/settings/SettingsDetails'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { db, OrganizationSettings, ToolTypeWithTypes, getOrganizationSettings, updateOrganizationSettings, reactiveDb } from '@teamhub/db'
-import { getToolTypes } from '@teamhub/ai'
-import { ToolTypeDefinition } from '@teamhub/ai/src/tools'
+import {
+  db,
+  OrganizationSettings,
+  ToolTypeWithTypes,
+  getOrganizationSettings,
+  updateOrganizationSettings,
+  reactiveDb,
+} from '@teamhub/db'
+import { getToolTypes } from '@agelum/ai'
+import { ToolTypeDefinition } from '@agelum/ai/src/tools'
 
 async function updateSettings(settings: OrganizationSettings) {
   'use server'
@@ -43,7 +50,10 @@ export default async function SettingsPage({ searchParams }: PageProps) {
     )
   }
 
-  const settings = await getOrganizationSettings.execute({ organizationId }, reactiveDb)
+  const settings = await getOrganizationSettings.execute(
+    { organizationId },
+    reactiveDb
+  )
   const toolTypes = await getToolTypes()
   settings.toolTypes = toolTypes
 

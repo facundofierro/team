@@ -1,6 +1,6 @@
 'use client'
 
-import { FormCard, GhostButton, ActionButton } from '@teamhub/ux-core'
+import { FormCard, GhostButton, ActionButton } from '@agelum/ux-core'
 import { Sparkles, FileText, Settings, Shield, Plus, Save } from 'lucide-react'
 
 export default function FormCardPage() {

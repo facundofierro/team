@@ -5,6 +5,8 @@ const config: Config = {
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    // Include ux-core components
+    '../../packages/ux-core/src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -49,7 +51,7 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-        // TeamHub specific colors
+        // Agelum specific colors
         menu: 'hsl(var(--menu))',
         menu2: 'hsl(var(--menu2))',
       },

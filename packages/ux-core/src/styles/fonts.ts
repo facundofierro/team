@@ -1,5 +1,5 @@
 /**
- * Font Configuration for TeamHub UX Core
+ * Font Configuration for Agelum UX Core
  * Based on the reference design from packages/ux-core/designs/config
  */
 

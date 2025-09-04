@@ -118,7 +118,7 @@ export function ContentExample() {
     {
       id: 'sarah-chen',
       quote:
-        "TeamHub transformed our construction business from reactive to predictive. We're now completing projects 40% faster with 25% lower costs. The AI agents handle everything from procurement to workforce planning.",
+        "Agelum transformed our construction business from reactive to predictive. We're now completing projects 40% faster with 25% lower costs. The AI agents handle everything from procurement to workforce planning.",
       author: 'Sarah Chen',
       position: 'CEO',
       company: 'MetalCorp Industries',
@@ -139,7 +139,7 @@ export function ContentExample() {
     {
       id: 'emily-watson',
       quote:
-        'Implementing TeamHub was seamless. The ROI was immediate, and the support team was incredibly helpful throughout the entire process.',
+        'Implementing Agelum was seamless. The ROI was immediate, and the support team was incredibly helpful throughout the entire process.',
       author: 'Emily Watson',
       position: 'CTO',
       company: 'TechStart Solutions',
@@ -244,7 +244,7 @@ export function ContentExample() {
             </h2>
             <p className="text-lg text-teamhub-muted max-w-3xl mx-auto">
               Real data from companies that have transformed their operations
-              with TeamHub
+              with Agelum
             </p>
           </div>
 

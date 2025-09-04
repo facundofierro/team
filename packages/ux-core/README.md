@@ -1,4 +1,4 @@
-# @teamhub/ux-core
+# @agelum/ux-core
 
 UX Core package for TeamHub - Component library and design system utilities.
 
@@ -72,35 +72,35 @@ The package provides three main categories of components:
 
 ```typescript
 // Import from external libraries (shadcn, tailark, origin, etc.)
-import { Button, Card, Badge } from '@teamhub/ux-core'
+import { Button, Card, Badge } from '@agelum/ux-core'
 
 // Or import specific components from specific libraries
-import { Button } from '@teamhub/ux-core/components/shadcn/button'
-import { Card } from '@teamhub/ux-core/components/shadcn/card'
+import { Button } from '@agelum/ux-core/components/shadcn/button'
+import { Card } from '@agelum/ux-core/components/shadcn/card'
 ```
 
 #### 2. TeamHub Core Components (Styled)
 
 ```typescript
 // Import TeamHub design system components
-import { TeamHubButton, TeamHubCard, TeamHubDialog } from '@teamhub/ux-core'
+import { TeamHubButton, TeamHubCard, TeamHubDialog } from '@agelum/ux-core'
 
 // Or import directly from core components
-import { TeamHubButton } from '@teamhub/ux-core/components-core/teamhub-button'
+import { TeamHubButton } from '@agelum/ux-core/components-core/teamhub-button'
 ```
 
 #### 3. Site-Specific Components
 
 ```typescript
 // Import site-specific components
-import { HeroSection } from '@teamhub/ux-core/components-site/hero-section'
+import { HeroSection } from '@agelum/ux-core/components-site/hero-section'
 ```
 
 ### Examples and Demos
 
 ```typescript
 // Import examples separately
-import { ComponentShowcase, SimpleDemo } from '@teamhub/ux-core/examples'
+import { ComponentShowcase, SimpleDemo } from '@agelum/ux-core/examples'
 
 // Use in your app
 <ComponentShowcase />  // Full component library
@@ -112,20 +112,20 @@ import { ComponentShowcase, SimpleDemo } from '@teamhub/ux-core/examples'
 ### 1. Install the Package
 
 ```bash
-pnpm add @teamhub/ux-core
+pnpm add @agelum/ux-core
 ```
 
 ### 2. Import CSS Variables
 
 ```css
 /* In your app's global CSS */
-@import '@teamhub/ux-core/src/styles/globals.css';
+@import '@agelum/ux-core/src/styles/globals.css';
 ```
 
 ### 3. Use Components
 
 ```tsx
-import { Button, Card } from '@teamhub/ux-core'
+import { Button, Card } from '@agelum/ux-core'
 
 export default function MyPage() {
   return (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { cn } from '@/utils'
+import { cn } from '../../utils/cn'
 
 interface ChatWidgetProps {
   className?: string
@@ -47,7 +47,7 @@ export function ChatWidget({
   onSendMessage,
   showInput = true,
   showFooter = true,
-  footerText = 'Powered by TeamHub AI',
+  footerText = 'Powered by Agelum AI',
   position = 'left',
   size = 'md',
 }: ChatWidgetProps) {

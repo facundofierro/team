@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { sendChat } from '@teamhub/ai'
+import { sendChat } from '@agelum/ai'
 import { auth } from '@/auth'
 import {
   db,

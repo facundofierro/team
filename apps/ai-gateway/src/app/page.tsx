@@ -13,10 +13,10 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          TeamHub AI Gateway
+          Agelum AI Gateway
         </h1>
         <p className="text-lg text-gray-600 mb-8">
-          AI provider abstraction service for TeamHub
+          AI provider abstraction service for Agelum
         </p>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-2">

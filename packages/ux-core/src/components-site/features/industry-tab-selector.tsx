@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { cn } from '@/utils'
+import { cn } from '../../utils/cn'
+import { siteUtils } from '../colors'
 
 interface IndustryTab {
   id: string

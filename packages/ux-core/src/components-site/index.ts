@@ -1,10 +1,17 @@
-// TeamHub Site Components
+// Agelum Site Components
 // These are components specifically designed for site/landing page usage
 // They are more focused on marketing, presentation, and public-facing content
 
 // Color System
 export { siteColors, siteUtils } from './colors'
-export type { SiteColorKey, SiteBrandKey, SiteMarketingKey } from './colors'
+export type {
+  SiteColorKey,
+  SitePrimaryKey,
+  SiteGradientKey,
+  SiteBackgroundKey,
+  SiteTextKey,
+  SiteBorderKey,
+} from './colors'
 
 // Landing Page Components
 // New components will be exported here as they are created

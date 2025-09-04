@@ -1,17 +1,14 @@
 import React from 'react'
-import { cn } from '@/utils'
+import { cn } from '../../utils/cn'
+import { siteColors, siteUtils } from '../colors'
 
 interface HeadlineProps {
   children: React.ReactNode
   className?: string
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
-  color?:
-    | 'white'
-    | 'teamhub-secondary'
-    | 'teamhub-primary'
-    | 'teamhub-highlight'
+  color?: 'white' | 'gray' | 'pink' | 'orange'
   emphasis?: 'none' | 'gradient' | 'highlight'
-  emphasisColor?: 'teamhub-highlight' | 'teamhub-accent' | 'teamhub-primary'
+  emphasisColor?: 'pink' | 'orange' | 'blue'
   align?: 'left' | 'center' | 'right'
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 }
@@ -25,10 +22,10 @@ const headlineSizes = {
 }
 
 const headlineColors = {
-  white: 'text-white',
-  'teamhub-secondary': 'text-teamhub-secondary',
-  'teamhub-primary': 'text-teamhub-primary',
-  'teamhub-highlight': 'text-teamhub-highlight',
+  white: siteColors.text.white,
+  gray: 'text-gray-800',
+  pink: siteColors.text.pink,
+  orange: siteColors.text.orange,
 }
 
 const headlineAlign = {
@@ -51,7 +48,7 @@ export function Headline({
   size = 'lg',
   color = 'white',
   emphasis = 'none',
-  emphasisColor = 'teamhub-highlight',
+  emphasisColor = 'pink',
   align = 'center',
   maxWidth = 'lg',
 }: HeadlineProps) {
@@ -73,12 +70,9 @@ export function Headline({
             key={index}
             className={cn(
               'text-transparent bg-clip-text bg-gradient-to-r',
-              emphasisColor === 'teamhub-highlight' &&
-                'from-teamhub-highlight to-teamhub-accent',
-              emphasisColor === 'teamhub-accent' &&
-                'from-teamhub-accent to-teamhub-primary',
-              emphasisColor === 'teamhub-primary' &&
-                'from-teamhub-primary to-teamhub-accent'
+              emphasisColor === 'pink' && 'from-[#F45584] to-[#8B5CF6]',
+              emphasisColor === 'orange' && 'from-[#FF8C42] to-[#F45584]',
+              emphasisColor === 'blue' && 'from-[#4F9CF9] to-[#3B82F6]'
             )}
           >
             {word}
@@ -113,7 +107,7 @@ interface SubHeadlineProps {
   children: React.ReactNode
   className?: string
   size?: 'sm' | 'md' | 'lg'
-  color?: 'white' | 'teamhub-muted' | 'teamhub-accent'
+  color?: 'white' | 'gray300' | 'gray200'
   align?: 'left' | 'center' | 'right'
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl'
 }
@@ -125,9 +119,9 @@ const subHeadlineSizes = {
 }
 
 const subHeadlineColors = {
-  white: 'text-white',
-  'teamhub-muted': 'text-teamhub-muted',
-  'teamhub-accent': 'text-teamhub-accent',
+  white: siteColors.text.white,
+  gray300: siteColors.text.gray300,
+  gray200: siteColors.text.gray200,
 }
 
 export function SubHeadline({

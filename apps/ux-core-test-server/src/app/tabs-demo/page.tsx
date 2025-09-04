@@ -1,6 +1,6 @@
 'use client'
 
-import { TeamHubTabs, type TeamHubTabItem } from '@teamhub/ux-core'
+import { AgelumTabs, type AgelumTabItem } from '@agelum/ux-core'
 import {
   BarChart3,
   Bot,
@@ -14,7 +14,7 @@ import {
   Server,
 } from 'lucide-react'
 
-const tabItems: TeamHubTabItem[] = [
+const tabItems: AgelumTabItem[] = [
   {
     value: 'overview',
     label: 'Overview',
@@ -114,7 +114,7 @@ const tabItems: TeamHubTabItem[] = [
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Configuration Settings</h3>
         <p className="text-gray-600">
-          Configure global settings for your TeamHub workspace and agents.
+          Configure global settings for your Agelum workspace and agents.
         </p>
         <div className="space-y-6">
           <div>
@@ -125,7 +125,7 @@ const tabItems: TeamHubTabItem[] = [
               type="text"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="Enter workspace name"
-              defaultValue="My TeamHub Workspace"
+              defaultValue="My Agelum Workspace"
             />
           </div>
           <div>
@@ -170,7 +170,7 @@ const tabItems: TeamHubTabItem[] = [
 ]
 
 // Tab items matching the design image
-const designTabItems: TeamHubTabItem[] = [
+const designTabItems: AgelumTabItem[] = [
   {
     value: 'chat',
     label: 'Chat',
@@ -231,7 +231,7 @@ const designTabItems: TeamHubTabItem[] = [
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Configuration Settings</h3>
         <p className="text-gray-600">
-          Configure global settings for your TeamHub workspace and agents.
+          Configure global settings for your Agelum workspace and agents.
         </p>
       </div>
     ),
@@ -239,7 +239,7 @@ const designTabItems: TeamHubTabItem[] = [
 ]
 
 // Additional tab items for other variants
-const chatTabItems: TeamHubTabItem[] = [
+const chatTabItems: AgelumTabItem[] = [
   {
     value: 'chat',
     label: 'Chat',
@@ -287,10 +287,10 @@ export default function TabsDemo() {
       <div className="space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            TeamHub Tabs Demo
+            Agelum Tabs Demo
           </h1>
           <p className="text-gray-600">
-            Showcase of the TeamHub tabs component with different variants and
+            Showcase of the Agelum tabs component with different variants and
             features
           </p>
         </div>
@@ -301,7 +301,7 @@ export default function TabsDemo() {
             Design Match - Navigation Tabs
           </h2>
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <TeamHubTabs
+            <AgelumTabs
               items={designTabItems}
               defaultValue="chat"
               variant="underline"
@@ -315,7 +315,7 @@ export default function TabsDemo() {
             Underline Variant (Default)
           </h2>
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <TeamHubTabs
+            <AgelumTabs
               items={designTabItems}
               defaultValue="chat"
               variant="underline"
@@ -327,7 +327,7 @@ export default function TabsDemo() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-800">Pills Variant</h2>
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <TeamHubTabs
+            <AgelumTabs
               items={chatTabItems}
               defaultValue="chat"
               variant="pills"
@@ -341,7 +341,7 @@ export default function TabsDemo() {
             Default Variant
           </h2>
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <TeamHubTabs
+            <AgelumTabs
               items={chatTabItems}
               defaultValue="chat"
               variant="default"
@@ -359,7 +359,7 @@ export default function TabsDemo() {
                 Small Size
               </h3>
               <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <TeamHubTabs
+                <AgelumTabs
                   items={chatTabItems}
                   defaultValue="chat"
                   variant="underline"
@@ -373,7 +373,7 @@ export default function TabsDemo() {
                 Medium Size (Default)
               </h3>
               <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <TeamHubTabs
+                <AgelumTabs
                   items={chatTabItems}
                   defaultValue="chat"
                   variant="underline"
@@ -387,7 +387,7 @@ export default function TabsDemo() {
                 Large Size
               </h3>
               <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <TeamHubTabs
+                <AgelumTabs
                   items={chatTabItems}
                   defaultValue="chat"
                   variant="underline"
@@ -413,10 +413,10 @@ export default function TabsDemo() {
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
               <h3 className="font-medium text-green-900 mb-2">
-                🎨 TeamHub Colors
+                🎨 Agelum Colors
               </h3>
               <p className="text-green-700 text-sm">
-                Uses TeamHub design system colors with purple-to-violet gradient
+                Uses Agelum design system colors with purple-to-violet gradient
                 indicators and gray non-selected tabs
               </p>
             </div>

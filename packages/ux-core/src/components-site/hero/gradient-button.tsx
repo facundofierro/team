@@ -1,5 +1,6 @@
 import React from 'react'
-import { cn } from '@/utils'
+import { cn } from '../../utils/cn'
+import { siteColors, siteUtils } from '../colors'
 
 interface GradientButtonProps {
   children: React.ReactNode
@@ -14,13 +15,10 @@ interface GradientButtonProps {
 }
 
 const buttonVariants = {
-  primary:
-    'bg-gradient-to-r from-teamhub-highlight to-teamhub-accent hover:from-teamhub-accent hover:to-teamhub-highlight text-white shadow-lg hover:shadow-xl',
-  secondary:
-    'bg-gradient-to-r from-teamhub-primary to-teamhub-accent hover:from-teamhub-accent hover:to-teamhub-primary text-white shadow-md hover:shadow-lg',
-  outline:
-    'bg-transparent border-2 border-teamhub-highlight text-teamhub-highlight hover:bg-teamhub-highlight hover:text-white',
-  ghost: 'bg-transparent text-teamhub-highlight hover:bg-teamhub-highlight/10',
+  primary: siteUtils.button.primary,
+  secondary: siteUtils.button.secondary,
+  outline: siteUtils.button.outline,
+  ghost: siteUtils.button.ghost,
 }
 
 const buttonSizes = {
@@ -46,7 +44,7 @@ export function GradientButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'relative inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-teamhub-highlight focus:ring-offset-2',
+        'relative inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#F45584] focus:ring-offset-2',
         buttonVariants[variant],
         buttonSizes[size],
         fullWidth && 'w-full',
@@ -56,7 +54,7 @@ export function GradientButton({
     >
       {/* Background gradient overlay for better text contrast */}
       {variant === 'primary' && (
-        <div className="absolute inset-0 bg-gradient-to-r from-teamhub-highlight to-teamhub-accent rounded-lg opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F45584] to-[#8B5CF6] rounded-lg opacity-90" />
       )}
 
       {/* Content */}

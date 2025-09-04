@@ -1,15 +1,12 @@
 import React from 'react'
 import { cn } from '../../utils'
+import { siteColors, siteUtils } from '../colors'
 
 interface FeatureCardProps {
   icon?: React.ReactNode
   title: string
   metric?: string
-  metricColor?:
-    | 'teamhub-hot-pink'
-    | 'teamhub-accent'
-    | 'teamhub-success'
-    | 'teamhub-warning'
+  metricColor?: 'pink' | 'orange' | 'blue' | 'success' | 'warning'
   description: string
   features?: string[]
   className?: string
@@ -19,12 +16,11 @@ interface FeatureCardProps {
 }
 
 const cardVariants = {
-  default: 'bg-white border border-teamhub-border/20 shadow-sm',
-  elevated:
-    'bg-white border border-teamhub-border/20 shadow-lg hover:shadow-xl',
-  outlined: 'bg-transparent border-2 border-teamhub-highlight/30',
+  default: siteUtils.card,
+  elevated: `${siteUtils.card} shadow-lg hover:shadow-xl`,
+  outlined: 'bg-transparent border-2 border-[#F45584]/30',
   gradient:
-    'bg-gradient-to-br from-teamhub-highlight/5 to-teamhub-accent/5 border border-teamhub-highlight/20 shadow-md',
+    'bg-gradient-to-br from-[#F45584]/5 to-[#8B5CF6]/5 border border-[#F45584]/20 shadow-md',
 }
 
 const cardSizes = {
@@ -34,17 +30,18 @@ const cardSizes = {
 }
 
 const metricColors = {
-  'teamhub-hot-pink': 'text-teamhub-hot-pink',
-  'teamhub-accent': 'text-teamhub-accent',
-  'teamhub-success': 'text-teamhub-success',
-  'teamhub-warning': 'text-teamhub-warning',
+  pink: siteColors.text.pink,
+  orange: siteColors.text.orange,
+  blue: 'text-[#4F9CF9]',
+  success: siteUtils.status.success,
+  warning: siteUtils.status.warning,
 }
 
 export function FeatureCard({
   icon,
   title,
   metric,
-  metricColor = 'teamhub-hot-pink',
+  metricColor = 'pink',
   description,
   features,
   className,
@@ -65,14 +62,18 @@ export function FeatureCard({
       {/* Icon */}
       {icon && (
         <div className="mb-4 flex justify-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-teamhub-highlight to-teamhub-accent rounded-lg flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow">
+          <div
+            className={`w-12 h-12 ${siteColors.gradients.primary} rounded-lg flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow`}
+          >
             {icon}
           </div>
         </div>
       )}
 
       {/* Title */}
-      <h3 className="text-xl font-semibold text-teamhub-secondary mb-3 text-center">
+      <h3
+        className={`text-xl font-semibold ${siteColors.text.gray300} mb-3 text-center`}
+      >
         {title}
       </h3>
 
@@ -86,7 +87,9 @@ export function FeatureCard({
       )}
 
       {/* Description */}
-      <p className="text-teamhub-muted text-center mb-6 leading-relaxed">
+      <p
+        className={`${siteColors.text.gray400} text-center mb-6 leading-relaxed`}
+      >
         {description}
       </p>
 
@@ -96,7 +99,7 @@ export function FeatureCard({
           {features.map((feature, index) => (
             <li key={index} className="flex items-start space-x-2">
               <svg
-                className="w-5 h-5 text-teamhub-success flex-shrink-0 mt-0.5"
+                className={`w-5 h-5 ${siteUtils.status.success} flex-shrink-0 mt-0.5`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -108,7 +111,9 @@ export function FeatureCard({
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span className="text-sm text-teamhub-secondary">{feature}</span>
+              <span className={`text-sm ${siteColors.text.gray300}`}>
+                {feature}
+              </span>
             </li>
           ))}
         </ul>
@@ -122,11 +127,7 @@ interface CompactFeatureCardProps {
   icon?: React.ReactNode
   title: string
   metric?: string
-  metricColor?:
-    | 'teamhub-hot-pink'
-    | 'teamhub-accent'
-    | 'teamhub-success'
-    | 'teamhub-warning'
+  metricColor?: 'pink' | 'orange' | 'blue' | 'success' | 'warning'
   description: string
   className?: string
 }
@@ -135,26 +136,28 @@ export function CompactFeatureCard({
   icon,
   title,
   metric,
-  metricColor = 'teamhub-hot-pink',
+  metricColor = 'pink',
   description,
   className,
 }: CompactFeatureCardProps) {
   return (
     <div
       className={cn(
-        'bg-white border border-teamhub-border/20 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow',
+        `${siteUtils.card} p-4 hover:shadow-md transition-shadow`,
         className
       )}
     >
       <div className="flex items-start space-x-3">
         {icon && (
-          <div className="w-8 h-8 bg-gradient-to-br from-teamhub-primary to-teamhub-accent rounded-lg flex items-center justify-center text-white flex-shrink-0">
+          <div
+            className={`w-8 h-8 ${siteColors.gradients.primary} rounded-lg flex items-center justify-center text-white flex-shrink-0`}
+          >
             {icon}
           </div>
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <h4 className="font-semibold text-teamhub-secondary text-sm">
+            <h4 className={`font-semibold ${siteColors.text.gray300} text-sm`}>
               {title}
             </h4>
             {metric && (
@@ -165,7 +168,7 @@ export function CompactFeatureCard({
               </span>
             )}
           </div>
-          <p className="text-xs text-teamhub-muted leading-relaxed">
+          <p className={`text-xs ${siteColors.text.gray400} leading-relaxed`}>
             {description}
           </p>
         </div>

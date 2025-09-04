@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { MCPResourceMonitor } from '@teamhub/ai'
+import { MCPResourceMonitor } from '@agelum/ai'
 
 export async function GET(
   request: NextRequest,

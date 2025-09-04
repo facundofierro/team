@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { cn } from '@/utils'
+import { cn } from '../../utils/cn'
+import { siteColors, siteUtils } from '../colors'
 
 interface Industry {
   id: string
@@ -67,8 +68,8 @@ export function IndustrySelector({
             'flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200',
             selectorSizes[size],
             isActive
-              ? 'bg-teamhub-primary text-white shadow-md'
-              : 'text-teamhub-secondary hover:text-teamhub-primary hover:bg-teamhub-background'
+              ? `${siteColors.gradients.primary} text-white shadow-md`
+              : `${siteColors.text.gray300} ${siteUtils.hover.pink}`
           )}
         >
           <div
@@ -89,8 +90,8 @@ export function IndustrySelector({
             'flex flex-col items-center space-y-2 p-4 rounded-lg border-2 transition-all duration-200',
             selectorSizes[size],
             isActive
-              ? 'border-teamhub-primary bg-teamhub-primary/5 text-teamhub-primary'
-              : 'border-teamhub-border/20 hover:border-teamhub-primary/40 hover:bg-teamhub-background'
+              ? `border-[#F45584] bg-[#F45584]/5 text-[#F45584]`
+              : `${siteColors.borders.gray700} hover:border-[#F45584]/40 hover:bg-gray-50`
           )}
         >
           <div
@@ -111,8 +112,8 @@ export function IndustrySelector({
             'flex flex-col items-center space-y-3 p-6 rounded-xl border-2 transition-all duration-200 text-center',
             selectorSizes[size],
             isActive
-              ? 'border-teamhub-primary bg-teamhub-primary/5 text-teamhub-primary shadow-lg'
-              : 'border-teamhub-border/20 hover:border-teamhub-primary/40 hover:bg-teamhub-background'
+              ? `border-[#F45584] bg-[#F45584]/5 text-[#F45584] shadow-lg`
+              : `${siteColors.borders.gray700} hover:border-[#F45584]/40 hover:bg-gray-50`
           )}
         >
           <div
@@ -121,7 +122,7 @@ export function IndustrySelector({
           />
           <span className="font-semibold">{industry.name}</span>
           {showDescription && industry.description && (
-            <p className="text-sm text-teamhub-muted leading-relaxed">
+            <p className={`text-sm ${siteColors.text.gray400} leading-relaxed`}>
               {industry.description}
             </p>
           )}
@@ -141,23 +142,25 @@ export function IndustrySelector({
 
       {/* Industry Features */}
       {showFeatures && currentIndustry && (
-        <div className="bg-white border border-teamhub-border/20 rounded-xl p-6 shadow-sm">
+        <div className={siteUtils.card}>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-teamhub-secondary mb-2">
+            <h3
+              className={`text-lg font-semibold ${siteColors.text.gray300} mb-2`}
+            >
               {currentIndustry.name} Features
             </h3>
             {currentIndustry.description && (
-              <p className="text-teamhub-muted text-sm">
+              <p className={`${siteColors.text.gray400} text-sm`}>
                 {currentIndustry.description}
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {currentIndustry.features.map((feature, index) => (
               <div key={index} className="flex items-start space-x-2">
                 <svg
-                  className="w-4 h-4 text-teamhub-success flex-shrink-0 mt-0.5"
+                  className={`w-4 h-4 ${siteUtils.status.success} flex-shrink-0 mt-0.5`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -169,7 +172,7 @@ export function IndustrySelector({
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span className="text-sm text-teamhub-secondary">
+                <span className={`text-sm ${siteColors.text.gray300}`}>
                   {feature}
                 </span>
               </div>

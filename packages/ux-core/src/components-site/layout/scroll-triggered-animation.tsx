@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { cn } from '@/utils'
+import { cn } from '../../utils/cn'
 
 interface ScrollTriggeredAnimationProps {
   children: React.ReactNode

@@ -8,7 +8,7 @@ This guide explains how to integrate and use the TeamHub UX Core package in your
 
 ```bash
 # In your application directory
-pnpm add @teamhub/ux-core
+pnpm add @agelum/ux-core
 ```
 
 ### 2. Import CSS Variables
@@ -17,13 +17,13 @@ Import the TeamHub design system CSS variables in your main CSS file:
 
 ```css
 /* In your app's global CSS */
-@import '@teamhub/ux-core/src/styles/globals.css';
+@import '@agelum/ux-core/src/styles/globals.css';
 ```
 
 ### 3. Use Components
 
 ```tsx
-import { Button, Card, Badge } from '@teamhub/ux-core'
+import { Button, Card, Badge } from '@agelum/ux-core'
 
 export default function MyPage() {
   return (
@@ -99,7 +99,7 @@ className = 'bg-white' // Pure white for cards
 Use the comprehensive component showcase to see all available components:
 
 ```tsx
-import { ComponentShowcase } from '@teamhub/ux-core/examples'
+import { ComponentShowcase } from '@agelum/ux-core/examples'
 
 export default function DevPage() {
   return <ComponentShowcase />
@@ -111,7 +111,7 @@ export default function DevPage() {
 For a quick overview of key components:
 
 ```tsx
-import { SimpleDemo } from '@teamhub/ux-core/examples'
+import { SimpleDemo } from '@agelum/ux-core/examples'
 
 export default function QuickDemo() {
   return <SimpleDemo />
@@ -196,7 +196,7 @@ Override CSS variables in your app:
 ### Navigation Bar
 
 ```tsx
-import { Button, Badge } from '@teamhub/ux-core'
+import { Button, Badge } from '@agelum/ux-core'
 
 export function NavBar() {
   return (
@@ -227,7 +227,7 @@ import {
   CardHeader,
   CardTitle,
   Badge,
-} from '@teamhub/ux-core'
+} from '@agelum/ux-core'
 
 export function DashboardCard({ title, value, status, trend }) {
   return (
@@ -262,7 +262,7 @@ export function DashboardCard({ title, value, status, trend }) {
 
 If you're already using shadcn/ui components:
 
-1. Replace imports with `@teamhub/ux-core` components
+1. Replace imports with `@agelum/ux-core` components
 2. Update color classes to use TeamHub design system
 3. Test components to ensure proper styling
 

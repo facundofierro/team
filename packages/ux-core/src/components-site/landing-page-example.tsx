@@ -115,7 +115,7 @@ const industryData = [
 
 // Sample statistics data
 const statsData = [
-  { label: 'Organizations', value: '500+', description: 'Trust TeamHub' },
+  { label: 'Organizations', value: '500+', description: 'Trust Agelum' },
   {
     label: 'AI Agents',
     value: '10,000+',
@@ -140,7 +140,7 @@ const testimonialsData = [
     role: 'CTO, HealthTech Solutions',
     company: 'Healthcare',
     content:
-      "TeamHub transformed our patient care workflow. We've reduced administrative overhead by 60% while improving patient satisfaction.",
+      "Agelum transformed our patient care workflow. We've reduced administrative overhead by 60% while improving patient satisfaction.",
     avatar: 'SJ',
   },
   {
@@ -179,7 +179,7 @@ export function LandingPageExample() {
       chatPanel={
         <ChatWidget
           title="AI Business Consultant"
-          subtitle="Ask me about TeamHub solutions"
+          subtitle="Ask me about Agelum solutions"
           inputPlaceholder="How can AI automation help my business?"
         />
       }
@@ -187,11 +187,7 @@ export function LandingPageExample() {
       {/* Hero Section */}
       <HeroSection background="gradient" fullHeight padding="2xl">
         <ScrollTriggeredAnimation animation="fadeIn" delay={200}>
-          <Headline
-            size="2xl"
-            emphasis="highlight"
-            emphasisColor="teamhub-highlight"
-          >
+          <Headline size="2xl" emphasis="highlight" emphasisColor="pink">
             Transform Your Business with AI Automation
           </Headline>
         </ScrollTriggeredAnimation>

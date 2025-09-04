@@ -13,3 +13,8 @@ export {
   AutomationIndustrySelector,
   CompactIndustrySelector,
 } from './industry-tab-selector'
+export { LandingFeatures } from './landing-features'
+export { HowItWorks } from './how-it-works'
+export { IndustryShowcaseSection } from './industry-showcase-section'
+export { ImplementationTimelineSection } from './implementation-timeline-section'
+export { EnhancedGuaranteeSection } from './enhanced-guarantee-section'

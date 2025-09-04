@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { SidebarItem } from './sidebar'
 
-export const defaultTeamHubItems: SidebarItem[] = [
+export const defaultAgelumItems: SidebarItem[] = [
   {
     id: 'dashboard',
     name: 'Dashboard',

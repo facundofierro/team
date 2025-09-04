@@ -1,5 +1,6 @@
 import React from 'react'
-import { cn } from '@/utils'
+import { cn } from '../../utils/cn'
+import { siteColors, siteUtils } from '../colors'
 
 interface ValuePropositionCardProps {
   title: string
@@ -8,11 +9,7 @@ interface ValuePropositionCardProps {
   metric?: {
     value: string
     label: string
-    color?:
-      | 'teamhub-highlight'
-      | 'teamhub-accent'
-      | 'teamhub-success'
-      | 'teamhub-warning'
+    color?: 'pink' | 'orange' | 'blue' | 'success' | 'warning'
   }
   icon?: React.ReactNode
   features?: string[]
@@ -24,12 +21,11 @@ interface ValuePropositionCardProps {
 }
 
 const cardVariants = {
-  default: 'bg-white border border-teamhub-border/20 shadow-sm',
-  elevated:
-    'bg-white border border-teamhub-border/20 shadow-lg hover:shadow-xl',
+  default: siteUtils.card,
+  elevated: `${siteUtils.card} shadow-lg hover:shadow-xl`,
   gradient:
-    'bg-gradient-to-br from-teamhub-highlight/10 to-teamhub-accent/10 border border-teamhub-highlight/20 shadow-md',
-  outlined: 'bg-transparent border-2 border-teamhub-highlight/30',
+    'bg-gradient-to-br from-[#F45584]/10 to-[#8B5CF6]/10 border border-[#F45584]/20 shadow-md',
+  outlined: 'bg-transparent border-2 border-[#F45584]/30',
 }
 
 const cardSizes = {
@@ -39,10 +35,11 @@ const cardSizes = {
 }
 
 const metricColors = {
-  'teamhub-highlight': 'text-teamhub-highlight',
-  'teamhub-accent': 'text-teamhub-accent',
-  'teamhub-success': 'text-teamhub-success',
-  'teamhub-warning': 'text-teamhub-warning',
+  pink: siteColors.text.pink,
+  orange: siteColors.text.orange,
+  blue: 'text-[#4F9CF9]',
+  success: siteUtils.status.success,
+  warning: siteUtils.status.warning,
 }
 
 export function ValuePropositionCard({
@@ -78,20 +75,26 @@ export function ValuePropositionCard({
       {/* Icon */}
       {icon && (
         <div className="mb-6 flex justify-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-teamhub-highlight to-teamhub-accent rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow">
+          <div
+            className={`w-16 h-16 ${siteColors.gradients.primary} rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow`}
+          >
             {icon}
           </div>
         </div>
       )}
 
       {/* Title */}
-      <h3 className="text-2xl font-bold text-teamhub-secondary mb-2 text-center">
+      <h3
+        className={`text-2xl font-bold ${siteColors.text.gray300} mb-2 text-center`}
+      >
         {title}
       </h3>
 
       {/* Subtitle */}
       {subtitle && (
-        <p className="text-teamhub-muted text-center mb-4 text-sm font-medium">
+        <p
+          className={`${siteColors.text.gray400} text-center mb-4 text-sm font-medium`}
+        >
           {subtitle}
         </p>
       )}
@@ -102,19 +105,21 @@ export function ValuePropositionCard({
           <div
             className={cn(
               'text-4xl font-bold mb-1',
-              metricColors[metric.color || 'teamhub-highlight']
+              metricColors[metric.color || 'pink']
             )}
           >
             {metric.value}
           </div>
-          <div className="text-sm text-teamhub-muted font-medium">
+          <div className={`text-sm ${siteColors.text.gray400} font-medium`}>
             {metric.label}
           </div>
         </div>
       )}
 
       {/* Description */}
-      <p className="text-teamhub-muted text-center mb-6 leading-relaxed">
+      <p
+        className={`${siteColors.text.gray400} text-center mb-6 leading-relaxed`}
+      >
         {description}
       </p>
 
@@ -123,7 +128,9 @@ export function ValuePropositionCard({
         <ul className="space-y-3 mb-6">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start space-x-3">
-              <div className="w-5 h-5 bg-gradient-to-br from-teamhub-success to-teamhub-accent rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div
+                className={`w-5 h-5 ${siteColors.gradients.blueToBlue} rounded-full flex items-center justify-center flex-shrink-0 mt-0.5`}
+              >
                 <svg
                   className="w-3 h-3 text-white"
                   fill="none"
@@ -138,7 +145,9 @@ export function ValuePropositionCard({
                   />
                 </svg>
               </div>
-              <span className="text-sm text-teamhub-secondary leading-relaxed">
+              <span
+                className={`text-sm ${siteColors.text.gray300} leading-relaxed`}
+              >
                 {feature}
               </span>
             </li>
@@ -151,7 +160,7 @@ export function ValuePropositionCard({
         <div className="text-center">
           <button
             onClick={onCtaClick}
-            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teamhub-highlight to-teamhub-accent text-white font-semibold rounded-lg hover:from-teamhub-accent hover:to-teamhub-highlight transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+            className={`inline-flex items-center px-6 py-3 ${siteColors.gradients.primary} text-white font-semibold rounded-lg hover:from-[#8B5CF6] hover:to-[#F45584] transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg`}
           >
             {ctaText}
             <svg
@@ -188,33 +197,35 @@ export function CompactValuePropositionCard({
   return (
     <div
       className={cn(
-        'bg-white border border-teamhub-border/20 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow',
+        `${siteUtils.card} p-4 hover:shadow-md transition-shadow`,
         className
       )}
     >
       <div className="flex items-start space-x-3">
         {icon && (
-          <div className="w-10 h-10 bg-gradient-to-br from-teamhub-highlight to-teamhub-accent rounded-lg flex items-center justify-center text-white flex-shrink-0">
+          <div
+            className={`w-10 h-10 ${siteColors.gradients.primary} rounded-lg flex items-center justify-center text-white flex-shrink-0`}
+          >
             {icon}
           </div>
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="font-semibold text-teamhub-secondary text-sm">
+            <h4 className={`font-semibold ${siteColors.text.gray300} text-sm`}>
               {title}
             </h4>
             {metric && (
               <span
                 className={cn(
                   'text-sm font-bold',
-                  metricColors[metric.color || 'teamhub-highlight']
+                  metricColors[metric.color || 'pink']
                 )}
               >
                 {metric.value}
               </span>
             )}
           </div>
-          <p className="text-xs text-teamhub-muted leading-relaxed">
+          <p className={`text-xs ${siteColors.text.gray400} leading-relaxed`}>
             {description}
           </p>
         </div>

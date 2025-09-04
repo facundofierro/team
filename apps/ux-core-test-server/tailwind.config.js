@@ -9,7 +9,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // TeamHub design system colors
+        // Agelum design system colors
         'bg-menu': '#1a1a1a',
         'bg-menu2': '#2a2a2a',
         'bg-background': '#0a0a0a',

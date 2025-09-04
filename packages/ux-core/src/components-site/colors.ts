@@ -1,111 +1,202 @@
 /**
  * Components Site Color System
- * Colors for components-site components (landing pages, marketing)
- * Uses Tailwind CSS classes and custom CSS variables
+ * Colors from reference design1 - exact color palette used in the reference
  */
 
-// Site-specific color tokens that extend the base design system
+// Reference design1 color tokens - exact colors from the reference code
 export const siteColors = {
-  // Brand colors for marketing/landing pages
-  brand: {
-    primary: 'var(--teamhub-primary)', // Purple
-    secondary: 'var(--teamhub-secondary)', // Coral/Pink
-    accent: 'var(--teamhub-accent)', // Lavender
-    background: 'var(--teamhub-background)', // Light background
-    foreground: 'var(--teamhub-foreground)', // Dark text
+  // Primary colors from reference design1
+  primary: {
+    red: '#f45584', // Main red/pink used extensively
+    orange: '#ff8c42', // Orange accent color
+    darkmuted: '#303b58', // Dark muted blue
+    lightvibrant: '#ce4c76', // Light vibrant pink/magenta
+    darkvibrant: '#6c3350', // Dark vibrant purple/burgundy
+    muted: '#74ac64', // Muted green
   },
 
-  // Marketing-specific colors
-  marketing: {
-    hero: {
-      background: 'var(--teamhub-hero-bg)',
-      text: 'var(--teamhub-hero-text)',
-      accent: 'var(--teamhub-hero-accent)',
-    },
-    cta: {
-      primary: 'var(--teamhub-cta-primary)',
-      secondary: 'var(--teamhub-cta-secondary)',
-      text: 'var(--teamhub-cta-text)',
-    },
-    features: {
-      background: 'var(--teamhub-features-bg)',
-      card: 'var(--teamhub-features-card)',
-      text: 'var(--teamhub-features-text)',
-    },
+  // Gradients from reference design1 (converted to Tailwind notation)
+  gradients: {
+    primary: 'bg-gradient-to-br from-[#f45584] to-[#6c3350]',
+    cta: 'bg-gradient-to-r from-[#f45584] to-[#ce4c76]',
+    blue: 'bg-gradient-to-r from-[#f45584] to-[#303b58]',
+    blueToBlue: 'bg-gradient-to-r from-[#303b58] to-[#303b58]', // Darkmuted to Darkmuted gradient
+    orange: 'bg-gradient-to-r from-[#ff8c42] to-[#f45584]',
+    green: 'bg-gradient-to-br from-[#74ac64] to-[#303b58]',
+    vibrantToMuted: 'bg-gradient-to-r from-[#6c3350] to-[#303b58]',
   },
 
-  // Status colors for site components
-  status: {
-    success: 'var(--teamhub-success)',
-    warning: 'var(--teamhub-warning)',
-    error: 'var(--teamhub-error)',
-    info: 'var(--teamhub-info)',
+  // Background colors from reference design1 (converted to Tailwind notation)
+  backgrounds: {
+    dark: 'bg-gradient-to-br from-gray-900 via-gray-800 to-black',
+    glass: 'bg-gray-800/60 backdrop-blur-sm',
+    glassLight: 'bg-white/10 backdrop-blur-sm',
+    white10: 'bg-white/10',
+    white70: 'bg-white/70',
   },
 
-  // Interactive states for site components
-  interactive: {
-    hover: 'var(--teamhub-hover)',
-    active: 'var(--teamhub-active)',
-    focus: 'var(--teamhub-focus)',
-    disabled: 'var(--teamhub-disabled)',
+  // Chat widget colors
+  chatWidget: {
+    container: 'bg-white/10 backdrop-blur-xl border-white/20',
+    header: 'bg-white/5 border-white/20',
+    messageUser: 'bg-white/20 backdrop-blur-sm border-white/10',
+    messageAI: 'bg-white/10 backdrop-blur-sm border-white/20',
+    input: 'bg-white/10 backdrop-blur-sm border-white/20',
+    quickReply:
+      'bg-white/10 backdrop-blur-sm border-white/30 hover:bg-white/20 hover:border-white/40',
+    sendButton:
+      'bg-gradient-to-r from-[#F45584] to-[#E91E63] hover:from-[#F45584]/90 hover:to-[#E91E63]/90',
+    typingDot1: 'animate-bounce',
+    typingDot2: 'animate-bounce [animation-delay:0.1s]',
+    typingDot3: 'animate-bounce [animation-delay:0.2s]',
+  },
+
+  // Text colors from reference design1 (converted to Tailwind notation)
+  text: {
+    white: 'text-white',
+    white70: 'text-white/70',
+    white60: 'text-white/60',
+    white50: 'text-white/50',
+    white80: 'text-white/80',
+    gray300: 'text-gray-300',
+    gray200: 'text-gray-200',
+    gray400: 'text-gray-400',
+    red: 'text-[#f45584]',
+    pink: 'text-[#f45584]', // Alias for red color
+    orange: 'text-[#ff8c42]',
+    darkmuted: 'text-[#303b58]',
+    lightvibrant: 'text-[#ce4c76]',
+    darkvibrant: 'text-[#6c3350]',
+    muted: 'text-[#74ac64]',
+  },
+
+  // Border colors from reference design1 (converted to Tailwind notation)
+  borders: {
+    gray700: 'border-gray-700/50',
+    gray600: 'border-gray-600/50',
+    white20: 'border-white/20',
+    white30: 'border-white/30',
+    pink500: 'border-pink-500/50',
   },
 } as const
 
-// Utility functions for site components
+// Utility functions for easy access to colors
 export const siteUtils = {
-  // Get Tailwind classes for common patterns
-  getButtonClasses: (
-    variant: 'primary' | 'secondary' | 'outline' | 'ghost'
-  ) => {
-    const classes = {
-      primary: 'bg-teamhub-primary text-white hover:bg-teamhub-primary/90',
-      secondary:
-        'bg-teamhub-secondary text-white hover:bg-teamhub-secondary/90',
-      outline:
-        'border-teamhub-primary text-teamhub-primary hover:bg-teamhub-primary hover:text-white',
-      ghost: 'text-teamhub-primary hover:bg-teamhub-primary/10',
-    }
-    return classes[variant]
+  // Button styles
+  button: {
+    primary: `${siteColors.gradients.primary} text-white hover:from-[#f45584]/90 hover:to-[#6c3350]/90`,
+    secondary: `${siteColors.gradients.blue} text-white hover:from-[#f45584]/90 hover:to-[#303b58]/90`,
+    cta: `${siteColors.gradients.cta} text-white hover:from-[#f45584]/90 hover:to-[#ce4c76]/90`,
+    outline: `border border-[#f45584] text-[#f45584] hover:bg-[#f45584] hover:text-white`,
+    ghost: `text-[#f45584] hover:bg-[#f45584]/10`,
   },
 
-  // Get gradient classes
-  getGradientClasses: (
-    direction: 'horizontal' | 'vertical' | 'diagonal' = 'horizontal'
-  ) => {
-    const gradients = {
-      horizontal: 'bg-gradient-to-r from-teamhub-primary to-teamhub-accent',
-      vertical: 'bg-gradient-to-b from-teamhub-primary to-teamhub-accent',
-      diagonal: 'bg-gradient-to-br from-teamhub-primary to-teamhub-accent',
-    }
-    return gradients[direction]
+  // Card styles
+  card: `bg-white border ${siteColors.borders.gray700} rounded-xl shadow-sm`,
+
+  // Hover effects
+  hover: {
+    red: `hover:text-[#f45584] hover:bg-[#f45584]/10`,
+    pink: `hover:text-[#f45584] hover:bg-[#f45584]/10`, // Alias for red hover
+    orange: `hover:text-[#ff8c42] hover:bg-[#ff8c42]/10`,
+    darkmuted: `hover:text-[#303b58] hover:bg-[#303b58]/10`,
+    lightvibrant: `hover:text-[#ce4c76] hover:bg-[#ce4c76]/10`,
+    darkvibrant: `hover:text-[#6c3350] hover:bg-[#6c3350]/10`,
+    muted: `hover:text-[#74ac64] hover:bg-[#74ac64]/10`,
+    white10: `hover:bg-white/10`,
   },
 
-  // Get text color classes
-  getTextClasses: (variant: 'primary' | 'secondary' | 'muted' | 'inverse') => {
-    const classes = {
-      primary: 'text-teamhub-foreground',
-      secondary: 'text-teamhub-secondary',
-      muted: 'text-teamhub-muted',
-      inverse: 'text-white',
-    }
-    return classes[variant]
+  // Focus effects
+  focus: {
+    pink: `focus:ring-2 focus:ring-[#F45584] focus:border-transparent`,
   },
 
-  // Get background classes
+  // Status colors
+  status: {
+    success: 'text-green-500',
+    warning: 'text-yellow-500',
+    error: 'text-red-500',
+  },
+
+  // Utility functions for component usage
   getBackgroundClasses: (
-    variant: 'primary' | 'secondary' | 'card' | 'hero'
+    variant: 'dark' | 'glass' | 'glassLight' | 'white10' | 'white70'
   ) => {
-    const classes = {
-      primary: 'bg-teamhub-background',
-      secondary: 'bg-teamhub-secondary/5',
-      card: 'bg-white',
-      hero: 'bg-teamhub-hero-bg',
-    }
-    return classes[variant]
+    return siteColors.backgrounds[variant]
+  },
+
+  getTextClasses: (
+    variant:
+      | 'white'
+      | 'white70'
+      | 'white60'
+      | 'white50'
+      | 'white80'
+      | 'gray300'
+      | 'gray200'
+      | 'gray400'
+      | 'red'
+      | 'pink'
+      | 'orange'
+      | 'darkmuted'
+      | 'lightvibrant'
+      | 'darkvibrant'
+      | 'muted'
+  ) => {
+    return siteColors.text[variant]
+  },
+
+  getHoverClasses: (
+    variant:
+      | 'red'
+      | 'pink'
+      | 'orange'
+      | 'darkmuted'
+      | 'lightvibrant'
+      | 'darkvibrant'
+      | 'muted'
+      | 'white10'
+  ) => {
+    return siteUtils.hover[variant]
+  },
+
+  getFocusClasses: (variant: 'pink') => {
+    return siteUtils.focus[variant]
+  },
+
+  getButtonClasses: (
+    variant: 'primary' | 'secondary' | 'cta' | 'outline' | 'ghost'
+  ) => {
+    return siteUtils.button[variant]
+  },
+
+  getGradientClasses: (
+    variant: 'primary' | 'cta' | 'blue' | 'blueToBlue' | 'orange' | 'green'
+  ) => {
+    return siteColors.gradients[variant]
+  },
+
+  getChatWidgetClasses: (
+    variant:
+      | 'container'
+      | 'header'
+      | 'messageUser'
+      | 'messageAI'
+      | 'input'
+      | 'quickReply'
+      | 'sendButton'
+      | 'typingDot1'
+      | 'typingDot2'
+      | 'typingDot3'
+  ) => {
+    return siteColors.chatWidget[variant]
   },
 } as const
 
-// Type exports
+// Type exports for reference design1 colors
 export type SiteColorKey = keyof typeof siteColors
-export type SiteBrandKey = keyof typeof siteColors.brand
-export type SiteMarketingKey = keyof typeof siteColors.marketing
+export type SitePrimaryKey = keyof typeof siteColors.primary
+export type SiteGradientKey = keyof typeof siteColors.gradients
+export type SiteBackgroundKey = keyof typeof siteColors.backgrounds
+export type SiteTextKey = keyof typeof siteColors.text
+export type SiteBorderKey = keyof typeof siteColors.borders

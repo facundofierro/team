@@ -1,5 +1,6 @@
 import React from 'react'
 import { cn } from '../../utils'
+import { siteColors, siteUtils } from '../colors'
 import {
   GradientButton,
   SecondaryButton,
@@ -25,14 +26,10 @@ interface CTAButtonsProps {
 }
 
 const buttonVariants = {
-  primary:
-    'bg-teamhub-hot-pink hover:bg-teamhub-hot-pink/90 text-white shadow-lg hover:shadow-xl',
-  secondary:
-    'bg-teamhub-primary hover:bg-teamhub-primary/90 text-white shadow-lg hover:shadow-xl',
-  outline:
-    'border-2 border-teamhub-hot-pink text-teamhub-hot-pink hover:bg-teamhub-hot-pink hover:text-white',
-  ghost:
-    'text-teamhub-hot-pink hover:bg-teamhub-hot-pink/10 hover:text-teamhub-hot-pink',
+  primary: siteUtils.button.cta,
+  secondary: siteUtils.button.primary,
+  outline: siteUtils.button.outline,
+  ghost: siteUtils.button.ghost,
 }
 
 const buttonSizes = {
@@ -69,7 +66,7 @@ export function CTAButtons({
 }: CTAButtonsProps) {
   const renderButton = (button: CTAButtonConfig, index: number) => {
     const buttonClasses = cn(
-      'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teamhub-hot-pink focus:ring-offset-2',
+      'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#F45584] focus:ring-offset-2',
       buttonVariants[button.variant || 'primary'],
       buttonSizes[button.size || 'md'],
       button.icon && 'space-x-2'

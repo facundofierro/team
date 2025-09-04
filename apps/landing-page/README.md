@@ -1,6 +1,6 @@
-# TeamHub Landing Page
+# Agelum Landing Page
 
-A modern, conversion-focused landing page for TeamHub built with Next.js 14, TypeScript, and Tailwind CSS.
+A modern, conversion-focused landing page for Agelum built with Next.js 14, TypeScript, and Tailwind CSS.
 
 ## Features
 
@@ -18,7 +18,7 @@ A modern, conversion-focused landing page for TeamHub built with Next.js 14, Typ
 
 - Node.js 18+
 - pnpm (recommended) or npm
-- Access to the TeamHub monorepo
+- Access to the Agelum monorepo
 
 ### Installation
 
@@ -104,4 +104,4 @@ The landing page is configured for deployment with:
 
 ## License
 
-Private - TeamHub internal use only.
+Private - Agelum internal use only.

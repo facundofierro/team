@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Sidebar, defaultTeamHubItems } from '@teamhub/ux-core'
+import { Sidebar, defaultAgelumItems } from '@agelum/ux-core'
 import {
   LayoutDashboard,
   CheckSquare,
@@ -96,7 +96,7 @@ export default function SidebarDemoPage() {
       {/* Sidebar */}
       <div className="flex-shrink-0">
         <Sidebar
-          items={defaultTeamHubItems}
+          items={defaultAgelumItems}
           activeNavItem={selectedItem}
           onNavItemChange={handleItemClick}
           logo={{
@@ -180,7 +180,7 @@ export default function SidebarDemoPage() {
 
             {/* Sidebar Variants */}
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Default TeamHub Items */}
+              {/* Default Agelum Items */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">
                   Default Agelum Items

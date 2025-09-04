@@ -98,7 +98,7 @@ export const ConversationArea = memo(function ConversationArea({
 
   // Refs for scroll management
   const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const scrollThrottleRef = useRef<NodeJS.Timeout>()
+  const scrollThrottleRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   // Detect streaming mode based on isLoading state
   useEffect(() => {
@@ -119,7 +119,7 @@ export const ConversationArea = memo(function ConversationArea({
     console.log('🔄 [ConversationArea] Processing messages:', {
       messages: messages.length,
       toolCallMessages: toolCallMessages.length,
-      total: allMessages.length
+      total: allMessages.length,
     })
 
     const sorted = allMessages.sort((a, b) => {
@@ -152,29 +152,30 @@ export const ConversationArea = memo(function ConversationArea({
   }, [messages, toolCallMessages])
 
   // Simple visible messages calculation
-  const { visibleMessages, hasMoreMessages, hiddenMessageCount } = useMemo(() => {
-    const totalMessages = sortedMessages.length
-    const hasMore = totalMessages > visibleMessageCount
-    
-    // Show the most recent messages (last N messages)
-    const startIndex = Math.max(0, totalMessages - visibleMessageCount)
-    const visible = sortedMessages.slice(startIndex)
-    const hiddenCount = Math.max(0, totalMessages - visibleMessageCount)
+  const { visibleMessages, hasMoreMessages, hiddenMessageCount } =
+    useMemo(() => {
+      const totalMessages = sortedMessages.length
+      const hasMore = totalMessages > visibleMessageCount
 
-    console.log('📏 [ConversationArea] Simple pagination:', {
-      totalMessages,
-      visibleCount: visible.length,
-      startIndex,
-      hasMore,
-      hiddenCount
-    })
+      // Show the most recent messages (last N messages)
+      const startIndex = Math.max(0, totalMessages - visibleMessageCount)
+      const visible = sortedMessages.slice(startIndex)
+      const hiddenCount = Math.max(0, totalMessages - visibleMessageCount)
 
-    return {
-      visibleMessages: visible,
-      hasMoreMessages: hasMore,
-      hiddenMessageCount: hiddenCount,
-    }
-  }, [sortedMessages, visibleMessageCount])
+      console.log('📏 [ConversationArea] Simple pagination:', {
+        totalMessages,
+        visibleCount: visible.length,
+        startIndex,
+        hasMore,
+        hiddenCount,
+      })
+
+      return {
+        visibleMessages: visible,
+        hasMoreMessages: hasMore,
+        hiddenMessageCount: hiddenCount,
+      }
+    }, [sortedMessages, visibleMessageCount])
 
   // Simple load more handler
   const handleLoadMore = useCallback(() => {
@@ -187,9 +188,12 @@ export const ConversationArea = memo(function ConversationArea({
 
     // Calculate how many more messages to show
     const remaining = hiddenMessageCount
-    const batchSize = remaining <= 10 ? remaining : Math.min(LOAD_MORE_BATCH_SIZE, remaining)
+    const batchSize =
+      remaining <= 10 ? remaining : Math.min(LOAD_MORE_BATCH_SIZE, remaining)
 
-    setVisibleMessageCount((prev) => Math.min(prev + batchSize, sortedMessages.length))
+    setVisibleMessageCount((prev) =>
+      Math.min(prev + batchSize, sortedMessages.length)
+    )
 
     // Maintain scroll position after loading more messages
     setTimeout(() => {
@@ -265,7 +269,7 @@ export const ConversationArea = memo(function ConversationArea({
   }, [visibleMessages.length, shouldMaintainScroll, isNearTop])
 
   return (
-    <ScrollArea ref={scrollAreaRef} className="flex-1 min-h-0 px-4">
+    <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 min-h-0">
       <div className="py-4 space-y-4">
         {/* Simple Message Pagination Component */}
         <MessagePagination
@@ -289,8 +293,8 @@ export const ConversationArea = memo(function ConversationArea({
         {/* Loading indicator */}
         {isLoading && (
           <div className="p-4 rounded-lg max-w-[80%] break-words bg-gray-100/40 text-gray-900">
-            <div className="flex items-center gap-2">
-              <Brain className="w-4 h-4 animate-pulse text-orange-500" />
+            <div className="flex gap-2 items-center">
+              <Brain className="w-4 h-4 text-orange-500 animate-pulse" />
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"></div>
                 <div
@@ -308,22 +312,20 @@ export const ConversationArea = memo(function ConversationArea({
 
         {/* Simple performance info in development */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-50 rounded">
+          <div className="p-2 mt-2 text-xs text-gray-500 bg-gray-50 rounded">
             <div>
-              📊 Simple Pagination: {visibleMessages.length}/{sortedMessages.length}{' '}
-              messages visible
+              📊 Simple Pagination: {visibleMessages.length}/
+              {sortedMessages.length} messages visible
             </div>
-            <div>
-              🔧 Tool calls: {toolCallMessages.length} tool messages
-            </div>
+            <div>🔧 Tool calls: {toolCallMessages.length} tool messages</div>
             <div className="flex gap-2 mt-1">
               {isStreamingMode && (
-                <span className="bg-orange-100 px-1 rounded">
+                <span className="px-1 bg-orange-100 rounded">
                   Streaming Mode
                 </span>
               )}
               {isNearTop && (
-                <span className="bg-gray-100 px-1 rounded">Near Top</span>
+                <span className="px-1 bg-gray-100 rounded">Near Top</span>
               )}
             </div>
           </div>

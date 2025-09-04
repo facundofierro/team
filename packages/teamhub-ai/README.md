@@ -1,4 +1,4 @@
-# @teamhub/ai
+# @agelum/ai
 
 A comprehensive AI library for TeamHub that provides various AI-powered functions for chat, task management, workflows, and tool integration.
 
@@ -32,7 +32,7 @@ Sends a chat message to an AI agent with memory management and streaming respons
 **Example:**
 
 ```typescript
-import { sendChat } from '@teamhub/ai'
+import { sendChat } from '@agelum/ai'
 
 const response = await sendChat({
   databaseName: 'my-database',
@@ -70,7 +70,7 @@ Creates and sends a task to an agent with optional cron scheduling.
 **Example:**
 
 ```typescript
-import { sendTask } from '@teamhub/ai'
+import { sendTask } from '@agelum/ai'
 
 const message = await sendTask({
   taskId: 'task-123',

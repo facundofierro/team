@@ -1,16 +1,12 @@
 import React from 'react'
-import { cn } from '@/utils'
+import { cn } from '../../utils/cn'
 import { Container } from '../layout'
+import { siteColors, siteUtils } from '../colors'
 
 interface HeroSectionProps {
   children: React.ReactNode
   className?: string
-  background?:
-    | 'none'
-    | 'dark'
-    | 'gradient'
-    | 'teamhub-primary'
-    | 'teamhub-secondary'
+  background?: 'none' | 'dark' | 'gradient' | 'primary' | 'secondary'
   fullHeight?: boolean
   centered?: boolean
   padding?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
@@ -20,11 +16,10 @@ interface HeroSectionProps {
 
 const backgroundClasses = {
   none: '',
-  dark: 'bg-gradient-to-br from-teamhub-secondary to-teamhub-secondary/80',
-  gradient:
-    'bg-gradient-to-br from-teamhub-highlight via-teamhub-accent to-teamhub-primary',
-  'teamhub-primary': 'bg-teamhub-primary',
-  'teamhub-secondary': 'bg-teamhub-secondary',
+  dark: siteColors.backgrounds.dark,
+  gradient: siteColors.gradients.primary,
+  primary: siteColors.gradients.primary,
+  secondary: siteColors.gradients.blue,
 }
 
 const paddingClasses = {

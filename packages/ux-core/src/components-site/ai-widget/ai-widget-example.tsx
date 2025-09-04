@@ -20,7 +20,7 @@ export function AIWidgetExample() {
       id: '1',
       type: 'bot' as const,
       message:
-        "Hi! I'm your AI business transformation consultant. I can help you understand how TeamHub can revolutionize your operations and deliver guaranteed ROI. What would you like to explore first?",
+        "Hi! I'm your AI business transformation consultant. I can help you understand how Agelum can revolutionize your operations and deliver guaranteed ROI. What would you like to explore first?",
       timestamp: '2:30 PM',
     },
   ])
@@ -62,7 +62,7 @@ export function AIWidgetExample() {
         break
       case 'examples':
         response =
-          "Perfect! Let me show you some real examples of how TeamHub has transformed businesses. We've helped companies achieve 40% faster project delivery, 25% cost reduction, and 90% process automation. Which industry examples would be most relevant to you?"
+          "Perfect! Let me show you some real examples of how Agelum has transformed businesses. We've helped companies achieve 40% faster project delivery, 25% cost reduction, and 90% process automation. Which industry examples would be most relevant to you?"
         break
       case 'savings':
         response =
@@ -70,7 +70,7 @@ export function AIWidgetExample() {
         break
       case 'how-it-works':
         response =
-          'TeamHub works in three phases: 1) AI Agent Setup - We configure AI agents for your specific needs, 2) Integration - Seamlessly connect with your existing systems, 3) Optimization - Continuous improvement and scaling. The entire process takes just 90 days from start to finish!'
+          'Agelum works in three phases: 1) AI Agent Setup - We configure AI agents for your specific needs, 2) Integration - Seamlessly connect with your existing systems, 3) Optimization - Continuous improvement and scaling. The entire process takes just 90 days from start to finish!'
         break
       default:
         response =
@@ -141,7 +141,7 @@ export function AIWidgetExample() {
         position="left"
         size="md"
         onSendMessage={handleSendMessage}
-        footerText="Powered by TeamHub AI"
+        footerText="Powered by Agelum AI"
       >
         {/* Messages */}
         <div className="space-y-4">
@@ -179,10 +179,10 @@ export function AIWidgetExample() {
         position="right"
         size="sm"
         onSendMessage={handleSendMessage}
-        footerText="TeamHub Support"
+        footerText="Agelum Support"
       >
         <MessageBubble
-          message="Hello! I'm here to help with any questions about TeamHub. How can I assist you today?"
+          message="Hello! I'm here to help with any questions about Agelum. How can I assist you today?"
           type="bot"
           avatar={<BotAvatar size="sm" status="online" />}
           showAvatar

@@ -1,6 +1,6 @@
-// TeamHub Core Components
+// Agelum Core Components
 // These are custom components built with our design system
-// They use external components as building blocks but have TeamHub styling
+// They use external components as building blocks but have Agelum styling
 
 // Color Systems
 export { coreColors, coreUtils } from './light-theme-colors'
@@ -15,7 +15,7 @@ export type {
 // Sidebar Components
 export {
   Sidebar,
-  defaultTeamHubItems,
+  defaultAgelumItems,
   type SidebarProps,
   type SidebarItem,
 } from './sidebar'
@@ -68,4 +68,4 @@ export {
 } from './agentsList'
 
 // Tabs Components
-export { TeamHubTabs, type TeamHubTabsProps, type TeamHubTabItem } from './tabs'
+export { AgelumTabs, type AgelumTabsProps, type AgelumTabItem } from './tabs'

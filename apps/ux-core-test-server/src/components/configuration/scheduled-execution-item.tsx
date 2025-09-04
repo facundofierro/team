@@ -1,5 +1,5 @@
 import React from 'react'
-import { cn } from '@teamhub/ux-core'
+import { cn } from '@agelum/ux-core'
 import {
   Check,
   Pause,

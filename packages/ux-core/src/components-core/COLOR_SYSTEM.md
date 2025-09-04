@@ -25,7 +25,7 @@ We have **two separate color systems** for different use cases:
 ### **When to Use Light Theme Colors**
 
 ```tsx
-import { coreColors, coreUtils } from '@teamhub/ux-core'
+import { coreColors, coreUtils } from '@agelum/ux-core'
 
 // For buttons, forms, cards on light backgrounds
 <button style={{
@@ -44,7 +44,7 @@ import { coreColors, coreUtils } from '@teamhub/ux-core'
 ### **When to Use Dark Theme Colors**
 
 ```tsx
-import { componentColors, componentUtils } from '@teamhub/ux-core'
+import { componentColors, componentUtils } from '@agelum/ux-core'
 
 // For sidebar, navigation on dark backgrounds
 <div style={{

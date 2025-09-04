@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { TitleWithSubtitle } from '@teamhub/ux-core'
+import { TitleWithSubtitle } from '@agelum/ux-core'
 
 export default function TitleWithSubtitleDemo() {
   return (

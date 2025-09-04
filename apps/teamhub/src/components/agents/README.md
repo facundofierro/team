@@ -1,6 +1,6 @@
 # Agents Components
 
-A comprehensive set of React components for managing AI agents within the TeamHub platform. These components provide a full-featured interface for agent management, configuration, and interaction.
+A comprehensive set of React components for managing AI agents within the Agelum platform. These components provide a full-featured interface for agent management, configuration, and interaction.
 
 ## 🏗️ Architecture Overview
 
