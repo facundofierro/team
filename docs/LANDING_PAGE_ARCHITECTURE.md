@@ -7,7 +7,7 @@
 | Context      | File                                                         | Export                              | Usage                  |
 | ------------ | ------------------------------------------------------------ | ----------------------------------- | ---------------------- |
 | Landing Page | `packages/ux-core/src/components-site/colors.ts`             | `siteColors`, `siteUtils`           | Public-facing sites    |
-| TeamHub App  | `packages/ux-core/src/components-core/light-theme-colors.ts` | `coreColors`, `coreUtils`           | Internal UI components |
+| Agelum App   | `packages/ux-core/src/components-core/light-theme-colors.ts` | `coreColors`, `coreUtils`           | Internal UI components |
 | Dark Theme   | `packages/ux-core/src/components-core/dark-theme-colors.ts`  | `componentColors`, `componentUtils` | Dark-themed components |
 
 ### 📁 File Organization
@@ -34,7 +34,7 @@ packages/ux-core/src/components-site/  # Presentation Layer
 1. **Use defined color systems**
 
 ```typescript
-import { siteColors, siteUtils } from '@teamhub/ux-core'
+import { siteColors, siteUtils } from '@agelum/ux-core'
 <div className={siteColors.gradients.primary}>
 ```
 
@@ -103,7 +103,7 @@ export const LandingHero = ({ onCtaClick }: Props) => {
 
 ```typescript
 // ❌ WRONG: Using site colors in core components
-import { siteColors } from '@teamhub/ux-core'
+import { siteColors } from '@agelum/ux-core'
 // This should use coreColors instead
 ```
 
@@ -117,7 +117,7 @@ import {
   LandingHeader,
   siteColors,
   siteUtils,
-} from '@teamhub/ux-core'
+} from '@agelum/ux-core'
 
 // ✅ Content imports
 import { heroContent } from '../content/hero-content'
@@ -226,7 +226,7 @@ export const navigationHandlers = {
 
 ```typescript
 // apps/landing-page/src/app/page.tsx
-import { LandingHero } from '@teamhub/ux-core'
+import { LandingHero } from '@agelum/ux-core'
 import { heroContent } from '../content/hero-content'
 import { navigationHandlers } from '../handlers/navigation-handlers'
 

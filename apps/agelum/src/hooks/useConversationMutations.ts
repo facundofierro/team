@@ -73,9 +73,9 @@ export function useConversationMutations() {
       input: StartConversationInput
     ): Promise<ConversationMemory | null> => {
       if (!organizationId) {
-        console.error(
-          '❌ [useConversationMutations] No organization ID available'
-        )
+        log.agelum.chat.error('No organization ID available', undefined, {
+          function: 'startNewConversation',
+        })
         return null
       }
 
@@ -83,18 +83,23 @@ export function useConversationMutations() {
       setStartError(null)
 
       try {
-        console.log(
-          '🆕 [useConversationMutations] Starting new conversation for agent:',
-          input.agentId
-        )
+        log.agelum.chat.info('Starting new conversation for agent', undefined, {
+          agentId: input.agentId,
+          function: 'startNewConversation',
+        })
         const result = await startNewConversationAction(
           input.agentId,
           input.firstMessage,
           orgDatabaseName
         )
-        console.log(
-          '✅ [useConversationMutations] New conversation started:',
-          result?.id
+        log.agelum.chat.info(
+          'New conversation started successfully',
+          undefined,
+          {
+            conversationId: result?.id,
+            agentId: input.agentId,
+            function: 'startNewConversation',
+          }
         )
         return result
       } catch (error) {
@@ -103,10 +108,11 @@ export function useConversationMutations() {
             ? error
             : new Error('Failed to start conversation')
         setStartError(err)
-        console.error(
-          '❌ [useConversationMutations] Failed to start conversation:',
-          error
-        )
+        log.agelum.chat.error('Failed to start conversation', undefined, {
+          error: err.message,
+          agentId: input.agentId,
+          function: 'startNewConversation',
+        })
         return null
       } finally {
         setIsStartingConversation(false)
@@ -119,9 +125,9 @@ export function useConversationMutations() {
   const addMessageToConversation = useCallback(
     async (input: AddMessageInput): Promise<ConversationMemory | null> => {
       if (!organizationId) {
-        console.error(
-          '❌ [useConversationMutations] No organization ID available'
-        )
+        log.agelum.chat.error('No organization ID available', undefined, {
+          function: 'addMessageToConversation',
+        })
         return null
       }
 
@@ -129,10 +135,11 @@ export function useConversationMutations() {
       setAddMessageError(null)
 
       try {
-        console.log(
-          '📝 [useConversationMutations] Adding message to conversation:',
-          input.conversationId
-        )
+        log.agelum.chat.info('Adding message to conversation', undefined, {
+          conversationId: input.conversationId,
+          role: input.role,
+          function: 'addMessageToConversation',
+        })
         const result = await addMessageAction(
           input.conversationId,
           input.role,
@@ -141,16 +148,20 @@ export function useConversationMutations() {
           input.messageId,
           input.toolCalls
         )
-        console.log('✅ [useConversationMutations] Message added successfully')
+        log.agelum.chat.info('Message added successfully', undefined, {
+          conversationId: input.conversationId,
+          function: 'addMessageToConversation',
+        })
         return result
       } catch (error) {
         const err =
           error instanceof Error ? error : new Error('Failed to add message')
         setAddMessageError(err)
-        console.error(
-          '❌ [useConversationMutations] Failed to add message:',
-          error
-        )
+        log.agelum.chat.error('Failed to add message', undefined, {
+          error: err.message,
+          conversationId: input.conversationId,
+          function: 'addMessageToConversation',
+        })
         return null
       } finally {
         setIsAddingMessage(false)
@@ -165,9 +176,9 @@ export function useConversationMutations() {
       input: SwitchConversationInput
     ): Promise<ConversationMemory | null> => {
       if (!organizationId) {
-        console.error(
-          '❌ [useConversationMutations] No organization ID available'
-        )
+        log.agelum.chat.error('No organization ID available', undefined, {
+          function: 'switchToConversation',
+        })
         return null
       }
 
@@ -175,16 +186,21 @@ export function useConversationMutations() {
       setSwitchError(null)
 
       try {
-        console.log(
-          '🔄 [useConversationMutations] Switching to conversation:',
-          input.conversationId
-        )
+        log.agelum.chat.info('Switching to conversation', undefined, {
+          conversationId: input.conversationId,
+          function: 'switchToConversation',
+        })
         const result = await switchConversationAction(
           input.conversationId,
           orgDatabaseName
         )
-        console.log(
-          '✅ [useConversationMutations] Switched to conversation successfully'
+        log.agelum.chat.info(
+          'Switched to conversation successfully',
+          undefined,
+          {
+            conversationId: input.conversationId,
+            function: 'switchToConversation',
+          }
         )
         return result
       } catch (error) {
@@ -193,10 +209,11 @@ export function useConversationMutations() {
             ? error
             : new Error('Failed to switch conversation')
         setSwitchError(err)
-        console.error(
-          '❌ [useConversationMutations] Failed to switch conversation:',
-          error
-        )
+        log.agelum.chat.error('Failed to switch conversation', undefined, {
+          error: err.message,
+          conversationId: input.conversationId,
+          function: 'switchToConversation',
+        })
         return null
       } finally {
         setIsSwitchingConversation(false)
@@ -209,9 +226,9 @@ export function useConversationMutations() {
   const completeConversation = useCallback(
     async (input: CompleteConversationInput): Promise<boolean> => {
       if (!organizationId) {
-        console.error(
-          '❌ [useConversationMutations] No organization ID available'
-        )
+        log.agelum.chat.error('No organization ID available', undefined, {
+          function: 'completeConversation',
+        })
         return false
       }
 
@@ -219,18 +236,20 @@ export function useConversationMutations() {
       setCompleteError(null)
 
       try {
-        console.log(
-          '✅ [useConversationMutations] Completing conversation:',
-          input.conversationId
-        )
+        log.agelum.chat.info('Completing conversation', undefined, {
+          conversationId: input.conversationId,
+          shouldGenerateBrief: input.shouldGenerateBrief,
+          function: 'completeConversation',
+        })
         await completeConversationAction(
           input.conversationId,
           orgDatabaseName,
           input.shouldGenerateBrief || false
         )
-        console.log(
-          '✅ [useConversationMutations] Conversation completed successfully'
-        )
+        log.agelum.chat.info('Conversation completed successfully', undefined, {
+          conversationId: input.conversationId,
+          function: 'completeConversation',
+        })
         return true
       } catch (error) {
         const err =
@@ -238,10 +257,11 @@ export function useConversationMutations() {
             ? error
             : new Error('Failed to complete conversation')
         setCompleteError(err)
-        console.error(
-          '❌ [useConversationMutations] Failed to complete conversation:',
-          error
-        )
+        log.agelum.chat.error('Failed to complete conversation', undefined, {
+          error: err.message,
+          conversationId: input.conversationId,
+          function: 'completeConversation',
+        })
         return false
       } finally {
         setIsCompletingConversation(false)
@@ -255,8 +275,10 @@ export function useConversationMutations() {
     async (
       input: UpdateConversationInput
     ): Promise<ConversationMemory | null> => {
-      console.warn(
-        '📝 [useConversationMutations] Update conversation not implemented yet'
+      log.agelum.chat.warn(
+        'Update conversation not implemented yet',
+        undefined,
+        { conversationId: input.conversationId, function: 'updateConversation' }
       )
       return null
     },

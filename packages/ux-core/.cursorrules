@@ -1,8 +1,21 @@
 # UX-Core Color System Rules
 
+## 🏷️ **Application Name Change**
+
+**IMPORTANT**: This application was previously named "Teamhub" but has been renamed to "Agelum". When you encounter references to the old name:
+
+- **✅ DO**: Update documentation, comments, and non-production code from "Teamhub" to "Agelum"
+- **✅ DO**: Update package names from `@teamhub/` to `@agelum/` in documentation
+- **⚠️ CAUTION**: Be careful with production deployment files (Docker, CI/CD, infrastructure) - only change if you're certain it won't break deployment
+- **❌ AVOID**: Changing service names, container names, or database names in production without thorough testing
+- **❌ AVOID**: Changing environment variables or configuration keys that might be used in production
+
+**Safe to change**: Documentation, README files, comments, example code, and development-only files.
+**Requires testing**: Docker compose files, deployment scripts, CI/CD workflows, and infrastructure configurations.
+
 ## 🎨 **Color System Enforcement**
 
-This file enforces strict color usage rules for the `@teamhub/ux-core` package to maintain design consistency and prevent hardcoded colors.
+This file enforces strict color usage rules for the `@agelum/ux-core` package to maintain design consistency and prevent hardcoded colors.
 
 ## 📋 **Core Rules**
 
@@ -255,4 +268,4 @@ Following these rules ensures:
 
 ---
 
-**Remember**: The color system is designed to eliminate blue colors and maintain TeamHub's purple brand identity. Always use the provided color systems and utility functions.
+**Remember**: The color system is designed to eliminate blue colors and maintain Agelum's purple brand identity. Always use the provided color systems and utility functions.
