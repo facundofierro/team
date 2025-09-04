@@ -225,11 +225,11 @@ importers:
         specifier: ^5.0.0
         version: 5.9.2
 
-  apps/teamhub:
+  apps/agelum:
     dependencies:
       '@agelum/ai':
         specifier: workspace:*
-        version: link:../../packages/teamhub-ai
+        version: link:../../packages/agelum-ai
       '@agelum/db':
         specifier: workspace:*
         version: link:../../packages/agelum-db
@@ -660,7 +660,7 @@ importers:
         specifier: ^5.4.5
         version: 5.9.2
 
-  packages/teamhub-ai:
+  packages/agelum-ai:
     dependencies:
       '@agelum/db':
         specifier: workspace:*

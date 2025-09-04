@@ -21,9 +21,9 @@ COPY pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY turbo.json ./
-COPY apps/teamhub/package.json ./apps/teamhub/
+COPY apps/agelum/package.json ./apps/agelum/
 COPY packages/agelum-db/package.json ./packages/agelum-db/
-COPY packages/teamhub-ai/package.json ./packages/teamhub-ai/
+COPY packages/agelum-ai/package.json ./packages/agelum-ai/
 COPY packages/drizzle-reactive/package.json ./packages/drizzle-reactive/
 COPY packages/logger/package.json ./packages/logger/
 
@@ -50,9 +50,9 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Copy standalone output (this contains everything needed to run!)
-COPY --from=builder /app/apps/teamhub/.next/standalone ./
-COPY --from=builder /app/apps/teamhub/.next/static ./apps/teamhub/.next/static
-COPY --from=builder /app/apps/teamhub/public ./apps/teamhub/public
+COPY --from=builder /app/apps/agelum/.next/standalone ./
+COPY --from=builder /app/apps/agelum/.next/static ./apps/agelum/.next/static
+COPY --from=builder /app/apps/agelum/public ./apps/agelum/public
 
 # The distroless image runs as non-root by default
 USER 1001:1001
@@ -60,4 +60,4 @@ USER 1001:1001
 EXPOSE 3000
 
 # Start the standalone server (distroless doesn't have shell, so direct node call)
-CMD ["apps/teamhub/server.js"]
+CMD ["apps/agelum/server.js"]
