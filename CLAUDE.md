@@ -9,15 +9,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 pnpm install              # Install all dependencies
 pnpm dev                  # Start all apps in development mode
-pnpm dev:teamhub          # Start only TeamHub (main app)
+pnpm dev:agelum           # Start only Agelum (main app)
 ```
 
 ### Building
 
 ```bash
 pnpm build                # Build all apps
-pnpm build:teamhub        # Build TeamHub for production
-pnpm build:teamhub:prod   # Build with production environment
+pnpm build:agelum         # Build Agelum for production
+pnpm build:agelum:prod    # Build with production environment
 pnpm build:ai-gateway     # Build AI Gateway only
 ```
 
@@ -46,19 +46,19 @@ pnpm clean               # Clean build artifacts
 
 ## Architecture Overview
 
-TeamHub is a multi-tenant AI agent management platform built with a microservices architecture:
+Agelum is a multi-tenant AI agent management platform built with a microservices architecture:
 
 ### Core Applications
 
-- **teamhub**: Main Next.js 14 application with UI and API
+- **agelum**: Main Next.js 14 application with UI and API
 - **ai-gateway**: AI provider abstraction layer (OpenAI, DeepSeek, etc.)
 - **browser-service**: Automated browser control using Playwright
 
 ### Shared Packages
 
-- **@teamhub/ai**: AI functions and tool integrations
-- **@teamhub/db**: Database schemas and ORM functions (Drizzle ORM)
-- **@teamhub/ai-services**: Multi-provider AI service abstraction
+- **@agelum/ai**: AI functions and tool integrations
+- **@agelum/db**: Database schemas and ORM functions (Drizzle ORM)
+- **@agelum/ai-services**: Multi-provider AI service abstraction
 - **@drizzle/reactive**: Reactive database client with real-time updates
 - **@repo/logger**: Centralized logging utilities
 - **@repo/ux-core**: Shared UI components and design system
@@ -74,14 +74,14 @@ TeamHub is a multi-tenant AI agent management platform built with a microservice
 ## Project Structure
 
 ```
-teamhub/
+agelum/
 ├── apps/
-│   ├── teamhub/          # Main Next.js application (Port 3000)
+│   ├── agelum/           # Main Next.js application (Port 3000)
 │   ├── ai-gateway/       # AI provider gateway (Next.js API routes)
 │   └── browser-service/  # Browser automation service (Express + Playwright)
 ├── packages/
-│   ├── teamhub-ai/       # AI functions and tools
-│   ├── agelum-db/       # Database schemas, migrations, and ORM
+│   ├── agelum-ai/        # AI functions and tools
+│   ├── agelum-db/        # Database schemas, migrations, and ORM
 │   ├── ai-services/      # AI provider integrations
 │   ├── drizzle-reactive/ # Reactive database client
 │   ├── logger/          # Logging utilities
@@ -113,7 +113,7 @@ teamhub/
 
 ### Tool Framework
 
-- Extensible tool system in `packages/teamhub-ai/src/tools/`
+- Extensible tool system in `packages/agelum-ai/src/tools/`
 - Built-in tools: search (Google, DuckDuckGo, Yandex), memory search, web browser
 - MCP (Model Context Protocol) integration for external tools
 - Tool usage tracking and rate limiting
@@ -127,11 +127,11 @@ teamhub/
 
 ## Environment Setup
 
-### Required Environment Variables (apps/teamhub/.env.local)
+### Required Environment Variables (apps/agelum/.env.local)
 
 ```bash
 # Database
-DATABASE_URL="postgresql://teamhub:password@localhost:5432/teamhub"
+DATABASE_URL="postgresql://agelum:password@localhost:5432/agelum"
 REDIS_URL="redis://localhost:6379"
 
 # Authentication
@@ -162,7 +162,7 @@ docker-compose -f infrastructure/docker/docker-stack.yml up -d
 ./infrastructure/scripts/deploy.sh v1.0.0
 
 # Force redeploy specific services
-FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy.sh v1.0.0
+FORCE_REDEPLOY_AGELUM=true ./infrastructure/scripts/deploy.sh v1.0.0
 ```
 
 ## Code Conventions
@@ -195,15 +195,15 @@ FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy.sh v1.0.0
 
 ### Entry Points
 
-- `apps/teamhub/src/app/page.tsx` - Main dashboard
-- `apps/teamhub/src/app/agents/page.tsx` - Agent management
-- `apps/teamhub/src/app/api/chat/route.ts` - AI chat endpoint
+- `apps/agelum/src/app/page.tsx` - Main dashboard
+- `apps/agelum/src/app/agents/page.tsx` - Agent management
+- `apps/agelum/src/app/api/chat/route.ts` - AI chat endpoint
 
 ### Core Components
 
-- `apps/teamhub/src/components/agents/AgentsList.tsx` - Agent list UI
-- `apps/teamhub/src/components/agents/agentDetails/ChatCard.tsx` - Agent chat interface
-- `packages/teamhub-ai/src/functions/sendChat.ts` - Core chat functionality
+- `apps/agelum/src/components/agents/AgentsList.tsx` - Agent list UI
+- `apps/agelum/src/components/agents/agentDetails/ChatCard.tsx` - Agent chat interface
+- `packages/agelum-ai/src/functions/sendChat.ts` - Core chat functionality
 
 ### Database Schema
 
@@ -226,14 +226,14 @@ FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy.sh v1.0.0
 pnpm dev
 
 # Start specific service
-pnpm dev:teamhub
+pnpm dev:agelum
 ```
 
 ### Production Deployment
 
 ```bash
 # Build for production
-pnpm build:teamhub:prod
+pnpm build:agelum:prod
 
 # Deploy to Docker Swarm
 ./infrastructure/scripts/deploy.sh v1.0.0
