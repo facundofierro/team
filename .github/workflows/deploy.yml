@@ -26,8 +26,8 @@ on:
         options:
           - 'false'
           - 'true'
-      force_redeploy_teamhub:
-        description: 'Force redeploy TeamHub application'
+      force_redeploy_agelum:
+        description: 'Force redeploy Agelum application'
         required: false
         default: 'false'
         type: choice
@@ -173,7 +173,7 @@ jobs:
           echo "📋 Selective Redeployment Options:"
           echo "  🔄 All Services:   ${{ github.event.inputs.force_redeploy_all || 'false' }}"
           echo "  🌐 Nginx:          ${{ github.event.inputs.force_redeploy_nginx || 'false' }}"
-          echo "  🎯 TeamHub:        ${{ github.event.inputs.force_redeploy_teamhub || 'false' }}"
+          echo "  🎯 Agelum:        ${{ github.event.inputs.force_redeploy_agelum || 'false' }}"
           echo "  🎬 Remotion:       ${{ github.event.inputs.force_redeploy_remotion || 'false' }}"
           echo "  🔧 Infrastructure: ${{ github.event.inputs.force_redeploy_infrastructure || 'false' }} (rebuilds DB image)"
           echo "  ☁️ Nextcloud:      ${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
@@ -235,7 +235,7 @@ jobs:
           # Enhanced granular deployment options
           export FORCE_REDEPLOY_ALL="${{ github.event.inputs.force_redeploy_all || 'false' }}"
           export FORCE_REDEPLOY_NGINX="${{ github.event.inputs.force_redeploy_nginx || 'false' }}"
-          export FORCE_REDEPLOY_TEAMHUB="${{ github.event.inputs.force_redeploy_teamhub || 'false' }}"
+          export FORCE_REDEPLOY_AGELUM="${{ github.event.inputs.force_redeploy_agelum || 'false' }}"
           export FORCE_REDEPLOY_REMOTION="${{ github.event.inputs.force_redeploy_remotion || 'false' }}"
           export FORCE_REDEPLOY_INFRASTRUCTURE="${{ github.event.inputs.force_redeploy_infrastructure || 'false' }}"
           export FORCE_REDEPLOY_NEXTCLOUD="${{ github.event.inputs.force_redeploy_nextcloud || 'false' }}"
@@ -274,8 +274,8 @@ jobs:
           # Wait for infrastructure services first
           echo "⏳ Waiting for PostgreSQL and Redis..."
           for i in {1..30}; do
-            if docker service ls --filter name=teamhub_postgres --format "{{.Replicas}}" | grep -q "1/1" && \
-               docker service ls --filter name=teamhub_redis --format "{{.Replicas}}" | grep -q "1/1"; then
+            if docker service ls --filter name=agelum_postgres --format "{{.Replicas}}" | grep -q "1/1" && \
+               docker service ls --filter name=agelum_redis --format "{{.Replicas}}" | grep -q "1/1"; then
               echo "✅ Infrastructure services are ready"
               break
             fi
@@ -290,8 +290,8 @@ jobs:
           # Wait for application services
           echo "⏳ Waiting for application services..."
           for i in {1..20}; do
-            if docker service ls --filter name=teamhub_teamhub --format "{{.Replicas}}" | grep -q "1/1" && \
-               docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
+            if docker service ls --filter name=agelum_agelum --format "{{.Replicas}}" | grep -q "1/1" && \
+               docker service ls --filter name=agelum_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
               echo "✅ Core application services are ready"
               break
             fi
@@ -323,7 +323,7 @@ jobs:
       - name: Delete old container images
         uses: actions/delete-package-versions@v5
         with:
-          package-name: 'teamhub'
+          package-name: 'agelum'
           package-type: 'container'
           min-versions-to-keep: 2
           delete-only-untagged-versions: false
