@@ -66,8 +66,11 @@ services:
       rollback_config:
         parallelism: 1
         delay: 10s
+    ports:
+      - '3001:3001'
     environment:
       - NODE_ENV=production
+      - PORT=3001
       # Add any environment variables your remotion service needs
     networks:
       agelum_network:
