@@ -72,10 +72,18 @@ check_disk_space() {
 check_data_volumes() {
     echo -e "${BLUE}🛡️  Checking data volume safety...${NC}"
 
+    # Check for migration needs
+    local NEEDS_MIGRATION=false
+    local MIGRATION_VOLUMES=()
+
     # Check PostgreSQL data
     if docker volume ls --filter name=agelum_postgres_data --format "{{.Name}}" | grep -q agelum_postgres_data; then
         local POSTGRES_SIZE=$(docker system df -v | grep agelum_postgres_data | awk '{print $3}' || echo "Unknown")
         echo -e "${GREEN}✅ PostgreSQL data volume exists (${POSTGRES_SIZE})${NC}"
+    elif docker volume ls --filter name=teamhub_postgres_data --format "{{.Name}}" | grep -q teamhub_postgres_data; then
+        echo -e "${YELLOW}⚠️  Found teamhub_postgres_data - migration needed${NC}"
+        NEEDS_MIGRATION=true
+        MIGRATION_VOLUMES+=("postgres")
     else
         echo -e "${YELLOW}⚠️  PostgreSQL data volume not found - will be created${NC}"
     fi
@@ -84,6 +92,10 @@ check_data_volumes() {
     if docker volume ls --filter name=agelum_redis_data --format "{{.Name}}" | grep -q agelum_redis_data; then
         local REDIS_SIZE=$(docker system df -v | grep agelum_redis_data | awk '{print $3}' || echo "Unknown")
         echo -e "${GREEN}✅ Redis data volume exists (${REDIS_SIZE})${NC}"
+    elif docker volume ls --filter name=teamhub_redis_data --format "{{.Name}}" | grep -q teamhub_redis_data; then
+        echo -e "${YELLOW}⚠️  Found teamhub_redis_data - migration needed${NC}"
+        NEEDS_MIGRATION=true
+        MIGRATION_VOLUMES+=("redis")
     else
         echo -e "${YELLOW}⚠️  Redis data volume not found - will be created${NC}"
     fi
@@ -92,6 +104,10 @@ check_data_volumes() {
     if docker volume ls --filter name=agelum_nextcloud_data --format "{{.Name}}" | grep -q agelum_nextcloud_data; then
         local NEXTCLOUD_SIZE=$(docker system df -v | grep agelum_nextcloud_data | awk '{print $3}' || echo "Unknown")
         echo -e "${GREEN}✅ Nextcloud data volume exists (${NEXTCLOUD_SIZE})${NC}"
+    elif docker volume ls --filter name=teamhub_nextcloud_data --format "{{.Name}}" | grep -q teamhub_nextcloud_data; then
+        echo -e "${YELLOW}⚠️  Found teamhub_nextcloud_data - migration needed${NC}"
+        NEEDS_MIGRATION=true
+        MIGRATION_VOLUMES+=("nextcloud")
     else
         echo -e "${YELLOW}⚠️  Nextcloud data volume not found - will be created${NC}"
     fi
@@ -100,6 +116,10 @@ check_data_volumes() {
     if docker volume ls --filter name=agelum_nextcloud_db_data --format "{{.Name}}" | grep -q agelum_nextcloud_db_data; then
         local NEXTCLOUD_DB_SIZE=$(docker system df -v | grep agelum_nextcloud_db_data | awk '{print $3}' || echo "Unknown")
         echo -e "${GREEN}✅ Nextcloud DB data volume exists (${NEXTCLOUD_DB_SIZE})${NC}"
+    elif docker volume ls --filter name=teamhub_nextcloud_db_data --format "{{.Name}}" | grep -q teamhub_nextcloud_db_data; then
+        echo -e "${YELLOW}⚠️  Found teamhub_nextcloud_db_data - migration needed${NC}"
+        NEEDS_MIGRATION=true
+        MIGRATION_VOLUMES+=("nextcloud_db")
     else
         echo -e "${YELLOW}⚠️  Nextcloud DB data volume not found - will be created${NC}"
     fi
@@ -107,6 +127,25 @@ check_data_volumes() {
     # PostHog volumes disabled
 
     # ClickHouse volumes disabled
+
+    # Handle migration if needed
+    if [ "$NEEDS_MIGRATION" = true ]; then
+        echo ""
+        echo -e "${YELLOW}🔄 Volume migration required!${NC}"
+        echo -e "${YELLOW}Found teamhub_ volumes that need to be migrated to agelum_ volumes${NC}"
+        echo ""
+        echo -e "${BLUE}💡 To migrate volumes, run:${NC}"
+        echo -e "  sudo ./infrastructure/scripts/migrate-volumes.sh"
+        echo ""
+        echo -e "${YELLOW}⚠️  This will:${NC}"
+        echo -e "  • Create new agelum_ volumes"
+        echo -e "  • Copy data from teamhub_ volumes"
+        echo -e "  • Preserve original teamhub_ volumes as backups"
+        echo ""
+        echo -e "${RED}❌ Deployment cannot continue without volume migration${NC}"
+        echo -e "${RED}Please run the migration script first, then retry deployment${NC}"
+        exit 1
+    fi
 
     echo -e "${GREEN}💾 Data volumes are preserved during service redeployment${NC}"
     echo ""
