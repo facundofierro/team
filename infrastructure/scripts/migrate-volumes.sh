@@ -97,12 +97,17 @@ echo -e "${YELLOW}⚠️  IMPORTANT: This script will create new agelum_ volumes
 echo -e "${YELLOW}⚠️  The original teamhub_ volumes will be preserved as backups${NC}"
 echo ""
 
-# Ask for confirmation
-read -p "Do you want to proceed with the migration? (y/N): " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}❌ Migration cancelled by user${NC}"
-    exit 0
+# Check if running in automated mode (CI/CD)
+if [ "$CI" = "true" ] || [ "$AUTOMATED_MIGRATION" = "true" ]; then
+    echo -e "${BLUE}🤖 Running in automated mode - proceeding with migration${NC}"
+else
+    # Ask for confirmation in interactive mode
+    read -p "Do you want to proceed with the migration? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}❌ Migration cancelled by user${NC}"
+        exit 0
+    fi
 fi
 
 echo ""

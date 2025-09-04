@@ -134,17 +134,58 @@ check_data_volumes() {
         echo -e "${YELLOW}🔄 Volume migration required!${NC}"
         echo -e "${YELLOW}Found teamhub_ volumes that need to be migrated to agelum_ volumes${NC}"
         echo ""
-        echo -e "${BLUE}💡 To migrate volumes, run:${NC}"
-        echo -e "  sudo ./infrastructure/scripts/migrate-volumes.sh"
-        echo ""
+        echo -e "${BLUE}🚀 Automatically running volume migration...${NC}"
         echo -e "${YELLOW}⚠️  This will:${NC}"
         echo -e "  • Create new agelum_ volumes"
         echo -e "  • Copy data from teamhub_ volumes"
         echo -e "  • Preserve original teamhub_ volumes as backups"
         echo ""
-        echo -e "${RED}❌ Deployment cannot continue without volume migration${NC}"
-        echo -e "${RED}Please run the migration script first, then retry deployment${NC}"
-        exit 1
+
+        # Check if migration script exists
+        if [ ! -f "infrastructure/scripts/migrate-volumes.sh" ]; then
+            echo -e "${RED}❌ Migration script not found at infrastructure/scripts/migrate-volumes.sh${NC}"
+            echo -e "${RED}Please ensure the migration script is available${NC}"
+            exit 1
+        fi
+
+        # Make migration script executable
+        chmod +x infrastructure/scripts/migrate-volumes.sh
+
+        # Run migration script in automated mode
+        echo -e "${BLUE}🔄 Running volume migration...${NC}"
+        export AUTOMATED_MIGRATION=true
+        if sudo infrastructure/scripts/migrate-volumes.sh; then
+            echo -e "${GREEN}✅ Volume migration completed successfully${NC}"
+            echo ""
+        else
+            echo -e "${RED}❌ Volume migration failed${NC}"
+            echo -e "${RED}Please check the migration logs and try again${NC}"
+            exit 1
+        fi
+
+        # Verify migration was successful
+        echo -e "${BLUE}🔍 Verifying migration...${NC}"
+        local MIGRATION_VERIFIED=true
+
+        # Check if agelum volumes now exist
+        if ! docker volume ls --filter name=agelum_postgres_data --format "{{.Name}}" | grep -q agelum_postgres_data; then
+            echo -e "${RED}❌ PostgreSQL migration verification failed${NC}"
+            MIGRATION_VERIFIED=false
+        fi
+
+        if ! docker volume ls --filter name=agelum_redis_data --format "{{.Name}}" | grep -q agelum_redis_data; then
+            echo -e "${RED}❌ Redis migration verification failed${NC}"
+            MIGRATION_VERIFIED=false
+        fi
+
+        if [ "$MIGRATION_VERIFIED" = false ]; then
+            echo -e "${RED}❌ Migration verification failed - some volumes were not created${NC}"
+            echo -e "${RED}Please check the migration logs and try again${NC}"
+            exit 1
+        fi
+
+        echo -e "${GREEN}✅ Migration verification successful - proceeding with deployment${NC}"
+        echo ""
     fi
 
     echo -e "${GREEN}💾 Data volumes are preserved during service redeployment${NC}"
