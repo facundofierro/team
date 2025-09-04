@@ -24,6 +24,7 @@ COPY turbo.json ./
 COPY apps/agelum/package.json ./apps/agelum/
 COPY packages/agelum-db/package.json ./packages/agelum-db/
 COPY packages/agelum-ai/package.json ./packages/agelum-ai/
+COPY packages/ux-core/package.json ./packages/ux-core/
 COPY packages/drizzle-reactive/package.json ./packages/drizzle-reactive/
 COPY packages/logger/package.json ./packages/logger/
 
