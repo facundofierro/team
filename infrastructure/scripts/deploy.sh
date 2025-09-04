@@ -106,19 +106,19 @@ check_data_volumes() {
         echo ""
 
         # Check if migration script exists
-        if [ ! -f "infrastructure/scripts/migrate-volumes.sh" ]; then
-            echo -e "${RED}❌ Migration script not found at infrastructure/scripts/migrate-volumes.sh${NC}"
+        if [ ! -f "infrastructure/scripts/migrate-volumes-docker.sh" ]; then
+            echo -e "${RED}❌ Migration script not found at infrastructure/scripts/migrate-volumes-docker.sh${NC}"
             echo -e "${RED}Please ensure the migration script is available${NC}"
             exit 1
         fi
 
         # Make migration script executable
-        chmod +x infrastructure/scripts/migrate-volumes.sh
+        chmod +x infrastructure/scripts/migrate-volumes-docker.sh
 
-        # Run migration script in automated mode
+        # Run migration script in automated mode (no sudo required)
         echo -e "${BLUE}🔄 Running volume migration...${NC}"
         export AUTOMATED_MIGRATION=true
-        if sudo infrastructure/scripts/migrate-volumes.sh; then
+        if infrastructure/scripts/migrate-volumes-docker.sh; then
             echo -e "${GREEN}✅ Volume migration completed successfully${NC}"
             echo ""
         else
