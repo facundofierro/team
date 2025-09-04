@@ -9,10 +9,6 @@ export FORCE_REDEPLOY_NGINX="${FORCE_REDEPLOY_NGINX:-false}"
 export FORCE_REDEPLOY_AGELUM="${FORCE_REDEPLOY_AGELUM:-false}"
 export FORCE_REDEPLOY_REMOTION="${FORCE_REDEPLOY_REMOTION:-false}"
 export FORCE_REDEPLOY_INFRASTRUCTURE="${FORCE_REDEPLOY_INFRASTRUCTURE:-false}"
-export FORCE_REDEPLOY_NEXTCLOUD="${FORCE_REDEPLOY_NEXTCLOUD:-false}"
-# PostHog/ClickHouse disabled
-export FORCE_REDEPLOY_POSTHOG="false"
-export FORCE_REDEPLOY_CLICKHOUSE="false"
 export FORCE_REDEPLOY_ALL="${FORCE_REDEPLOY_ALL:-false}"
 
 # Backwards compatibility with old FORCE_REDEPLOY
@@ -26,8 +22,6 @@ if [ "$FORCE_REDEPLOY_ALL" = "true" ]; then
     export FORCE_REDEPLOY_AGELUM="true"
     export FORCE_REDEPLOY_REMOTION="true"
     export FORCE_REDEPLOY_INFRASTRUCTURE="true"
-    export FORCE_REDEPLOY_NEXTCLOUD="true"
-    # PostHog/ClickHouse disabled – keep false
 fi
 
 # Colors for output
@@ -43,9 +37,6 @@ show_deployment_options() {
     echo -e "  🎯 Agelum:         ${FORCE_REDEPLOY_AGELUM}"
     echo -e "  🎬 Remotion:       ${FORCE_REDEPLOY_REMOTION}"
     echo -e "  🔧 PostgreSQL/Redis: ${FORCE_REDEPLOY_INFRASTRUCTURE}"
-    echo -e "  ☁️ Nextcloud:      ${FORCE_REDEPLOY_NEXTCLOUD}"
-    echo -e "  📊 PostHog:        ${FORCE_REDEPLOY_POSTHOG}"
-    echo -e "  🗄️  ClickHouse:     ${FORCE_REDEPLOY_CLICKHOUSE}"
     echo -e "  🔄 All Services:   ${FORCE_REDEPLOY_ALL}"
     echo ""
 }
@@ -100,33 +91,6 @@ check_data_volumes() {
         echo -e "${YELLOW}⚠️  Redis data volume not found - will be created${NC}"
     fi
 
-    # Check Nextcloud data
-    if docker volume ls --filter name=agelum_nextcloud_data --format "{{.Name}}" | grep -q agelum_nextcloud_data; then
-        local NEXTCLOUD_SIZE=$(docker system df -v | grep agelum_nextcloud_data | awk '{print $3}' || echo "Unknown")
-        echo -e "${GREEN}✅ Nextcloud data volume exists (${NEXTCLOUD_SIZE})${NC}"
-    elif docker volume ls --filter name=teamhub_nextcloud_data --format "{{.Name}}" | grep -q teamhub_nextcloud_data; then
-        echo -e "${YELLOW}⚠️  Found teamhub_nextcloud_data - migration needed${NC}"
-        NEEDS_MIGRATION=true
-        MIGRATION_VOLUMES+=("nextcloud")
-    else
-        echo -e "${YELLOW}⚠️  Nextcloud data volume not found - will be created${NC}"
-    fi
-
-    # Check Nextcloud DB data
-    if docker volume ls --filter name=agelum_nextcloud_db_data --format "{{.Name}}" | grep -q agelum_nextcloud_db_data; then
-        local NEXTCLOUD_DB_SIZE=$(docker system df -v | grep agelum_nextcloud_db_data | awk '{print $3}' || echo "Unknown")
-        echo -e "${GREEN}✅ Nextcloud DB data volume exists (${NEXTCLOUD_DB_SIZE})${NC}"
-    elif docker volume ls --filter name=teamhub_nextcloud_db_data --format "{{.Name}}" | grep -q teamhub_nextcloud_db_data; then
-        echo -e "${YELLOW}⚠️  Found teamhub_nextcloud_db_data - migration needed${NC}"
-        NEEDS_MIGRATION=true
-        MIGRATION_VOLUMES+=("nextcloud_db")
-    else
-        echo -e "${YELLOW}⚠️  Nextcloud DB data volume not found - will be created${NC}"
-    fi
-
-    # PostHog volumes disabled
-
-    # ClickHouse volumes disabled
 
     # Handle migration if needed
     if [ "$NEEDS_MIGRATION" = true ]; then
@@ -134,17 +98,58 @@ check_data_volumes() {
         echo -e "${YELLOW}🔄 Volume migration required!${NC}"
         echo -e "${YELLOW}Found teamhub_ volumes that need to be migrated to agelum_ volumes${NC}"
         echo ""
-        echo -e "${BLUE}💡 To migrate volumes, run:${NC}"
-        echo -e "  sudo ./infrastructure/scripts/migrate-volumes.sh"
-        echo ""
+        echo -e "${BLUE}🚀 Automatically running volume migration...${NC}"
         echo -e "${YELLOW}⚠️  This will:${NC}"
         echo -e "  • Create new agelum_ volumes"
         echo -e "  • Copy data from teamhub_ volumes"
         echo -e "  • Preserve original teamhub_ volumes as backups"
         echo ""
-        echo -e "${RED}❌ Deployment cannot continue without volume migration${NC}"
-        echo -e "${RED}Please run the migration script first, then retry deployment${NC}"
-        exit 1
+
+        # Check if migration script exists
+        if [ ! -f "infrastructure/scripts/migrate-volumes.sh" ]; then
+            echo -e "${RED}❌ Migration script not found at infrastructure/scripts/migrate-volumes.sh${NC}"
+            echo -e "${RED}Please ensure the migration script is available${NC}"
+            exit 1
+        fi
+
+        # Make migration script executable
+        chmod +x infrastructure/scripts/migrate-volumes.sh
+
+        # Run migration script in automated mode
+        echo -e "${BLUE}🔄 Running volume migration...${NC}"
+        export AUTOMATED_MIGRATION=true
+        if sudo infrastructure/scripts/migrate-volumes.sh; then
+            echo -e "${GREEN}✅ Volume migration completed successfully${NC}"
+            echo ""
+        else
+            echo -e "${RED}❌ Volume migration failed${NC}"
+            echo -e "${RED}Please check the migration logs and try again${NC}"
+            exit 1
+        fi
+
+        # Verify migration was successful
+        echo -e "${BLUE}🔍 Verifying migration...${NC}"
+        local MIGRATION_VERIFIED=true
+
+        # Check if agelum volumes now exist
+        if ! docker volume ls --filter name=agelum_postgres_data --format "{{.Name}}" | grep -q agelum_postgres_data; then
+            echo -e "${RED}❌ PostgreSQL migration verification failed${NC}"
+            MIGRATION_VERIFIED=false
+        fi
+
+        if ! docker volume ls --filter name=agelum_redis_data --format "{{.Name}}" | grep -q agelum_redis_data; then
+            echo -e "${RED}❌ Redis migration verification failed${NC}"
+            MIGRATION_VERIFIED=false
+        fi
+
+        if [ "$MIGRATION_VERIFIED" = false ]; then
+            echo -e "${RED}❌ Migration verification failed - some volumes were not created${NC}"
+            echo -e "${RED}Please check the migration logs and try again${NC}"
+            exit 1
+        fi
+
+        echo -e "${GREEN}✅ Migration verification successful - proceeding with deployment${NC}"
+        echo ""
     fi
 
     echo -e "${GREEN}💾 Data volumes are preserved during service redeployment${NC}"
@@ -274,9 +279,6 @@ check_individual_service_status() {
     local AGELUM_OK=false
     local NGINX_OK=false
     local REMOTION_OK=false
-    local NEXTCLOUD_OK=false
-    local POSTHOG_OK=true
-    local CLICKHOUSE_OK=true
 
     if check_service_status "agelum_agelum" "Agelum"; then
         AGELUM_OK=true
@@ -289,12 +291,6 @@ check_individual_service_status() {
     if check_service_status "agelum_remotion" "Remotion"; then
         REMOTION_OK=true
     fi
-
-    if check_service_status "agelum_nextcloud" "Nextcloud"; then
-        NEXTCLOUD_OK=true
-    fi
-
-    # PostHog/ClickHouse services disabled
 
     # Return status based on force redeploy flags
     local NEEDS_DEPLOYMENT=false
@@ -310,12 +306,6 @@ check_individual_service_status() {
     if [ "$FORCE_REDEPLOY_REMOTION" = "true" ] || [ "$REMOTION_OK" = false ]; then
         NEEDS_DEPLOYMENT=true
     fi
-
-    if [ "$FORCE_REDEPLOY_NEXTCLOUD" = "true" ] || [ "$NEXTCLOUD_OK" = false ]; then
-        NEEDS_DEPLOYMENT=true
-    fi
-
-    # PostHog/ClickHouse redeploy disabled
 
     if [ "$NEEDS_DEPLOYMENT" = true ]; then
         echo -e "${YELLOW}⚠️  Services need deployment based on status/force flags${NC}"
@@ -489,29 +479,6 @@ wait_for_services() {
         done
     fi
 
-    # Check nextcloud service (if being deployed)
-    if [ "$FORCE_REDEPLOY_NEXTCLOUD" = "true" ] || ! check_service_status "agelum_nextcloud" "Nextcloud" >/dev/null 2>&1; then
-        echo -e "${BLUE}⏳ Waiting for Nextcloud service...${NC}"
-        local nextcloud_ready=false
-        for i in {1..15}; do
-            if docker service ls --filter name=agelum_nextcloud --format "{{.Replicas}}" | grep -q "1/1"; then
-                echo -e "${GREEN}✅ Nextcloud service is ready${NC}"
-                nextcloud_ready=true
-                break
-            fi
-            if [ $i -eq 15 ]; then
-                echo -e "${RED}❌ Nextcloud service failed to start after 15 attempts${NC}"
-                docker service logs agelum_nextcloud --tail 20 || true
-                # Nextcloud is non-critical, don't count as critical failure
-                echo -e "${YELLOW}⚠️  Nextcloud failed but is non-critical${NC}"
-            else
-                echo "Waiting for Nextcloud service... (attempt $i/15)"
-                sleep 10
-            fi
-        done
-    fi
-
-    # PostHog wait disabled
 
         # Show complete service status before failing
     echo -e "${BLUE}📊 Complete Service Status Summary:${NC}"
@@ -564,14 +531,6 @@ test_application() {
         echo -e "${YELLOW}⚠️  Remotion service may still be starting up${NC}"
     fi
 
-    # Test nextcloud endpoint
-    if curl -f --connect-timeout 5 --max-time 10 http://127.0.0.1:80/nextcloud/ >/dev/null 2>&1; then
-        echo -e "${GREEN}✅ Nextcloud service is accessible${NC}"
-    else
-        echo -e "${YELLOW}⚠️  Nextcloud service may still be starting up${NC}"
-    fi
-
-    # PostHog endpoint test disabled
 }
 
 # Enhanced cleanup function with disk space monitoring
@@ -632,9 +591,6 @@ show_deployment_summary() {
     [ "$FORCE_REDEPLOY_AGELUM" = "true" ] && echo -e "  🎯 Agelum: ✅ Redeployed"
     [ "$FORCE_REDEPLOY_REMOTION" = "true" ] && echo -e "  🎬 Remotion: ✅ Redeployed"
     [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] && echo -e "  🔧 Infrastructure: ✅ Redeployed"
-    [ "$FORCE_REDEPLOY_NEXTCLOUD" = "true" ] && echo -e "  ☁️  Nextcloud: ✅ Redeployed"
-    [ "$FORCE_REDEPLOY_POSTHOG" = "true" ] && echo -e "  📊 PostHog: ✅ Redeployed"
-    [ "$FORCE_REDEPLOY_CLICKHOUSE" = "true" ] && echo -e "  🗄️  ClickHouse: ✅ Redeployed"
 
     # Show running services
     echo ""

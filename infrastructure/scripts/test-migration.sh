@@ -67,12 +67,6 @@ echo ""
 # Test core volumes
 test_volume_migration "teamhub_postgres_data" "agelum_postgres_data" "PostgreSQL data"
 test_volume_migration "teamhub_redis_data" "agelum_redis_data" "Redis data"
-test_volume_migration "teamhub_nextcloud_data" "agelum_nextcloud_data" "Nextcloud data"
-test_volume_migration "teamhub_nextcloud_db_data" "agelum_nextcloud_db_data" "Nextcloud database data"
-
-# Test optional volumes
-test_volume_migration "teamhub_clickhouse_data" "agelum_clickhouse_data" "ClickHouse data"
-test_volume_migration "teamhub_posthog_data" "agelum_posthog_data" "PostHog data"
 
 echo -e "${BLUE}📊 Migration Test Summary:${NC}"
 echo "=========================="
