@@ -362,7 +362,7 @@ wait_for_services() {
         done
     fi
 
-    # Check remotion service (if being deployed)
+    # Check remotion service (if being deployed) - non-critical
     if [ "$FORCE_REDEPLOY_REMOTION" = "true" ] || ! check_service_status "agelum_remotion" "Remotion" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Remotion service...${NC}"
         local remotion_ready=false
@@ -373,10 +373,10 @@ wait_for_services() {
                 break
             fi
             if [ $i -eq 15 ]; then
-                echo -e "${RED}❌ Remotion service failed to start after 15 attempts${NC}"
+                echo -e "${YELLOW}⚠️  Remotion service failed to start after 15 attempts${NC}"
                 docker service logs agelum_remotion --tail 20 || true
-                CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
-                SERVICE_FAILURES+=("Remotion")
+                echo -e "${YELLOW}⚠️  Remotion is non-critical, continuing deployment...${NC}"
+                # Don't count as critical failure
             else
                 echo "Waiting for Remotion service... (attempt $i/15)"
                 sleep 10
