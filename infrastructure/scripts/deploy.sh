@@ -6,7 +6,7 @@ echo "=== Enhanced Application Deployment ==="
 
 # Default values for selective redeployment
 export FORCE_REDEPLOY_NGINX="${FORCE_REDEPLOY_NGINX:-false}"
-export FORCE_REDEPLOY_TEAMHUB="${FORCE_REDEPLOY_TEAMHUB:-false}"
+export FORCE_REDEPLOY_AGELUM="${FORCE_REDEPLOY_AGELUM:-false}"
 export FORCE_REDEPLOY_REMOTION="${FORCE_REDEPLOY_REMOTION:-false}"
 export FORCE_REDEPLOY_INFRASTRUCTURE="${FORCE_REDEPLOY_INFRASTRUCTURE:-false}"
 export FORCE_REDEPLOY_NEXTCLOUD="${FORCE_REDEPLOY_NEXTCLOUD:-false}"
@@ -23,7 +23,7 @@ fi
 # If FORCE_REDEPLOY_ALL is true, set all individual flags
 if [ "$FORCE_REDEPLOY_ALL" = "true" ]; then
     export FORCE_REDEPLOY_NGINX="true"
-    export FORCE_REDEPLOY_TEAMHUB="true"
+    export FORCE_REDEPLOY_AGELUM="true"
     export FORCE_REDEPLOY_REMOTION="true"
     export FORCE_REDEPLOY_INFRASTRUCTURE="true"
     export FORCE_REDEPLOY_NEXTCLOUD="true"
@@ -40,7 +40,7 @@ NC='\033[0m' # No Color
 show_deployment_options() {
     echo -e "${BLUE}📋 Deployment Options:${NC}"
     echo -e "  🌐 Nginx:          ${FORCE_REDEPLOY_NGINX}"
-    echo -e "  🎯 TeamHub:        ${FORCE_REDEPLOY_TEAMHUB}"
+    echo -e "  🎯 Agelum:         ${FORCE_REDEPLOY_AGELUM}"
     echo -e "  🎬 Remotion:       ${FORCE_REDEPLOY_REMOTION}"
     echo -e "  🔧 PostgreSQL/Redis: ${FORCE_REDEPLOY_INFRASTRUCTURE}"
     echo -e "  ☁️ Nextcloud:      ${FORCE_REDEPLOY_NEXTCLOUD}"
@@ -73,32 +73,32 @@ check_data_volumes() {
     echo -e "${BLUE}🛡️  Checking data volume safety...${NC}"
 
     # Check PostgreSQL data
-    if docker volume ls --filter name=teamhub_postgres_data --format "{{.Name}}" | grep -q teamhub_postgres_data; then
-        local POSTGRES_SIZE=$(docker system df -v | grep teamhub_postgres_data | awk '{print $3}' || echo "Unknown")
+    if docker volume ls --filter name=agelum_postgres_data --format "{{.Name}}" | grep -q agelum_postgres_data; then
+        local POSTGRES_SIZE=$(docker system df -v | grep agelum_postgres_data | awk '{print $3}' || echo "Unknown")
         echo -e "${GREEN}✅ PostgreSQL data volume exists (${POSTGRES_SIZE})${NC}"
     else
         echo -e "${YELLOW}⚠️  PostgreSQL data volume not found - will be created${NC}"
     fi
 
     # Check Redis data
-    if docker volume ls --filter name=teamhub_redis_data --format "{{.Name}}" | grep -q teamhub_redis_data; then
-        local REDIS_SIZE=$(docker system df -v | grep teamhub_redis_data | awk '{print $3}' || echo "Unknown")
+    if docker volume ls --filter name=agelum_redis_data --format "{{.Name}}" | grep -q agelum_redis_data; then
+        local REDIS_SIZE=$(docker system df -v | grep agelum_redis_data | awk '{print $3}' || echo "Unknown")
         echo -e "${GREEN}✅ Redis data volume exists (${REDIS_SIZE})${NC}"
     else
         echo -e "${YELLOW}⚠️  Redis data volume not found - will be created${NC}"
     fi
 
     # Check Nextcloud data
-    if docker volume ls --filter name=teamhub_nextcloud_data --format "{{.Name}}" | grep -q teamhub_nextcloud_data; then
-        local NEXTCLOUD_SIZE=$(docker system df -v | grep teamhub_nextcloud_data | awk '{print $3}' || echo "Unknown")
+    if docker volume ls --filter name=agelum_nextcloud_data --format "{{.Name}}" | grep -q agelum_nextcloud_data; then
+        local NEXTCLOUD_SIZE=$(docker system df -v | grep agelum_nextcloud_data | awk '{print $3}' || echo "Unknown")
         echo -e "${GREEN}✅ Nextcloud data volume exists (${NEXTCLOUD_SIZE})${NC}"
     else
         echo -e "${YELLOW}⚠️  Nextcloud data volume not found - will be created${NC}"
     fi
 
     # Check Nextcloud DB data
-    if docker volume ls --filter name=teamhub_nextcloud_db_data --format "{{.Name}}" | grep -q teamhub_nextcloud_db_data; then
-        local NEXTCLOUD_DB_SIZE=$(docker system df -v | grep teamhub_nextcloud_db_data | awk '{print $3}' || echo "Unknown")
+    if docker volume ls --filter name=agelum_nextcloud_db_data --format "{{.Name}}" | grep -q agelum_nextcloud_db_data; then
+        local NEXTCLOUD_DB_SIZE=$(docker system df -v | grep agelum_nextcloud_db_data | awk '{print $3}' || echo "Unknown")
         echo -e "${GREEN}✅ Nextcloud DB data volume exists (${NEXTCLOUD_DB_SIZE})${NC}"
     else
         echo -e "${YELLOW}⚠️  Nextcloud DB data volume not found - will be created${NC}"
@@ -138,11 +138,11 @@ check_infrastructure_status() {
     local POSTGRES_OK=false
     local REDIS_OK=false
 
-    if check_service_status "teamhub_postgres" "PostgreSQL"; then
+    if check_service_status "agelum_postgres" "PostgreSQL"; then
         POSTGRES_OK=true
     fi
 
-    if check_service_status "teamhub_redis" "Redis"; then
+    if check_service_status "agelum_redis" "Redis"; then
         REDIS_OK=true
     fi
 
@@ -161,7 +161,7 @@ manage_nginx_config() {
 
     # Generate timestamp-based version for the config
     local CONFIG_VERSION=$(date +%Y%m%d_%H%M%S)
-    local CONFIG_NAME="teamhub_nginx_config_${CONFIG_VERSION}"
+    local CONFIG_NAME="agelum_nginx_config_${CONFIG_VERSION}"
 
     # Check if config file exists
     if [ ! -f "infrastructure/configs/nginx.conf" ]; then
@@ -172,7 +172,7 @@ manage_nginx_config() {
     # Remove old configs if forcing nginx redeploy
     if [ "$FORCE_REDEPLOY_NGINX" = "true" ]; then
         echo -e "${BLUE}🗑️  Removing old nginx configs due to force redeploy...${NC}"
-        local OLD_CONFIGS=$(docker config ls --filter name=teamhub_nginx_config --format "{{.Name}}" || echo "")
+        local OLD_CONFIGS=$(docker config ls --filter name=agelum_nginx_config --format "{{.Name}}" || echo "")
         if [ -n "$OLD_CONFIGS" ]; then
             echo "$OLD_CONFIGS" | while read -r config; do
                 if [ -n "$config" ]; then
@@ -196,7 +196,7 @@ manage_nginx_config() {
 
     # Clean up old nginx configs (keep last 3)
     echo -e "${BLUE}🧹 Cleaning up old nginx configs...${NC}"
-    local OLD_CONFIGS=$(docker config ls --filter name=teamhub_nginx_config_ --format "{{.Name}}" | sort -r | tail -n +4)
+    local OLD_CONFIGS=$(docker config ls --filter name=agelum_nginx_config_ --format "{{.Name}}" | sort -r | tail -n +4)
     if [ -n "$OLD_CONFIGS" ]; then
         echo "$OLD_CONFIGS" | while read -r config; do
             # Check if config is in use before removing
@@ -232,26 +232,26 @@ setup_infrastructure() {
 check_individual_service_status() {
     echo -e "${BLUE}🔍 Checking individual service status...${NC}"
 
-    local TEAMHUB_OK=false
+    local AGELUM_OK=false
     local NGINX_OK=false
     local REMOTION_OK=false
     local NEXTCLOUD_OK=false
     local POSTHOG_OK=true
     local CLICKHOUSE_OK=true
 
-    if check_service_status "teamhub_teamhub" "TeamHub"; then
-        TEAMHUB_OK=true
+    if check_service_status "agelum_agelum" "Agelum"; then
+        AGELUM_OK=true
     fi
 
-    if check_service_status "teamhub_nginx" "Nginx"; then
+    if check_service_status "agelum_nginx" "Nginx"; then
         NGINX_OK=true
     fi
 
-    if check_service_status "teamhub_remotion" "Remotion"; then
+    if check_service_status "agelum_remotion" "Remotion"; then
         REMOTION_OK=true
     fi
 
-    if check_service_status "teamhub_nextcloud" "Nextcloud"; then
+    if check_service_status "agelum_nextcloud" "Nextcloud"; then
         NEXTCLOUD_OK=true
     fi
 
@@ -260,7 +260,7 @@ check_individual_service_status() {
     # Return status based on force redeploy flags
     local NEEDS_DEPLOYMENT=false
 
-    if [ "$FORCE_REDEPLOY_TEAMHUB" = "true" ] || [ "$TEAMHUB_OK" = false ]; then
+    if [ "$FORCE_REDEPLOY_AGELUM" = "true" ] || [ "$AGELUM_OK" = false ]; then
         NEEDS_DEPLOYMENT=true
     fi
 
@@ -295,12 +295,12 @@ deploy_full_stack() {
 
     # Use GitHub Container Registry image
     if [ -n "$CONTAINER_REGISTRY" ] && [ -n "$IMAGE_TAG" ]; then
-        local CONTAINER_IMAGE="$CONTAINER_REGISTRY/teamhub:$IMAGE_TAG"
+        local CONTAINER_IMAGE="$CONTAINER_REGISTRY/agelum:$IMAGE_TAG"
         echo "Using Container Registry image: $CONTAINER_IMAGE"
 
         # Create a temporary docker-stack.yml and update the image
         cp infrastructure/docker/docker-stack.yml ./docker-stack-temp.yml
-        sed -i "s|localhost:5000/teamhub:.*|$CONTAINER_IMAGE|" ./docker-stack-temp.yml
+        sed -i "s|localhost:5000/agelum:.*|$CONTAINER_IMAGE|" ./docker-stack-temp.yml
 
         # Update remotion image if REMOTION_IMAGE is provided
         if [ -n "$REMOTION_IMAGE" ]; then
@@ -324,7 +324,7 @@ deploy_full_stack() {
     # PostHog/ClickHouse env disabled
 
     echo -e "${BLUE}🚀 Deploying application stack...${NC}"
-    docker stack deploy -c ./docker-stack-temp.yml teamhub
+    docker stack deploy -c ./docker-stack-temp.yml agelum
 
     # Clean up temporary file
     rm -f ./docker-stack-temp.yml
@@ -342,18 +342,18 @@ wait_for_services() {
     local SERVICE_FAILURES=()
 
     # Check infrastructure services first (if being deployed)
-    if [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] || ! check_service_status "teamhub_postgres" "PostgreSQL" >/dev/null 2>&1; then
+    if [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] || ! check_service_status "agelum_postgres" "PostgreSQL" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for PostgreSQL service...${NC}"
         local postgres_ready=false
         for i in {1..30}; do
-            if docker service ls --filter name=teamhub_postgres --format "{{.Replicas}}" | grep -q "1/1"; then
+            if docker service ls --filter name=agelum_postgres --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ PostgreSQL service is ready${NC}"
                 postgres_ready=true
                 break
             fi
             if [ $i -eq 30 ]; then
                 echo -e "${RED}❌ PostgreSQL service failed to start after 30 attempts${NC}"
-                docker service logs teamhub_postgres --tail 20 || true
+                docker service logs agelum_postgres --tail 20 || true
                 CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
                 SERVICE_FAILURES+=("PostgreSQL")
             else
@@ -363,18 +363,18 @@ wait_for_services() {
         done
     fi
 
-    if [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] || ! check_service_status "teamhub_redis" "Redis" >/dev/null 2>&1; then
+    if [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] || ! check_service_status "agelum_redis" "Redis" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Redis service...${NC}"
         local redis_ready=false
         for i in {1..15}; do
-            if docker service ls --filter name=teamhub_redis --format "{{.Replicas}}" | grep -q "1/1"; then
+            if docker service ls --filter name=agelum_redis --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Redis service is ready${NC}"
                 redis_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ Redis service failed to start after 15 attempts${NC}"
-                docker service logs teamhub_redis --tail 20 || true
+                docker service logs agelum_redis --tail 20 || true
                 CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
                 SERVICE_FAILURES+=("Redis")
             else
@@ -385,40 +385,40 @@ wait_for_services() {
     fi
 
     # Check teamhub service first (if being deployed)
-    if [ "$FORCE_REDEPLOY_TEAMHUB" = "true" ] || ! check_service_status "teamhub_teamhub" "TeamHub" >/dev/null 2>&1; then
-        echo -e "${BLUE}⏳ Waiting for TeamHub service...${NC}"
+    if [ "$FORCE_REDEPLOY_AGELUM" = "true" ] || ! check_service_status "agelum_agelum" "Agelum" >/dev/null 2>&1; then
+        echo -e "${BLUE}⏳ Waiting for Agelum service...${NC}"
         local teamhub_ready=false
         for i in {1..15}; do
-            if docker service ls --filter name=teamhub_teamhub --format "{{.Replicas}}" | grep -q "1/1"; then
-                echo -e "${GREEN}✅ TeamHub service is ready${NC}"
+            if docker service ls --filter name=agelum_agelum --format "{{.Replicas}}" | grep -q "1/1"; then
+                echo -e "${GREEN}✅ Agelum service is ready${NC}"
                 teamhub_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
-                echo -e "${RED}❌ TeamHub service failed to start after 15 attempts${NC}"
-                docker service logs teamhub_teamhub --tail 20 || true
+                echo -e "${RED}❌ Agelum service failed to start after 15 attempts${NC}"
+                docker service logs agelum_agelum --tail 20 || true
                 CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
-                SERVICE_FAILURES+=("TeamHub")
+                SERVICE_FAILURES+=("Agelum")
             else
-                echo "Waiting for TeamHub service... (attempt $i/15)"
+                echo "Waiting for Agelum service... (attempt $i/15)"
                 sleep 10
             fi
         done
     fi
 
     # Check remotion service (if being deployed)
-    if [ "$FORCE_REDEPLOY_REMOTION" = "true" ] || ! check_service_status "teamhub_remotion" "Remotion" >/dev/null 2>&1; then
+    if [ "$FORCE_REDEPLOY_REMOTION" = "true" ] || ! check_service_status "agelum_remotion" "Remotion" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Remotion service...${NC}"
         local remotion_ready=false
         for i in {1..15}; do
-            if docker service ls --filter name=teamhub_remotion --format "{{.Replicas}}" | grep -q "1/1"; then
+            if docker service ls --filter name=agelum_remotion --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Remotion service is ready${NC}"
                 remotion_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ Remotion service failed to start after 15 attempts${NC}"
-                docker service logs teamhub_remotion --tail 20 || true
+                docker service logs agelum_remotion --tail 20 || true
                 CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
                 SERVICE_FAILURES+=("Remotion")
             else
@@ -429,18 +429,18 @@ wait_for_services() {
     fi
 
     # Check nginx service last (if being deployed)
-    if [ "$FORCE_REDEPLOY_NGINX" = "true" ] || ! check_service_status "teamhub_nginx" "Nginx" >/dev/null 2>&1; then
+    if [ "$FORCE_REDEPLOY_NGINX" = "true" ] || ! check_service_status "agelum_nginx" "Nginx" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Nginx service...${NC}"
         local nginx_ready=false
         for i in {1..15}; do
-            if docker service ls --filter name=teamhub_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
+            if docker service ls --filter name=agelum_nginx --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Nginx service is ready${NC}"
                 nginx_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ Nginx service failed to start after 15 attempts${NC}"
-                docker service logs teamhub_nginx --tail 20 || true
+                docker service logs agelum_nginx --tail 20 || true
                 CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
                 SERVICE_FAILURES+=("Nginx")
             else
@@ -451,18 +451,18 @@ wait_for_services() {
     fi
 
     # Check nextcloud service (if being deployed)
-    if [ "$FORCE_REDEPLOY_NEXTCLOUD" = "true" ] || ! check_service_status "teamhub_nextcloud" "Nextcloud" >/dev/null 2>&1; then
+    if [ "$FORCE_REDEPLOY_NEXTCLOUD" = "true" ] || ! check_service_status "agelum_nextcloud" "Nextcloud" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Nextcloud service...${NC}"
         local nextcloud_ready=false
         for i in {1..15}; do
-            if docker service ls --filter name=teamhub_nextcloud --format "{{.Replicas}}" | grep -q "1/1"; then
+            if docker service ls --filter name=agelum_nextcloud --format "{{.Replicas}}" | grep -q "1/1"; then
                 echo -e "${GREEN}✅ Nextcloud service is ready${NC}"
                 nextcloud_ready=true
                 break
             fi
             if [ $i -eq 15 ]; then
                 echo -e "${RED}❌ Nextcloud service failed to start after 15 attempts${NC}"
-                docker service logs teamhub_nextcloud --tail 20 || true
+                docker service logs agelum_nextcloud --tail 20 || true
                 # Nextcloud is non-critical, don't count as critical failure
                 echo -e "${YELLOW}⚠️  Nextcloud failed but is non-critical${NC}"
             else
@@ -480,7 +480,7 @@ wait_for_services() {
 
     # Check current status of all services
     echo -e "${BLUE}🔍 Current Service Status:${NC}"
-    docker service ls --filter name=teamhub_ --format "table {{.Name}}\t{{.Replicas}}\t{{.Image}}\t{{.Ports}}"
+    docker service ls --filter name=agelum_ --format "table {{.Name}}\t{{.Replicas}}\t{{.Image}}\t{{.Ports}}"
 
     echo ""
     echo -e "${BLUE}📋 Service Check Results:${NC}"
@@ -503,11 +503,11 @@ test_application() {
     echo -e "${BLUE}🧪 Testing application endpoints...${NC}"
 
     # Test teamhub endpoint
-    if docker service ls --filter name=teamhub_teamhub --format "{{.Name}}" | grep -q teamhub_teamhub; then
+    if docker service ls --filter name=agelum_agelum --format "{{.Name}}" | grep -q agelum_agelum; then
         if curl -f --connect-timeout 5 --max-time 10 http://127.0.0.1:80/ >/dev/null 2>&1; then
-            echo -e "${GREEN}✅ TeamHub application is accessible${NC}"
+            echo -e "${GREEN}✅ Agelum application is accessible${NC}"
         else
-            echo -e "${YELLOW}⚠️  TeamHub application may still be starting up${NC}"
+            echo -e "${YELLOW}⚠️  Agelum application may still be starting up${NC}"
         fi
     fi
 
@@ -590,7 +590,7 @@ show_deployment_summary() {
     # Show deployment scope
     echo -e "${BLUE}🎯 Deployment Scope:${NC}"
     [ "$FORCE_REDEPLOY_NGINX" = "true" ] && echo -e "  🌐 Nginx: ✅ Redeployed"
-    [ "$FORCE_REDEPLOY_TEAMHUB" = "true" ] && echo -e "  🎯 TeamHub: ✅ Redeployed"
+    [ "$FORCE_REDEPLOY_AGELUM" = "true" ] && echo -e "  🎯 Agelum: ✅ Redeployed"
     [ "$FORCE_REDEPLOY_REMOTION" = "true" ] && echo -e "  🎬 Remotion: ✅ Redeployed"
     [ "$FORCE_REDEPLOY_INFRASTRUCTURE" = "true" ] && echo -e "  🔧 Infrastructure: ✅ Redeployed"
     [ "$FORCE_REDEPLOY_NEXTCLOUD" = "true" ] && echo -e "  ☁️  Nextcloud: ✅ Redeployed"
@@ -600,16 +600,16 @@ show_deployment_summary() {
     # Show running services
     echo ""
     echo -e "${BLUE}🔍 Running Services:${NC}"
-    docker service ls --filter name=teamhub_ --format "table {{.Name}}\t{{.Replicas}}\t{{.Image}}" | grep -E "(NAME|teamhub_)"
+    docker service ls --filter name=agelum_ --format "table {{.Name}}\t{{.Replicas}}\t{{.Image}}" | grep -E "(NAME|agelum_)"
 
     echo ""
     echo -e "${BLUE}💾 Data Volume Status:${NC}"
-    docker volume ls --filter name=teamhub_ --format "table {{.Name}}\t{{.Size}}" | grep -E "(NAME|teamhub_)" || echo "  No volumes found"
+    docker volume ls --filter name=agelum_ --format "table {{.Name}}\t{{.Size}}" | grep -E "(NAME|agelum_)" || echo "  No volumes found"
 
     echo ""
     echo -e "${BLUE}🎯 Quick Actions:${NC}"
-    echo "  • View logs: docker service logs teamhub_<service>"
-    echo "  • Scale service: docker service scale teamhub_<service>=N"
+    echo "  • View logs: docker service logs agelum_<service>"
+    echo "  • Scale service: docker service scale agelum_<service>=N"
     echo "  • Redeploy single service: FORCE_REDEPLOY_<SERVICE>=true"
     echo ""
     echo -e "${GREEN}🌐 Application URL: http://your-server-ip${NC}"
@@ -634,7 +634,7 @@ main() {
         exit 1
     fi
 
-    echo -e "${BLUE}🚀 Starting enhanced deployment with Container Registry image: $CONTAINER_REGISTRY/teamhub:$IMAGE_TAG${NC}"
+    echo -e "${BLUE}🚀 Starting enhanced deployment with Container Registry image: $CONTAINER_REGISTRY/agelum:$IMAGE_TAG${NC}"
 
     # Show deployment configuration
     show_deployment_options

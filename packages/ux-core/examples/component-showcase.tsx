@@ -36,10 +36,10 @@ export default function ComponentShowcase() {
         {/* Header */}
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-teamhub-secondary mb-4">
-            TeamHub UX Core Components
+            Agelum UX Core Components
           </h1>
           <p className="text-lg text-teamhub-muted max-w-2xl mx-auto">
-            A comprehensive showcase of all available components with TeamHub
+            A comprehensive showcase of all available components with Agelum
             design system colors. This demonstrates the visual consistency and
             component library available for development.
           </p>
@@ -374,7 +374,7 @@ export default function ComponentShowcase() {
                       </DialogTitle>
                       <DialogDescription className="text-teamhub-muted">
                         This is a sample dialog that demonstrates the modal
-                        functionality with TeamHub design system colors.
+                        functionality with Agelum design system colors.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
@@ -441,8 +441,8 @@ export default function ComponentShowcase() {
         {/* Footer */}
         <footer className="text-center py-8 border-t border-teamhub-border">
           <p className="text-teamhub-muted">
-            TeamHub UX Core Component Library • Built with shadcn/ui and
-            Tailwind CSS
+            Agelum UX Core Component Library • Built with shadcn/ui and Tailwind
+            CSS
           </p>
         </footer>
       </div>

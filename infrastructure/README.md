@@ -17,7 +17,7 @@ GitHub Actions → GitHub Container Registry → Self-hosted Server (Docker Swar
 3. **PostgreSQL**: Primary database
 4. **Redis**: Caching and session storage
 5. **Nginx**: Reverse proxy and web server
-6. **Teamhub**: Main application
+6. **Agelum**: Main application
 7. **Nextcloud**: File storage and collaboration
 
 ## Two-Stage Deployment Process
@@ -33,7 +33,7 @@ The deployment follows a smart two-stage approach that avoids duplicating servic
 
 ### Stage 2: Application Deployment
 
-- **Full stack status check**: Verifies if teamhub and nginx services are already running
+- **Full stack status check**: Verifies if agelum and nginx services are already running
 - **Smart updates**: Only deploys application stack if needed or when forced
 - **Configuration management**: Properly handles nginx configuration and service networking
 - **Health monitoring**: Performs post-deployment health checks
@@ -162,18 +162,18 @@ The deployment script intelligently handles different scenarios:
 
 2. **Service Not Starting**
 
-   - Check service logs: `docker service logs teamhub_<service-name>`
+   - Check service logs: `docker service logs agelum_<service-name>`
    - Verify environment variables are set
    - Run health check: `./infrastructure/scripts/health-check.sh`
 
 3. **Database Connection Issues**
 
    - Ensure PostgreSQL service is running: `docker service ls`
-   - Check database logs: `docker service logs teamhub_postgres`
-   - Verify connection string in teamhub service
+   - Check database logs: `docker service logs agelum_postgres`
+   - Verify connection string in agelum service
 
 4. **Nginx Configuration Issues**
-   - Check nginx logs: `docker service logs teamhub_nginx`
+   - Check nginx logs: `docker service logs agelum_nginx`
    - Verify nginx.conf syntax
    - Ensure all upstream services are available
 
@@ -185,9 +185,9 @@ The deployment script intelligently handles different scenarios:
 
 # Manual service checks
 docker service ls
-docker service logs teamhub_teamhub
-docker service logs teamhub_nginx
-docker service logs teamhub_postgres
+docker service logs agelum_agelum
+docker service logs agelum_nginx
+docker service logs agelum_postgres
 
 # Test application endpoints
 curl http://localhost/

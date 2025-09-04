@@ -1,8 +1,8 @@
-# TeamHub Cursor Rules
+# Agelum Cursor Rules
 
 ## Project Overview
 
-TeamHub is an enterprise AI agent management platform built with Next.js 14, TypeScript, and a modern monorepo structure. It provides multi-tenant environments for organizations to create, manage, and orchestrate AI agents at scale.
+Agelum is an enterprise AI agent management platform built with Next.js 14, TypeScript, and a modern monorepo structure. It provides multi-tenant environments for organizations to create, manage, and orchestrate AI agents at scale.
 
 ## Architecture Guidelines
 
@@ -15,14 +15,14 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 
 ### Applications
 
-- **teamhub**: Main Next.js application (UI + API)
+- **agelum**: Main Next.js application (UI + API)
 - **ai-gateway**: AI provider abstraction service
 - **browser-service**: Automated browser control (currently disabled due to Playwright build issues)
 
 ### Packages
 
-- **teamhub-ai**: AI functions, tools, and agent communication
-- **teamhub-db**: Database schemas, ORM functions, and data access
+- **agelum-ai**: AI functions, tools, and agent communication
+- **agelum-db**: Database schemas, ORM functions, and data access
 - **ai-services**: Multi-provider AI service abstractions
 - **drizzle-reactive**: Reactive database library for zero-config real-time features
 
@@ -46,7 +46,7 @@ TeamHub is an enterprise AI agent management platform built with Next.js 14, Typ
 
 ### Component Organization & UX-Core Package
 
-TeamHub uses a centralized component system through the `packages/ux-core` package to ensure consistent styling and maintainability across the entire monorepo.
+Agelum uses a centralized component system through the `packages/ux-core` package to ensure consistent styling and maintainability across the entire monorepo.
 
 #### Package Structure
 
@@ -59,12 +59,12 @@ packages/ux-core/src/
 │   ├── motion/         # Framer Motion components
 │   ├── ai-sdk/         # AI SDK components
 │   └── aceternity/     # Aceternity UI components
-├── components-core/     # TeamHub application components (exported)
-│   ├── teamhub-button.tsx
-│   ├── teamhub-form.tsx
-│   ├── teamhub-input.tsx
-│   ├── teamhub-dialog.tsx
-│   └── teamhub-card.tsx
+├── components-core/     # Agelum application components (exported)
+│   ├── agelum-button.tsx
+│   ├── agelum-form.tsx
+│   ├── agelum-input.tsx
+│   ├── agelum-dialog.tsx
+│   └── agelum-card.tsx
 ├── components-site/     # Landing page & public site components (exported)
 │   ├── features/        # Feature showcase components
 │   ├── layout/          # Layout components
@@ -82,16 +82,16 @@ packages/ux-core/src/
 **1. External Components (`components/`)**
 
 - **NOT exported** - these are internal dependencies only
-- Used as base components for building custom TeamHub components
+- Used as base components for building custom Agelum components
 - All styling and customization should be applied in `components-core` or `components-site`
 - Never import directly from external packages in applications
 
 **2. Core Components (`components-core/`)**
 
-- **Exported** for use in TeamHub applications (`apps/teamhub`, `apps/ai-gateway`)
-- Contain all styling, colors, and TeamHub-specific design tokens
+- **Exported** for use in Agelum applications (`apps/agelum`, `apps/ai-gateway`)
+- Contain all styling, colors, and Agelum-specific design tokens
 - Built on top of external components with consistent theming
-- Use TeamHub color scheme: `bg-menu`, `bg-menu2`, `bg-background`, etc.
+- Use Agelum color scheme: `bg-menu`, `bg-menu2`, `bg-background`, etc.
 - Include responsive design and accessibility features
 
 **3. Site Components (`components-site/`)**
@@ -105,16 +105,16 @@ packages/ux-core/src/
 
 ```typescript
 // ✅ CORRECT: Import from ux-core package
-import { Button, Card, TeamHubButton } from '@teamhub/ux-core'
+import { Button, Card, AgelumButton } from '@agelum/ux-core'
 
 // ❌ WRONG: Direct import from external packages
 import { Button } from '@/components/ui/button'
 import { Button } from 'shadcn/ui'
 
-// ✅ CORRECT: Use TeamHub-styled components
-<TeamHubButton variant="primary" size="lg">
+// ✅ CORRECT: Use Agelum-styled components
+<AgelumButton variant="primary" size="lg">
   Create Agent
-</TeamHubButton>
+</AgelumButton>
 
 // ❌ WRONG: Use raw external components
 <Button variant="default">Create Agent</Button>
@@ -131,9 +131,9 @@ import { Button } from 'shadcn/ui'
 #### Component Development Workflow
 
 1. **Base Component**: Start with external component (shadcn, etc.)
-2. **Styling**: Apply TeamHub design system in `components-core/`
+2. **Styling**: Apply Agelum design system in `components-core/`
 3. **Export**: Add to `packages/ux-core/src/index.ts`
-4. **Usage**: Import from `@teamhub/ux-core` in applications
+4. **Usage**: Import from `@agelum/ux-core` in applications
 5. **Updates**: Modify styling only in ux-core package
 
 #### Benefits of This Approach
@@ -155,7 +155,7 @@ import { Button } from 'shadcn/ui'
 
 - Use Drizzle ORM exclusively for database operations
 - **NEW: Use @drizzle/reactive for all database functions**
-- All database functions should be in `packages/teamhub-db`
+- All database functions should be in `packages/agelum-db`
 - Follow type-safe query patterns
 - Use transactions for multi-table operations
 - Implement proper error handling and validation
@@ -181,7 +181,7 @@ import { Button } from 'shadcn/ui'
 - Provide reactive context once at the app root using `TrpcReactiveProvider`.
 - Inputs:
   - `organizationId` (URL/store/session)
-  - `relations` from `@teamhub/db/reactive-config` (client-safe)
+  - `relations` from `@agelum/db/reactive-config` (client-safe)
   - `trpcClient` via `createTRPCProxyClient` + `httpBatchLink('/api/trpc')`
 - Do not add per-page providers.
 
@@ -218,10 +218,10 @@ const { data: agents, isStale } = useReactive('agents.getAll', {
 })
 ```
 
-### TeamHub Relations Configuration
+### Agelum Relations Configuration
 
 ```typescript
-const teamhubReactiveConfig = {
+const agelumReactiveConfig = {
   relations: {
     // When agent changes, invalidate these queries
     agent: ['message.fromAgentId', 'memory.agentId', 'organization.id'],
@@ -266,7 +266,7 @@ export const getAgents = defineReactiveFunction({
 const router = createReactiveRouter({ db }).addQuery(getAgents)
 ```
 
-### Multi-tenant DB rules (TeamHub specific)
+### Multi-tenant DB rules (Agelum specific)
 
 - Resolve tenant DB via main DB: look up `organization.databaseName` by `organizationId`.
 - Never use `organizationId` as a database name.
@@ -336,7 +336,7 @@ const router = createReactiveRouter({ db }).addQuery(getAgents)
 
 ### Component Development with UX-Core
 
-- **Always use components from `@teamhub/ux-core` package**
+- **Always use components from `@agelum/ux-core` package**
 - Never create new UI components directly in applications
 - Extend existing ux-core components when new functionality is needed
 - Follow the established component hierarchy: external → core → site
@@ -346,7 +346,7 @@ const router = createReactiveRouter({ db }).addQuery(getAgents)
 
 - **All styling must be defined in `packages/ux-core`**
 - Use Tailwind CSS classes consistently
-- Follow TeamHub design system: colors, spacing, typography
+- Follow Agelum design system: colors, spacing, typography
 - Implement responsive design patterns
 - Ensure accessibility compliance (ARIA labels, keyboard navigation)
 
@@ -477,7 +477,7 @@ const router = createReactiveRouter({ db }).addQuery(getAgents)
 - Use browser caching for static assets
 - Monitor cache hit rates
 
-## Common TeamHub Patterns
+## Common Agelum Patterns
 
 ### Agent Operations
 
@@ -568,7 +568,7 @@ export const getOrganizationOverview = defineReactiveFunction({
 
 ### Task Organization
 
-TeamHub uses a milestone-based task management system with priority-based organization:
+Agelum uses a milestone-based task management system with priority-based organization:
 
 - **Tasks are organized by priority**: A (Critical), B (High), C (Medium), D (Future)
 - **File naming convention**: `{Priority}: {task-name} ({story-points})`
@@ -598,7 +598,7 @@ TeamHub uses a milestone-based task management system with priority-based organi
 
 ## AI Assistant Guidance
 
-When helping with TeamHub development:
+When helping with Agelum development:
 
 1. **Always suggest @drizzle/reactive patterns** for database operations
 2. **Check existing relations config** when adding new reactive functions
@@ -613,12 +613,12 @@ When helping with TeamHub development:
 
 ### Component Development Guidance
 
-11. **Always use `@teamhub/ux-core` package** for UI components
+11. **Always use `@agelum/ux-core` package** for UI components
 12. **Check existing ux-core components** before suggesting new ones
 13. **Follow component hierarchy**: external → core → site components
 14. **Suggest styling changes in ux-core** package, not in applications
 15. **Maintain consistent design system** across all components
-16. **Use TeamHub color scheme** and design tokens consistently
+16. **Use Agelum color scheme** and design tokens consistently
 17. **Implement responsive design** patterns in all components
 18. **Ensure accessibility compliance** in component suggestions
 
@@ -626,7 +626,7 @@ When helping with TeamHub development:
 
 ### Component Separation of Concerns
 
-TeamHub follows a strict separation of concerns for landing page components to ensure maintainability, reusability, and clear responsibility boundaries.
+Agelum follows a strict separation of concerns for landing page components to ensure maintainability, reusability, and clear responsibility boundaries.
 
 #### Architecture Overview
 
@@ -661,7 +661,7 @@ packages/ux-core/src/components-site/  # Presentation Layer
 
 2. **Core Colors** (`packages/ux-core/src/components-core/light-theme-colors.ts`)
 
-   - **ONLY** for TeamHub application components
+   - **ONLY** for Agelum application components
    - Contains `coreColors` and `coreUtils` exports
    - Used in buttons, forms, cards, and internal UI
 
@@ -728,7 +728,7 @@ export const navigationHandlers = {
 }
 
 // apps/landing-page/src/app/page.tsx
-import { LandingHero } from '@teamhub/ux-core'
+import { LandingHero } from '@agelum/ux-core'
 import { heroContent } from '../content/hero-content'
 import { navigationHandlers } from '../handlers/navigation-handlers'
 
@@ -784,11 +784,11 @@ export const LandingHero = ({ onCtaClick }: Props) => {
 
 ```typescript
 // ❌ WRONG: Using site colors in core components
-import { siteColors } from '@teamhub/ux-core'
+import { siteColors } from '@agelum/ux-core'
 // This should use coreColors instead
 
 // ❌ WRONG: Using core colors in site components
-import { coreColors } from '@teamhub/ux-core'
+import { coreColors } from '@agelum/ux-core'
 // This should use siteColors instead
 ```
 
@@ -798,7 +798,7 @@ import { coreColors } from '@teamhub/ux-core'
 
 ```typescript
 // ✅ CORRECT: Using site colors for landing page
-import { siteColors, siteUtils } from '@teamhub/ux-core'
+import { siteColors, siteUtils } from '@agelum/ux-core'
 
 <div className={siteColors.gradients.primary}>
 <button className={siteUtils.getButtonClasses('primary')}>
@@ -866,7 +866,7 @@ import {
   LandingHeader,
   siteColors,
   siteUtils,
-} from '@teamhub/ux-core'
+} from '@agelum/ux-core'
 
 // ✅ CORRECT: Content imports
 import { heroContent } from '../content/hero-content'

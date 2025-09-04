@@ -18,7 +18,7 @@
 
 ## 🌟 Overview
 
-TeamHub is an enterprise-grade platform that revolutionizes how organizations create, deploy, and manage AI agents. Built for multi-tenant environments, it provides isolated workspaces where teams can leverage artificial intelligence through custom agents tailored to their specific organizational needs.
+Agelum is an enterprise-grade platform that revolutionizes how organizations create, deploy, and manage AI agents. Built for multi-tenant environments, it provides isolated workspaces where teams can leverage artificial intelligence through custom agents tailored to their specific organizational needs.
 
 ### ✨ Key Highlights
 
@@ -35,11 +35,11 @@ TeamHub is an enterprise-grade platform that revolutionizes how organizations cr
 
 ## 🏗️ Architecture
 
-TeamHub follows a modern microservices architecture with clear separation of concerns:
+Agelum follows a modern microservices architecture with clear separation of concerns:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                          TeamHub Platform                       │
+│                          Agelum Platform                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Frontend (Next.js 14)                                         │
 │  ├── shadcn/ui Components    ├── Zustand State Management      │
@@ -47,7 +47,7 @@ TeamHub follows a modern microservices architecture with clear separation of con
 │  └── Analytics Dashboard     └── Organization Settings         │
 ├─────────────────────────────────────────────────────────────────┤
 │  Backend Services                                              │
-│  ├── AI Gateway              ├── TeamHub Core                  │
+│  ├── AI Gateway              ├── Agelum Core                   │
 │  ├── Browser Service         └── Database Layer                │
 ├─────────────────────────────────────────────────────────────────┤
 │  Data & Infrastructure                                         │
@@ -60,7 +60,7 @@ TeamHub follows a modern microservices architecture with clear separation of con
 
 | Application         | Purpose                               | Technology           |
 | ------------------- | ------------------------------------- | -------------------- |
-| **teamhub**         | Main web application with UI and API  | Next.js 14, React 18 |
+| **agelum**          | Main web application with UI and API  | Next.js 14, React 18 |
 | **ai-gateway**      | Unified AI provider abstraction layer | Next.js API routes   |
 | **browser-service** | Automated browser control service     | Playwright, Node.js  |
 
@@ -68,8 +68,8 @@ TeamHub follows a modern microservices architecture with clear separation of con
 
 | Package         | Purpose                               | Features                         |
 | --------------- | ------------------------------------- | -------------------------------- |
-| **teamhub-ai**  | AI functions and tool integrations    | Chat, workflows, tool management |
-| **teamhub-db**  | Database schemas and ORM functions    | Drizzle ORM, type-safe queries   |
+| **agelum-ai**   | AI functions and tool integrations    | Chat, workflows, tool management |
+| **agelum-db**   | Database schemas and ORM functions    | Drizzle ORM, type-safe queries   |
 | **ai-services** | Multi-provider AI service abstraction | OpenAI, DeepSeek, Fal, Eden AI   |
 
 ---
@@ -193,22 +193,22 @@ TeamHub follows a modern microservices architecture with clear separation of con
 ```bash
 # 1. Clone the repository
 git clone <repository-url>
-cd teamhub
+cd agelum
 
 # 2. Install dependencies
 pnpm install
 
 # 3. Set up environment variables
-cp apps/teamhub/.env.example apps/teamhub/.env.local
+cp apps/agelum/.env.example apps/agelum/.env.local
 ```
 
 ### Environment Configuration
 
-Create `apps/teamhub/.env.local` with the following variables:
+Create `apps/agelum/.env.local` with the following variables:
 
 ```bash
 # Database Configuration
-DATABASE_URL="postgresql://teamhub:password@localhost:5432/teamhub"
+DATABASE_URL="postgresql://agelum:password@localhost:5432/agelum"
 REDIS_URL="redis://localhost:6379"
 
 # Authentication
@@ -247,7 +247,7 @@ TEST_USER_PASSWORD="testpassword"
 pnpm dev
 
 # Or start specific services
-pnpm dev:teamhub        # Main application
+pnpm dev:agelum         # Main application
 pnpm build:ai-gateway   # AI Gateway only
 ```
 
@@ -255,7 +255,7 @@ pnpm build:ai-gateway   # AI Gateway only
 
 ```bash
 # Build for production
-pnpm build:teamhub:prod
+pnpm build:agelum:prod
 
 # Docker deployment (automated CI/CD)
 ./infrastructure/scripts/deploy.sh v1.0.0
@@ -270,7 +270,7 @@ pnpm build:teamhub:prod
 
 ### 1. **Creating Your First Organization**
 
-1. Sign in to TeamHub using your configured authentication provider
+1. Sign in to Agelum using your configured authentication provider
 2. Click "Create Organization" in the sidebar
 3. Enter your organization name
 4. Your organization will be created with its own isolated environment
@@ -341,12 +341,12 @@ Agents automatically store and retrieve relevant memories:
 ```bash
 # Development
 pnpm dev                    # Start all apps in development
-pnpm dev:teamhub           # Start TeamHub only
+pnpm dev:agelum            # Start Agelum only
 
 # Building
 pnpm build                 # Build all apps
-pnpm build:teamhub         # Build TeamHub for production
-pnpm build:teamhub:prod    # Build with production environment
+pnpm build:agelum          # Build Agelum for production
+pnpm build:agelum:prod     # Build with production environment
 
 # Testing
 pnpm test                  # Run all tests
@@ -366,14 +366,14 @@ pnpm clean                # Clean build artifacts
 ### Project Structure
 
 ```
-teamhub/
+agelum/
 ├── apps/
-│   ├── teamhub/          # Main Next.js application
+│   ├── agelum/           # Main Next.js application
 │   ├── ai-gateway/       # AI provider abstraction service
 │   └── browser-service/  # Automated browser control
 ├── packages/
-│   ├── teamhub-ai/       # AI functions and tools
-│   ├── teamhub-db/       # Database schemas and functions
+│   ├── agelum-ai/        # AI functions and tools
+│   ├── agelum-db/        # Database schemas and functions
 │   └── ai-services/      # Multi-provider AI abstractions
 ├── infrastructure/
 │   ├── docker/           # Docker configurations
@@ -384,7 +384,7 @@ teamhub/
 
 ### Adding Custom Tools
 
-Create a new tool in `packages/teamhub-ai/src/tools/`:
+Create a new tool in `packages/agelum-ai/src/tools/`:
 
 ```typescript
 import { ToolTypeDefinition } from '../tools'
@@ -419,11 +419,11 @@ Add new AI providers in `packages/ai-services/src/`:
 
 ### Docker Swarm (Recommended)
 
-TeamHub uses an advanced Docker Swarm deployment with:
+Agelum uses an advanced Docker Swarm deployment with:
 
 ```bash
 # Automated deployment with selective service updates
-FORCE_REDEPLOY_TEAMHUB=true ./infrastructure/scripts/deploy.sh v1.0.0
+FORCE_REDEPLOY_AGELUM=true ./infrastructure/scripts/deploy.sh v1.0.0
 
 # Full deployment
 FORCE_REDEPLOY_ALL=true ./infrastructure/scripts/deploy.sh v1.0.0
@@ -540,7 +540,7 @@ This project is licensed under the MIT License - see the [LICENSE](./docs/licens
 
 <div align="center">
 
-**Made with ❤️ by the TeamHub team**
+**Made with ❤️ by the Agelum team**
 
 [⭐ Star on GitHub](https://github.com/your-repo) • [🐦 Follow on Twitter](https://twitter.com/your-handle)
 

@@ -7,7 +7,7 @@
     "site": "app",
     "market": "app",
     "cron": "app",
-    "teamhub": "app",
+    "agelum": "app",
     "packages": "resource",
     "api-facebook": "resource",
     "api-instagram": "resource",
@@ -31,7 +31,7 @@
     "public": "download",
     "hooks": "mappings",
     "node_modules": "constant",
-    "teamhub-db": "resource",
-    "teamhub-ai": "resource"
+    "agelum-db": "resource",
+    "agelum-ai": "resource"
   }
 }

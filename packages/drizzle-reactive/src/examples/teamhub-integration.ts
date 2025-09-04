@@ -1,13 +1,13 @@
 /**
- * Example integration with TeamHub using the corrected reactive function architecture
+ * Example integration with Agelum using the corrected reactive function architecture
  */
 
 import { z } from 'zod'
 import { defineReactiveFunction } from '../core/function'
 import type { ReactiveConfig } from '../core/types'
 
-// Generic TeamHub reactive configuration (no hardcoded fields)
-export const teamhubReactiveConfig: ReactiveConfig = {
+// Generic Agelum reactive configuration (no hardcoded fields)
+export const agelumReactiveConfig: ReactiveConfig = {
   relations: {
     agent: ['message.fromAgentId', 'memory.agentId'],
     organization: ['agent.organizationId', 'tool.organizationId'],

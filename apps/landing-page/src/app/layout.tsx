@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://teamhub.ai',
+    url: 'https://agelum.ai',
     title: 'Agelum - AI Agent Management Platform',
     description:
       'Enterprise AI agent management platform for organizations to create, manage, and orchestrate AI agents at scale.',

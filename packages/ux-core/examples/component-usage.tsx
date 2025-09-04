@@ -9,13 +9,13 @@ import {
   CardTitle,
 } from '../src/components/shadcn/card'
 
-// TeamHub Core components (with design system styling)
-import { TeamHubButton } from '../src/components-core/teamhub-button'
+// Agelum Core components (with design system styling)
+import { AgelumButton } from '../src/components-core/agelum-button'
 import {
-  TeamHubCard,
-  TeamHubCardContent,
-  TeamHubCardHeader,
-  TeamHubCardTitle,
+  AgelumCard,
+  AgelumCardContent,
+  AgelumCardHeader,
+  AgelumCardTitle,
 } from '../src/components-core/teamhub-card'
 
 export function ComponentUsageExamples() {
@@ -29,7 +29,7 @@ export function ComponentUsageExamples() {
           External shadcn/ui Components (Raw)
         </h2>
         <p className="text-muted-foreground">
-          These are the base components from shadcn/ui without TeamHub styling.
+          These are the base components from shadcn/ui without Agelum styling.
         </p>
 
         <div className="flex gap-4 flex-wrap">
@@ -48,32 +48,32 @@ export function ComponentUsageExamples() {
         </Card>
       </section>
 
-      {/* TeamHub Core Components */}
+      {/* Agelum Core Components */}
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">
-          TeamHub Core Components (Styled)
+          Agelum Core Components (Styled)
         </h2>
         <p className="text-muted-foreground">
-          These are custom components built with TeamHub design system styling.
+          These are custom components built with Agelum design system styling.
         </p>
 
         <div className="flex gap-4 flex-wrap">
-          <TeamHubButton variant="default">TeamHub Button</TeamHubButton>
-          <TeamHubButton variant="outline">TeamHub Outline</TeamHubButton>
-          <TeamHubButton variant="secondary">TeamHub Secondary</TeamHubButton>
+          <AgelumButton variant="default">Agelum Button</AgelumButton>
+          <AgelumButton variant="outline">Agelum Outline</AgelumButton>
+          <AgelumButton variant="secondary">Agelum Secondary</AgelumButton>
         </div>
 
-        <TeamHubCard className="w-80">
-          <TeamHubCardHeader>
-            <TeamHubCardTitle>TeamHub Styled Card</TeamHubCardTitle>
-          </TeamHubCardHeader>
-          <TeamHubCardContent>
+        <AgelumCard className="w-80">
+          <AgelumCardHeader>
+            <AgelumCardTitle>Agelum Styled Card</AgelumCardTitle>
+          </AgelumCardHeader>
+          <AgelumCardContent>
             <p>
-              This card uses TeamHub design system styling with custom colors
-              and shadows.
+              This card uses Agelum design system styling with custom colors and
+              shadows.
             </p>
-          </TeamHubCardContent>
-        </TeamHubCard>
+          </AgelumCardContent>
+        </AgelumCard>
       </section>
 
       {/* Usage Guidelines */}
@@ -86,7 +86,7 @@ export function ComponentUsageExamples() {
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Use for rapid prototyping</li>
               <li>• When you need the base functionality</li>
-              <li>• For components not yet in TeamHub core</li>
+              <li>• For components not yet in Agelum core</li>
               <li>
                 • Import from: <code>@/components/shadcn/</code>
               </li>
@@ -94,10 +94,10 @@ export function ComponentUsageExamples() {
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-lg font-medium">TeamHub Core Components</h3>
+            <h3 className="text-lg font-medium">Agelum Core Components</h3>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Use for production applications</li>
-              <li>• When you need consistent TeamHub styling</li>
+              <li>• When you need consistent Agelum styling</li>
               <li>• For components that match your design system</li>
               <li>
                 • Import from: <code>@/components/core/</code>
