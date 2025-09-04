@@ -1,5 +1,5 @@
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client'
-import type { AppRouter } from '@teamhub/db'
+import type { AppRouter } from '@agelum/db'
 
 // Create the tRPC client with proxy client for better type inference
 export const trpcClient = createTRPCProxyClient<AppRouter>({

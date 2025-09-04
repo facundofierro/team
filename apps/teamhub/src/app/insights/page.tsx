@@ -1,4 +1,4 @@
-import { db } from '@teamhub/db'
+import { db } from '@agelum/db'
 import { redirect } from 'next/navigation'
 import { InsightsListWrapper } from '@/components/insights/InsightsListWrapper'
 import { DataGrid } from '@/components/insights/DataGrid'

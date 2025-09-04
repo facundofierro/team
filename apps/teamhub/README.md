@@ -54,7 +54,7 @@ Agelum is built as a modern monorepo with the following structure:
 │   └── teamhub/          # Main Next.js application
 ├── packages/
 │   ├── teamhub-ai/       # AI functions and tools
-│   └── teamhub-db/       # Database schemas and functions
+│   └── agelum-db/       # Database schemas and functions
 ```
 
 ### Technology Stack

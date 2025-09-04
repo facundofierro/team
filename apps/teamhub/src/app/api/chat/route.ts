@@ -1,14 +1,8 @@
 import { NextRequest } from 'next/server'
 import { sendChat } from '@agelum/ai'
 import { auth } from '@/auth'
-import {
-  db,
-  getOrganizations,
-  getAgent,
-  getTool,
-  reactiveDb,
-} from '@teamhub/db'
-import type { AgentToolPermissions } from '@teamhub/db'
+import { db, getOrganizations, getAgent, getTool, reactiveDb } from '@agelum/db'
+import type { AgentToolPermissions } from '@agelum/db'
 import { log } from '@repo/logger'
 
 export async function POST(req: NextRequest) {

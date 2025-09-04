@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import { useReactive } from '@drizzle/reactive/client'
-import type { MemoryWithTypes, ConversationMessage } from '@teamhub/db'
+import type { MemoryWithTypes, ConversationMessage } from '@agelum/db'
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 
 type MemoryCardProps = {

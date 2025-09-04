@@ -1,5 +1,5 @@
 import { auth } from '@/auth'
-import { getOrganizations, reactiveDb } from '@teamhub/db'
+import { getOrganizations, reactiveDb } from '@agelum/db'
 import { redirect } from 'next/navigation'
 
 /**

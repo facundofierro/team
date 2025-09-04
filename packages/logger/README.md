@@ -132,7 +132,7 @@ Enable detailed logging for specific users:
 
 ```bash
 # Format: userId:logType:logLevel,userId2:logType2:logLevel2
-USER_LOG_CONFIG="user123:teamhub-auth:DEBUG,user456:teamhub-db-query:DEBUG"
+USER_LOG_CONFIG="user123:teamhub-auth:DEBUG,user456:agelum-db-query:DEBUG"
 ```
 
 ## Adding New Log Types

@@ -1,7 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 import { Message } from '@ai-sdk/react'
 import { memo } from 'react'
-import type { ToolCall } from '@teamhub/db'
+import type { ToolCall } from '@agelum/db'
 import { ToolCallIndicator } from './ToolCallIndicator'
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 

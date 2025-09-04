@@ -28,7 +28,7 @@ import type {
   AgentToolPermissions,
   ConversationMemory,
   Agent,
-} from '@teamhub/db'
+} from '@agelum/db'
 
 type ChatCardProps = {
   scheduled?: {

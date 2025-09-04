@@ -2,14 +2,14 @@
 
 import { MessageTypesCard } from './settingsDetails/MessageTypesCard'
 import { SharedMemoryCard } from './settingsDetails/SharedMemoryCard'
-import type { OrganizationSettings } from '@teamhub/db'
+import type { OrganizationSettings } from '@agelum/db'
 import { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import { Skeleton } from '../ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { UsersCard } from './settingsDetails/UsersCard'
 import { ToolsCard } from './settingsDetails/ToolsCard'
-import { MemoryWithTypes } from '@teamhub/db'
+import { MemoryWithTypes } from '@agelum/db'
 
 type SettingsDetailsProps = {
   settings?: OrganizationSettings

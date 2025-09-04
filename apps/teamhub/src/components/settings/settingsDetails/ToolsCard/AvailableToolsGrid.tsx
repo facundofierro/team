@@ -2,7 +2,7 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 // import { Plus } from 'lucide-react'
-import { ToolType } from '@teamhub/db'
+import { ToolType } from '@agelum/db'
 import { Badge } from '@/components/ui/badge'
 
 interface AvailableToolsGridProps {

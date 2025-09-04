@@ -5,7 +5,7 @@ import {
   type ConversationMemory,
   type ConversationMessage,
   type ToolCall,
-} from '@teamhub/db'
+} from '@agelum/db'
 import {
   processConversationTitle,
   processConversationBrief,

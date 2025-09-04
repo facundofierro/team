@@ -69,7 +69,7 @@ TeamHub follows a modern microservices architecture with clear separation of con
 | Package         | Purpose                               | Features                         |
 | --------------- | ------------------------------------- | -------------------------------- |
 | **teamhub-ai**  | AI functions and tool integrations    | Chat, workflows, tool management |
-| **teamhub-db**  | Database schemas and ORM functions    | Drizzle ORM, type-safe queries   |
+| **agelum-db**   | Database schemas and ORM functions    | Drizzle ORM, type-safe queries   |
 | **ai-services** | Multi-provider AI service abstraction | OpenAI, DeepSeek, Fal, Eden AI   |
 
 ---
@@ -373,7 +373,7 @@ teamhub/
 │   └── browser-service/  # Automated browser control
 ├── packages/
 │   ├── teamhub-ai/       # AI functions and tools
-│   ├── teamhub-db/       # Database schemas and functions
+│   ├── agelum-db/       # Database schemas and functions
 │   └── ai-services/      # Multi-provider AI abstractions
 ├── infrastructure/
 │   ├── docker/           # Docker configurations

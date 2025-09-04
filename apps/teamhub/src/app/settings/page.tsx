@@ -8,7 +8,7 @@ import {
   getOrganizationSettings,
   updateOrganizationSettings,
   reactiveDb,
-} from '@teamhub/db'
+} from '@agelum/db'
 import { getToolTypes } from '@agelum/ai'
 import { ToolTypeDefinition } from '@agelum/ai/src/tools'
 

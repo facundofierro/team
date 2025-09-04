@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { getOrganizations, dbMemories, reactiveDb } from '@teamhub/db'
+import { getOrganizations, dbMemories, reactiveDb } from '@agelum/db'
 import {
   generateConversationTitle,
   generateConversationBrief,
@@ -8,7 +8,7 @@ import {
   generateTitleFromDescription,
   type ConversationProcessingOptions,
 } from '@agelum/ai'
-import type { ConversationMessage } from '@teamhub/db'
+import type { ConversationMessage } from '@agelum/db'
 
 export async function POST(
   request: NextRequest,

@@ -39,14 +39,14 @@ export const getDefaultConfig = (): LogConfig => {
       },
 
       // TeamHub Packages Log Types
-      'teamhub-db': { level: getLogLevel('LOG_TEAMHUB_DB', 'INFO') },
-      'teamhub-db-schema': {
+      'agelum-db': { level: getLogLevel('LOG_TEAMHUB_DB', 'INFO') },
+      'agelum-db-schema': {
         level: getLogLevel('LOG_TEAMHUB_DB_SCHEMA', 'INFO'),
       },
-      'teamhub-db-query': {
+      'agelum-db-query': {
         level: getLogLevel('LOG_TEAMHUB_DB_QUERY', 'INFO'),
       },
-      'teamhub-db-migration': {
+      'agelum-db-migration': {
         level: getLogLevel('LOG_TEAMHUB_DB_MIGRATION', 'INFO'),
       },
 
@@ -95,8 +95,8 @@ export const getDefaultConfig = (): LogConfig => {
       'system-api': { level: getLogLevel('LOG_SYSTEM_API', 'INFO') },
 
       // Legacy/Compatibility Log Types (for backward compatibility)
-      db: { level: getLogLevel('LOG_DB', 'INFO') }, // Alias for teamhub-db
-      'db-query': { level: getLogLevel('LOG_DB_QUERY', 'INFO') }, // Alias for teamhub-db-query
+      db: { level: getLogLevel('LOG_DB', 'INFO') }, // Alias for agelum-db
+      'db-query': { level: getLogLevel('LOG_DB_QUERY', 'INFO') }, // Alias for agelum-db-query
       ai: { level: getLogLevel('LOG_AI', 'INFO') }, // Alias for teamhub-ai
       auth: { level: getLogLevel('LOG_AUTH', 'INFO') }, // Alias for system-auth
       api: { level: getLogLevel('LOG_API', 'INFO') }, // Alias for system-api

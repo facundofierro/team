@@ -32,7 +32,7 @@ The centralized logging package `@repo/logger` already exists in `packages/logge
 
 - **drizzle-reactive** - Reactive database library (Core files updated, builds successfully)
 - **ai-services** - Multi-provider AI service abstractions (Full logging implementation)
-- **teamhub-db** - Database schemas and ORM functions (Full logging implementation, builds successfully)
+- **agelum-db** - Database schemas and ORM functions (Full logging implementation, builds successfully)
 - **teamhub-ai** - AI functions, tools, and agent communication (Core functions updated)
 
 ### ✅ IMPLEMENTATION TASKS COMPLETED

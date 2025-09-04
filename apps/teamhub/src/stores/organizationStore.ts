@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Organization } from '@teamhub/db'
+import type { Organization } from '@agelum/db'
 
 export type OrganizationStore = {
   currentOrganization: Organization | null

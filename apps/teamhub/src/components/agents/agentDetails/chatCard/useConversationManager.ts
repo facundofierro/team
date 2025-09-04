@@ -8,7 +8,7 @@ import type {
   ConversationMessage,
   ToolCall,
   Agent,
-} from '@teamhub/db'
+} from '@agelum/db'
 // Import the new reactive hooks
 import { useConversations } from '@/hooks/useConversations'
 import { useConversationMutations } from '@/hooks/useConversationMutations'

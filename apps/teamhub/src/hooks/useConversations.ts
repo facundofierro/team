@@ -2,7 +2,7 @@
 
 import { useReactive, useReactiveQuery } from '@drizzle/reactive/client'
 import { useOrganizationStore } from '@/stores/organizationStore'
-import type { ConversationMemory } from '@teamhub/db'
+import type { ConversationMemory } from '@agelum/db'
 import { log } from '@repo/logger'
 
 /**

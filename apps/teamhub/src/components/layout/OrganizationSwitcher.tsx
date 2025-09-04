@@ -16,7 +16,7 @@ import { useOrganizationStore } from '@/stores/organizationStore'
 import { useAgentStore } from '@/stores/agentStore'
 import { cn } from '@/lib/utils'
 import { useRouter, usePathname } from 'next/navigation'
-import { Organization, NewOrganization } from '@teamhub/db'
+import { Organization, NewOrganization } from '@agelum/db'
 import { Input } from '@/components/ui/input'
 import {
   createOrganization,

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { Card } from '@/components/ui/card'
-import { ToolType, ToolWithTypes, OrganizationSettings } from '@teamhub/db'
+import { ToolType, ToolWithTypes, OrganizationSettings } from '@agelum/db'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToolCarousel } from './ToolsCard/ToolCarousel'
 import { AvailableToolsGrid } from './ToolsCard/AvailableToolsGrid'

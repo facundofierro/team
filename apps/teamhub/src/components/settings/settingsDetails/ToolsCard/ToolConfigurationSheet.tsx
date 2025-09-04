@@ -9,7 +9,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { ToolType, ToolWithTypes } from '@teamhub/db'
+import { ToolType, ToolWithTypes } from '@agelum/db'
 import { ConfigurationParameters } from './ConfigurationParameters'
 
 // Helper function to get managed tool configuration

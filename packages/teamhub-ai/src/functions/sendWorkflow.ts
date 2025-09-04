@@ -1,4 +1,4 @@
-import type { AgentMemoryRule } from '@teamhub/db'
+import type { AgentMemoryRule } from '@agelum/db'
 import type { MemoryStoreRule, TaskMetadata } from '../types'
 import { sendTask } from './sendTask'
 

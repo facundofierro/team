@@ -4,8 +4,8 @@ import {
   createMessage,
   getAgent,
   reactiveDb,
-} from '@teamhub/db'
-import type { AgentMemoryRule, AgentToolPermission } from '@teamhub/db'
+} from '@agelum/db'
+import type { AgentMemoryRule, AgentToolPermission } from '@agelum/db'
 import type { MemoryStoreRule } from '../types'
 import { generateStreamText } from '../ai/vercel/generateStreamText'
 import { log } from '@repo/logger'

@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Plus, UserX } from 'lucide-react'
-import type { User as DbUser } from '@teamhub/db'
+import type { User as DbUser } from '@agelum/db'
 
 type User = DbUser & {
   role: 'admin' | 'user'

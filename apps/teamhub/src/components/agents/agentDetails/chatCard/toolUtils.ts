@@ -1,4 +1,4 @@
-import type { ToolCall } from '@teamhub/db'
+import type { ToolCall } from '@agelum/db'
 
 // Helper function to parse tool execution errors and extract user-friendly messages
 export function parseToolError(toolCall: ToolCall): {

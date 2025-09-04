@@ -6,7 +6,7 @@ import { ToolCallIndicator } from './ToolCallIndicator'
 import { MessageContent } from './MessageContent'
 import { MessagePagination } from './MessagePagination'
 import { useMemo, useState, useCallback, useEffect, useRef, memo } from 'react'
-import type { ToolCall } from '@teamhub/db'
+import type { ToolCall } from '@agelum/db'
 
 interface ToolCallMessage extends Message {
   toolCall?: ToolCall

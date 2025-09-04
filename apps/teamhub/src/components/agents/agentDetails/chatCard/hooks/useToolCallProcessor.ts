@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Message } from '@ai-sdk/react'
 import { useToast } from '@/hooks/use-toast'
 import { parseToolError } from '../toolUtils'
-import type { ToolCall } from '@teamhub/db'
+import type { ToolCall } from '@agelum/db'
 
 interface UseToolCallProcessorProps {
   data: any[] // Streaming data from useChat

@@ -22,7 +22,7 @@ COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY turbo.json ./
 COPY apps/teamhub/package.json ./apps/teamhub/
-COPY packages/teamhub-db/package.json ./packages/teamhub-db/
+COPY packages/agelum-db/package.json ./packages/agelum-db/
 COPY packages/teamhub-ai/package.json ./packages/teamhub-ai/
 COPY packages/drizzle-reactive/package.json ./packages/drizzle-reactive/
 COPY packages/logger/package.json ./packages/logger/

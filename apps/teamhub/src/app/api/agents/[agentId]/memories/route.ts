@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbMemories, getOrganizations, reactiveDb } from '@teamhub/db'
+import { dbMemories, getOrganizations, reactiveDb } from '@agelum/db'
 import { auth } from '@/auth'
 
 export async function GET(

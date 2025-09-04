@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 import Yandex from 'next-auth/providers/yandex'
 import Google from 'next-auth/providers/google'
 import Credentials from 'next-auth/providers/credentials'
-import { authAdapter } from '@teamhub/db'
+import { authAdapter } from '@agelum/db'
 
 const allowedEmails = process.env.ALLOWED_EMAILS?.split(',') || []
 
@@ -83,7 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 // Check if user exists in database, create if not
                 const { getUserByEmail, createUser } = await import(
-                  '@teamhub/db'
+                  '@agelum/db'
                 )
                 let user = await getUserByEmail(testEmail)
 
@@ -125,7 +125,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               const email = process.env.TEST_USER_EMAIL!
 
               // Check if user exists in database, create if not
-              const { getUserByEmail, createUser } = await import('@teamhub/db')
+              const { getUserByEmail, createUser } = await import('@agelum/db')
               let user = await getUserByEmail(email)
 
               if (!user) {

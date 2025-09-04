@@ -1,6 +1,6 @@
 'use client'
 
-import type { MessageType } from '@teamhub/db'
+import type { MessageType } from '@agelum/db'
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card'
 
 type MessageTypesCardProps = {

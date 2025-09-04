@@ -4,7 +4,7 @@ import {
   createOrganization as createOrganizationFn,
   getOrganizations,
   reactiveDb,
-} from '@teamhub/db'
+} from '@agelum/db'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
@@ -73,7 +73,7 @@ export async function ensureOrganizationDatabaseSetup(organizationId: string) {
       throw new Error('Organization not found')
     }
 
-    // If needed, call a public helper exported by @teamhub/db for ensuring schemas
+    // If needed, call a public helper exported by @agelum/db for ensuring schemas
     // Currently, no public export is defined; skip runtime creation in Next build
     // and rely on migrations/setup scripts.
 

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { TrpcReactiveProvider } from '@drizzle/reactive/client'
-import { reactiveRelations } from '@teamhub/db/reactive-config'
+import { reactiveRelations } from '@agelum/db/reactive-config'
 import { trpcClient } from '@/lib/trpc'
 import { useSearchParams } from 'next/navigation'
 import { useOrganizationStore } from '@/stores/organizationStore'

@@ -4,7 +4,7 @@ import {
   updateMessage,
   updateCronLastRun,
   reactiveDb,
-} from '@teamhub/db'
+} from '@agelum/db'
 
 export async function cronExecute(cronId: string) {
   const cronJob = await getCron.execute({ id: cronId }, reactiveDb)

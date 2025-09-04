@@ -1,7 +1,7 @@
 'use client'
 
 import { Plus } from 'lucide-react'
-import type { Agent as DBAgent } from '@teamhub/db'
+import type { Agent as DBAgent } from '@agelum/db'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { useAgentStore } from '@/stores/agentStore'

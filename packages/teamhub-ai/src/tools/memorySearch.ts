@@ -1,6 +1,6 @@
 import { ToolTypeDefinition } from '../tools'
 import { z } from 'zod'
-import { db, dbMemories } from '@teamhub/db'
+import { db, dbMemories } from '@agelum/db'
 
 export type MemorySearchParameters = {
   query: string

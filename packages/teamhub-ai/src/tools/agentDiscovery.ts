@@ -1,6 +1,6 @@
 import { ToolTypeDefinition } from '../tools'
 import { z } from 'zod'
-import { getAgents, reactiveDb } from '@teamhub/db'
+import { getAgents, reactiveDb } from '@agelum/db'
 
 export type AgentDiscoveryParameters = {
   searchQuery?: string

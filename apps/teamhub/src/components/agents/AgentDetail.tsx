@@ -9,7 +9,7 @@ import {
 import { ChatCard } from '@/components/agents/agentDetails/ChatCard'
 import { DashboardCard } from './agentDetails/DashboardCard'
 import { SettingsCard } from './agentDetails/SettingsCard'
-import type { Agent, ToolWithTypes } from '@teamhub/db'
+import type { Agent, ToolWithTypes } from '@agelum/db'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Skeleton } from '../../components/ui/skeleton'
 import { useEffect, useState, useMemo, useCallback } from 'react'

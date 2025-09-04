@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Search, Wrench, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { ToolCall } from '@teamhub/db'
+import type { ToolCall } from '@agelum/db'
 import { ArgumentsDisplay } from './ArgumentsDisplay'
 import { SearchResultCard } from './SearchResultCard'
 import {

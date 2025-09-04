@@ -1,4 +1,4 @@
-import type { ToolCall } from '@teamhub/db'
+import type { ToolCall } from '@agelum/db'
 import { ToolCallDialog } from './ToolCallDialog'
 
 interface ToolCallIndicatorProps {

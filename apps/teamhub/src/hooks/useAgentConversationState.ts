@@ -3,7 +3,7 @@
 import { useCallback, useEffect } from 'react'
 import { useReactive } from '@drizzle/reactive/client'
 import { useReactiveMutation } from './useReactiveMutation'
-import type { Agent } from '@teamhub/db'
+import type { Agent } from '@agelum/db'
 
 export function useAgentConversationState(agentId: string | null) {
   // Get agent data with conversation state from database

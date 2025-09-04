@@ -1,5 +1,5 @@
-import { createMessage, createCron, reactiveDb } from '@teamhub/db'
-import type { AgentMemoryRule, AgentToolPermission } from '@teamhub/db'
+import { createMessage, createCron, reactiveDb } from '@agelum/db'
+import type { AgentMemoryRule, AgentToolPermission } from '@agelum/db'
 import type { MemoryStoreRule, CronConfig, TaskMetadata } from '../types'
 
 export async function sendTask(params: {

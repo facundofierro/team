@@ -1,7 +1,7 @@
 import { generateOneShot, AIProvider } from '../ai/vercel/generateText'
 import { generateConversationEmbedding } from '../ai/vercel/generateEmbedding'
-import { dbMemories, dbEmbeddings } from '@teamhub/db'
-import type { ConversationMessage } from '@teamhub/db'
+import { dbMemories, dbEmbeddings } from '@agelum/db'
+import type { ConversationMessage } from '@agelum/db'
 
 export type ConversationProcessingOptions = {
   orgDatabaseName: string

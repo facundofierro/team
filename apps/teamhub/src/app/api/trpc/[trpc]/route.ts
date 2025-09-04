@@ -1,7 +1,7 @@
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
-import { appRouter } from '@teamhub/db'
+import { appRouter } from '@agelum/db'
 import { auth } from '@/auth'
-import { reactiveDb } from '@teamhub/db'
+import { reactiveDb } from '@agelum/db'
 
 const handler = (req: Request) =>
   fetchRequestHandler({

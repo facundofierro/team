@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 // import { Plus, ChevronLeft, ChevronRight } from 'lucide-react'
-import { ToolType } from '@teamhub/db'
+import { ToolType } from '@agelum/db'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { useOrganizationStore } from '@/stores/organizationStore'
-import type { ConversationMemory, ToolCall } from '@teamhub/db'
+import type { ConversationMemory, ToolCall } from '@agelum/db'
 // Import server actions for fallback
 import {
   startNewConversation as startNewConversationAction,

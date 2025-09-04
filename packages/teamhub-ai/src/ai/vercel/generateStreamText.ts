@@ -5,7 +5,7 @@ import {
   createDataStreamResponse,
   StreamData,
 } from 'ai'
-import { MemoryWithTypes, Memory, AgentToolPermission } from '@teamhub/db'
+import { MemoryWithTypes, Memory, AgentToolPermission } from '@agelum/db'
 import { generateDeepseekStream } from './deepseek/generateStreamText'
 import { generateOpenAIStream } from './openai/generateStreamText'
 import { getAISDKTool } from '../../tools'

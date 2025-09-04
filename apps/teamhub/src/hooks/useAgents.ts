@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import type { Agent } from '@teamhub/db'
+import type { Agent } from '@agelum/db'
 
 export function useAgents() {
   return useQuery({

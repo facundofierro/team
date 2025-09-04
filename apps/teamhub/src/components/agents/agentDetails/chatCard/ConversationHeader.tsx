@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ToolCallDialog } from './ToolCallDialog'
-import type { ToolCall } from '@teamhub/db'
+import type { ToolCall } from '@agelum/db'
 
 type ConversationHeaderProps = {
   currentConversation?: {

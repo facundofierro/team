@@ -1,4 +1,4 @@
-import type { ConversationMemory } from '@teamhub/db'
+import type { ConversationMemory } from '@agelum/db'
 
 export interface ContextConfig {
   maxRecentMessages: number // Default: 20

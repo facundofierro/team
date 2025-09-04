@@ -16,7 +16,7 @@ Implement the newly created `@drizzle/reactive` package in TeamHub, starting wit
 
 ### Current Database Functions Structure
 
-Location: `packages/teamhub-db/src/db/functions/agency.ts`
+Location: `packages/agelum-db/src/db/functions/agency.ts`
 
 - `createOrganization()`, `getOrganizations()`, `getOrganizationSettings()`
 - `createAgent()`, `getAgent()`, `getAgents()`, `updateAgent()`, `deleteAgent()`
@@ -34,23 +34,27 @@ Location: `packages/teamhub-db/src/db/functions/agency.ts`
 ### ✅ Completed Items
 
 1. **Reactive Database Configuration**
+
    - Configured main database with reactive wrappers using `@drizzle/reactive`
    - Implemented relation configuration for automatic invalidation across tables
    - Established both server-side (Redis) and client-side (localStorage) caching
 
 2. **Reactive Function Definitions**
+
    - Created comprehensive reactive functions for agents (getAgents, getAgent, createAgent, updateAgent, deleteAgent)
    - Created comprehensive reactive functions for organizations (getOrganizations, getOrganization, createOrganization)
    - Defined proper dependencies for each function to ensure accurate cache invalidation
    - Implemented proper input validation using Zod schemas
 
 3. **tRPC Integration**
+
    - Created reactive tRPC router that auto-generates procedures from reactive functions
    - Set up tRPC API endpoint with proper context and reactive database instance
    - Ensured type safety with automatic procedure generation
    - Established lazy initialization to avoid build-time database connection issues
 
 4. **Server-Sent Events for Real-time Updates**
+
    - Implemented SSE endpoint for real-time reactive updates (/api/events)
    - Added event acknowledgment endpoint for reliable delivery (/api/events/ack)
    - Set up authorization via user sessions
@@ -64,6 +68,7 @@ Location: `packages/teamhub-db/src/db/functions/agency.ts`
 ### 🔄 Partially Completed Items
 
 1. **API Route Migration**
+
    - Started migration of API routes to use reactive functions
    - Some routes still use direct database access and need to be migrated
 
@@ -75,22 +80,26 @@ Location: `packages/teamhub-db/src/db/functions/agency.ts`
 ### 📋 Pending Tasks
 
 1. **Complete API Route Migration**
+
    - Identify remaining API routes using direct database access
    - Migrate all routes to use reactive functions for consistency
    - Ensure backward compatibility during transition
 
 2. **Comprehensive Testing**
+
    - Write unit tests for all reactive functions
    - Create integration tests for real-time updates
    - Perform performance benchmarks to validate cache hit rates
    - Test edge cases like network disconnections and reconnections
 
 3. **Authorization and Access Control**
+
    - Implement robust authorization checks in reactive functions
    - Ensure proper access control for organization-specific data
    - Add row-level security where appropriate
 
 4. **Documentation and Developer Guidelines**
+
    - Create documentation for reactive function patterns
    - Establish guidelines for creating new reactive functions
    - Document best practices for client-side usage
@@ -123,7 +132,7 @@ Start with the main `teamhub` database (agency/auth schemas) to:
 
 #### 1.1 Update Main Database Configuration
 
-**File**: `packages/teamhub-db/src/db/index.ts`
+**File**: `packages/agelum-db/src/db/index.ts`
 
 ```typescript
 // Before
@@ -156,7 +165,7 @@ export const db = createReactiveDb(drizzle(pool, { schema }), reactiveConfig)
 
 #### 1.2 Create Reactive Function Definitions
 
-**File**: `packages/teamhub-db/src/db/functions/reactive/agents.ts`
+**File**: `packages/agelum-db/src/db/functions/reactive/agents.ts`
 
 ```typescript
 import { defineReactiveFunction } from '@drizzle/reactive'
@@ -232,7 +241,7 @@ export const updateAgent = defineReactiveFunction({
 
 #### 1.3 Create Reactive Function Definitions for Organizations
 
-**File**: `packages/teamhub-db/src/db/functions/reactive/organizations.ts`
+**File**: `packages/agelum-db/src/db/functions/reactive/organizations.ts`
 
 ```typescript
 export const getOrganizations = defineReactiveFunction({
@@ -270,7 +279,7 @@ export const createOrganization = defineReactiveFunction({
 
 #### 2.1 Create Reactive tRPC Router
 
-**File**: `packages/teamhub-db/src/trpc/router.ts`
+**File**: `packages/agelum-db/src/trpc/router.ts`
 
 ```typescript
 import { createReactiveRouter } from '@drizzle/reactive/trpc'
@@ -454,7 +463,7 @@ Keep existing REST endpoints working during transition period, but internally us
 
 #### 6.1 Unit Tests for Reactive Functions
 
-**File**: `packages/teamhub-db/src/db/functions/reactive/__tests__/agents.test.ts`
+**File**: `packages/agelum-db/src/db/functions/reactive/__tests__/agents.test.ts`
 
 ```typescript
 import { getAgents, createAgent } from '../agents'
@@ -576,7 +585,7 @@ No new environment variables required for phase 1.
 **Updated: 4-7 days remaining**
 
 - ✅ Step 1: Configure Reactive Database (COMPLETED)
-- ✅ Step 2: Implement tRPC Integration (COMPLETED) 
+- ✅ Step 2: Implement tRPC Integration (COMPLETED)
 - ✅ Step 3: Add SSE for Real-time Updates (COMPLETED)
 - ✅ Step 4: Update Client-Side Integration (COMPLETED)
 - 🔄 Step 5: Migrate Existing API Routes (1-2 days remaining)
@@ -587,15 +596,18 @@ No new environment variables required for phase 1.
 ## Next Steps
 
 1. **Complete API Route Migration**:
+
    - Identify remaining direct database access in API routes using `grep` for `db.query` and similar patterns
    - Systematically replace direct access with reactive function calls
 
 2. **Testing and Validation**:
+
    - Create comprehensive test suite for reactive functions
    - Test real-time updates with multiple concurrent users
    - Verify cache invalidation patterns are working correctly
 
 3. **Documentation**:
+
    - Document reactive function patterns for future development
    - Create guidelines for properly defining dependencies
    - Provide examples of client-side usage patterns

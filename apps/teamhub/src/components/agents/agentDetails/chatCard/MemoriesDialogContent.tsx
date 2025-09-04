@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Brain } from 'lucide-react'
 import { DialogClose } from '@/components/ui/dialog'
-import type { Memory } from '@teamhub/db'
+import type { Memory } from '@agelum/db'
 
 type TestMemory = {
   id: string

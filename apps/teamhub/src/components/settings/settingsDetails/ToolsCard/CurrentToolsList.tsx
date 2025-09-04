@@ -2,7 +2,7 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 // import { Trash2, Settings2 } from 'lucide-react'
-import { ToolWithTypes } from '@teamhub/db'
+import { ToolWithTypes } from '@agelum/db'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 

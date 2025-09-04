@@ -1,4 +1,4 @@
-import { ToolTypeWithTypes, verifyToolUsage, reactiveDb } from '@teamhub/db'
+import { ToolTypeWithTypes, verifyToolUsage, reactiveDb } from '@agelum/db'
 import { searchGoogle, SearchGoogleParameters } from './tools/searchGoogle'
 import { searchYandex, SearchYandexParameters } from './tools/searchYandex'
 import {

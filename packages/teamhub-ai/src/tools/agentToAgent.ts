@@ -6,7 +6,7 @@ import {
   createMessage,
   updateMessage,
   reactiveDb,
-} from '@teamhub/db'
+} from '@agelum/db'
 import { log } from '@repo/logger'
 
 export type A2AParameters = {
@@ -326,7 +326,7 @@ export const agentToAgent: ToolTypeDefinition = {
         )
 
         // Import the memory functions dynamically to avoid circular dependencies
-        const { dbMemories } = await import('@teamhub/db')
+        const { dbMemories } = await import('@agelum/db')
         const memoryFunctions = await dbMemories(orgDatabaseName)
 
         // Format the message for conversation context

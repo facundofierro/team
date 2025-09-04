@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { OrganizationSwitcher } from './OrganizationSwitcher'
-import { Organization } from '@teamhub/db'
+import { Organization } from '@agelum/db'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import { useAgentStore } from '@/stores/agentStore'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'

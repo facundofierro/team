@@ -12,7 +12,7 @@ import {
   Store,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import type { Agent } from '@teamhub/db'
+import type { Agent } from '@agelum/db'
 
 interface SimpleReactiveTestProps {
   organizationId: string
@@ -254,7 +254,7 @@ export function SimpleReactiveTest({
             <strong>Error:</strong> {error ? error.message : 'None'}
           </div>
           <div>
-            <strong>Data Source:</strong> Real database query via teamhub-db
+            <strong>Data Source:</strong> Real database query via agelum-db
           </div>
           <div>
             <strong>Cache Layer:</strong> Redis (server) + localStorage (client)

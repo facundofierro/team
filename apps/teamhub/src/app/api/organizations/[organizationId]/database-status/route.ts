@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { getOrganizations, reactiveDb } from '@teamhub/db'
+import { getOrganizations, reactiveDb } from '@agelum/db'
 
 export async function GET(
   request: NextRequest,

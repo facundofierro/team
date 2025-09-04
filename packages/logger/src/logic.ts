@@ -98,10 +98,10 @@ export const createLogger = (): Logger => ({
 
   // TeamHub Packages Loggers
   teamhubDb: {
-    main: createTypeLogger('teamhub-db'),
-    schema: createTypeLogger('teamhub-db-schema'),
-    query: createTypeLogger('teamhub-db-query'),
-    migration: createTypeLogger('teamhub-db-migration'),
+    main: createTypeLogger('agelum-db'),
+    schema: createTypeLogger('agelum-db-schema'),
+    query: createTypeLogger('agelum-db-query'),
+    migration: createTypeLogger('agelum-db-migration'),
   },
 
   teamhubAi: {

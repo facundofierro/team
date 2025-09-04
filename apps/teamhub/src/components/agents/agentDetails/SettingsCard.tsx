@@ -16,13 +16,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import type { Agent, ToolWithTypes } from '@teamhub/db'
+import type { Agent, ToolWithTypes } from '@agelum/db'
 import type {
   AgentToolPermission,
   AgentPolicyRule,
   AgentMemoryRule,
   AgentToolPermissions,
-} from '@teamhub/db'
+} from '@agelum/db'
 
 type SettingsCardProps = {
   agent?: Agent

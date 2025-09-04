@@ -1,6 +1,6 @@
 'use client'
 
-import type { MessageType, Memory, MemoryWithTypes } from '@teamhub/db'
+import type { MessageType, Memory, MemoryWithTypes } from '@agelum/db'
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card'
 
 type SharedMemoryCardProps = {
