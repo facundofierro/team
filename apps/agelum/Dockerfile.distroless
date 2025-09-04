@@ -16,23 +16,12 @@ RUN npm install -g pnpm turbo typescript
 
 WORKDIR /app
 
-# Copy package files for dependency resolution
-COPY pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
-COPY package.json ./
-COPY turbo.json ./
-COPY apps/agelum/package.json ./apps/agelum/
-COPY packages/agelum-db/package.json ./packages/agelum-db/
-COPY packages/agelum-ai/package.json ./packages/agelum-ai/
-COPY packages/drizzle-reactive/package.json ./packages/drizzle-reactive/
-COPY packages/logger/package.json ./packages/logger/
+# Copy all files for proper workspace setup
+COPY . .
 
 # Install dependencies with cache mount
 RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store \
     pnpm install --frozen-lockfile --prod=false --shamefully-hoist
-
-# Copy source code
-COPY . .
 
 # Build the application (creates standalone output)
 RUN pnpm build:agelum:prod
