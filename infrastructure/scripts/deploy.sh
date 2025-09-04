@@ -384,6 +384,35 @@ wait_for_services() {
         done
     fi
 
+    # Wait for all upstream services to be ready before starting nginx
+    echo -e "${BLUE}⏳ Waiting for upstream services to be ready before starting nginx...${NC}"
+
+    # Wait for Agelum service
+    if docker service ls --filter name=agelum_agelum --format "{{.Replicas}}" | grep -q "1/1"; then
+        echo -e "${GREEN}✅ Agelum service is ready${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Agelum service not ready, waiting...${NC}"
+        for i in {1..30}; do
+            if docker service ls --filter name=agelum_agelum --format "{{.Replicas}}" | grep -q "1/1"; then
+                echo -e "${GREEN}✅ Agelum service is ready${NC}"
+                break
+            fi
+            if [ $i -eq 30 ]; then
+                echo -e "${YELLOW}⚠️  Agelum service not ready after 30 attempts, nginx may have issues${NC}"
+            else
+                echo "Waiting for Agelum service... (attempt $i/30)"
+                sleep 10
+            fi
+        done
+    fi
+
+    # Wait for Remotion service (optional)
+    if docker service ls --filter name=agelum_remotion --format "{{.Replicas}}" | grep -q "1/1"; then
+        echo -e "${GREEN}✅ Remotion service is ready${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Remotion service not ready, nginx will handle gracefully${NC}"
+    fi
+
     # Check nginx service last (if being deployed)
     if [ "$FORCE_REDEPLOY_NGINX" = "true" ] || ! check_service_status "agelum_nginx" "Nginx" >/dev/null 2>&1; then
         echo -e "${BLUE}⏳ Waiting for Nginx service...${NC}"

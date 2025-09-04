@@ -165,6 +165,41 @@ NGINX_STATUS=$?
 check_service "agelum_remotion" "Remotion Rendering Service"
 REMOTION_STATUS=$?
 
+# Additional service checks
+echo ""
+echo "=== Service Accessibility Check ==="
+echo -e "${BLUE}🔍 Checking if services are accessible within the network...${NC}"
+
+# Check if Agelum is accessible on its internal port
+if [ $AGELUM_STATUS -eq 0 ]; then
+    echo -e "${BLUE}  Testing Agelum internal connectivity...${NC}"
+    local agelum_container=$(docker ps -q --filter label=com.docker.swarm.service.name=agelum_agelum | head -1)
+    if [ -n "$agelum_container" ]; then
+        if docker exec "$agelum_container" wget -q -O- http://localhost:3000/health 2>/dev/null; then
+            echo -e "${GREEN}    ✅ Agelum internal health check passed${NC}"
+        else
+            echo -e "${YELLOW}    ⚠️  Agelum internal health check failed${NC}"
+        fi
+    else
+        echo -e "${YELLOW}    ⚠️  No Agelum container found for internal test${NC}"
+    fi
+fi
+
+# Check if Remotion is accessible on its internal port
+if [ $REMOTION_STATUS -eq 0 ]; then
+    echo -e "${BLUE}  Testing Remotion internal connectivity...${NC}"
+    local remotion_container=$(docker ps -q --filter label=com.docker.swarm.service.name=agelum_remotion | head -1)
+    if [ -n "$remotion_container" ]; then
+        if docker exec "$remotion_container" wget -q -O- http://localhost:3001/health 2>/dev/null; then
+            echo -e "${GREEN}    ✅ Remotion internal health check passed${NC}"
+        else
+            echo -e "${YELLOW}    ⚠️  Remotion internal health check failed${NC}"
+        fi
+    else
+        echo -e "${YELLOW}    ⚠️  No Remotion container found for internal test${NC}"
+    fi
+fi
+
 # Wait a bit for services to stabilize after confirming they're running
 if [ $NGINX_STATUS -eq 0 ]; then
     echo -e "${BLUE}⏳ Waiting 10 seconds for nginx to fully initialize...${NC}"
