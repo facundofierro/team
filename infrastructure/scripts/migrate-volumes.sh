@@ -118,15 +118,6 @@ echo ""
 echo -e "${BLUE}💾 Creating backups of existing volumes...${NC}"
 backup_volume "teamhub_postgres_data"
 backup_volume "teamhub_redis_data"
-backup_volume "teamhub_nextcloud_data"
-backup_volume "teamhub_nextcloud_db_data"
-backup_volume "teamhub_clickhouse_data"
-backup_volume "teamhub_clickhouse_logs"
-backup_volume "teamhub_posthog_data"
-backup_volume "teamhub_posthog_db_data"
-backup_volume "teamhub_posthog_redis_data"
-backup_volume "teamhub_zookeeper_data"
-backup_volume "teamhub_zookeeper_logs"
 
 echo ""
 
@@ -135,26 +126,6 @@ echo -e "${BLUE}🔧 Migrating core infrastructure volumes...${NC}"
 migrate_volume "teamhub_postgres_data" "agelum_postgres_data" "PostgreSQL data"
 migrate_volume "teamhub_redis_data" "agelum_redis_data" "Redis data"
 
-# Migrate Nextcloud volumes
-echo -e "${BLUE}☁️  Migrating Nextcloud volumes...${NC}"
-migrate_volume "teamhub_nextcloud_data" "agelum_nextcloud_data" "Nextcloud data"
-migrate_volume "teamhub_nextcloud_db_data" "agelum_nextcloud_db_data" "Nextcloud database data"
-
-# Migrate ClickHouse volumes (if needed)
-echo -e "${BLUE}🗄️  Migrating ClickHouse volumes...${NC}"
-migrate_volume "teamhub_clickhouse_data" "agelum_clickhouse_data" "ClickHouse data"
-migrate_volume "teamhub_clickhouse_logs" "agelum_clickhouse_logs" "ClickHouse logs"
-
-# Migrate PostHog volumes (if needed)
-echo -e "${BLUE}📊 Migrating PostHog volumes...${NC}"
-migrate_volume "teamhub_posthog_data" "agelum_posthog_data" "PostHog data"
-migrate_volume "teamhub_posthog_db_data" "agelum_posthog_db_data" "PostHog database data"
-migrate_volume "teamhub_posthog_redis_data" "agelum_posthog_redis_data" "PostHog Redis data"
-
-# Migrate Zookeeper volumes (if needed)
-echo -e "${BLUE}🐘 Migrating Zookeeper volumes...${NC}"
-migrate_volume "teamhub_zookeeper_data" "agelum_zookeeper_data" "Zookeeper data"
-migrate_volume "teamhub_zookeeper_logs" "agelum_zookeeper_logs" "Zookeeper logs"
 
 echo ""
 echo -e "${GREEN}🎉 Volume migration completed successfully!${NC}"
