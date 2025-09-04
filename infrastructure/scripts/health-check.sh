@@ -36,7 +36,29 @@ check_service() {
 
             # Check if there are any recent service logs
             echo -e "${BLUE}    Recent logs:${NC}"
-            docker service logs "$service_name" --tail 3 2>/dev/null | head -3 || echo -e "${YELLOW}      No logs available yet${NC}"
+            docker service logs "$service_name" --tail 10 2>/dev/null | head -10 || echo -e "${YELLOW}      No logs available yet${NC}"
+
+            # For nginx specifically, get more detailed error information
+            if [ "$service_name" = "agelum_nginx" ]; then
+                echo -e "${BLUE}    🔍 Detailed nginx debugging:${NC}"
+                echo -e "${BLUE}      Service inspect:${NC}"
+                docker service inspect agelum_nginx --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' 2>/dev/null || echo "        Could not get image info"
+
+                echo -e "${BLUE}      Service tasks:${NC}"
+                docker service ps agelum_nginx --no-trunc --format "table {{.Name}}\t{{.CurrentState}}\t{{.Error}}" 2>/dev/null || echo "        Could not get task info"
+
+                echo -e "${BLUE}      Recent error logs:${NC}"
+                docker service logs agelum_nginx --tail 20 2>/dev/null | grep -i error || echo "        No error logs found"
+
+                echo -e "${BLUE}      Nginx config validation:${NC}"
+                # Try to validate nginx config if container is running
+                local nginx_container=$(docker ps -q --filter label=com.docker.swarm.service.name=agelum_nginx | head -1)
+                if [ -n "$nginx_container" ]; then
+                    docker exec "$nginx_container" nginx -t 2>&1 || echo "        Could not validate nginx config"
+                else
+                    echo "        No nginx container running to validate config"
+                fi
+            fi
 
             return 1
         fi
@@ -143,21 +165,6 @@ NGINX_STATUS=$?
 check_service "agelum_remotion" "Remotion Rendering Service"
 REMOTION_STATUS=$?
 
-check_service "agelum_nextcloud" "Nextcloud"
-NEXTCLOUD_STATUS=$?
-
-check_service "agelum_nextcloud_db" "Nextcloud Database"
-NEXTCLOUD_DB_STATUS=$?
-
-check_service "agelum_posthog" "PostHog Analytics"
-POSTHOG_STATUS=$?
-
-check_service "agelum_posthog_db" "PostHog Database"
-POSTHOG_DB_STATUS=$?
-
-check_service "agelum_posthog_redis" "PostHog Redis"
-POSTHOG_REDIS_STATUS=$?
-
 # Wait a bit for services to stabilize after confirming they're running
 if [ $NGINX_STATUS -eq 0 ]; then
     echo -e "${BLUE}⏳ Waiting 10 seconds for nginx to fully initialize...${NC}"
@@ -211,17 +218,8 @@ NGINX_HEALTH_STATUS=$?
 check_endpoint_with_retry "http://127.0.0.1:80" "Main Application"
 MAIN_APP_STATUS=$?
 
-check_endpoint_with_retry "http://127.0.0.1:80/nextcloud/" "Nextcloud"
-NEXTCLOUD_ENDPOINT_STATUS=$?
-
 check_endpoint_with_retry "http://127.0.0.1:80/remotion/health" "Remotion"
 REMOTION_ENDPOINT_STATUS=$?
-
-check_endpoint_with_retry "http://127.0.0.1:8000/health" "PostHog Health"
-POSTHOG_HEALTH_STATUS=$?
-
-check_endpoint_with_retry "http://127.0.0.1:8000" "PostHog Application"
-POSTHOG_ENDPOINT_STATUS=$?
 
 # Optional external services (may not be deployed)
 echo ""
@@ -237,7 +235,7 @@ echo "🔍 Debug: Proceeding to overall status calculation..."
 echo ""
 echo "=== Overall Status ==="
 
-TOTAL_SERVICES=10
+TOTAL_SERVICES=5
 HEALTHY_SERVICES=0
 
 echo "🔍 Debug: Calculating service health status..."
@@ -247,15 +245,10 @@ echo "🔍 Debug: Calculating service health status..."
 [ $AGELUM_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Agelum: healthy"
 [ $NGINX_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nginx: healthy"
 [ $REMOTION_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Remotion: healthy"
-[ $NEXTCLOUD_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nextcloud: healthy"
-[ $NEXTCLOUD_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ Nextcloud DB: healthy"
-[ $POSTHOG_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ PostHog: healthy"
-[ $POSTHOG_DB_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ PostHog DB: healthy"
-[ $POSTHOG_REDIS_STATUS -eq 0 ] && ((HEALTHY_SERVICES++)) && echo "  ✅ PostHog Redis: healthy"
 
 echo "Core services: $HEALTHY_SERVICES/$TOTAL_SERVICES healthy"
 
-echo "🔍 Debug: Endpoint status - Nginx Health: $NGINX_HEALTH_STATUS, Main App: $MAIN_APP_STATUS, Nextcloud: $NEXTCLOUD_ENDPOINT_STATUS, Remotion: $REMOTION_ENDPOINT_STATUS, PostHog Health: $POSTHOG_HEALTH_STATUS, PostHog App: $POSTHOG_ENDPOINT_STATUS"
+echo "🔍 Debug: Endpoint status - Nginx Health: $NGINX_HEALTH_STATUS, Main App: $MAIN_APP_STATUS, Remotion: $REMOTION_ENDPOINT_STATUS"
 
 # More lenient exit criteria - allow deployment to succeed if core services are up
 # even if some endpoints are temporarily not accessible
