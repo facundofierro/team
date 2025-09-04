@@ -19,10 +19,10 @@ export default function SimpleDemo() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-teamhub-secondary mb-4">
-            TeamHub UX Core Demo
+            Agelum UX Core Demo
           </h1>
           <p className="text-teamhub-muted">
-            Simple demonstration of key components with TeamHub design system
+            Simple demonstration of key components with Agelum design system
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export default function SimpleDemo() {
             <CardTitle className="text-teamhub-secondary">
               Color Palette
             </CardTitle>
-            <CardDescription>TeamHub design system colors</CardDescription>
+            <CardDescription>Agelum design system colors</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

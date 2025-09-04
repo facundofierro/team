@@ -3,12 +3,13 @@
 import { useCallback, useState } from 'react'
 import { useOrganizationStore } from '@/stores/organizationStore'
 import type { ConversationMemory, ToolCall } from '@agelum/db'
+import { log } from '@repo/logger'
 // Import server actions for fallback
 import {
   startNewConversation as startNewConversationAction,
   addMessageToConversation as addMessageAction,
   switchToConversation as switchConversationAction,
-  completeConversation as completeConversationAction
+  completeConversation as completeConversationAction,
 } from '@/lib/actions/conversation'
 
 interface StartConversationInput {
@@ -55,7 +56,8 @@ export function useConversationMutations() {
   const [isStartingConversation, setIsStartingConversation] = useState(false)
   const [isAddingMessage, setIsAddingMessage] = useState(false)
   const [isSwitchingConversation, setIsSwitchingConversation] = useState(false)
-  const [isCompletingConversation, setIsCompletingConversation] = useState(false)
+  const [isCompletingConversation, setIsCompletingConversation] =
+    useState(false)
   const [isUpdatingConversation, setIsUpdatingConversation] = useState(false)
 
   // Error states
@@ -67,28 +69,44 @@ export function useConversationMutations() {
 
   // Start new conversation using server action
   const startNewConversation = useCallback(
-    async (input: StartConversationInput): Promise<ConversationMemory | null> => {
+    async (
+      input: StartConversationInput
+    ): Promise<ConversationMemory | null> => {
       if (!organizationId) {
-        console.error('❌ [useConversationMutations] No organization ID available')
+        console.error(
+          '❌ [useConversationMutations] No organization ID available'
+        )
         return null
       }
 
       setIsStartingConversation(true)
       setStartError(null)
-      
+
       try {
-        console.log('🆕 [useConversationMutations] Starting new conversation for agent:', input.agentId)
+        console.log(
+          '🆕 [useConversationMutations] Starting new conversation for agent:',
+          input.agentId
+        )
         const result = await startNewConversationAction(
           input.agentId,
           input.firstMessage,
           orgDatabaseName
         )
-        console.log('✅ [useConversationMutations] New conversation started:', result?.id)
+        console.log(
+          '✅ [useConversationMutations] New conversation started:',
+          result?.id
+        )
         return result
       } catch (error) {
-        const err = error instanceof Error ? error : new Error('Failed to start conversation')
+        const err =
+          error instanceof Error
+            ? error
+            : new Error('Failed to start conversation')
         setStartError(err)
-        console.error('❌ [useConversationMutations] Failed to start conversation:', error)
+        console.error(
+          '❌ [useConversationMutations] Failed to start conversation:',
+          error
+        )
         return null
       } finally {
         setIsStartingConversation(false)
@@ -101,15 +119,20 @@ export function useConversationMutations() {
   const addMessageToConversation = useCallback(
     async (input: AddMessageInput): Promise<ConversationMemory | null> => {
       if (!organizationId) {
-        console.error('❌ [useConversationMutations] No organization ID available')
+        console.error(
+          '❌ [useConversationMutations] No organization ID available'
+        )
         return null
       }
 
       setIsAddingMessage(true)
       setAddMessageError(null)
-      
+
       try {
-        console.log('📝 [useConversationMutations] Adding message to conversation:', input.conversationId)
+        console.log(
+          '📝 [useConversationMutations] Adding message to conversation:',
+          input.conversationId
+        )
         const result = await addMessageAction(
           input.conversationId,
           input.role,
@@ -121,9 +144,13 @@ export function useConversationMutations() {
         console.log('✅ [useConversationMutations] Message added successfully')
         return result
       } catch (error) {
-        const err = error instanceof Error ? error : new Error('Failed to add message')
+        const err =
+          error instanceof Error ? error : new Error('Failed to add message')
         setAddMessageError(err)
-        console.error('❌ [useConversationMutations] Failed to add message:', error)
+        console.error(
+          '❌ [useConversationMutations] Failed to add message:',
+          error
+        )
         return null
       } finally {
         setIsAddingMessage(false)
@@ -134,27 +161,42 @@ export function useConversationMutations() {
 
   // Switch to conversation using server action
   const switchToConversation = useCallback(
-    async (input: SwitchConversationInput): Promise<ConversationMemory | null> => {
+    async (
+      input: SwitchConversationInput
+    ): Promise<ConversationMemory | null> => {
       if (!organizationId) {
-        console.error('❌ [useConversationMutations] No organization ID available')
+        console.error(
+          '❌ [useConversationMutations] No organization ID available'
+        )
         return null
       }
 
       setIsSwitchingConversation(true)
       setSwitchError(null)
-      
+
       try {
-        console.log('🔄 [useConversationMutations] Switching to conversation:', input.conversationId)
+        console.log(
+          '🔄 [useConversationMutations] Switching to conversation:',
+          input.conversationId
+        )
         const result = await switchConversationAction(
           input.conversationId,
           orgDatabaseName
         )
-        console.log('✅ [useConversationMutations] Switched to conversation successfully')
+        console.log(
+          '✅ [useConversationMutations] Switched to conversation successfully'
+        )
         return result
       } catch (error) {
-        const err = error instanceof Error ? error : new Error('Failed to switch conversation')
+        const err =
+          error instanceof Error
+            ? error
+            : new Error('Failed to switch conversation')
         setSwitchError(err)
-        console.error('❌ [useConversationMutations] Failed to switch conversation:', error)
+        console.error(
+          '❌ [useConversationMutations] Failed to switch conversation:',
+          error
+        )
         return null
       } finally {
         setIsSwitchingConversation(false)
@@ -167,26 +209,39 @@ export function useConversationMutations() {
   const completeConversation = useCallback(
     async (input: CompleteConversationInput): Promise<boolean> => {
       if (!organizationId) {
-        console.error('❌ [useConversationMutations] No organization ID available')
+        console.error(
+          '❌ [useConversationMutations] No organization ID available'
+        )
         return false
       }
 
       setIsCompletingConversation(true)
       setCompleteError(null)
-      
+
       try {
-        console.log('✅ [useConversationMutations] Completing conversation:', input.conversationId)
+        console.log(
+          '✅ [useConversationMutations] Completing conversation:',
+          input.conversationId
+        )
         await completeConversationAction(
           input.conversationId,
           orgDatabaseName,
           input.shouldGenerateBrief || false
         )
-        console.log('✅ [useConversationMutations] Conversation completed successfully')
+        console.log(
+          '✅ [useConversationMutations] Conversation completed successfully'
+        )
         return true
       } catch (error) {
-        const err = error instanceof Error ? error : new Error('Failed to complete conversation')
+        const err =
+          error instanceof Error
+            ? error
+            : new Error('Failed to complete conversation')
         setCompleteError(err)
-        console.error('❌ [useConversationMutations] Failed to complete conversation:', error)
+        console.error(
+          '❌ [useConversationMutations] Failed to complete conversation:',
+          error
+        )
         return false
       } finally {
         setIsCompletingConversation(false)
@@ -197,8 +252,12 @@ export function useConversationMutations() {
 
   // Update conversation - not implemented yet, return null
   const updateConversation = useCallback(
-    async (input: UpdateConversationInput): Promise<ConversationMemory | null> => {
-      console.warn('📝 [useConversationMutations] Update conversation not implemented yet')
+    async (
+      input: UpdateConversationInput
+    ): Promise<ConversationMemory | null> => {
+      console.warn(
+        '📝 [useConversationMutations] Update conversation not implemented yet'
+      )
       return null
     },
     []
@@ -218,9 +277,9 @@ export function useConversationMutations() {
     isSwitchingConversation,
     isCompletingConversation,
     isUpdatingConversation,
-    
+
     // Combined loading state
-    isLoading: 
+    isLoading:
       isStartingConversation ||
       isAddingMessage ||
       isSwitchingConversation ||
@@ -233,9 +292,9 @@ export function useConversationMutations() {
     switchError,
     completeError,
     updateError,
-    
+
     // Combined error
-    error: 
+    error:
       startError ||
       addMessageError ||
       switchError ||
