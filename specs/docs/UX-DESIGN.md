@@ -12,11 +12,15 @@ This document outlines the complete UX design strategy for TeamHub, an enterpris
 
 ### Existing Navigation Structure
 
-Based on the current screenshots, TeamHub has established:
+Based on the current main menu, TeamHub has established:
 
 - **Dashboard**: Overview and main landing page
+- **Tasks**: Task management and workflow automation
 - **Agents**: AI agent management and configuration
-- **Insights**: Data visualization and analytics
+- **Workflows**: Process automation and n8n integration
+- **Data Hub**: Database management and analytics
+- **Documents**: Content and knowledge management
+- **Tools**: Tool ecosystem and integrations
 - **Settings**: Platform and organization configuration
 
 ### Current Strengths
@@ -30,7 +34,7 @@ Based on the current screenshots, TeamHub has established:
 
 ## 🏗️ High-Level Functionality Grouping
 
-**6 Main Navigation Sections** (consolidated from 7 for cleaner navigation)
+**8 Main Navigation Sections** (aligned with current main menu)
 
 ### 1. **Dashboard** - Overview & Control Center
 
@@ -42,7 +46,18 @@ Based on the current screenshots, TeamHub has established:
 - Quick access to common tasks
 - Organization-wide insights and KPIs
 
-### 2. **Agents** - AI Agent Management
+### 2. **Tasks** - Task Management & Automation
+
+**Purpose**: Manage tasks, workflows, and automated processes
+**Key Functions**:
+
+- Task creation and management
+- Priority and status tracking
+- Task automation and workflows
+- Project organization and delegation
+- AI-powered task generation
+
+### 3. **Agents** - AI Agent Management
 
 **Purpose**: Create, configure, and manage AI agents and their capabilities
 **Key Functions**:
@@ -51,8 +66,9 @@ Based on the current screenshots, TeamHub has established:
 - Tool assignment and management
 - Agent-to-agent communication
 - Performance monitoring and optimization
+- Instance management and cloning
 
-### 3. **Workflows** - Process Automation & n8n Integration
+### 4. **Workflows** - Process Automation & n8n Integration
 
 **Purpose**: Design, manage, and monitor automated workflows and processes
 **Key Functions**:
@@ -62,7 +78,7 @@ Based on the current screenshots, TeamHub has established:
 - Execution monitoring and debugging
 - Integration with external systems
 
-### 4. **Data Hub** - Database & Analytics (formerly "Insights")
+### 5. **Data Hub** - Database & Analytics
 
 **Purpose**: Manage data, create insights, and generate business intelligence
 **Key Functions**:
@@ -73,7 +89,7 @@ Based on the current screenshots, TeamHub has established:
 - Business intelligence and reporting
 - Data visualization and dashboards
 
-### 5. **Documents** - Content & Knowledge Management
+### 6. **Documents** - Content & Knowledge Management
 
 **Purpose**: Create, organize, and manage all types of business documents
 **Key Functions**:
@@ -84,17 +100,27 @@ Based on the current screenshots, TeamHub has established:
 - AI-powered document analysis and insights
 - Integration with external tools (Google Docs, Sheets)
 
-### 6. **Settings** - Platform Configuration & Integrations
+### 7. **Tools** - Tool Ecosystem & Integrations
 
-**Purpose**: Configure platform settings, users, organization preferences, and external connections
+**Purpose**: Manage tools, integrations, and external connections
+**Key Functions**:
+
+- Tool marketplace and installation
+- MCP server management
+- API connections and webhooks
+- Custom tool development
+- Integration monitoring and analytics
+
+### 8. **Settings** - Platform Configuration
+
+**Purpose**: Configure platform settings, users, and organization preferences
 **Key Functions**:
 
 - User and role management
 - Organization settings
 - Security and compliance
 - System configuration
-- **Integrations**: MCP server management, API connections, webhooks
-- **External Services**: Third-party service connections and authentication
+- Custom branding and theming
 
 ---
 
@@ -105,10 +131,12 @@ Based on the current screenshots, TeamHub has established:
 ```
 TeamHub Logo
 ├── Dashboard
+├── Tasks
 ├── Agents
 ├── Workflows
 ├── Data Hub
 ├── Documents
+├── Tools
 └── Settings
 ```
 
@@ -121,6 +149,14 @@ Each main section has contextual tabs that change based on the selected area:
 - **Overview**: System health, recent activities, quick actions
 - **Widgets**: Customizable dashboard widgets and layouts
 - **Analytics**: Organization-wide KPIs and metrics
+
+#### ✅ Tasks Section
+
+- **My Tasks**: Personal task management and tracking
+- **Projects**: Project organization and task grouping
+- **Automation**: Task automation and workflow triggers
+- **Templates**: Reusable task templates and patterns
+- **Analytics**: Task performance and completion metrics
 
 #### 🤖 Agents Section
 
@@ -154,13 +190,21 @@ Each main section has contextual tabs that change based on the selected area:
 - **External**: Google Docs, Sheets, and other integrations
 - **Analytics**: Document usage, collaboration metrics
 
+#### 🛠️ Tools Section
+
+- **Marketplace**: Tool discovery and installation
+- **MCP Servers**: MCP server management and configuration
+- **Integrations**: API connections and webhook management
+- **Custom Tools**: Custom tool development and deployment
+- **Analytics**: Tool usage and performance metrics
+
 #### ⚙️ Settings Section
 
 - **General**: User management, organization settings, preferences
 - **Security**: Security configuration, compliance, audit logs
-- **Integrations**: MCP servers, API connections, webhooks
 - **System**: Backup, performance, monitoring configuration
-- **Tools**: Tool marketplace and configuration
+- **Branding**: Custom branding and theming
+- **Advanced**: Advanced configuration and debugging
 
 ---
 
@@ -177,7 +221,18 @@ Each main section has contextual tabs that change based on the selected area:
 - Data insights summary
 - Quick action buttons
 
-### 2. **Agents Page**
+### 2. **Tasks Page**
+
+**Layout**: Task management interface with project organization
+**Key Components**:
+
+- Task list with filtering and sorting
+- Project organization and grouping
+- Task creation and editing forms
+- Automation configuration
+- Progress tracking and analytics
+
+### 3. **Agents Page**
 
 **Layout**: Master-detail with agent list and configuration panels
 **Key Components**:
@@ -188,7 +243,7 @@ Each main section has contextual tabs that change based on the selected area:
 - Performance metrics
 - Chat interface for agent testing
 
-### 3. **Workflows Page**
+### 4. **Workflows Page**
 
 **Layout**: Visual workflow designer with management sidebar
 **Key Components**:
@@ -199,7 +254,7 @@ Each main section has contextual tabs that change based on the selected area:
 - Integration configuration
 - Performance analytics
 
-### 4. **Data Hub Page**
+### 5. **Data Hub Page**
 
 **Layout**: Tabbed interface for different data functions
 **Key Components**:
@@ -210,7 +265,7 @@ Each main section has contextual tabs that change based on the selected area:
 - Report generation
 - Vector search interface
 
-### 5. **Documents Page**
+### 6. **Documents Page**
 
 **Layout**: File explorer with AI generation tools
 **Key Components**:
@@ -221,16 +276,27 @@ Each main section has contextual tabs that change based on the selected area:
 - External integration management
 - Collaboration features
 
-### 6. **Settings Page**
+### 7. **Tools Page**
+
+**Layout**: Tool marketplace with management interface
+**Key Components**:
+
+- Tool discovery and installation
+- MCP server management
+- Integration configuration
+- Custom tool development
+- Usage analytics and monitoring
+
+### 8. **Settings Page**
 
 **Layout**: Organized settings categories with tabbed interface
 **Key Components**:
 
 - **General Settings**: User management, organization settings, system preferences
 - **Security & Compliance**: Security configuration, compliance settings, audit logs
-- **Integrations**: MCP server management, API connections, webhook configuration
-- **External Services**: Third-party service connections, authentication management
 - **System Configuration**: Backup & recovery, performance settings, monitoring
+- **Branding**: Custom branding and theming options
+- **Advanced**: Advanced configuration and debugging tools
 
 ---
 
@@ -252,6 +318,34 @@ Each main section has contextual tabs that change based on the selected area:
   - Organization-wide KPIs
   - Performance Metrics Dashboard
   - Trend Analysis and Forecasting
+
+### ✅ Tasks
+
+- **My Tasks Tab**
+  - Personal Task List
+  - Task Filtering and Sorting
+  - Task Creation and Editing
+  - Priority and Status Management
+- **Projects Tab**
+  - Project Organization
+  - Task Grouping and Hierarchy
+  - Project Timeline and Milestones
+  - Team Collaboration
+- **Automation Tab**
+  - Task Automation Rules
+  - Workflow Triggers
+  - AI-Powered Task Generation
+  - Automation Analytics
+- **Templates Tab**
+  - Task Template Library
+  - Custom Template Creation
+  - Template Categories
+  - Template Sharing
+- **Analytics Tab**
+  - Task Performance Metrics
+  - Completion Analytics
+  - Productivity Insights
+  - Team Performance
 
 ### 🤖 Agents
 
@@ -373,12 +467,45 @@ Each main section has contextual tabs that change based on the selected area:
   - Access Patterns
   - Performance Metrics
 
+### 🛠️ Tools
+
+- **Marketplace Tab**
+  - Tool Discovery and Browsing
+  - Tool Categories and Search
+  - Installation and Setup
+  - Tool Reviews and Ratings
+  - Featured Tools
+- **MCP Servers Tab**
+  - MCP Server Management
+  - Server Configuration
+  - Health Monitoring
+  - Resource Usage
+  - Server Analytics
+- **Integrations Tab**
+  - API Connection Management
+  - Webhook Configuration
+  - External Service Authentication
+  - Integration Testing
+  - Connection Status
+- **Custom Tools Tab**
+  - Custom Tool Development
+  - Tool Configuration
+  - Tool Deployment
+  - Version Management
+  - Custom Tool Analytics
+- **Analytics Tab**
+  - Tool Usage Metrics
+  - Performance Analytics
+  - Integration Health
+  - Cost Tracking
+  - Usage Patterns
+
 ### ⚙️ Settings
 
 - **General Tab**
   - User Management
   - Organization Settings
-- System Preferences
+  - System Preferences
   - Profile Configuration
   - Notification Settings
 - **Security Tab**
@@ -387,24 +514,24 @@ Each main section has contextual tabs that change based on the selected area:
   - Audit Logs
   - Access Control
   - Authentication Methods
-- **Integrations Tab**
-  - MCP Server Management
-  - API Connections
-  - Webhook Configuration
-  - External Service Authentication
-  - Integration Status
 - **System Tab**
   - Backup & Recovery
   - Performance Settings
   - Monitoring Configuration
   - System Health
   - Maintenance Tools
-- **Tools Tab**
-  - Tool Marketplace
-  - Tool Configuration
-  - Tool Permissions
-  - Usage Analytics
-  - Custom Tool Development
+- **Branding Tab**
+  - Custom Branding
+  - Theme Configuration
+  - Logo Management
+  - Color Schemes
+  - Custom CSS
+- **Advanced Tab**
+  - Advanced Configuration
+  - Debugging Tools
+  - System Logs
+  - Performance Tuning
+  - Experimental Features
 
 ---
 
@@ -418,6 +545,13 @@ TeamHub Platform
 │   ├── Overview: System health, activities, quick actions
 │   ├── Widgets: Custom dashboard builder and configuration
 │   └── Analytics: Organization KPIs and performance metrics
+│
+├── ✅ Tasks (5 tabs)
+│   ├── My Tasks: Personal task management and tracking
+│   ├── Projects: Project organization and task grouping
+│   ├── Automation: Task automation and workflow triggers
+│   ├── Templates: Reusable task templates and patterns
+│   └── Analytics: Task performance and completion metrics
 │
 ├── 🤖 Agents (5 tabs)
 │   ├── Chat: Agent conversations and interactions
@@ -447,15 +581,22 @@ TeamHub Platform
 │   ├── External: Google Docs, Sheets integration
 │   └── Analytics: Usage and collaboration metrics
 │
+├── 🛠️ Tools (5 tabs)
+│   ├── Marketplace: Tool discovery and installation
+│   ├── MCP Servers: MCP server management and configuration
+│   ├── Integrations: API connections and webhook management
+│   ├── Custom Tools: Custom tool development and deployment
+│   └── Analytics: Tool usage and performance metrics
+│
 └── ⚙️ Settings (5 tabs)
     ├── General: User and organization management
     ├── Security: Security, compliance, and audit
-    ├── Integrations: MCP, APIs, and webhooks
     ├── System: Backup, performance, and monitoring
-    └── Tools: Tool marketplace and configuration
+    ├── Branding: Custom branding and theming
+    └── Advanced: Advanced configuration and debugging
 ```
 
-**Total: 6 main sections × 5 tabs each = 30 main interface areas**
+**Total: 8 main sections × 5 tabs each = 40 main interface areas**
 
 ---
 

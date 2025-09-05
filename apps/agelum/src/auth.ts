@@ -6,9 +6,10 @@ import { authAdapter } from '@agelum/db'
 
 const allowedEmails = process.env.ALLOWED_EMAILS?.split(',') || []
 
-if (!process.env.NEXTAUTH_SECRET) {
-  throw new Error('NEXTAUTH_SECRET must be set')
-}
+// Commented out during build - env vars not available at build time
+// if (!process.env.NEXTAUTH_SECRET) {
+//   throw new Error('NEXTAUTH_SECRET must be set')
+// }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: authAdapter,

@@ -136,14 +136,17 @@ Use CSS modules or styled-components to isolate the component's styles from exte
 ### Changes Made
 
 1. **Main Component Wrapper (Line 198):**
+
    - **Before:** `className="flex flex-col h-full text-white bg-neutral-600 p-4"`
    - **After:** `className="flex flex-col h-full"`
 
 2. **Component Props (Line 207):**
+
    - **Before:** `className="h-full bg-transparent border-0 shadow-none"`
    - **After:** `className="h-full"`
 
 3. **Loading State (Line 147):**
+
    - Removed `text-white bg-neutral-600` classes
    - Updated skeleton colors to use proper light/dark theme classes
 

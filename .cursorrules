@@ -573,7 +573,7 @@ Agelum uses a milestone-based task management system with priority-based organiz
 - **Tasks are organized by priority**: A (Critical), B (High), C (Medium), D (Future)
 - **File naming convention**: `{Priority}: {task-name} ({story-points})`
 - **Story points scale**: 1 (1-2 days), 2 (3-5 days), 3 (1-2 weeks), 4 (2-3 weeks), 5 (3-4 weeks)
-- **Directory structure**: `pending/`, `doing/`, `done/` based on task status
+- **Directory structure**: `pending/`, `doing/`, `done/`, `_epic/` based on task status and scope
 
 ### Current Milestones
 
@@ -586,15 +586,35 @@ Agelum uses a milestone-based task management system with priority-based organiz
 - **Pending**: `specs/tasks/pending/` - Tasks waiting to be started
 - **Doing**: `specs/tasks/doing/` - Tasks currently in development
 - **Done**: `specs/tasks/done/` - Completed tasks with implementation details
+- **\_Epic**: `specs/tasks/_epic/` - Large epic tasks that span multiple milestones or require significant coordination
+
+### Epic Task Management
+
+Epic tasks are large, complex initiatives that typically:
+
+- **Span multiple milestones** or quarters
+- **Require coordination** across multiple team members
+- **Involve multiple deliverables** and dependencies
+- **Have story points of 5+** (3-4+ weeks of work)
+- **Break down into smaller tasks** that move through pending/doing/done
+
+#### Epic Task Guidelines
+
+- **Epic files remain in `_epic/`** throughout their lifecycle
+- **Create sub-tasks** in pending/doing/done as epic progresses
+- **Reference epic tasks** in related smaller task files
+- **Update epic status** as major milestones are reached
+- **Document epic scope** and success criteria clearly
 
 ### When Working on Tasks
 
 1. **Check current priorities** in `specs/tasks/tasks.md`
-2. **Move tasks between directories** as status changes
+2. **Move tasks between directories** as status changes (except epics)
 3. **Update task files** with progress, blockers, and completion details
 4. **Follow priority order** - complete A tasks before B, B before C, etc.
 5. **Estimate story points** accurately for new tasks
 6. **Document learnings** in completed tasks for future reference
+7. **For epics**: Create and manage sub-tasks, update epic progress regularly
 
 ## AI Assistant Guidance
 
@@ -610,17 +630,20 @@ When helping with Agelum development:
 8. **Follow task priority system** - focus on current milestone tasks first
 9. **Update task status** when completing work or encountering blockers
 10. **Document implementation details** in task files for team knowledge
+11. **For epic tasks**: Help break down large initiatives into manageable sub-tasks
+12. **Reference epic tasks** when working on related smaller tasks
+13. **Update epic progress** when major milestones are reached
 
 ### Component Development Guidance
 
-11. **Always use `@agelum/ux-core` package** for UI components
-12. **Check existing ux-core components** before suggesting new ones
-13. **Follow component hierarchy**: external → core → site components
-14. **Suggest styling changes in ux-core** package, not in applications
-15. **Maintain consistent design system** across all components
-16. **Use Agelum color scheme** and design tokens consistently
-17. **Implement responsive design** patterns in all components
-18. **Ensure accessibility compliance** in component suggestions
+14. **Always use `@agelum/ux-core` package** for UI components
+15. **Check existing ux-core components** before suggesting new ones
+16. **Follow component hierarchy**: external → core → site components
+17. **Suggest styling changes in ux-core** package, not in applications
+18. **Maintain consistent design system** across all components
+19. **Use Agelum color scheme** and design tokens consistently
+20. **Implement responsive design** patterns in all components
+21. **Ensure accessibility compliance** in component suggestions
 
 ## Landing Page Component Architecture
 

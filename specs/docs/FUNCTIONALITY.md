@@ -1,5 +1,9 @@
 # TeamHub Functionality Reference
 
+> **📁 This documentation has been reorganized for better navigation and maintainability.**
+>
+> **👉 Please refer to the new structure in [`specs/docs/functionality/`](./functionality/)**
+
 ## Overview
 
 TeamHub is an enterprise AI agent management platform that enables organizations to create, manage, and orchestrate AI agents at scale. Built with Next.js 14, TypeScript, and a modern monorepo architecture, it provides secure multi-tenant environments where teams can leverage artificial intelligence through custom agents tailored to their specific organizational needs.
@@ -12,27 +16,96 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 
 ---
 
-## 🏢 Multi-Organization Management
+## 📁 New Documentation Structure
 
-### Organization Features
+The functionality documentation has been reorganized into a more manageable structure:
 
-- **Complete Data Isolation**: Each organization operates with dedicated database schemas and isolated data
-- **Dynamic Organization Switching**: Seamless UI context switching between organizations
-- **Organization Creation**: Self-service organization setup with automated database provisioning
-- **Database Management**: Automatic PostgreSQL database creation with custom naming and schema setup
-- **Organization Settings**: Comprehensive configuration management per organization
+### Main Application Menus
 
-### User Management
+- **[📊 Dashboard](./functionality/dashboard.md)** - Overview & Analytics
+- **[✅ Tasks](./functionality/tasks.md)** - Task Management System
+- **[🤖 Agents](./functionality/agents.md)** - Agent Management & Communication
+- **[🔄 Workflows](./functionality/workflows.md)** - Workflow Orchestration & n8n Integration
+- **[🗄️ Data Hub](./functionality/data-hub.md)** - Database Management & Business Intelligence
+- **[📄 Documents](./functionality/documents.md)** - Document & Knowledge Management
+- **[🛠️ Tools](./functionality/tools.md)** - Comprehensive Tool Ecosystem
+- **[⚙️ Settings](./functionality/settings.md)** - Organization Settings & Configuration
 
-- **Multi-Provider Authentication**: Yandex OAuth, Google OAuth, email/password, and test user modes
-- **Role-Based Access Control**: Admin and user roles with granular permissions
-- **User Invitation System**: Add and manage users within organizations
-- **Session Management**: Secure JWT-based sessions with configurable expiration
-- **Access Control Lists**: Email-based whitelist system for organization access
+### Additional Features
+
+- **[🧠 Memory Management](./functionality/other-features.md#memory-management)** - Intelligent Memory System
+- **[💬 Real-Time Communication](./functionality/other-features.md#real-time-communication)** - Chat Interface & Conversation Management
+- **[🚀 Infrastructure & Deployment](./functionality/other-features.md#infrastructure-deployment)** - Container Orchestration & CI/CD
+- **[🔧 Developer Experience](./functionality/other-features.md#developer-experience)** - API Architecture & Testing
+- **[📱 User Experience](./functionality/other-features.md#user-experience)** - Interface Design & Navigation
+- **[💰 Business Value](./functionality/other-features.md#business-value)** - ROI & Competitive Advantages
+- **[🌐 Public Agent Market](./functionality/other-features.md#public-agent-market)** - Market Opportunity & Revenue Potential
+- **[🔮 Integration Capabilities](./functionality/other-features.md#integration-capabilities)** - AI Provider Support & External Integrations
+
+### Quick Navigation
+
+- **[📋 Index](./functionality/index.md)** - Complete overview with brief descriptions
+- **[🔗 All Features](./functionality/other-features.md)** - Comprehensive additional features
 
 ---
 
-## 🤖 Advanced AI Agent System
+## Legacy Content (Deprecated)
+
+> ⚠️ **The content below is maintained for reference but has been moved to the new structure above.**
+>
+> **Please use the new organized documentation for the most up-to-date information.**
+
+---
+
+## 📊 Dashboard
+
+### Overview & Analytics
+
+- **Executive Dashboard**: High-level KPIs and performance metrics across all organizational activities
+- **Real-Time Monitoring**: Live system health, agent performance, and workflow status
+- **Usage Analytics**: Comprehensive tracking of agent interactions, tool usage, and user activity
+- **Performance Metrics**: Response times, success rates, and efficiency indicators
+- **Custom Dashboards**: Personalized views based on user roles and responsibilities
+
+### Key Performance Indicators
+
+- **Agent Performance**: Conversation success rates, response times, and user satisfaction
+- **Workflow Efficiency**: Automation completion rates and time savings
+- **Data Insights**: Business intelligence and trend analysis
+- **System Health**: Resource utilization, error rates, and uptime metrics
+- **ROI Tracking**: Cost savings and efficiency improvements
+
+---
+
+## ✅ Tasks
+
+### Task Management System
+
+- **Task Creation**: Convert conversations, workflows, and agent interactions into actionable tasks
+- **Priority Management**: AI-powered priority assignment based on content analysis and urgency
+- **Status Tracking**: Comprehensive task lifecycle management with custom status workflows
+- **Assignment & Delegation**: Task assignment to specific users, agents, or teams
+- **Due Date Management**: Scheduling and deadline tracking with automated reminders
+
+### Task Organization
+
+- **Project Grouping**: Organize tasks by projects, clients, or business functions
+- **Tag System**: Flexible tagging and categorization for easy task discovery
+- **Search & Filtering**: Advanced search capabilities across all task attributes
+- **Template System**: Reusable task templates for common business processes
+- **Bulk Operations**: Mass task updates, assignments, and status changes
+
+### Task Automation
+
+- **AI-Powered Task Generation**: Automatic task creation from conversations and workflows
+- **Workflow Integration**: Seamless integration with n8n workflows for task automation
+- **Escalation Rules**: Automatic task escalation based on priority, time, or complexity
+- **Progress Tracking**: Real-time progress monitoring and completion reporting
+- **Notification System**: Automated notifications for task updates and deadlines
+
+---
+
+## 🤖 Agents
 
 ### Agent Management
 
@@ -103,51 +176,195 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 
 ---
 
-## 🧠 Intelligent Memory Management
+## 🔄 Workflows
 
-### Memory System Architecture
+### Workflow Orchestration & n8n Integration
 
-- **Unified Memory Model**: Single system handling conversations, facts, preferences, skills, and context
-- **Conversation Memory**: Automatic conversation history with context preservation
-- **Fact Memory**: Store and retrieve discrete facts and information
-- **Preference Memory**: User and organizational preference tracking
-- **Skill Memory**: Agent capability and learned behavior storage
+#### Strategic Integration Approach
 
-### Memory Operations
+**TeamHub + n8n = Complete Solution**:
 
-- **Semantic Search**: Vector-based memory search using pgvector (when available)
-- **Memory Categories**: Organized storage with customizable categorization
-- **Context Retrieval**: Smart memory selection for conversation context
-- **Memory Lifecycle**: Retention policies and automatic cleanup
-- **Access Tracking**: Usage analytics and memory access patterns
+- **TeamHub**: AI agents, memory, MCP integration, conversation management
+- **n8n**: Workflow automation, external integrations, process orchestration
+- **Combined**: Best of both worlds with faster time to market
 
-### Advanced Memory Features
+#### n8n Integration Capabilities
 
-- **Brief Generation**: AI-powered conversation summarization
-- **Memory Sharing**: Cross-agent memory access for organizational knowledge
-- **Importance Scoring**: Weighted memory ranking (1-10 scale)
-- **Memory Selection**: Interactive memory picker for conversation context
-- **Memory Statistics**: Comprehensive analytics and usage reporting
+- **API Integration**: Connect TeamHub to n8n via REST API
+- **Workflow Management**: Create, trigger, and monitor n8n workflows from TeamHub
+- **Data Flow**: Pass data between TeamHub AI agents and n8n workflows
+- **Unified Interface**: Present n8n workflows as TeamHub tools
+- **Error Handling**: Comprehensive error handling and fallback mechanisms
+
+#### Workflow Orchestration Features
+
+- **Visual Workflow Builder**: Leverage n8n's superior workflow design tools
+- **200+ Integrations**: Access to n8n's extensive integration ecosystem
+- **Process Automation**: Complex multi-step workflow orchestration
+- **Scheduled Execution**: Cron-based workflow scheduling and automation
+- **Conditional Logic**: Advanced branching and decision-making workflows
+
+#### Customer Benefits
+
+- **Familiar Tools**: Many customers already use n8n
+- **Proven Technology**: Both platforms are battle-tested
+- **Flexible Integration**: Use together or independently
+- **No Vendor Lock-in**: Open standards and easy migration
+- **Faster Deployment**: 6-12 months time savings vs custom development
+
+### Workflow Management
+
+- **Workflow Templates**: Pre-built workflow templates for common business processes
+- **Custom Workflows**: Create and customize workflows for specific organizational needs
+- **Workflow Monitoring**: Real-time workflow execution monitoring and performance tracking
+- **Error Handling**: Comprehensive error detection, logging, and recovery mechanisms
+- **Workflow Optimization**: AI-powered suggestions for workflow performance improvement
 
 ---
 
-## 🛠️ Comprehensive Tool Ecosystem
+## 🗄️ Data Hub
 
-### Built-in Search Tools
+### Database Management
+
+#### Table Management
+
+- **Custom Table Creation**: Create and manage database tables for business data
+- **AI Data Population**: Automatically populate tables with AI-researched information
+- **Data Import/Export**: CSV, JSON, and database format support
+- **Table Relationships**: Define and manage table relationships and foreign keys
+- **Data Validation**: Set up validation rules and constraints
+
+#### Vector Search & AI Research
+
+- **Vector Search**: Semantic search capabilities using pgvector (when available)
+- **AI Research Tools**: Automated data gathering and research capabilities
+- **Data Enrichment**: AI-powered data enhancement and validation
+- **Research Templates**: Pre-defined research workflows for common business needs
+- **Data Quality Monitoring**: Track data accuracy and completeness
+
+### Business Intelligence
+
+#### Reporting & Analytics
+
+- **Custom Dashboards**: Create personalized business intelligence dashboards
+- **KPI Tracking**: Monitor key performance indicators and business metrics
+- **Trend Analysis**: AI-powered trend identification and forecasting
+- **Data Export**: Export reports in multiple formats (PDF, Excel, CSV)
+- **Scheduled Reports**: Automated report generation and distribution
+
+#### Data Visualization
+
+- **Interactive Data Grids**: Explore organizational data with sortable tables
+- **Insights Dashboard**: Key performance indicators and metrics
+- **Usage Analytics**: Agent and tool usage statistics
+- **Performance Monitoring**: System health and performance metrics
+- **Custom Reports**: Configurable reporting system
+
+### Public Agent Analytics
+
+#### Customer Interaction Analytics
+
+- **Conversation Analytics**: Track customer conversation patterns and topics
+- **Customer Journey Mapping**: Visualize customer interaction flows and drop-off points
+- **Response Time Metrics**: Monitor agent response times and customer satisfaction
+- **Escalation Analysis**: Track human handoff rates and resolution success
+- **Sentiment Analysis**: AI-powered customer sentiment tracking and trend analysis
+
+#### Lead Generation & Sales Analytics
+
+- **Lead Qualification Metrics**: Track lead scoring accuracy and conversion rates
+- **Sales Pipeline Integration**: Monitor lead progression through sales funnel
+- **Customer Intent Analysis**: Identify purchase intent and product interest
+- **Conversion Tracking**: Measure chat-to-sale conversion rates
+- **ROI Measurement**: Calculate return on investment for public agent deployment
+
+#### Customer Insights & Intelligence
+
+- **Customer Behavior Patterns**: Analyze interaction timing, frequency, and preferences
+- **Product Interest Tracking**: Monitor which products/services generate most inquiries
+- **Geographic Analysis**: Track customer location and regional trends
+- **Demographic Insights**: Analyze customer segments and targeting opportunities
+- **Competitive Intelligence**: Monitor customer questions about competitors
+
+---
+
+## 📄 Documents
+
+### Document & Knowledge Management
+
+#### Document Types & Formats
+
+##### Core Document Types
+
+- **AI-Generated Documents**: Business plans, reports, proposals, and analysis
+- **Text Documents**: Rich text editor with AI assistance and collaboration
+- **PDF Documents**: Import, view, and AI-powered analysis of PDF content
+- **Media Files**: Images, videos, and audio with AI-powered tagging and analysis
+- **External Links**: Integration with Google Docs, Sheets, and other external tools
+
+##### AI Document Generation
+
+- **Business Plan Generator**: AI-powered business plan creation with industry insights
+- **Report Templates**: Pre-built templates for common business documents
+- **Content Enhancement**: AI-powered writing assistance and improvement
+- **Multi-Language Support**: Generate documents in multiple languages
+- **Brand Consistency**: Maintain company voice and style across all documents
+
+#### Document Organization
+
+##### Folder Structure
+
+- **Hierarchical Organization**: Create nested folder structures for document organization
+- **Smart Folders**: AI-powered automatic document categorization
+- **Tag System**: Flexible tagging and labeling for easy document discovery
+- **Search & Discovery**: Full-text search with AI-powered semantic search
+- **Version Control**: Track document versions and changes over time
+
+##### Collaboration Features
+
+- **Team Editing**: Real-time collaborative document editing
+- **Comment System**: Inline comments and feedback system
+- **Approval Workflows**: Document review and approval processes
+- **Access Control**: Granular permissions for document access and editing
+- **Activity Tracking**: Monitor document usage and collaboration patterns
+
+#### External Integrations
+
+##### Google Workspace Integration
+
+- **Google Docs**: Create, edit, and manage Google Docs from TeamHub
+- **Google Sheets**: AI-powered data analysis and spreadsheet management
+- **Google Drive**: Seamless file synchronization and management
+- **Real-time Updates**: Live synchronization between TeamHub and Google Workspace
+
+##### Other External Tools
+
+- **Microsoft Office**: Integration with Word, Excel, and PowerPoint
+- **Notion**: Connect and manage Notion pages and databases
+- **Slack**: Document sharing and collaboration through Slack
+- **Email Integration**: Send documents and track engagement
+
+---
+
+## 🛠️ Tools
+
+### Comprehensive Tool Ecosystem
+
+#### Built-in Search Tools
 
 - **Google Search**: Full Google Search API integration with custom search engines
 - **DuckDuckGo Search**: Privacy-focused search with no API key requirements
 - **Yandex Search**: Multi-protocol Yandex search (REST, gRPC, Gen) with regional support
 - **Web Search Aggregation**: Combined search results from multiple providers
 
-### Communication Tools
+#### Communication Tools
 
 - **Agent Discovery**: Find and search for agents within organizations
 - **Agent-to-Agent Messaging**: Secure internal agent communication
 - **Memory Search**: Advanced memory query and retrieval system
 - **Cross-Agent Coordination**: Workflow orchestration between agents
 
-### Integration Tools
+#### Integration Tools
 
 - **MCP (Model Context Protocol) Connector**: Connect to external MCP servers
 - **Web Browser Automation**: Playwright-based browser control (currently disabled)
@@ -180,11 +397,9 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 - **Error Handling**: Automated error detection and recovery
 - **Workflow Optimization**: AI-powered workflow performance suggestions
 
----
+### MCP (Model Context Protocol) Integration
 
-## 🔧 MCP (Model Context Protocol) Integration
-
-### Container Management
+#### Container Management
 
 - **Isolated MCP Containers**: Docker-based isolated environments per organization
 - **Resource Limits**: CPU, memory, and process limits with monitoring
@@ -192,7 +407,7 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 - **Volume Management**: Persistent data and log storage
 - **Network Isolation**: Dedicated networks for security
 
-### MCP Discovery & Installation
+#### MCP Discovery & Installation
 
 - **MCP Registry**: Built-in catalog of popular MCP servers
 - **GitHub Integration**: Search and discover MCPs from GitHub repositories
@@ -200,7 +415,7 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 - **Community MCPs**: Support for community-developed MCP servers
 - **Custom MCP Installation**: Support for private and custom MCP servers
 
-### MCP Operations
+#### MCP Operations
 
 - **Lifecycle Management**: Start, stop, install, and remove MCPs
 - **Health Monitoring**: Container and MCP process health checks
@@ -210,39 +425,105 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 
 ---
 
-## 🔄 Workflow Orchestration & n8n Integration
+## ⚙️ Settings
 
-### Strategic Integration Approach
+### Organization Settings & Configuration
 
-**TeamHub + n8n = Complete Solution**:
+#### Tool Management
 
-- **TeamHub**: AI agents, memory, MCP integration, conversation management
-- **n8n**: Workflow automation, external integrations, process orchestration
-- **Combined**: Best of both worlds with faster time to market
+- **Tool Marketplace**: Browse and install available tools
+- **Tool Configuration**: Detailed parameter configuration per tool
+- **MCP Management**: Dedicated MCP discovery and installation interface
+- **Usage Analytics**: Tool usage statistics and cost tracking
+- **Tool Permissions**: Assign tools to specific agents with restrictions
 
-### n8n Integration Capabilities
+#### System Configuration
 
-- **API Integration**: Connect TeamHub to n8n via REST API
-- **Workflow Management**: Create, trigger, and monitor n8n workflows from TeamHub
-- **Data Flow**: Pass data between TeamHub AI agents and n8n workflows
-- **Unified Interface**: Present n8n workflows as TeamHub tools
-- **Error Handling**: Comprehensive error handling and fallback mechanisms
+- **Message Types**: Configure supported message formats
+- **Shared Memory**: Organization-wide memory sharing settings
+- **User Management**: Add, remove, and manage organization users
+- **Security Settings**: Access controls and permission management
+- **Integration Settings**: API keys and external service configuration
 
-### Workflow Orchestration Features
+#### Advanced Settings
 
-- **Visual Workflow Builder**: Leverage n8n's superior workflow design tools
-- **200+ Integrations**: Access to n8n's extensive integration ecosystem
-- **Process Automation**: Complex multi-step workflow orchestration
-- **Scheduled Execution**: Cron-based workflow scheduling and automation
-- **Conditional Logic**: Advanced branching and decision-making workflows
+- **Database Management**: Organization database status and health
+- **Resource Monitoring**: Container and resource usage tracking
+- **Backup Configuration**: Data retention and backup policies
+- **Audit Logging**: Activity tracking and compliance features
+- **Custom Branding**: Organization-specific theming and configuration
 
-### Customer Benefits
+### Multi-Organization Management
 
-- **Familiar Tools**: Many customers already use n8n
-- **Proven Technology**: Both platforms are battle-tested
-- **Flexible Integration**: Use together or independently
-- **No Vendor Lock-in**: Open standards and easy migration
-- **Faster Deployment**: 6-12 months time savings vs custom development
+#### Organization Features
+
+- **Complete Data Isolation**: Each organization operates with dedicated database schemas and isolated data
+- **Dynamic Organization Switching**: Seamless UI context switching between organizations
+- **Organization Creation**: Self-service organization setup with automated database provisioning
+- **Database Management**: Automatic PostgreSQL database creation with custom naming and schema setup
+- **Organization Settings**: Comprehensive configuration management per organization
+
+#### User Management
+
+- **Multi-Provider Authentication**: Yandex OAuth, Google OAuth, email/password, and test user modes
+- **Role-Based Access Control**: Admin and user roles with granular permissions
+- **User Invitation System**: Add and manage users within organizations
+- **Session Management**: Secure JWT-based sessions with configurable expiration
+- **Access Control Lists**: Email-based whitelist system for organization access
+
+### Security & Authentication
+
+#### Authentication Systems
+
+- **Multi-Provider OAuth**: Yandex, Google OAuth with secure token handling
+- **Credentials Authentication**: Email/password authentication for testing
+- **Test User System**: Development and testing user accounts
+- **Session Management**: Secure JWT sessions with configurable expiration
+- **Access Control**: Email whitelist and role-based access control
+
+#### Security Features
+
+- **Organization Isolation**: Complete data separation between organizations
+- **Container Security**: Hardened Docker containers with security constraints
+- **API Security**: Authenticated and authorized API endpoints
+- **Data Encryption**: Secure data storage and transmission
+- **Audit Logging**: Comprehensive security event logging
+
+#### Compliance
+
+- **Data Isolation**: GDPR and SOC 2 compatible data separation
+- **Access Logs**: Complete audit trails for compliance reporting
+- **Permission Management**: Granular access controls
+- **Data Retention**: Configurable data retention policies
+- **Security Monitoring**: Real-time security event monitoring
+
+---
+
+## 🧠 Intelligent Memory Management
+
+### Memory System Architecture
+
+- **Unified Memory Model**: Single system handling conversations, facts, preferences, skills, and context
+- **Conversation Memory**: Automatic conversation history with context preservation
+- **Fact Memory**: Store and retrieve discrete facts and information
+- **Preference Memory**: User and organizational preference tracking
+- **Skill Memory**: Agent capability and learned behavior storage
+
+### Memory Operations
+
+- **Semantic Search**: Vector-based memory search using pgvector (when available)
+- **Memory Categories**: Organized storage with customizable categorization
+- **Context Retrieval**: Smart memory selection for conversation context
+- **Memory Lifecycle**: Retention policies and automatic cleanup
+- **Access Tracking**: Usage analytics and memory access patterns
+
+### Advanced Memory Features
+
+- **Brief Generation**: AI-powered conversation summarization
+- **Memory Sharing**: Cross-agent memory access for organizational knowledge
+- **Importance Scoring**: Weighted memory ranking (1-10 scale)
+- **Memory Selection**: Interactive memory picker for conversation context
+- **Memory Statistics**: Comprehensive analytics and usage reporting
 
 ---
 
@@ -271,136 +552,6 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 - **Task Creation**: Convert conversations into scheduled tasks
 - **Workflow Initiation**: Start complex multi-step workflows from chat
 - **Export/Import**: Conversation data portability
-
----
-
-## ⚙️ Organization Settings & Configuration
-
-### Tool Management
-
-- **Tool Marketplace**: Browse and install available tools
-- **Tool Configuration**: Detailed parameter configuration per tool
-- **MCP Management**: Dedicated MCP discovery and installation interface
-- **Usage Analytics**: Tool usage statistics and cost tracking
-- **Tool Permissions**: Assign tools to specific agents with restrictions
-
-### System Configuration
-
-- **Message Types**: Configure supported message formats
-- **Shared Memory**: Organization-wide memory sharing settings
-- **User Management**: Add, remove, and manage organization users
-- **Security Settings**: Access controls and permission management
-- **Integration Settings**: API keys and external service configuration
-
-### Advanced Settings
-
-- **Database Management**: Organization database status and health
-- **Resource Monitoring**: Container and resource usage tracking
-- **Backup Configuration**: Data retention and backup policies
-- **Audit Logging**: Activity tracking and compliance features
-- **Custom Branding**: Organization-specific theming and configuration
-
----
-
-## 📊 Analytics & Insights
-
-### Data Visualization
-
-- **Interactive Data Grids**: Explore organizational data with sortable tables
-- **Insights Dashboard**: Key performance indicators and metrics
-- **Usage Analytics**: Agent and tool usage statistics
-- **Performance Monitoring**: System health and performance metrics
-- **Custom Reports**: Configurable reporting system
-
-### Database Management
-
-#### Table Management
-
-- **Custom Table Creation**: Create and manage database tables for business data
-- **AI Data Population**: Automatically populate tables with AI-researched information
-- **Data Import/Export**: CSV, JSON, and database format support
-- **Table Relationships**: Define and manage table relationships and foreign keys
-- **Data Validation**: Set up validation rules and constraints
-
-#### Vector Search & AI Research
-
-- **Vector Search**: Semantic search capabilities using pgvector (when available)
-- **AI Research Tools**: Automated data gathering and research capabilities
-- **Data Enrichment**: AI-powered data enhancement and validation
-- **Research Templates**: Pre-defined research workflows for common business needs
-- **Data Quality Monitoring**: Track data accuracy and completeness
-
-### Business Intelligence
-
-#### Reporting & Analytics
-
-- **Custom Dashboards**: Create personalized business intelligence dashboards
-- **KPI Tracking**: Monitor key performance indicators and business metrics
-- **Trend Analysis**: AI-powered trend identification and forecasting
-- **Data Export**: Export reports in multiple formats (PDF, Excel, CSV)
-- **Scheduled Reports**: Automated report generation and distribution
-
-### Public Agent Analytics
-
-#### Customer Interaction Analytics
-
-- **Conversation Analytics**: Track customer conversation patterns and topics
-- **Customer Journey Mapping**: Visualize customer interaction flows and drop-off points
-- **Response Time Metrics**: Monitor agent response times and customer satisfaction
-- **Escalation Analysis**: Track human handoff rates and resolution success
-- **Sentiment Analysis**: AI-powered customer sentiment tracking and trend analysis
-
-#### Lead Generation & Sales Analytics
-
-- **Lead Qualification Metrics**: Track lead scoring accuracy and conversion rates
-- **Sales Pipeline Integration**: Monitor lead progression through sales funnel
-- **Customer Intent Analysis**: Identify purchase intent and product interest
-- **Conversion Tracking**: Measure chat-to-sale conversion rates
-- **ROI Measurement**: Calculate return on investment for public agent deployment
-
-#### Customer Insights & Intelligence
-
-- **Customer Behavior Patterns**: Analyze interaction timing, frequency, and preferences
-- **Product Interest Tracking**: Monitor which products/services generate most inquiries
-- **Geographic Analysis**: Track customer location and regional trends
-- **Demographic Insights**: Analyze customer segments and targeting opportunities
-- **Competitive Intelligence**: Monitor customer questions about competitors
-
-### Monitoring Capabilities
-
-- **Real-Time Metrics**: Live system performance monitoring
-- **Error Tracking**: Comprehensive error logging and analysis
-- **Resource Usage**: Container and system resource monitoring
-- **User Activity**: Track user interactions and system usage
-- **Audit Trails**: Complete activity logs for compliance
-
----
-
-## 🔒 Security & Authentication
-
-### Authentication Systems
-
-- **Multi-Provider OAuth**: Yandex, Google OAuth with secure token handling
-- **Credentials Authentication**: Email/password authentication for testing
-- **Test User System**: Development and testing user accounts
-- **Session Management**: Secure JWT sessions with configurable expiration
-- **Access Control**: Email whitelist and role-based access control
-
-### Security Features
-
-- **Organization Isolation**: Complete data separation between organizations
-- **Container Security**: Hardened Docker containers with security constraints
-- **API Security**: Authenticated and authorized API endpoints
-- **Data Encryption**: Secure data storage and transmission
-- **Audit Logging**: Comprehensive security event logging
-
-### Compliance
-
-- **Data Isolation**: GDPR and SOC 2 compatible data separation
-- **Access Logs**: Complete audit trails for compliance reporting
-- **Permission Management**: Granular access controls
-- **Data Retention**: Configurable data retention policies
-- **Security Monitoring**: Real-time security event monitoring
 
 ---
 
@@ -589,62 +740,6 @@ TeamHub is an enterprise AI agent management platform that enables organizations
 - **Total Addressable Market**: $8.5B (customer service software market)
 - **Serviceable Market**: $2.1B (AI-powered customer service segment)
 - **Initial Target**: $210M (enterprise customer service automation)
-
----
-
-## 📄 Document & Knowledge Management
-
-### Document Types & Formats
-
-#### Core Document Types
-
-- **AI-Generated Documents**: Business plans, reports, proposals, and analysis
-- **Text Documents**: Rich text editor with AI assistance and collaboration
-- **PDF Documents**: Import, view, and AI-powered analysis of PDF content
-- **Media Files**: Images, videos, and audio with AI-powered tagging and analysis
-- **External Links**: Integration with Google Docs, Sheets, and other external tools
-
-#### AI Document Generation
-
-- **Business Plan Generator**: AI-powered business plan creation with industry insights
-- **Report Templates**: Pre-built templates for common business documents
-- **Content Enhancement**: AI-powered writing assistance and improvement
-- **Multi-Language Support**: Generate documents in multiple languages
-- **Brand Consistency**: Maintain company voice and style across all documents
-
-### Document Organization
-
-#### Folder Structure
-
-- **Hierarchical Organization**: Create nested folder structures for document organization
-- **Smart Folders**: AI-powered automatic document categorization
-- **Tag System**: Flexible tagging and labeling for easy document discovery
-- **Search & Discovery**: Full-text search with AI-powered semantic search
-- **Version Control**: Track document versions and changes over time
-
-#### Collaboration Features
-
-- **Team Editing**: Real-time collaborative document editing
-- **Comment System**: Inline comments and feedback system
-- **Approval Workflows**: Document review and approval processes
-- **Access Control**: Granular permissions for document access and editing
-- **Activity Tracking**: Monitor document usage and collaboration patterns
-
-### External Integrations
-
-#### Google Workspace Integration
-
-- **Google Docs**: Create, edit, and manage Google Docs from TeamHub
-- **Google Sheets**: AI-powered data analysis and spreadsheet management
-- **Google Drive**: Seamless file synchronization and management
-- **Real-time Updates**: Live synchronization between TeamHub and Google Workspace
-
-#### Other External Tools
-
-- **Microsoft Office**: Integration with Word, Excel, and PowerPoint
-- **Notion**: Connect and manage Notion pages and databases
-- **Slack**: Document sharing and collaboration through Slack
-- **Email Integration**: Send documents and track engagement
 
 ---
 
